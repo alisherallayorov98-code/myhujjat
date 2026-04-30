@@ -1,0 +1,63 @@
+# Test rejimi — Caddy yo'q, to'g'ridan-to'g'ri portlar
+# Foydalanish: docker compose -f docker-compose.test.yml up -d --build
+# URL: http://45.92.173.48:3100
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       myhujjat
+      POSTGRES_USER:     myhujjat
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - myhujjat_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myhujjat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - myhujjat_net
+
+  backend:
+    build:
+      context:    ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./backend/.env.prod
+    environment:
+      COOKIE_SECURE: "false"   # HTTP test uchun
+    ports:
+      - "4100:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - myhujjat_net
+
+  frontend:
+    build:
+      context:    ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ./frontend/.env.prod
+    ports:
+      - "3100:3000"
+    depends_on:
+      - backend
+    networks:
+      - myhujjat_net
+
+volumes:
+  postgres_data:
+
+networks:
+  myhujjat_net:
+    driver: bridge

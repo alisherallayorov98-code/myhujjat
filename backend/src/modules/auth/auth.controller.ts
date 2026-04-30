@@ -42,7 +42,7 @@ export class AuthController {
 
     res.cookie('refresh_token', data.refreshToken, {
       httpOnly: true,
-      secure:   process.env.NODE_ENV === 'production',
+      secure:   process.env.COOKIE_SECURE !== 'false' && process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge:   7 * 24 * 60 * 60 * 1000,
       path:     '/api/v1/auth',
@@ -64,7 +64,7 @@ export class AuthController {
 
     res.cookie('refresh_token', data.refreshToken, {
       httpOnly: true,
-      secure:   process.env.NODE_ENV === 'production',
+      secure:   process.env.COOKIE_SECURE !== 'false' && process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge:   7 * 24 * 60 * 60 * 1000,
       path:     '/api/v1/auth',
