@@ -1,0 +1,249 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { Search, Loader2, X } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Input }  from '@/components/ui/Input'
+import api        from '@/lib/api'
+import { cn }     from '@/lib/cn'
+import toast      from 'react-hot-toast'
+import type { Counterparty } from '@/lib/types'
+
+interface CpDropdownProps {
+  cps:          Counterparty[]
+  value:        string
+  onChange:     (id: string, name: string) => void
+  orgId:        string
+  onCpCreated?: (cp: Counterparty) => void
+}
+
+export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropdownProps) {
+  const [search,    setSearch]    = useState('')
+  const [open,      setOpen]      = useState(false)
+  const [loading,   setLoading]   = useState(false)
+  const [quickAdd,  setQuickAdd]  = useState(false)
+  const [newCp,     setNewCp]     = useState({ name: '', inn: '', directorName: '', address: '', phone: '', bankName: '', bankAccount: '', mfo: '' })
+  const [savingCp,  setSavingCp]  = useState(false)
+  const dropRef     = useRef<HTMLDivElement>(null)
+  const prevStir    = useRef('')
+  const prevQuickStir = useRef('')
+
+  const selectedCp = cps.find(c => c.id === value)
+
+  useEffect(() => {
+    if (selectedCp) setSearch(selectedCp.name)
+  }, [selectedCp])
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Auto-search when exactly 9 digits entered (no Enter needed)
+  useEffect(() => {
+    const digs = search.replace(/\D/g, '')
+    if (digs.length < 9) { prevStir.current = ''; return }
+    if (digs.length !== 9 || digs === prevStir.current || loading || value) return
+    prevStir.current = digs
+    void lookupAndCreate(digs)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
+
+  useEffect(() => {
+    if (!quickAdd) return
+    const inn = newCp.inn
+    if (inn.length < 9) { prevQuickStir.current = ''; return }
+    if (inn.length !== 9 || inn === prevQuickStir.current || loading) return
+    prevQuickStir.current = inn
+    void handleStirLookup()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newCp.inn, quickAdd])
+
+  async function lookupAndCreate(digs: string) {
+    const existing = cps.find(c => (c.inn || '').replace(/\D/g, '') === digs)
+    if (existing) {
+      onChange(existing.id, existing.name)
+      setSearch(existing.name)
+      setOpen(false)
+      return
+    }
+    setLoading(true)
+    try {
+      const { data } = await api.get(`/stir/${digs}`)
+      const saved = await api.post('/counterparties', {
+        organizationId: orgId,
+        name: data.name, inn: digs,
+        directorName: data.directorName || '',
+        address: data.address || '',
+        phone: data.phone || '',
+      })
+      const cp = saved.data as Counterparty
+      onCpCreated?.(cp)
+      onChange(cp.id, cp.name)
+      setSearch(cp.name)
+      setOpen(false)
+      toast.success(`Topildi: ${cp.name}`)
+    } catch {
+      toast.error("STIR bo'yicha topilmadi — qo'lda kiriting")
+      setQuickAdd(true)
+      setNewCp(p => ({ ...p, inn: digs }))
+      setOpen(false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filtered = (() => {
+    const q = search.toLowerCase().trim()
+    if (!q) return cps.slice(0, 12)
+    const digs = q.replace(/\D/g, '')
+    return cps
+      .map(cp => {
+        const inn  = (cp.inn || '').replace(/\D/g, '')
+        const name = cp.name.toLowerCase()
+        let score = 0
+        if (digs && inn.startsWith(digs))  score = 4
+        else if (digs && inn.includes(digs)) score = 3
+        else if (name.startsWith(q))       score = 2
+        else if (name.includes(q))         score = 1
+        return { cp, score }
+      })
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(x => x.cp)
+  })()
+
+  async function handleEnter() {
+    const digs = search.replace(/\D/g, '')
+    if (digs.length === 9) { prevStir.current = digs; await lookupAndCreate(digs); return }
+    if (filtered.length > 0) {
+      onChange(filtered[0].id, filtered[0].name)
+      setSearch(filtered[0].name)
+      setOpen(false)
+    }
+  }
+
+  async function handleStirLookup() {
+    const inn = newCp.inn.trim()
+    if (!/^\d{9}$/.test(inn)) { toast.error("STIR 9 ta raqam bo'lishi kerak"); return }
+    setLoading(true)
+    try {
+      const { data } = await api.get(`/stir/${inn}`)
+      setNewCp(p => ({ ...p, name: data.name || p.name, directorName: data.directorName || p.directorName, address: data.address || p.address, phone: data.phone || p.phone }))
+      toast.success("Ma'lumotlar to'ldirildi")
+    } catch { toast.error("STIR topilmadi") }
+    finally { setLoading(false) }
+  }
+
+  async function handleQuickAddSave() {
+    if (!newCp.name.trim()) { toast.error('Nomi kiritilishi shart'); return }
+    setSavingCp(true)
+    try {
+      const { data } = await api.post('/counterparties', { organizationId: orgId, ...newCp })
+      const cp = data as Counterparty
+      onCpCreated?.(cp)
+      onChange(cp.id, cp.name)
+      setSearch(cp.name)
+      setQuickAdd(false)
+      setNewCp({ name: '', inn: '', directorName: '', address: '', phone: '', bankName: '', bankAccount: '', mfo: '' })
+      toast.success("Kontragent qo'shildi")
+    } catch (e: any) { toast.error(e?.response?.data?.message || 'Xatolik') }
+    finally { setSavingCp(false) }
+  }
+
+  if (quickAdd) {
+    return (
+      <div className="border border-[#E2E8F0] rounded-xl p-4 space-y-3 bg-[#F8FAFC]">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-sm font-semibold text-[#0F172A]">Yangi kontragent</p>
+          <button onClick={() => setQuickAdd(false)} className="text-[#94A3B8] hover:text-[#475569]"><X size={16} /></button>
+        </div>
+        <div className="flex gap-2">
+          <Input label="STIR" placeholder="123456789" value={newCp.inn}
+            onChange={e => setNewCp(p => ({ ...p, inn: e.target.value.replace(/\D/g, '').slice(0, 9) }))}
+            hint="9 ta raqam" />
+          <div className="flex items-end pb-0.5">
+            <Button size="sm" variant="secondary" loading={loading} onClick={handleStirLookup} disabled={newCp.inn.length !== 9}>
+              <Search size={14} />
+            </Button>
+          </div>
+        </div>
+        <Input label="Nomi *" value={newCp.name} onChange={e => setNewCp(p => ({ ...p, name: e.target.value }))} placeholder="Kompaniya nomi" />
+        <Input label="Rahbar" value={newCp.directorName} onChange={e => setNewCp(p => ({ ...p, directorName: e.target.value }))} placeholder="Familiya Ism" />
+        <Input label="Manzil" value={newCp.address} onChange={e => setNewCp(p => ({ ...p, address: e.target.value }))} />
+        <div className="grid grid-cols-2 gap-3">
+          <Input label="Bank" value={newCp.bankName} onChange={e => setNewCp(p => ({ ...p, bankName: e.target.value }))} />
+          <Input label="MFO" value={newCp.mfo} onChange={e => setNewCp(p => ({ ...p, mfo: e.target.value }))} />
+          <div className="col-span-2">
+            <Input label="Hisob raqami" value={newCp.bankAccount} onChange={e => setNewCp(p => ({ ...p, bankAccount: e.target.value }))} />
+          </div>
+        </div>
+        <div className="flex gap-2 pt-1">
+          <Button size="sm" variant="outline" onClick={() => setQuickAdd(false)}>Bekor</Button>
+          <Button size="sm" loading={savingCp} onClick={handleQuickAddSave} disabled={!newCp.name.trim()}>
+            Saqlash
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative" ref={dropRef}>
+      <div className="relative">
+        <input
+          value={search}
+          onChange={e => { setSearch(e.target.value); setOpen(!!e.target.value.trim() || true); if (e.target.value === '') onChange('', '') }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleEnter() } if (e.key === 'Escape') setOpen(false) }}
+          placeholder="Nom yoki STIR bo'yicha qidiring..."
+          disabled={loading}
+          className={cn(
+            'w-full h-10 rounded-lg text-sm pl-9 pr-3 border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 bg-white transition',
+            loading && 'opacity-60 cursor-wait'
+          )}
+        />
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]">
+          {loading ? <Loader2 size={14} className="animate-spin text-[#2563EB]" /> : <Search size={14} />}
+        </div>
+        {value && (
+          <button onClick={() => { onChange('', ''); setSearch('') }} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#475569]">
+            <X size={14} />
+          </button>
+        )}
+      </div>
+      {open && !value && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-xl shadow-xl max-h-56 overflow-y-auto">
+          {filtered.map(cp => (
+            <button key={cp.id} type="button"
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => { onChange(cp.id, cp.name); setSearch(cp.name); setOpen(false) }}
+              className="w-full text-left px-3 py-2.5 text-sm hover:bg-[#F8FAFC] transition border-b border-[#F1F5F9] last:border-0"
+            >
+              <p className="font-medium text-[#0F172A]">{cp.name}</p>
+              {cp.inn && <p className="text-xs text-[#94A3B8]">STIR: {cp.inn}</p>}
+            </button>
+          ))}
+          {filtered.length === 0 && search.trim() && (
+            <div className="px-3 py-3 text-sm text-[#94A3B8]">
+              Topilmadi.{' '}
+              <button className="text-[#2563EB] hover:underline" onMouseDown={e => e.preventDefault()} onClick={() => { setOpen(false); setQuickAdd(true); if (/^\d+$/.test(search.trim())) setNewCp(p => ({ ...p, inn: search.trim() })) }}>
+                Yangi qo'shish →
+              </button>
+            </div>
+          )}
+          {filtered.length === 0 && !search.trim() && (
+            <div className="px-3 py-3 text-sm text-[#94A3B8] text-center">
+              <button className="text-[#2563EB] hover:underline" onMouseDown={e => e.preventDefault()} onClick={() => { setOpen(false); setQuickAdd(true) }}>
+                + Yangi kontragent qo'shish
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

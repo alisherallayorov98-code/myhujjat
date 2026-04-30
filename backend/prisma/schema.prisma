@@ -1,0 +1,713 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// FOYDALANUVCHILAR
+// ============================================
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  phone         String?
+  avatarUrl     String?
+  isActive      Boolean  @default(true)
+  isVerified    Boolean  @default(false)
+  verifyToken   String?
+  resetToken    String?
+  resetTokenExp DateTime?
+  language      Lang     @default(UZ)
+  role          UserRole @default(USER)
+  telegramId    String?  @unique
+  telegramLinkCode String?  // /link AB12CD orqali ulash uchun
+
+  // ─── Didox integratsiyasi (faktura monitoringi uchun) ───
+  didoxApiKey      String?  // partner-token (yashirin)
+  didoxUserKey     String?  // user-key (yuridik shaxs identifikatori)
+  didoxConnected   Boolean  @default(false)
+  didoxLastSync    DateTime?
+  didoxSyncError   String?  // oxirgi sync xato xabari
+
+  // ─── 2FA (TOTP - Google Authenticator) ───
+  twoFactorSecret  String?  // shifrlangan TOTP secret
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorBackup  String?  // shifrlangan backup kodlar (JSON array)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  refreshTokens  RefreshToken[]
+  pushSubs       PushSubscription[]
+  organizations  Organization[]
+  orgMembers     OrgMember[]
+  subscription   Subscription?
+  payments       Payment[]
+  auditLogs      AuditLog[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Lang {
+  UZ
+  OZ
+  RU
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+// ─── Push notifications (VAPID) ──────────────────────────
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ============================================
+// TASHKILOTLAR
+// ============================================
+model Organization {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name            String
+  fullName        String?
+  inn             String?
+  directorName    String?
+  directorPinfl   String?
+
+  bankName        String?
+  bankAccount     String?
+  mfo             String?
+
+  address         String?
+  viloyat         String?
+  tuman           String?
+
+  phone           String?
+  oked            String?
+  okedName        String?
+  qqsReg          String?
+  qqsStavka       String?
+  chiefAccountant String?
+  senderName      String?
+  senderPinfl     String?
+  ustavKapital    String?
+  taxMode         String?
+  taxpayerType    Int?
+  regDate         String?
+  regNumber       String?
+  opfName         String?
+  soato           String?
+
+  soliqSyncedAt   DateTime?
+  status          String?
+  statusText      String?
+
+  stampUrl        String?
+  signatureUrl    String?
+  inviteToken     String?
+
+  isDefault       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  members         OrgMember[]
+  bankAccounts    BankAccount[]
+  counterparties  Counterparty[]
+  contracts       Contract[]
+  specifications  Specification[]
+  employees       Employee[]
+  tasischilar     Tasischi[]
+  documents       Document[]
+  invoices        Invoice[]
+  aiDocuments     AiDocument[]
+}
+
+model OrgMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitedEmail   String?
+  role           OrgRole      @default(MEMBER)
+  status         MemberStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+}
+
+enum OrgRole {
+  OWNER
+  MEMBER
+  ACCOUNTANT
+}
+
+enum MemberStatus {
+  PENDING
+  ACTIVE
+}
+
+model BankAccount {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bankName       String
+  accountNumber  String
+  mfo            String
+  isDefault      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
+
+// ============================================
+// KONTRAGENTLAR
+// ============================================
+model Counterparty {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name           String
+  inn            String?
+  directorName   String?
+  bankName       String?
+  bankAccount    String?
+  mfo            String?
+  address        String?
+  phone          String?
+  qqsReg         String?
+  oked           String?
+
+  stirStatus     String?
+  stirCheckedAt  DateTime?
+
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  contracts      Contract[]
+
+  @@index([organizationId, isActive])
+  @@index([inn])
+  @@index([name])
+}
+
+// ============================================
+// OBUNA TIZIMI
+// ============================================
+model Subscription {
+  id            String           @id @default(cuid())
+  userId        String           @unique
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan          SubscriptionPlan @default(FREE)
+  status        SubStatus        @default(ACTIVE)
+  startedAt     DateTime         @default(now())
+  expiresAt     DateTime?
+  contractCount Int              @default(0)
+  autoRenew     Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+enum SubscriptionPlan {
+  FREE
+  STANDARD
+  PRO
+  DEMO
+}
+
+enum SubStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+// ============================================
+// TO'LOVLAR
+// ============================================
+model Payment {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  provider    PayProvider
+  externalId  String?
+  amount      Decimal
+  currency    String        @default("UZS")
+  plan        String
+  months      Int
+  status      PayStatus     @default(PENDING)
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum PayProvider {
+  CLICK
+  PAYME
+}
+
+enum PayStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+// ============================================
+// SHARTNOMALAR
+// ============================================
+model Contract {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  counterpartyId String?
+  counterparty   Counterparty? @relation(fields: [counterpartyId], references: [id])
+
+  contractNumber String
+  contractDate   String
+  contractType   ContractType
+  city           String?      @default("Toshkent")
+  amount         Decimal      @default(0)
+  status         ContractStatus @default(DRAFT)
+
+  content        String?      @db.Text
+  extraData      Json?
+
+  productName    String?
+  specItems      Json?
+  qqsEnabled     Boolean      @default(false)
+  qqsRate        Decimal      @default(12)
+
+  signedUs       Boolean      @default(false)
+  signedCp       Boolean      @default(false)
+  signedUsAt     DateTime?
+  signedCpAt     DateTime?
+
+  didoxSent      Boolean      @default(false)
+  didoxId        String?
+
+  // ─── Faktura monitoringi (Didox/Roaming integratsiyasi) ───
+  totalInvoiced  Decimal      @default(0)  // jami fakturalar yig'indisi
+  invoiceCount   Int          @default(0)  // fakturalar soni
+  lastInvoiceAt  DateTime?                  // oxirgi faktura keldi
+  alertLevel     AlertLevel?                // joriy ogohlantirish darajasi
+  alertedAt      DateTime?                  // oxirgi alert vaqti
+
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  versions       ContractVersion[]
+  specifications Specification[]
+  shareLinks     ContractShareLink[]
+  invoices       Invoice[]
+
+  @@index([organizationId, isActive, createdAt])
+  @@index([organizationId, status])
+  @@index([counterpartyId])
+  @@index([contractNumber])
+  @@index([contractDate])
+}
+
+enum AlertLevel {
+  WARNING           // 80% — ogohlantirish
+  CRITICAL          // 95% — kritik darajaga yaqin
+  EXCEEDED          // 100%+ — oshib ketdi
+  CRITICAL_OVERAGE  // 120%+ — sezilarli oshib ketdi
+}
+
+// ============================================
+// SHARTNOMA OMMAVIY ULASHISH HAVOLALARI
+// ============================================
+model ContractShareLink {
+  id              String    @id @default(cuid())
+  token           String    @unique
+  contractId      String
+  contract        Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  recipientEmail  String?
+  recipientName   String?
+  recipientPhone  String?
+
+  viewedAt        DateTime?
+  viewCount       Int       @default(0)
+  signedAt        DateTime?
+  signerName      String?
+  signerEmail     String?
+  signerIp        String?
+
+  expiresAt       DateTime
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  @@index([token])
+  @@index([contractId])
+}
+
+enum ContractType {
+  OLDI_SOTDI
+  XIZMAT
+  IJARA
+  PUDRAT
+  QOSHIMCHA
+  MOLIYAVIY
+  DAVAL
+  XALQARO
+  AGENTLIK
+  TRANSPORT
+  LIZING
+  BOSHQA
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model ContractVersion {
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  version    Int
+  content    String   @db.Text
+  changedBy  String?
+  createdAt  DateTime @default(now())
+}
+
+// ============================================
+// SPESIFIKATSIYALAR
+// ============================================
+model Specification {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contractId     String?
+  contract       Contract?    @relation(fields: [contractId], references: [id])
+  specNumber     String
+  items          Json
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+// ============================================
+// XODIMLAR
+// ============================================
+model Employee {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  ism            String
+  jshshir        String?
+  passport       String?
+  lavozim        String?
+  bolim          String?
+  maosh          String?
+  ishBoshi       String?
+  status         String?      @default("active")
+  tel            String?
+  tugilganSana   String?
+  manzil         String?
+
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+// ============================================
+// TA'SISCHILAR
+// ============================================
+model Tasischi {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  ism            String
+  jshshir        String?
+  ulush          Decimal?
+  summa          Decimal?
+  passport       String?
+  manzil         String?
+
+  createdAt      DateTime     @default(now())
+}
+
+// ============================================
+// HUJJATLAR
+// ============================================
+model Document {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  type           DocumentType
+  title          String
+  number         String?
+  docDate        String?
+  content        Json
+  status         DocStatus    @default(DRAFT)
+
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+enum DocumentType {
+  BUYRUQ
+  BAYONNOMA
+  ISHONCHNOMA
+  ARIZA
+  HISOBOT
+  FAKTURA
+  AKT_SVERKI
+  TOLOV_GRAFIGI
+  SCHET
+  ISHGA_QABUL
+  ISHDAN_BOSHASH
+  TATIL
+  MEHNAT_SHARTNOMA
+  PRETENZIYA
+  DAV_ARIZA
+  BOSHQA
+}
+
+enum DocStatus {
+  DRAFT
+  FINAL
+  SENT
+}
+
+// ============================================
+// AI HUJJATLAR
+// ============================================
+model AiDocument {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String?
+
+  title          String
+  prompt         String       @db.Text
+  content        String       @db.Text
+  docType        String?
+  tokensUsed     Int          @default(0)
+  model          String?
+
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+}
+
+// ============================================
+// SHABLON TIZIMI
+// ============================================
+model Template {
+  id             String        @id @default(cuid())
+  organizationId String?
+  contractType   ContractType?
+  name           String
+  nameUz         String?
+  nameRu         String?
+  content        String        @db.Text
+  isSystem       Boolean       @default(false)
+  isPublic       Boolean       @default(false)
+  language       Lang          @default(UZ)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+// ============================================
+// ADMIN TIZIMI
+// ============================================
+model Admin {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  permissions  Json     @default("[]")
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entity     String?
+  entityId   String?
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model SupportSession {
+  id        String           @id @default(cuid())
+  userId    String?
+  email     String?
+  status    SupportStatus    @default(OPEN)
+  messages  SupportMessage[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+enum SupportStatus {
+  OPEN
+  CLOSED
+}
+
+model SupportMessage {
+  id        String         @id @default(cuid())
+  sessionId String
+  session   SupportSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String
+  content   String         @db.Text
+  createdAt DateTime       @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// ============================================
+// BILDIRISHNOMALAR
+// ============================================
+model Notification {
+  id              String           @id @default(cuid())
+  userId          String
+  organizationId  String?
+  type            NotificationType
+  title           String
+  message         String           @db.Text
+  link            String?
+  read            Boolean          @default(false)
+  readAt          DateTime?
+  createdAt       DateTime         @default(now())
+
+  @@index([userId, read, createdAt])
+}
+
+enum NotificationType {
+  CONTRACT_CREATED
+  CONTRACT_EXPIRING
+  CONTRACT_SIGNED
+  CONTRACT_OVERAGE          // shartnoma summasidan oshib ketish
+  SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_ACTIVATED
+  CONTRACT_LIMIT
+  INVOICE_RECEIVED
+  INVOICE_SIGNED
+  SYSTEM
+  WELCOME
+}
+
+// ============================================
+// FAKTURALAR (Didox/Roaming dan import)
+// ============================================
+model Invoice {
+  id              String           @id @default(cuid())
+  userId          String
+  organizationId  String
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Manba va identifikatorlari
+  source          InvoiceSource    @default(MANUAL)
+  didoxId         String?          @unique  // Didox dagi unique ID
+  documentNumber  String?          // EHF/faktura raqami
+  documentDate    String?          // YYYY-MM-DD
+
+  // Bog'liq shartnoma
+  contractId      String?
+  contract        Contract?        @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  contractNumber  String?          // Didox/manual'dan kelgan shartnoma raqami
+  contractDate    String?
+
+  // Tomonlar
+  sellerInn       String?          // sotuvchi STIR
+  sellerName      String?
+  buyerInn        String?          // xaridor STIR
+  buyerName       String?
+  direction       InvoiceDirection // bizga keladimi yoki bizdan ketadimi
+
+  // Summa
+  amount          Decimal          @default(0) // QQSsiz
+  vatAmount       Decimal          @default(0)
+  totalAmount     Decimal          @default(0) // QQS bilan
+
+  // Holat
+  status          InvoiceStatus    @default(DRAFT)
+
+  // Raw ma'lumotlar (Didox response)
+  rawData         Json?
+
+  syncedAt        DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([contractId])
+  @@index([sellerInn, buyerInn])
+  @@index([documentDate])
+}
+
+enum InvoiceSource {
+  MANUAL    // qo'lda kiritilgan
+  EXCEL     // Excel orqali import
+  DIDOX     // Didox API'dan
+  ROAMING   // boshqa operator (kelajakda)
+}
+
+enum InvoiceDirection {
+  INCOMING  // bizga keladi (xaridor)
+  OUTGOING  // bizdan ketadi (sotuvchi)
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}

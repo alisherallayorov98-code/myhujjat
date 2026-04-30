@@ -1,0 +1,32 @@
+# MyHujjat.uz — avtomatik HTTPS (Let's Encrypt orqali)
+# sslip.io DNS sizning IP ni avtomatik ko'rsatadi
+
+# Frontend — asosiy sayt
+myhujjat-45-92-173-48.sslip.io {
+	reverse_proxy frontend:3000
+
+	# API'ni shu domen ostidan o'tkazish (CORS muammosi yo'q)
+	handle /api/* {
+		reverse_proxy backend:4000
+	}
+
+	# Xavfsizlik header'lari
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options    "nosniff"
+		Referrer-Policy           "strict-origin-when-cross-origin"
+		X-Frame-Options           "SAMEORIGIN"
+		-Server
+	}
+
+	# Compression
+	encode zstd gzip
+
+	# Loglar
+	log {
+		output file /data/access.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}

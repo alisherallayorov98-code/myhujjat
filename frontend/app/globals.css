@@ -1,0 +1,383 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   CSS O'ZGARUVCHILAR — Light Mode
+   ============================================ */
+:root {
+  --color-primary:        #2563EB;
+  --color-primary-hover:  #1D4ED8;
+  --color-primary-light:  #DBEAFE;
+  --color-primary-dark:   #1E3A8A;
+
+  --color-success:        #16A34A;
+  --color-success-hover:  #15803D;
+  --color-success-light:  #DCFCE7;
+
+  --color-warning:        #D97706;
+  --color-warning-light:  #FEF3C7;
+
+  --color-danger:         #DC2626;
+  --color-danger-hover:   #B91C1C;
+  --color-danger-light:   #FEE2E2;
+
+  --color-info:           #0891B2;
+  --color-info-light:     #CFFAFE;
+
+  --color-bg-primary:     #FFFFFF;
+  --color-bg-secondary:   #F8FAFC;
+  --color-bg-tertiary:    #F1F5F9;
+  --color-bg-elevated:    #FFFFFF;
+
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #94A3B8;
+
+  --color-border-primary:   #E2E8F0;
+  --color-border-secondary: #CBD5E1;
+
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:  0 4px 6px rgba(0,0,0,0.07);
+  --shadow-lg:  0 10px 15px rgba(0,0,0,0.1);
+  --shadow-xl:  0 20px 25px rgba(0,0,0,0.1);
+
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-full: 9999px;
+
+  --font-sans:    'Inter', sans-serif;
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --sidebar-width:  260px;
+  --header-height:  64px;
+  --page-padding:   24px;
+}
+
+/* ============================================
+   CSS O'ZGARUVCHILAR — Dark Mode
+   ============================================ */
+html.dark {
+  --color-bg-primary:     #0F172A;
+  --color-bg-secondary:   #0B1220;
+  --color-bg-tertiary:    #1E293B;
+  --color-bg-elevated:    #111827;
+
+  --color-text-primary:   #F1F5F9;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted:     #64748B;
+
+  --color-border-primary:   #1F2937;
+  --color-border-secondary: #334155;
+}
+
+/* Dark mode color overrides
+   Hujjatlardagi qo'lda yozilgan hex ranglarni dark-mode'da o'zgartirish.
+   Bu komponentlarni qayta yozmasdan, butun loyiha bo'ylab tema almashishni ta'minlaydi. */
+html.dark body {
+  background-color: var(--color-bg-secondary);
+  color:            var(--color-text-primary);
+}
+
+/* — Backgrounds — */
+html.dark .bg-white,
+html.dark .bg-\[\#FFFFFF\],
+html.dark .bg-\[\#FFF\],
+html.dark .bg-\[\#fff\]            { background-color: #111827 !important; }
+html.dark .bg-\[\#F8FAFC\]         { background-color: #0B1220 !important; }
+html.dark .bg-\[\#F1F5F9\]         { background-color: #1E293B !important; }
+html.dark .bg-\[\#F0F9FF\]         { background-color: #1E3A8A33 !important; }
+html.dark .bg-\[\#F9FAFB\]         { background-color: #0B1220 !important; }
+html.dark .bg-\[\#FAFAFA\]         { background-color: #0B1220 !important; }
+html.dark .bg-\[\#FEFCE8\]         { background-color: #422006 !important; }
+html.dark .bg-\[\#DBEAFE\]         { background-color: #1E40AF44 !important; }
+html.dark .bg-\[\#BFDBFE\]         { background-color: #1E40AF66 !important; }
+html.dark .bg-\[\#DCFCE7\]         { background-color: #14532D55 !important; }
+html.dark .bg-\[\#BBF7D0\]         { background-color: #14532D77 !important; }
+html.dark .bg-\[\#FEF3C7\]         { background-color: #78350F55 !important; }
+html.dark .bg-\[\#FED7AA\]         { background-color: #78350F77 !important; }
+html.dark .bg-\[\#FEE2E2\]         { background-color: #7F1D1D55 !important; }
+html.dark .bg-\[\#FECACA\]         { background-color: #7F1D1D77 !important; }
+html.dark .bg-\[\#FEF2F2\]         { background-color: #7F1D1D33 !important; }
+html.dark .bg-\[\#CFFAFE\]         { background-color: #155E7555 !important; }
+html.dark .bg-\[\#E0E7FF\]         { background-color: #3730A355 !important; }
+html.dark .bg-\[\#EDE9FE\]         { background-color: #4C1D9555 !important; }
+html.dark .bg-\[\#F3E8FF\]         { background-color: #4C1D9555 !important; }
+html.dark .bg-\[\#FCE7F3\]         { background-color: #831843 !important; }
+
+/* — Text colors — */
+html.dark .text-\[\#0F172A\],
+html.dark .text-black              { color: #F1F5F9 !important; }
+html.dark .text-\[\#1E293B\]       { color: #E2E8F0 !important; }
+html.dark .text-\[\#334155\]       { color: #CBD5E1 !important; }
+html.dark .text-\[\#475569\]       { color: #CBD5E1 !important; }
+html.dark .text-\[\#64748B\]       { color: #94A3B8 !important; }
+html.dark .text-\[\#94A3B8\]       { color: #64748B !important; }
+html.dark .text-\[\#1F2937\]       { color: #E2E8F0 !important; }
+html.dark .text-\[\#374151\]       { color: #CBD5E1 !important; }
+
+/* — Borders — */
+html.dark .border-\[\#E2E8F0\]     { border-color: #1F2937 !important; }
+html.dark .border-\[\#CBD5E1\]     { border-color: #334155 !important; }
+html.dark .border-\[\#F1F5F9\]     { border-color: #1E293B !important; }
+html.dark .border-\[\#BFDBFE\]     { border-color: #1E40AF !important; }
+html.dark .border-\[\#FECACA\]     { border-color: #7F1D1D !important; }
+html.dark .border-\[\#BBF7D0\]     { border-color: #166534 !important; }
+html.dark .border-\[\#FED7AA\]     { border-color: #9A3412 !important; }
+html.dark .border-\[\#E5E7EB\]     { border-color: #1F2937 !important; }
+
+/* — Hover states — */
+html.dark .hover\:bg-\[\#F8FAFC\]:hover  { background-color: #1E293B !important; }
+html.dark .hover\:bg-\[\#F1F5F9\]:hover  { background-color: #243043 !important; }
+html.dark .hover\:bg-white:hover         { background-color: #1E293B !important; }
+html.dark .hover\:bg-\[\#FEE2E2\]:hover  { background-color: #7F1D1D77 !important; }
+
+/* — Cards / shadows — */
+html.dark .shadow-card,
+html.dark .shadow-modal,
+html.dark .shadow-button,
+html.dark .shadow-sm,
+html.dark .shadow,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl                     { box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important; }
+
+/* — Inputs — */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #1E293B !important;
+  color:            #F1F5F9 !important;
+  border-color:     #334155 !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: #64748B !important; }
+
+/* Document content (rasmiy hujjat ko'rinishi har doim oq qog'oz tarzida bo'lib qolsin) */
+html.dark .document-view,
+html.dark .document-content {
+  background-color: #ffffff !important;
+  color:            #000000 !important;
+}
+
+/* Toast theming */
+html.dark .theme-toast {
+  background-color: #1E293B !important;
+  color:            #F1F5F9 !important;
+  border:           1px solid #334155 !important;
+}
+:root .theme-toast:not(html.dark .theme-toast) {
+  background-color: #ffffff;
+  color:            #0F172A;
+  border:           1px solid #E2E8F0;
+}
+
+/* ============================================
+   ASOSIY STILLAR
+   ============================================ */
+* {
+  box-sizing: border-box;
+  margin:     0;
+  padding:    0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family:      var(--font-sans);
+  color:            var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+  line-height:      1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: var(--color-bg-tertiary); }
+::-webkit-scrollbar-thumb  { background: var(--color-border-secondary); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* ============================================
+   ANIMATSIYALAR
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.animate-fade-in     { animation: fadeIn    0.3s ease both; }
+.animate-fade-in-up  { animation: fadeInUp  0.4s ease both; }
+.animate-slide-in    { animation: slideIn   0.3s ease both; }
+.animate-scale-in    { animation: scaleIn   0.2s ease both; }
+.animate-spin        { animation: spin      1s linear infinite; }
+.animate-pulse       { animation: pulse     2s ease infinite; }
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-tertiary) 25%,
+    var(--color-bg-secondary) 50%,
+    var(--color-bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   PRINT STILLARI
+   ============================================ */
+@media print {
+  .no-print      { display: none !important; }
+  .print-only    { display: block !important; }
+  body           { background: white; color: black; font-size: 12pt; }
+  .document-view { box-shadow: none; border: none; }
+}
+
+/* ============================================
+   HUJJAT KO'RINISHI
+   ============================================ */
+.document-content {
+  font-family: 'Times New Roman', serif;
+  font-size:   14px;
+  line-height: 1.8;
+  color:       #000;
+}
+
+.document-content p    { margin-bottom: 8px; text-align: justify; }
+.document-content h2   { font-size: 14px; font-weight: bold; text-align: center; margin: 12px 0; }
+.document-content table { width: 100%; border-collapse: collapse; }
+.document-content td,
+.document-content th   { border: 1px solid #000; padding: 4px 8px; font-size: 12px; }
+
+/* ============================================
+   MOBILE / PWA
+   ============================================ */
+
+/* iOS safe area (notch, home bar) */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-top    { padding-top:    env(safe-area-inset-top);    }
+
+/* Smooth scroll on touch */
+.scroll-touch { -webkit-overflow-scrolling: touch; }
+
+/* Remove tap highlight on mobile */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Prevent iOS zoom on input focus */
+input, select, textarea { font-size: 16px !important; }
+@media (min-width: 768px) {
+  input, select, textarea { font-size: 14px !important; }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 8px;
+  background: #2563EB;
+  color: white;
+  padding: 8px 14px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 8px;
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Keyboard focus indicators (only for keyboard users, not mouse) */
+*:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* Mouse users — outline ko'rinmasin */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Reduced motion users — animatsiyalarni o'chirish */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Screen reader only — vizual ko'rinmas, lekin AT uchun mavjud */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* High-contrast yordamchi (kontrast 4.5:1 ga mos) */
+html.dark *:focus-visible {
+  outline-color: #60A5FA;
+}
