@@ -8,6 +8,8 @@ RUN npm ci --legacy-peer-deps
 
 # Build
 COPY . .
+# .env.prod ni Next.js standart joyiga ko'chirish — build paytida NEXT_PUBLIC_* o'qish uchun
+RUN [ -f .env.prod ] && cp .env.prod .env.production || true
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
