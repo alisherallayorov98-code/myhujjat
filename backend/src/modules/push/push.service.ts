@@ -20,11 +20,23 @@ export class PushService {
     const privKey = process.env.VAPID_PRIVATE_KEY
     const subject = process.env.VAPID_SUBJECT || 'mailto:support@myhujjat.uz'
 
-    if (pubKey && privKey) {
-      webpush.setVapidDetails(subject, pubKey, privKey)
-      this.configured = true
+    // Faqat haqiqiy ko'rinishdagi kalitlar uchun urinib ko'ramiz
+    // (placeholder yoki noto'g'ri formatda bo'lsa o'tkazib yuboramiz)
+    const validLooking = pubKey && privKey
+      && !pubKey.includes('PLACEHOLDER')
+      && !privKey.includes('PLACEHOLDER')
+      && pubKey.length >= 80   // Base64-url 65 bayt = 87 belgi
+
+    if (validLooking) {
+      try {
+        webpush.setVapidDetails(subject, pubKey!, privKey!)
+        this.configured = true
+        this.logger.log('VAPID kalitlari sozlandi — push bildirishnomalar yoqilgan')
+      } catch (err: any) {
+        this.logger.warn(`VAPID kalitlari noto'g'ri: ${err.message} — push bildirishnomalar o'chirildi`)
+      }
     } else {
-      this.logger.warn('VAPID kalitlari sozlanmagan — push bildirishnomalar ishlamaydi')
+      this.logger.warn('VAPID kalitlari sozlanmagan yoki placeholder — push bildirishnomalar o\'chirildi')
     }
   }
 
