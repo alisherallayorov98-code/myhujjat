@@ -1,5 +1,7 @@
 # ─── Build stage ─────────────────────────────────────────
 FROM node:20-alpine AS builder
+# OpenSSL va libc compat — Prisma uchun majburiy
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 COPY package*.json ./
@@ -11,6 +13,8 @@ RUN npm run build
 
 # ─── Runtime stage ───────────────────────────────────────
 FROM node:20-alpine
+# Runtime'da ham OpenSSL kerak — Prisma engine uchun
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 ENV NODE_ENV=production
