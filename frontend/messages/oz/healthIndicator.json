@@ -1,0 +1,11 @@
+{
+  "offline": "Интернет алоқаси йўқ",
+  "serverIssues": "Сервер муаммолар",
+  "serverSlow": "Сервер секин ишламоқда",
+  "componentDatabase": "Маълумотлар базаси",
+  "componentMemory": "Хотира",
+  "componentBreakers": "Ташқи хизматлар",
+  "footerBefore": "Тизим автоматик тузатиб олади. Агар муаммо давом этса,",
+  "footerLink": "ёрдам",
+  "footerAfter": "га ёзинг."
+}

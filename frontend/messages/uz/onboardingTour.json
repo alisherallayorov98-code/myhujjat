@@ -1,0 +1,19 @@
+{
+  "nextBtn": "Keyingi →",
+  "prevBtn": "← Orqaga",
+  "doneBtn": "Tayyor",
+  "step1Title": "Salom! 👋",
+  "step1Desc": "MyHujjat.uz ga xush kelibsiz! 1 daqiqada saytni qanday ishlatishni ko'rsatib o'taman.",
+  "step2Title": "1. Tashkilot qo'shing",
+  "step2Desc": "Avval o'z tashkilotingizni qo'shing. STIR (9 raqam) yozsangiz Soliq APIdan ma'lumotlar avtomatik to'ldiriladi.",
+  "step3Title": "2. Kontragentlar",
+  "step3Desc": "Hamkorlar (mijozlar/yetkazib beruvchilar) ro'yxati. Shu yerda STIR orqali avtomatik to'ldirish ham bor.",
+  "step4Title": "3. Shartnomalar",
+  "step4Desc": "Bu yerdan yangi shartnoma yaratish, ro'yxatni ko'rish, Excel'ga eksport qilish mumkin.",
+  "step5Title": "✨ Mira AI yordamchi",
+  "step5Desc": "Pastdan sehrli tugma — ovozli AI yordamchi. \"Bu oy nechta shartnoma yaratilgan?\" deb so'rasangiz, javob beradi yoki amal bajaradi!",
+  "step6Title": "Bildirishnomalar",
+  "step6Desc": "Yangi shartnoma yaratilganda, faktura kelganda yoki shartnoma summasidan oshib ketganda — shu yerda xabarlar.",
+  "step7Title": "Hammasi tayyor! 🎉",
+  "step7Desc": "Endi siz boshlaysiz. Savol bo'lsa o'ng pastdagi chat orqali yozing. Yaxshi ish!"
+}

@@ -1,0 +1,30 @@
+{
+  "ariaLabel": "Mira — ovozli yordamchi",
+  "name": "Mira",
+  "tagline": "AI ovozli yordamchi",
+  "greeting": "Salom! Men Miraman 👋",
+  "hint": "Mikrofonni bosib gapiring yoki pastdan matn yozing",
+  "example1": "💬 «Bu oy nechta shartnoma yaratilgan?»",
+  "example2": "💬 «Toshmatov MChJ uchun shartnoma yarat»",
+  "example3": "💬 «STIR 302756789 ni qidir»",
+  "thinking": "O'ylamoqda...",
+  "aiThinking": "AI o'ylamoqda...",
+  "inputPlaceholder": "Matn yozing yoki mikrofonni bosing...",
+  "stopAriaLabel": "To'xtatish",
+  "micAriaLabel": "Mikrofon",
+  "recording": "🔴 Yozilmoqda... {seconds}s — to'xtatish uchun qaytadan bosing",
+  "footerHint": "Mikrofonni bosib gapiring · Enter — yuborish",
+  "doneFallback": "Bajarildi",
+  "errorMicNotSupported": "Brauzeringiz mikrofonni qo'llab-quvvatlamaydi",
+  "errorTooShort": "Biroz uzunroq gapiring (kamida 1 sekund)",
+  "errorMicPermission": "Mikrofonga ruxsat berishni unutmang",
+  "errorAudioSend": "Audio yuborishda xato",
+  "errorGeneric": "Xatolik yuz berdi",
+  "tools": {
+    "createCounterparty": "Kontragent qo'shildi",
+    "createContract": "Shartnoma yaratildi",
+    "listContracts": "Shartnomalar ro'yxati",
+    "searchStir": "STIR qidirildi",
+    "getStats": "Statistika olindi"
+  }
+}

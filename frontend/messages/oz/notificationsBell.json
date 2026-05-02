@@ -1,0 +1,12 @@
+{
+  "ariaLabel": "Билдиришномалар",
+  "title": "Билдиришномалар",
+  "unreadCount": "{count} та ўқилмаган",
+  "markAllRead": "Ҳаммасини ўқилди",
+  "empty": "Билдиришнома йўқ",
+  "delete": "Ўчириш",
+  "now": "ҳозир",
+  "minutes": "{count} дақиқа",
+  "hours": "{count} соат",
+  "days": "{count} кун"
+}

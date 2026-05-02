@@ -1,0 +1,12 @@
+{
+  "ariaLabel": "Уведомления",
+  "title": "Уведомления",
+  "unreadCount": "{count} непрочитанных",
+  "markAllRead": "Прочитать все",
+  "empty": "Уведомлений нет",
+  "delete": "Удалить",
+  "now": "только что",
+  "minutes": "{count} мин",
+  "hours": "{count} ч",
+  "days": "{count} дн"
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations }      from 'next-intl'
 import { Download, X, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
@@ -10,19 +11,18 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY     = 'pwa_install_dismissed'
-const SHOW_AFTER_DAYS = 7  // rad etgandan so'ng 7 kun keyin yana ko'rsat
+const SHOW_AFTER_DAYS = 7
 
 export function PWAInstallPrompt() {
+  const t = useTranslations('pwaPrompt')
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    // Allaqachon o'rnatilgan bo'lsa ko'rsatma
     if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) {
       return
     }
 
-    // Yaqinda rad etgan bo'lsa ko'rsatma
     const dismissedAt = localStorage.getItem(DISMISS_KEY)
     if (dismissedAt) {
       const days = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24)
@@ -32,7 +32,6 @@ export function PWAInstallPrompt() {
     function handler(e: Event) {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // 5 sekund kutib chiqaramiz (foydalanuvchi sahifani ko'rib olsin)
       setTimeout(() => setShow(true), 5000)
     }
 
@@ -68,9 +67,9 @@ export function PWAInstallPrompt() {
           <Smartphone size={20} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-display font-bold text-[#0F172A] text-sm">MyHujjat ilovasini o'rnating</p>
+          <p className="font-display font-bold text-[#0F172A] text-sm">{t('title')}</p>
           <p className="text-xs text-[#475569] mt-1 leading-relaxed">
-            Tezkor kirish, oflayn rejim va telefoningizdan to'g'ridan-to'g'ri ishlash uchun.
+            {t('description')}
           </p>
           <div className="flex gap-2 mt-3">
             <Button
@@ -78,21 +77,21 @@ export function PWAInstallPrompt() {
               leftIcon={<Download size={13} />}
               onClick={handleInstall}
             >
-              O'rnatish
+              {t('install')}
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={handleDismiss}
             >
-              Keyinroq
+              {t('later')}
             </Button>
           </div>
         </div>
         <button
           onClick={handleDismiss}
           className="p-1 rounded text-[#94A3B8] hover:text-[#475569] shrink-0"
-          aria-label="Yopish"
+          aria-label={t('close')}
         >
           <X size={14} />
         </button>

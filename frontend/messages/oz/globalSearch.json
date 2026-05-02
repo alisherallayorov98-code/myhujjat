@@ -1,0 +1,17 @@
+{
+  "triggerPlaceholder": "Қидириш...",
+  "inputPlaceholder": "Шартнома, контрагент, ходим...",
+  "recentSearches": "Сўнгги қидирувлар",
+  "quickActions": "Тезкор ҳаракатлар",
+  "actionNewContract": "Янги шартнома",
+  "actionNewCounterparty": "Янги контрагент",
+  "actionAiDoc": "AI ҳужжат яратиш",
+  "noResults": "\"{query}\" бўйича натижа топилмади",
+  "minChars": "Камида 2 та белги киритинг",
+  "groupContracts": "Шартномалар",
+  "groupCounterparties": "Контрагентлар",
+  "groupEmployees": "Ходимлар",
+  "footerNav": "навигация",
+  "footerSelect": "танлаш",
+  "footerClose": "ёпиш"
+}

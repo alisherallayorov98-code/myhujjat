@@ -1,0 +1,11 @@
+{
+  "offline": "Нет подключения к интернету",
+  "serverIssues": "Проблемы с сервером",
+  "serverSlow": "Сервер работает медленно",
+  "componentDatabase": "База данных",
+  "componentMemory": "Память",
+  "componentBreakers": "Внешние сервисы",
+  "footerBefore": "Система автоматически восстанавливается. Если проблема не исчезнет,",
+  "footerLink": "поддержку",
+  "footerAfter": "."
+}

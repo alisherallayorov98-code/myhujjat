@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslations }                          from 'next-intl'
 import { useRouter }   from 'next/navigation'
 import {
   Search, Building2, Plus, Zap,
@@ -10,12 +11,6 @@ import { useQuery }    from '@tanstack/react-query'
 import { useAuth }     from '@/hooks/useAuth'
 import api             from '@/lib/api'
 import { cn }          from '@/lib/cn'
-
-const QUICK_ACTIONS = [
-  { id: 'new-contract', label: 'Yangi shartnoma',    icon: Plus,      url: '/dashboard/shartnomalar/yangi', shortcut: 'N' },
-  { id: 'new-cp',       label: 'Yangi kontragent',   icon: Building2, url: '/dashboard/kontragentlar?new=1', shortcut: 'K' },
-  { id: 'ai-doc',       label: 'AI hujjat yaratish', icon: Zap,       url: '/dashboard/ai', shortcut: 'A' },
-]
 
 type ResultItem = {
   id:       string
@@ -34,6 +29,7 @@ type SearchResults = {
 }
 
 export function GlobalSearch() {
+  const t = useTranslations('globalSearch')
   const router         = useRouter()
   const { currentOrg } = useAuth()
   const [open,    setOpen]    = useState(false)
@@ -42,7 +38,12 @@ export function GlobalSearch() {
   const inputRef   = useRef<HTMLInputElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
 
-  // Ctrl+K / Cmd+K shortcut
+  const QUICK_ACTIONS = [
+    { id: 'new-contract', label: t('actionNewContract'),     icon: Plus,      url: '/dashboard/shartnomalar/yangi',   shortcut: 'N' },
+    { id: 'new-cp',       label: t('actionNewCounterparty'), icon: Building2, url: '/dashboard/kontragentlar?new=1',  shortcut: 'K' },
+    { id: 'ai-doc',       label: t('actionAiDoc'),           icon: Zap,       url: '/dashboard/ai',                   shortcut: 'A' },
+  ]
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -105,7 +106,6 @@ export function GlobalSearch() {
   const showQuickActions = query.length === 0
   const showResults      = query.length >= 2 && !!results
 
-  // Arrow key + Enter navigation
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -142,7 +142,7 @@ export function GlobalSearch() {
         className="hidden sm:flex items-center gap-2 h-9 px-3 rounded-lg bg-[#F1F5F9] border border-[#E2E8F0] hover:border-[#CBD5E1] transition-all text-sm text-[#94A3B8] min-w-[200px]"
       >
         <Search size={14} />
-        <span className="flex-1 text-left">Qidirish...</span>
+        <span className="flex-1 text-left">{t('triggerPlaceholder')}</span>
         <kbd className="text-[10px] bg-white border border-[#E2E8F0] rounded px-1.5 py-0.5">
           Ctrl K
         </kbd>
@@ -159,7 +159,6 @@ export function GlobalSearch() {
       <div className="absolute inset-0 bg-[#0F172A]/50 backdrop-blur-sm" />
 
       <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] overflow-hidden">
-        {/* Input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-[#E2E8F0]">
           {isFetching
             ? <div className="w-4 h-4 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin shrink-0" />
@@ -169,7 +168,7 @@ export function GlobalSearch() {
             ref={inputRef}
             value={query}
             onChange={e => { setQuery(e.target.value); setFocused(0) }}
-            placeholder="Shartnoma, kontragent, xodim..."
+            placeholder={t('inputPlaceholder')}
             className="flex-1 outline-none text-sm text-[#0F172A] placeholder:text-[#94A3B8]"
           />
           {query && (
@@ -182,14 +181,13 @@ export function GlobalSearch() {
           </kbd>
         </div>
 
-        {/* Results */}
         <div className="max-h-[60vh] overflow-y-auto">
           {showQuickActions && (
             <div className="py-2">
               {recent.length > 0 && (
                 <div className="mb-2">
                   <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
-                    So'nggi qidiruvlar
+                    {t('recentSearches')}
                   </p>
                   {recent.map((r, i) => (
                     <button
@@ -205,7 +203,7 @@ export function GlobalSearch() {
               )}
 
               <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
-                Tezkor harakatlar
+                {t('quickActions')}
               </p>
               {QUICK_ACTIONS.map((action, i) => (
                 <button
@@ -232,14 +230,14 @@ export function GlobalSearch() {
             <div className="py-2">
               {results!.total === 0 ? (
                 <div className="px-4 py-8 text-center">
-                  <p className="text-sm text-[#94A3B8]">"{query}" bo'yicha natija topilmadi</p>
+                  <p className="text-sm text-[#94A3B8]">{t('noResults', { query })}</p>
                 </div>
               ) : (
                 <>
                   {results!.contracts.length > 0 && (
                     <div>
                       <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
-                        Shartnomalar
+                        {t('groupContracts')}
                       </p>
                       {results!.contracts.map((item, i) => (
                         <ResultRow
@@ -255,7 +253,7 @@ export function GlobalSearch() {
                   {results!.counterparties.length > 0 && (
                     <div>
                       <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
-                        Kontragentlar
+                        {t('groupCounterparties')}
                       </p>
                       {results!.counterparties.map((item, i) => (
                         <ResultRow
@@ -271,7 +269,7 @@ export function GlobalSearch() {
                   {results!.employees.length > 0 && (
                     <div>
                       <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
-                        Xodimlar
+                        {t('groupEmployees')}
                       </p>
                       {results!.employees.map((item, i) => (
                         <ResultRow
@@ -290,21 +288,20 @@ export function GlobalSearch() {
 
           {query.length === 1 && (
             <div className="px-4 py-6 text-center">
-              <p className="text-sm text-[#94A3B8]">Kamida 2 ta belgi kiriting</p>
+              <p className="text-sm text-[#94A3B8]">{t('minChars')}</p>
             </div>
           )}
         </div>
 
-        {/* Footer hints */}
         <div className="px-4 py-2.5 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center gap-4 text-[10px] text-[#94A3B8]">
           <span className="flex items-center gap-1">
-            <kbd className="bg-white border border-[#E2E8F0] rounded px-1">↑↓</kbd> navigatsiya
+            <kbd className="bg-white border border-[#E2E8F0] rounded px-1">↑↓</kbd> {t('footerNav')}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="bg-white border border-[#E2E8F0] rounded px-1">Enter</kbd> tanlash
+            <kbd className="bg-white border border-[#E2E8F0] rounded px-1">Enter</kbd> {t('footerSelect')}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="bg-white border border-[#E2E8F0] rounded px-1">Esc</kbd> yopish
+            <kbd className="bg-white border border-[#E2E8F0] rounded px-1">Esc</kbd> {t('footerClose')}
           </span>
         </div>
       </div>

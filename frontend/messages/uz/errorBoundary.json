@@ -1,0 +1,11 @@
+{
+  "titleTooMany": "Kutilmagan muammo",
+  "titleFixing": "Tuzatilmoqda...",
+  "descTooMany": "Sahifada bir nechta xato yuz berdi. Iltimos, bosh sahifaga qaytib, qaytadan urinib ko'ring.",
+  "descFixing": "Sayt o'zini avtomatik tuzatmoqda. Bir necha soniyadan so'ng qayta yuklanadi.",
+  "reloadCountdown": "soniyadan so'ng qayta yuklanadi",
+  "devDetails": "Texnik tafsilot (faqat dev rejimda)",
+  "reload": "Qaytadan yuklash",
+  "home": "Bosh sahifa",
+  "supportPrefix": "Agar muammo davom etsa:"
+}

@@ -1,0 +1,11 @@
+{
+  "offline": "Internet aloqasi yo'q",
+  "serverIssues": "Server muammolar",
+  "serverSlow": "Server sekin ishlamoqda",
+  "componentDatabase": "Ma'lumotlar bazasi",
+  "componentMemory": "Xotira",
+  "componentBreakers": "Tashqi xizmatlar",
+  "footerBefore": "Tizim avtomatik tuzatib oladi. Agar muammo davom etsa,",
+  "footerLink": "yordam",
+  "footerAfter": "ga yozing."
+}

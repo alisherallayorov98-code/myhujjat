@@ -6,6 +6,7 @@ import {
   Check, AlertCircle, Volume2,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import api from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/cn'
@@ -30,17 +31,25 @@ interface VoiceMessage {
   timestamp:   number
 }
 
-const TOOL_LABEL: Record<string, string> = {
-  createCounterparty: "Kontragent qo'shildi",
-  createContract:     'Shartnoma yaratildi',
-  listContracts:      "Shartnomalar ro'yxati",
-  searchStir:         'STIR qidirildi',
-  getStats:           'Statistika olindi',
-}
+const TOOL_KEYS = [
+  'createCounterparty',
+  'createContract',
+  'listContracts',
+  'searchStir',
+  'getStats',
+] as const
 
 export function VoiceAssistant() {
+  const t              = useTranslations('voiceAssistant')
   const { currentOrg } = useAuth()
   const qc             = useQueryClient()
+
+  function toolLabel(name: string): string {
+    if ((TOOL_KEYS as readonly string[]).includes(name)) {
+      return (t as any)(`tools.${name}`)
+    }
+    return name
+  }
 
   const [open,        setOpen]        = useState(false)
   const [status,      setStatus]      = useState<Status>('idle')
@@ -76,7 +85,7 @@ export function VoiceAssistant() {
     if (status !== 'idle') return
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      toast.error('Brauzeringiz mikrofonni qo\'llab-quvvatlamaydi')
+      toast.error(t('errorMicNotSupported'))
       return
     }
     try {
@@ -95,7 +104,7 @@ export function VoiceAssistant() {
         const duration = Date.now() - startTimeRef.current
         const blob = new Blob(audioChunksRef.current, { type: mr.mimeType || 'audio/webm' })
         if (duration < 500 || blob.size < 1500) {
-          toast.error("Biroz uzunroq gapiring (kamida 1 sekund)")
+          toast.error(t('errorTooShort'))
           setStatus('idle')
           return
         }
@@ -114,7 +123,7 @@ export function VoiceAssistant() {
       }, 30_000)
     } catch (err: any) {
       console.error(err)
-      toast.error('Mikrofonga ruxsat berishni unutmang')
+      toast.error(t('errorMicPermission'))
       setStatus('idle')
     }
   }
@@ -134,7 +143,7 @@ export function VoiceAssistant() {
       const cleanMime = mimeType.split(';')[0]
       await sendCommand({ audio: { data: base64, mimeType: cleanMime } })
     } catch (err: any) {
-      toast.error('Audio yuborishda xato')
+      toast.error(t('errorAudioSend'))
       setStatus('error')
     }
   }
@@ -168,7 +177,7 @@ export function VoiceAssistant() {
       // Agent javobi
       setMessages(m => [...m, {
         role:        'assistant',
-        text:        data.response || 'Bajarildi',
+        text:        data.response || t('doneFallback'),
         toolsCalled: data.toolsCalled,
         timestamp:   Date.now(),
       }])
@@ -194,7 +203,7 @@ export function VoiceAssistant() {
       setStatus('done')
       setTimeout(() => setStatus('idle'), 800)
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Xatolik yuz berdi'
+      const msg = err?.response?.data?.message || t('errorGeneric')
       setMessages(m => [...m, { role: 'assistant', text: `❌ ${msg}`, timestamp: Date.now() }])
       setStatus('error')
       setTimeout(() => setStatus('idle'), 1500)
@@ -283,7 +292,7 @@ export function VoiceAssistant() {
                             : <AlertCircle size={11} className="text-[#DC2626] shrink-0" />
                           }
                           <span className={t.success ? 'text-[#15803D]' : 'text-[#DC2626]'}>
-                            {TOOL_LABEL[t.name] || t.name}
+                            {toolLabel(t.name)}
                             {!t.success && t.error && `: ${t.error}`}
                           </span>
                         </div>

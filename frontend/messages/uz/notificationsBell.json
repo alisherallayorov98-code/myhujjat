@@ -1,0 +1,12 @@
+{
+  "ariaLabel": "Bildirishnomalar",
+  "title": "Bildirishnomalar",
+  "unreadCount": "{count} ta o'qilmagan",
+  "markAllRead": "Hammasini o'qildi",
+  "empty": "Bildirishnoma yo'q",
+  "delete": "O'chirish",
+  "now": "hozir",
+  "minutes": "{count} daqiqa",
+  "hours": "{count} soat",
+  "days": "{count} kun"
+}

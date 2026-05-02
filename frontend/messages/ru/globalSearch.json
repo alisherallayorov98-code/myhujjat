@@ -1,0 +1,17 @@
+{
+  "triggerPlaceholder": "Поиск...",
+  "inputPlaceholder": "Договор, контрагент, сотрудник...",
+  "recentSearches": "Недавние запросы",
+  "quickActions": "Быстрые действия",
+  "actionNewContract": "Новый договор",
+  "actionNewCounterparty": "Новый контрагент",
+  "actionAiDoc": "Создать документ AI",
+  "noResults": "По запросу \"{query}\" ничего не найдено",
+  "minChars": "Введите минимум 2 символа",
+  "groupContracts": "Договоры",
+  "groupCounterparties": "Контрагенты",
+  "groupEmployees": "Сотрудники",
+  "footerNav": "навигация",
+  "footerSelect": "выбрать",
+  "footerClose": "закрыть"
+}

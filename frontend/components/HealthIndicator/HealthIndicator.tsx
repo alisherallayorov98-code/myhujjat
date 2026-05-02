@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations }      from 'next-intl'
 import { useQuery } from '@tanstack/react-query'
 import { WifiOff, Activity } from 'lucide-react'
 import api from '@/lib/api'
@@ -13,10 +14,10 @@ interface HealthData {
 }
 
 export function HealthIndicator() {
+  const t = useTranslations('healthIndicator')
   const [online, setOnline] = useState(true)
   const [showDetails, setShowDetails] = useState(false)
 
-  // Online/offline holatini kuzatish
   useEffect(() => {
     function handleOnline()  { setOnline(true)  }
     function handleOffline() { setOnline(false) }
@@ -30,7 +31,6 @@ export function HealthIndicator() {
     }
   }, [])
 
-  // Server holatini har 60 soniyada tekshirish
   const { data: health } = useQuery<HealthData>({
     queryKey: ['health'],
     queryFn:  () => api.get('/health').then(r => r.data),
@@ -40,26 +40,24 @@ export function HealthIndicator() {
     enabled: online,
   })
 
-  // Offline holat
   if (!online) {
     return (
       <button
         onClick={() => setShowDetails(s => !s)}
         className="relative p-2 rounded-lg bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA] transition"
-        title="Internet aloqasi yo'q"
+        title={t('offline')}
       >
         <WifiOff size={16} />
       </button>
     )
   }
 
-  // Sayt holati
   const status = health?.status
-  if (status === 'healthy' || !health) return null  // hammasi yaxshi — ko'rsatma
+  if (status === 'healthy' || !health) return null
 
   const cfg = status === 'unhealthy'
-    ? { color: 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA]', label: 'Server muammolar', dot: 'bg-[#DC2626]' }
-    : { color: 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FDE68A]', label: 'Server sekin ishlamoqda', dot: 'bg-[#D97706]' }
+    ? { color: 'bg-[#FEE2E2] text-[#DC2626] hover:bg-[#FECACA]', label: t('serverIssues'), dot: 'bg-[#DC2626]' }
+    : { color: 'bg-[#FEF3C7] text-[#D97706] hover:bg-[#FDE68A]', label: t('serverSlow'),   dot: 'bg-[#D97706]' }
 
   return (
     <div className="relative">
@@ -88,9 +86,9 @@ export function HealthIndicator() {
                                                  'bg-[#DC2626]'
                   )} />
                   <span className="font-medium text-[#475569] capitalize">
-                    {key === 'database' ? "Ma'lumotlar bazasi" :
-                     key === 'memory'   ? 'Xotira' :
-                     key === 'breakers' ? 'Tashqi xizmatlar' : key}
+                    {key === 'database' ? t('componentDatabase') :
+                     key === 'memory'   ? t('componentMemory')   :
+                     key === 'breakers' ? t('componentBreakers') : key}
                   </span>
                   <span className="text-[#94A3B8] ml-auto">
                     {comp.status === 'up' ? '✓' : comp.message || '—'}
@@ -100,11 +98,11 @@ export function HealthIndicator() {
             </div>
 
             <p className="text-[11px] text-[#94A3B8] mt-3 pt-3 border-t border-[#F1F5F9]">
-              Tizim avtomatik tuzatib oladi. Agar muammo davom etsa,
+              {t('footerBefore')}
               <a href="mailto:support@myhujjat.uz" className="text-[#2563EB] ml-1 hover:underline">
-                yordam
+                {t('footerLink')}
               </a>
-              ga yozing.
+              {t('footerAfter')}
             </p>
           </div>
         </>

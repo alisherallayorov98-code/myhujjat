@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useTranslations }              from 'next-intl'
 import Link                            from 'next/link'
 import {
   Bell, Check, X, FileText, Clock,
@@ -37,27 +38,28 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; bg: string }> = {
   WELCOME:                { icon: Sparkles,    color: 'text-[#7C3AED]', bg: 'bg-[#EDE9FE]' },
 }
 
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const min  = Math.floor(diff / 60000)
-  const hr   = Math.floor(min / 60)
-  const day  = Math.floor(hr / 24)
-  if (min < 1)   return 'hozir'
-  if (min < 60)  return `${min} daqiqa`
-  if (hr < 24)   return `${hr} soat`
-  if (day < 7)   return `${day} kun`
-  return new Date(iso).toLocaleDateString('uz-UZ')
-}
-
 export function NotificationsBell() {
+  const t = useTranslations('notificationsBell')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const qc  = useQueryClient()
 
+  function timeAgo(iso: string): string {
+    const diff = Date.now() - new Date(iso).getTime()
+    const min  = Math.floor(diff / 60000)
+    const hr   = Math.floor(min / 60)
+    const day  = Math.floor(hr / 24)
+    if (min < 1)   return t('now')
+    if (min < 60)  return t('minutes', { count: min })
+    if (hr < 24)   return t('hours', { count: hr })
+    if (day < 7)   return t('days', { count: day })
+    return new Date(iso).toLocaleDateString('uz-UZ')
+  }
+
   const { data } = useQuery<NotificationsResponse>({
     queryKey: ['notifications'],
     queryFn:  () => api.get('/notifications?limit=10').then(r => r.data),
-    refetchInterval: 60_000, // har 1 daqiqada yangilab turish
+    refetchInterval: 60_000,
   })
 
   const markRead = useMutation({
@@ -96,7 +98,7 @@ export function NotificationsBell() {
       <button
         onClick={() => setOpen(o => !o)}
         className="relative p-2 rounded-lg text-[#94A3B8] hover:bg-[#F1F5F9] transition-colors"
-        aria-label="Bildirishnomalar"
+        aria-label={t('ariaLabel')}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
@@ -108,12 +110,11 @@ export function NotificationsBell() {
 
       {open && (
         <div className="absolute right-0 top-full mt-1.5 w-96 max-w-[calc(100vw-2rem)] bg-white border border-[#E2E8F0] rounded-xl shadow-xl z-30 overflow-hidden animate-scale-in">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#E2E8F0]">
             <div>
-              <p className="text-sm font-semibold text-[#0F172A]">Bildirishnomalar</p>
+              <p className="text-sm font-semibold text-[#0F172A]">{t('title')}</p>
               {unreadCount > 0 && (
-                <p className="text-xs text-[#94A3B8]">{unreadCount} ta o'qilmagan</p>
+                <p className="text-xs text-[#94A3B8]">{t('unreadCount', { count: unreadCount })}</p>
               )}
             </div>
             {unreadCount > 0 && (
@@ -122,17 +123,16 @@ export function NotificationsBell() {
                 disabled={markAllRead.isPending}
                 className="text-xs text-[#2563EB] hover:underline font-medium"
               >
-                Hammasini o'qildi
+                {t('markAllRead')}
               </button>
             )}
           </div>
 
-          {/* List */}
           <div className="max-h-[420px] overflow-y-auto">
             {items.length === 0 ? (
               <div className="py-12 text-center">
                 <Bell size={28} className="mx-auto text-[#CBD5E1] mb-2" />
-                <p className="text-sm text-[#94A3B8]">Bildirishnoma yo'q</p>
+                <p className="text-sm text-[#94A3B8]">{t('empty')}</p>
               </div>
             ) : (
               <div className="divide-y divide-[#F1F5F9]">
@@ -160,7 +160,7 @@ export function NotificationsBell() {
                       <button
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeNotif.mutate(n.id) }}
                         className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#CBD5E1] hover:text-[#DC2626] transition shrink-0"
-                        aria-label="O'chirish"
+                        aria-label={t('delete')}
                       >
                         <X size={12} />
                       </button>

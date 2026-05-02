@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useTranslations }              from 'next-intl'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api  from '@/lib/api'
 import { cn } from '@/lib/cn'
 
 export function SupportChat() {
+  const t = useTranslations('supportChat')
   const [open,    setOpen]    = useState(false)
   const [message, setMessage] = useState('')
   const qc        = useQueryClient()
@@ -46,14 +48,13 @@ export function SupportChat() {
 
   return (
     <>
-      {/* Trigger tugma */}
       <button
         onClick={() => setOpen(o => !o)}
         className={cn(
           'fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all',
           open ? 'bg-[#475569] hover:bg-[#334155]' : 'bg-[#2563EB] hover:bg-[#1D4ED8]'
         )}
-        aria-label="Qo'llab-quvvatlash"
+        aria-label={t('ariaLabel')}
       >
         {open
           ? <X size={20} className="text-white" />
@@ -61,19 +62,16 @@ export function SupportChat() {
         }
       </button>
 
-      {/* Chat oynasi */}
       {open && (
         <div
           className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-40 w-80 bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] overflow-hidden flex flex-col"
           style={{ height: '420px' }}
         >
-          {/* Header */}
           <div className="bg-[#2563EB] px-4 py-3 shrink-0">
-            <p className="text-white font-semibold text-sm">Qo'llab-quvvatlash</p>
-            <p className="text-blue-100 text-xs">Odatda 1–2 soat ichida javob</p>
+            <p className="text-white font-semibold text-sm">{t('title')}</p>
+            <p className="text-blue-100 text-xs">{t('subtitle')}</p>
           </div>
 
-          {/* Xabarlar */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2 scroll-touch">
             {isLoading ? (
               <div className="flex justify-center py-6">
@@ -83,7 +81,7 @@ export function SupportChat() {
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
                 <MessageCircle size={28} className="text-[#CBD5E1] mb-2" />
                 <p className="text-xs text-[#94A3B8] leading-relaxed">
-                  Savolingizni yozing, tez orada javob beramiz!
+                  {t('emptyHint')}
                 </p>
               </div>
             ) : (
@@ -106,7 +104,6 @@ export function SupportChat() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
           <div className="p-3 border-t border-[#E2E8F0] flex gap-2 shrink-0">
             <input
               value={message}
@@ -117,7 +114,7 @@ export function SupportChat() {
                   handleSend()
                 }
               }}
-              placeholder="Xabar yozing..."
+              placeholder={t('inputPlaceholder')}
               className="flex-1 text-sm border border-[#E2E8F0] rounded-lg px-3 py-2 outline-none focus:border-[#2563EB] transition-colors"
             />
             <button

@@ -1,0 +1,17 @@
+{
+  "triggerPlaceholder": "Qidirish...",
+  "inputPlaceholder": "Shartnoma, kontragent, xodim...",
+  "recentSearches": "So'nggi qidiruvlar",
+  "quickActions": "Tezkor harakatlar",
+  "actionNewContract": "Yangi shartnoma",
+  "actionNewCounterparty": "Yangi kontragent",
+  "actionAiDoc": "AI hujjat yaratish",
+  "noResults": "\"{query}\" bo'yicha natija topilmadi",
+  "minChars": "Kamida 2 ta belgi kiriting",
+  "groupContracts": "Shartnomalar",
+  "groupCounterparties": "Kontragentlar",
+  "groupEmployees": "Xodimlar",
+  "footerNav": "navigatsiya",
+  "footerSelect": "tanlash",
+  "footerClose": "yopish"
+}
