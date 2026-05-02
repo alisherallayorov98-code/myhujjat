@@ -324,7 +324,7 @@ export function VoiceAssistant() {
                 value={textInput}
                 onChange={e => setTextInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') sendText() }}
-                placeholder="Matn yozing yoki mikrofonni bosing..."
+                placeholder={t('inputPlaceholder')}
                 disabled={status === 'recording' || status === 'processing'}
                 className="flex-1 h-10 rounded-lg text-sm px-3 bg-[#F8FAFC] border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 disabled:opacity-60"
               />

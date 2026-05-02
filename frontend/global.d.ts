@@ -52,6 +52,7 @@ import type invoicesPanel     from './messages/uz/invoicesPanel.json'
 import type seifAi            from './messages/uz/seifAi.json'
 import type shablonlar        from './messages/uz/shablonlar.json'
 import type stirInput         from './messages/uz/stirInput.json'
+import type didoxSend         from './messages/uz/didoxSend.json'
 
 type AllMessages = {
   common:            typeof common
@@ -105,6 +106,7 @@ type AllMessages = {
   seifAi:            typeof seifAi
   shablonlar:        typeof shablonlar
   stirInput:         typeof stirInput
+  didoxSend:         typeof didoxSend
 }
 
 declare module 'next-intl' {

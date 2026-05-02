@@ -1,0 +1,12 @@
+{
+  "needSpec": "Avval spesifikatsiya qo'shing",
+  "sent": "Didox ga yuborildi!",
+  "error": "Didox xatolik",
+  "alreadySent": "Didox da yuborilgan",
+  "sendBtn": "Didox ga yuborish",
+  "modalTitle": "Didox ga yuborish",
+  "cancel": "Bekor",
+  "submit": "Yuborish",
+  "info": "Ushbu shartnoma bo'yicha faktura Didox elektron hisob-faktura tizimiga yuboriladi.",
+  "warning": "Diqqat: Yuborilgan hisob-fakturani qaytarib olish mumkin emas. Kontragent uni Didox tizimida ko'radi."
+}
