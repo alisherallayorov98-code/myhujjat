@@ -3,5 +3,22 @@
   "contracts": "Договор",
   "ai":        "AI",
   "safe":      "Сейф",
-  "menu":      "Меню"
+  "menu":      "Меню",
+  "section": {
+    "main":     "Основное",
+    "depts":    "Отделы",
+    "settings": "Настройки"
+  },
+  "item": {
+    "contracts":     "Договоры",
+    "counterparties": "Контрагенты",
+    "hr":            "Кадры (HR)",
+    "accountant":    "Бухгалтер",
+    "lawyer":        "Юрист",
+    "secretary":     "Секретарь",
+    "templates":     "Шаблоны",
+    "subscription":  "Подписка",
+    "settings":      "Настройки"
+  },
+  "logout": "Выход"
 }

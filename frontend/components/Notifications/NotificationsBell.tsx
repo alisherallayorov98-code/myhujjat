@@ -10,6 +10,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { cn } from '@/lib/cn'
+import { formatDate } from '@/lib/formatters'
 
 interface Notification {
   id:             string
@@ -53,7 +54,7 @@ export function NotificationsBell() {
     if (min < 60)  return t('minutes', { count: min })
     if (hr < 24)   return t('hours', { count: hr })
     if (day < 7)   return t('days', { count: day })
-    return new Date(iso).toLocaleDateString('uz-UZ')
+    return formatDate(iso, 'short')
   }
 
   const { data } = useQuery<NotificationsResponse>({

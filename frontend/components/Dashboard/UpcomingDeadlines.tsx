@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { useAuth }  from '@/hooks/useAuth'
 import { Card }     from '@/components/ui/Card'
 import { cn }       from '@/lib/cn'
+import { formatDate } from '@/lib/formatters'
 
 interface DeadlineItem {
   id:        string
@@ -136,7 +137,7 @@ function DeadlineRow({ item }: { item: DeadlineItem }) {
            item.daysLeft === 1 ? t('deadlines.tomorrow') :
            t('deadlines.daysLeft', { count: item.daysLeft })}
           <span className="text-[#CBD5E1]">·</span>
-          <span>{item.date.toLocaleDateString('uz-UZ')}</span>
+          <span>{formatDate(item.date, 'short')}</span>
         </p>
       </div>
       <span className={cn(

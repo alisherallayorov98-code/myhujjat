@@ -14,6 +14,7 @@ import { EmptyState, TableRowSkeleton }                   from '@/components/ui/
 import { useAuth }                                        from '@/hooks/useAuth'
 import api                                                from '@/lib/api'
 import { exportEmployeesExcel }                          from '@/lib/export/listExport'
+import { formatDate }                                    from '@/lib/formatters'
 import toast                                              from 'react-hot-toast'
 import Link                                               from 'next/link'
 
@@ -298,7 +299,7 @@ export default function KadrlarPage() {
                       {emp.maosh ? Number(emp.maosh).toLocaleString('uz-UZ') + ` ${t('som')}` : '—'}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#94A3B8]">
-                      {emp.ishBoshi ? new Date(emp.ishBoshi).toLocaleDateString('uz-UZ') : '—'}
+                      {emp.ishBoshi ? formatDate(emp.ishBoshi, 'short') : '—'}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#94A3B8]">{emp.tel || '—'}</td>
                     <td className="px-4 py-3">

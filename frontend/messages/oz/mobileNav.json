@@ -3,5 +3,22 @@
   "contracts": "Шартнома",
   "ai":        "AI",
   "safe":      "Сейф",
-  "menu":      "Меню"
+  "menu":      "Меню",
+  "section": {
+    "main":     "Асосий",
+    "depts":    "Бўлимлар",
+    "settings": "Созламалар"
+  },
+  "item": {
+    "contracts":     "Шартномалар",
+    "counterparties": "Контрагентлар",
+    "hr":            "Кадрлар (HR)",
+    "accountant":    "Бухгалтер",
+    "lawyer":        "Юрист",
+    "secretary":     "Котиб",
+    "templates":     "Шаблонлар",
+    "subscription":  "Обуна",
+    "settings":      "Созламалар"
+  },
+  "logout": "Чиқиш"
 }

@@ -1,11 +1,29 @@
 // ============================================
+// LOCALE — joriy tilni cookie'dan o'qish
+// ============================================
+type AppLocale = 'uz' | 'oz' | 'ru'
+
+function currentLocale(): AppLocale {
+  if (typeof document === 'undefined') return 'uz'
+  const m = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/)
+  const v = m?.[1] as AppLocale | undefined
+  return v && ['uz', 'oz', 'ru'].includes(v) ? v : 'uz'
+}
+
+function intlLocale(l: AppLocale): string {
+  return l === 'ru' ? 'ru-RU' : l === 'oz' ? 'uz-Cyrl-UZ' : 'uz-UZ'
+}
+
+// ============================================
 // VALYUTA FORMATLASH
 // ============================================
 export function formatCurrency(amount: number, currency = 'UZS'): string {
+  const lc = intlLocale(currentLocale())
+  const sumWord = currentLocale() === 'ru' ? 'сум' : currentLocale() === 'oz' ? "сўм" : "so'm"
   if (currency === 'UZS') {
-    return new Intl.NumberFormat('uz-UZ').format(Math.round(amount)) + " so'm"
+    return new Intl.NumberFormat(lc).format(Math.round(amount)) + ' ' + sumWord
   }
-  return new Intl.NumberFormat('uz-UZ', { style: 'currency', currency }).format(amount)
+  return new Intl.NumberFormat(lc, { style: 'currency', currency }).format(amount)
 }
 
 // ============================================
@@ -18,22 +36,33 @@ export function formatDate(
   const d = new Date(date)
   if (isNaN(d.getTime())) return '—'
 
-  const months_uz = [
-    'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
-    'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'
-  ]
+  const lc      = currentLocale()
+  const intlLc  = intlLocale(lc)
+
+  const monthsByLocale: Record<AppLocale, string[]> = {
+    uz: ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+         'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'],
+    oz: ['январ', 'феврал', 'март', 'апрел', 'май', 'июн',
+         'июл', 'август', 'сентабр', 'октабр', 'ноябр', 'декабр'],
+    ru: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+         'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
+  }
 
   if (format === 'long') {
-    return `${d.getDate()} ${months_uz[d.getMonth()]} ${d.getFullYear()} yil`
+    const months = monthsByLocale[lc]
+    const year   = d.getFullYear()
+    if (lc === 'ru') return `${d.getDate()} ${months[d.getMonth()]} ${year} г.`
+    if (lc === 'oz') return `${d.getDate()} ${months[d.getMonth()]} ${year} йил`
+    return `${d.getDate()} ${months[d.getMonth()]} ${year} yil`
   }
 
   if (format === 'short') {
-    return d.toLocaleDateString('uz-UZ', {
+    return d.toLocaleDateString(intlLc, {
       day: '2-digit', month: '2-digit', year: 'numeric'
     })
   }
 
-  return d.toLocaleDateString('uz-UZ')
+  return d.toLocaleDateString(intlLc)
 }
 
 // ============================================

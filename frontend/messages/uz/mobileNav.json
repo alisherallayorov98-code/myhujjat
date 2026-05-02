@@ -3,5 +3,22 @@
   "contracts": "Shartnoma",
   "ai":        "AI",
   "safe":      "Seif",
-  "menu":      "Menu"
+  "menu":      "Menu",
+  "section": {
+    "main":     "Asosiy",
+    "depts":    "Bo'limlar",
+    "settings": "Sozlamalar"
+  },
+  "item": {
+    "contracts":     "Shartnomalar",
+    "counterparties": "Kontragentlar",
+    "hr":            "Kadrlar (HR)",
+    "accountant":    "Buxgalter",
+    "lawyer":        "Yurist",
+    "secretary":     "Kotib",
+    "templates":     "Shablonlar",
+    "subscription":  "Obuna",
+    "settings":      "Sozlamalar"
+  },
+  "logout": "Chiqish"
 }
