@@ -1,4 +1,7 @@
+'use client'
+
 import Link  from 'next/link'
+import { useTranslations } from 'next-intl'
 import {
   CheckCircle2, Sparkles, ArrowRight, Clock, Shield, FileText,
 } from 'lucide-react'
@@ -20,6 +23,7 @@ export interface UseCaseConfig {
 }
 
 export function UseCasePage({ config }: { config: UseCaseConfig }) {
+  const t = useTranslations('useCases.ui')
   return (
     <div className="bg-white">
       {/* Hero */}
@@ -47,7 +51,7 @@ export function UseCasePage({ config }: { config: UseCaseConfig }) {
               href="/narxlar"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] font-semibold text-sm transition-colors"
             >
-              Narxlarni ko'rish
+              {t('ctaSecondary')}
             </Link>
           </div>
 
@@ -66,9 +70,9 @@ export function UseCasePage({ config }: { config: UseCaseConfig }) {
       {/* Muammolar */}
       <section className="px-4 py-16 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-[#DC2626] font-semibold text-sm mb-2">MUAMMOLAR</p>
+          <p className="text-[#DC2626] font-semibold text-sm mb-2">{t('problemsTag')}</p>
           <h2 className="font-display font-black text-[#0F172A] text-2xl sm:text-3xl">
-            {config.subtitle} duch keladigan vaziyatlar
+            {config.subtitle} {t('problemsTitle')}
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -88,9 +92,9 @@ export function UseCasePage({ config }: { config: UseCaseConfig }) {
       <section className="bg-[#F8FAFC] px-4 py-16">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-[#16A34A] font-semibold text-sm mb-2">YECHIM</p>
+            <p className="text-[#16A34A] font-semibold text-sm mb-2">{t('solutionsTag')}</p>
             <h2 className="font-display font-black text-[#0F172A] text-2xl sm:text-3xl">
-              MyHujjat.uz qanday yordam beradi
+              {t('solutionsTitle')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -115,7 +119,7 @@ export function UseCasePage({ config }: { config: UseCaseConfig }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h2 className="font-display font-black text-[#0F172A] text-2xl mb-5">
-              Asosiy imkoniyatlar
+              {t('featuresTitle')}
             </h2>
             <ul className="space-y-3">
               {config.features.map((f, i) => (
@@ -129,7 +133,7 @@ export function UseCasePage({ config }: { config: UseCaseConfig }) {
 
           <div>
             <h2 className="font-display font-black text-[#0F172A] text-2xl mb-5">
-              Tayyor hujjatlar
+              {t('documentsTitle')}
             </h2>
             <div className="grid grid-cols-1 gap-2">
               {config.documents.map((d, i) => (
@@ -149,7 +153,7 @@ export function UseCasePage({ config }: { config: UseCaseConfig }) {
       <section className="bg-[#F8FAFC] px-4 py-16">
         <div className="max-w-3xl mx-auto">
           <h2 className="font-display font-black text-[#0F172A] text-2xl sm:text-3xl text-center mb-10">
-            Tez-tez beriladigan savollar
+            {t('faqTitle')}
           </h2>
           <div className="space-y-3">
             {config.faq.map((item, i) => (
@@ -169,16 +173,16 @@ export function UseCasePage({ config }: { config: UseCaseConfig }) {
       <section className="px-4 py-20 bg-gradient-to-br from-[#1E3A8A] to-[#2563EB] text-white">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-display font-black text-3xl sm:text-4xl mb-4">
-            14 kun bepul sinab ko'ring
+            {t('finalCtaTitle')}
           </h2>
           <p className="text-lg text-blue-100 mb-8">
-            Karta kerak emas. Istalgan paytda bekor qilishingiz mumkin.
+            {t('finalCtaSubtitle')}
           </p>
           <Link
             href="/register"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white hover:bg-blue-50 text-[#1E3A8A] font-bold text-base transition-colors"
           >
-            Bepul boshlash
+            {t('finalCtaButton')}
             <ArrowRight size={18} />
           </Link>
         </div>

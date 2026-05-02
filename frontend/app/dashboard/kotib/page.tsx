@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery }         from '@tanstack/react-query'
+import { useTranslations }  from 'next-intl'
 import { useAuth }          from '@/hooks/useAuth'
 import api from '@/lib/api'
 import Link                 from 'next/link'
@@ -17,14 +18,15 @@ interface DocRow {
   createdAt: string
 }
 
-const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
-  DRAFT: { label: 'Qoralama', cls: 'bg-gray-100 text-gray-600' },
-  FINAL: { label: 'Tayyor',   cls: 'bg-green-100 text-green-700' },
-  SENT:  { label: 'Yuborildi', cls: 'bg-blue-100 text-blue-700' },
-}
-
 export default function KotibPage() {
+  const t = useTranslations('secretary')
   const { currentOrg: activeOrg } = useAuth()
+
+  const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+    DRAFT: { label: t('statusDraft'), cls: 'bg-gray-100 text-gray-600' },
+    FINAL: { label: t('statusFinal'), cls: 'bg-green-100 text-green-700' },
+    SENT:  { label: t('statusSent'), cls: 'bg-blue-100 text-blue-700' },
+  }
 
   const { data: recent = [] } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id],
