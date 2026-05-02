@@ -41,7 +41,7 @@ export function GlobalSearch() {
   const QUICK_ACTIONS = [
     { id: 'new-contract', label: t('actionNewContract'),     icon: Plus,      url: '/dashboard/shartnomalar/yangi',   shortcut: 'N' },
     { id: 'new-cp',       label: t('actionNewCounterparty'), icon: Building2, url: '/dashboard/kontragentlar?new=1',  shortcut: 'K' },
-    { id: 'ai-doc',       label: t('actionAiDoc'),           icon: Zap,       url: '/dashboard/ai',                   shortcut: 'A' },
+    { id: 'ai-doc',       label: t('actionAiDoc'),           icon: Zap,       url: '/dashboard/seif/ai',              shortcut: 'A' },
   ]
 
   useEffect(() => {

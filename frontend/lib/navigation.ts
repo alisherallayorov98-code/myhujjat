@@ -86,7 +86,7 @@ export const MAIN_NAV: NavItem[] = [
     path:  '/dashboard/kadrlar',
     children: [
       { id: 'xodimlar',    label: 'Xodimlar',    icon: ChevronRight, path: '/dashboard/kadrlar' },
-      { id: 'ishga-qabul', label: 'Ishga qabul', icon: ChevronRight, path: '/dashboard/kadrlar/ishga-qabul' },
+      { id: 'ishga-qabul', label: 'Ishga qabul', icon: ChevronRight, path: '/dashboard/kadrlar/hujjat' },
     ]
   },
   {

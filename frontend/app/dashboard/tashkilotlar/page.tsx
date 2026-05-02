@@ -111,6 +111,7 @@ export default function TashkilotlarPage() {
       )}
 
       <OrgFormModal
+        key={editOrg?.id ?? (addModal ? 'new' : 'closed')}
         open={addModal || !!editOrg}
         org={editOrg}
         onClose={() => { setAddModal(false); setEditOrg(null) }}

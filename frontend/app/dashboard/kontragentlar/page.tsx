@@ -268,6 +268,7 @@ export default function KontragentlarPage() {
       </Card>
 
       <CpFormModal
+        key={editCp?.id ?? (addModal ? 'new' : 'closed')}
         open={addModal || !!editCp}
         cp={editCp}
         orgId={currentOrg.id}

@@ -330,6 +330,7 @@ export default function KadrlarPage() {
       </Card>
 
       <XodimModal
+        key={editXodim?.id ?? (addModal ? 'new' : 'closed')}
         open={addModal || !!editXodim}
         xodim={editXodim}
         orgId={currentOrg?.id ?? ''}
