@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
 import { useTranslations }    from 'next-intl'
 import { useRouter }          from 'next/navigation'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
@@ -160,6 +160,18 @@ export default function YangiShartnoma() {
       address:      selectedCp.address,
     } : null,
   }), [type, form, mergedOrg, selectedCp, orgEdits, buildPreview])
+
+  // ─── Preview HTML — kechiktirib hisoblanadi (raqsga tushish muammosini bartaraf etadi)
+  // useDeferredValue: keystroke vaqtida ko'rib chiqish bloklanmaydi, React fonda yangilaydi
+  // useMemo:         HTML faqat input to'xtaganda qayta yaratiladi
+  const deferredForm     = useDeferredValue(form)
+  const deferredOrgEdits = useDeferredValue(orgEdits)
+  const deferredType     = useDeferredValue(type)
+  const previewHtml = useMemo(() => {
+    if (!preview) return ''
+    return renderContractHtml(buildContractObj())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preview, deferredForm, deferredOrgEdits, deferredType, currentOrg?.id, selectedCp?.id])
 
   function handleCreate() {
     if (!currentOrg?.id) return
@@ -448,11 +460,16 @@ export default function YangiShartnoma() {
               <p className="text-sm font-semibold text-[#0F172A]">{t('new_.previewTitle')}</p>
               <p className="text-xs text-[#94A3B8] mt-0.5">{t('new_.previewDesc')}</p>
             </div>
-            <div className="max-h-[700px] overflow-y-auto bg-[#F1F5F9] p-4">
+            <div className="max-h-[700px] overflow-y-auto bg-[#F1F5F9] p-4 flex justify-center">
               <div
-                className="bg-white shadow-md mx-auto"
-                style={{ maxWidth: 794, transform: 'scale(0.85)', transformOrigin: 'top center' }}
-                dangerouslySetInnerHTML={{ __html: renderContractHtml(buildContractObj()) }}
+                className="bg-white shadow-md shrink-0"
+                style={{
+                  width: 794,
+                  transform: 'scale(0.85)',
+                  transformOrigin: 'top left',
+                  marginRight: -120, // 794 * 0.15 — kompensatsiya, joylashuv sakramaydi
+                }}
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
               />
             </div>
           </Card>

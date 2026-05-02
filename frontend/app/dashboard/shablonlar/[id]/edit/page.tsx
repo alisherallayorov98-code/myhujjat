@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, use } from 'react'
+import { useState, useRef, useEffect, use, useDeferredValue, useMemo } from 'react'
 import { useTranslations }                from 'next-intl'
 import { useRouter, useSearchParams }     from 'next/navigation'
 import { ChevronLeft, Eye, Code, Save }   from 'lucide-react'
@@ -87,7 +87,11 @@ export default function EditShablonPage({ params }: { params: Promise<{ id: stri
     }, 0)
   }
 
-  const preview = fillTemplate(content, SAMPLE_DATA as any)
+  const deferredContent = useDeferredValue(content)
+  const preview = useMemo(
+    () => fillTemplate(deferredContent, SAMPLE_DATA as any),
+    [deferredContent],
+  )
 
   if (isLoading) {
     return (
