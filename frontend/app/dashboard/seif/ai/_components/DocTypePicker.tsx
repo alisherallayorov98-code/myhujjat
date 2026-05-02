@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/Card'
 import { cn }   from '@/lib/cn'
 import { DOC_TYPES, CATEGORIES } from './constants'
@@ -12,13 +13,14 @@ interface Props {
 }
 
 export function DocTypePicker({ category, setCategory, docType, setDocType }: Props) {
+  const t = useTranslations('seifAi')
   const filtered = category === 'all'
     ? DOC_TYPES
     : DOC_TYPES.filter(d => d.category === category)
 
   return (
     <Card>
-      <p className="text-sm font-semibold text-[#0F172A] mb-3">Hujjat turi</p>
+      <p className="text-sm font-semibold text-[#0F172A] mb-3">{t('docType')}</p>
 
       <div className="flex flex-wrap gap-1.5 mb-3">
         {CATEGORIES.map(cat => (
@@ -32,7 +34,7 @@ export function DocTypePicker({ category, setCategory, docType, setDocType }: Pr
                 : 'border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]'
             )}
           >
-            {cat.label}
+            {t(cat.labelKey as any)}
           </button>
         ))}
       </div>

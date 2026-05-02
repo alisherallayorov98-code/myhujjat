@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Sparkles } from 'lucide-react'
 import { Card }    from '@/components/ui/Card'
 import { Button }  from '@/components/ui/Button'
@@ -14,13 +15,14 @@ interface Props {
 }
 
 export function PromptForm({ docType, prompt, setPrompt, loading, onGenerate }: Props) {
+  const t = useTranslations('seifAi')
   const examples = EXAMPLE_PROMPTS[docType] || []
 
   return (
     <Card>
-      <p className="text-sm font-semibold text-[#0F172A] mb-1">Talablar va shartlar</p>
+      <p className="text-sm font-semibold text-[#0F172A] mb-1">{t('promptTitle')}</p>
       <p className="text-xs text-[#94A3B8] mb-3">
-        Tashkilot ma'lumotlari avtomatik qo'shiladi.
+        {t('promptHint')}
       </p>
 
       {examples.length > 0 && (
@@ -40,7 +42,7 @@ export function PromptForm({ docType, prompt, setPrompt, loading, onGenerate }: 
       <textarea
         value={prompt}
         onChange={e => setPrompt(e.target.value)}
-        placeholder={`${docType} uchun talablarni yozing...`}
+        placeholder={t('promptPlace', { type: docType })}
         className="w-full h-32 rounded-lg text-sm px-3 py-2.5 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 resize-none text-[#0F172A] placeholder:text-[#CBD5E1]"
       />
 
@@ -51,7 +53,7 @@ export function PromptForm({ docType, prompt, setPrompt, loading, onGenerate }: 
         onClick={onGenerate}
         className="mt-3"
       >
-        {loading ? 'Yaratilmoqda...' : 'Hujjat yaratish'}
+        {loading ? t('generating') : t('generateBtn')}
       </Button>
     </Card>
   )

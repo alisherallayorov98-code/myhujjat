@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }   from 'react'
+import { useTranslations } from 'next-intl'
 import { useQuery }   from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth }    from '@/hooks/useAuth'
@@ -15,6 +16,7 @@ import { ResultPanel }   from './_components/ResultPanel'
 import { DOC_TYPES }     from './_components/constants'
 
 export default function AiGeneratorPage() {
+  const t = useTranslations('seifAi')
   const { currentOrg, isPro } = useAuth()
 
   const [docType,  setDocType]  = useState<string>(DOC_TYPES[0].value)
@@ -37,8 +39,8 @@ export default function AiGeneratorPage() {
   if (!isPro) return <ProLockScreen />
 
   const handleGenerate = async () => {
-    if (!prompt.trim())   { toast.error('Talablarni kiriting');     return }
-    if (!currentOrg?.id)  { toast.error('Tashkilot tanlanmagan');   return }
+    if (!prompt.trim())   { toast.error(t('promptRequired'));     return }
+    if (!currentOrg?.id)  { toast.error(t('noOrg'));              return }
 
     setLoading(true)
     setResult('')
@@ -61,9 +63,9 @@ export default function AiGeneratorPage() {
 
       setResult(data.content)
       setSavedId(data.id)
-      toast.success('Hujjat yaratildi!')
+      toast.success(t('docCreated'))
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Xatolik yuz berdi')
+      toast.error(err?.response?.data?.message || t('error'))
     } finally {
       setLoading(false)
     }
@@ -72,17 +74,16 @@ export default function AiGeneratorPage() {
   return (
     <div>
       <PageHeader
-        title="AI Hujjat Generatsiya"
-        description="Tabiiy til bilan professional hujjatlar yarating"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
           { label: 'Seif',      path: '/dashboard/seif' },
-          { label: 'AI' },
+          { label: t('breadcrumb') },
         ]}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chap: tanlash + so'rov + tarix */}
         <div className="lg:col-span-1 space-y-4">
           <DocTypePicker
             category={category}
@@ -104,7 +105,6 @@ export default function AiGeneratorPage() {
           />
         </div>
 
-        {/* O'ng: natija */}
         <div className="lg:col-span-2">
           <ResultPanel
             loading={loading}

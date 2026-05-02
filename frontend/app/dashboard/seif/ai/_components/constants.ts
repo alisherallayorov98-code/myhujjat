@@ -16,12 +16,12 @@ export const DOC_TYPES = [
 ] as const
 
 export const CATEGORIES = [
-  { id: 'all',       label: 'Barchasi'  },
-  { id: 'shartnoma', label: 'Shartnoma' },
-  { id: 'kotib',     label: 'Kotib'     },
-  { id: 'buxgalter', label: 'Buxgalter' },
-  { id: 'kadr',      label: 'Kadrlar'   },
-  { id: 'yurist',    label: 'Yurist'    },
+  { id: 'all',       labelKey: 'categoryAll'        },
+  { id: 'shartnoma', labelKey: 'categoryContract'   },
+  { id: 'kotib',     labelKey: 'categorySecretary'  },
+  { id: 'buxgalter', labelKey: 'categoryAccountant' },
+  { id: 'kadr',      labelKey: 'categoryHr'         },
+  { id: 'yurist',    labelKey: 'categoryLawyer'     },
 ] as const
 
 export const EXAMPLE_PROMPTS: Record<string, string[]> = {

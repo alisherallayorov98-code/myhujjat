@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Sparkles, Copy, Check, Download, FileText } from 'lucide-react'
 import { Card }  from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -16,13 +17,14 @@ interface Props {
 }
 
 export function ResultPanel({ loading, result, docType, orgName }: Props) {
+  const t = useTranslations('seifAi')
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
     await navigator.clipboard.writeText(result)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-    toast.success('Nusxa olindi!')
+    toast.success(t('copyToast'))
   }
 
   return (
@@ -31,9 +33,9 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
         <div className="flex items-center gap-2">
           <Sparkles size={15} className="text-[#7C3AED]" />
           <span className="text-sm font-semibold text-[#0F172A]">
-            {result ? docType : "Natija ko'rinishi"}
+            {result ? docType : t('resultPreview')}
           </span>
-          {result && <Badge variant="success" size="sm">Tayyor</Badge>}
+          {result && <Badge variant="success" size="sm">{t('ready')}</Badge>}
         </div>
 
         {result && (
@@ -43,8 +45,8 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F1F5F9] transition-colors"
             >
               {copied
-                ? <><Check size={12} className="text-[#16A34A]" /> Nusxa olindi</>
-                : <><Copy size={12} /> Nusxa</>
+                ? <><Check size={12} className="text-[#16A34A]" /> {t('copied')}</>
+                : <><Copy size={12} /> {t('copy')}</>
               }
             </button>
             <button
@@ -73,6 +75,7 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
 }
 
 function LoadingState() {
+  const t = useTranslations('seifAi')
   return (
     <div className="flex flex-col items-center justify-center h-64 gap-4">
       <div className="relative">
@@ -82,8 +85,8 @@ function LoadingState() {
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#2563EB] animate-ping opacity-20" />
       </div>
       <div className="text-center">
-        <p className="font-bold text-[#0F172A] mb-1">AI hujjat yaratmoqda...</p>
-        <p className="text-sm text-[#94A3B8]">Bu biroz vaqt olishi mumkin</p>
+        <p className="font-bold text-[#0F172A] mb-1">{t('loadingTitle')}</p>
+        <p className="text-sm text-[#94A3B8]">{t('loadingHint')}</p>
       </div>
       <div className="flex gap-1.5">
         {[0, 1, 2].map(i => (
@@ -110,15 +113,16 @@ function ResultView({ content }: { content: string }) {
 }
 
 function EmptyState() {
+  const t = useTranslations('seifAi')
   return (
     <div className="flex flex-col items-center justify-center h-64 text-center gap-3">
       <div className="w-14 h-14 rounded-2xl bg-[#F3E8FF] flex items-center justify-center">
         <Sparkles size={24} className="text-[#7C3AED]" />
       </div>
       <div>
-        <p className="font-bold text-[#0F172A] mb-1">AI yordamchi tayyor</p>
+        <p className="font-bold text-[#0F172A] mb-1">{t('emptyTitle')}</p>
         <p className="text-sm text-[#94A3B8] max-w-xs">
-          Chap tomonda hujjat turini tanlab, talablarni kiriting va "Hujjat yaratish" tugmasini bosing
+          {t('emptyHint')}
         </p>
       </div>
     </div>

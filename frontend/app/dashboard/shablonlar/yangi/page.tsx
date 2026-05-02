@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect }    from 'react'
+import { useTranslations }                from 'next-intl'
 import { useRouter, useSearchParams }     from 'next/navigation'
 import { ChevronLeft, Eye, Code, Save }   from 'lucide-react'
 import { useQuery, useMutation }          from '@tanstack/react-query'
@@ -14,31 +15,12 @@ import api                                from '@/lib/api'
 import { CONTRACT_TYPE_CONFIG, ContractType, fillTemplate } from '@/lib/contractTemplates'
 import { cn }                             from '@/lib/cn'
 
-const PLACEHOLDERS = [
-  { key: '{{ORG_NOMI}}',    label: 'Tashkilot nomi' },
-  { key: '{{ORG_INN}}',     label: 'Tashkilot STIR' },
-  { key: '{{ORG_RAHBAR}}',  label: 'Rahbar ismi' },
-  { key: '{{ORG_BANK}}',    label: 'Bank nomi' },
-  { key: '{{ORG_HISOB}}',   label: 'Hisob raqam' },
-  { key: '{{ORG_MFO}}',     label: 'MFO' },
-  { key: '{{ORG_MANZIL}}',  label: 'Tashkilot manzili' },
-  { key: '{{CP_NOMI}}',     label: 'Kontragent nomi' },
-  { key: '{{CP_INN}}',      label: 'Kontragent STIR' },
-  { key: '{{CP_RAHBAR}}',   label: 'Kontragent rahbari' },
-  { key: '{{CP_BANK}}',     label: 'Kontragent banki' },
-  { key: '{{CP_HISOB}}',    label: 'Kontragent h/r' },
-  { key: '{{CP_MFO}}',      label: 'Kontragent MFO' },
-  { key: '{{CP_MANZIL}}',   label: 'Kontragent manzili' },
-  { key: '{{RAQAM}}',       label: 'Shartnoma raqami' },
-  { key: '{{SANA}}',        label: 'Shartnoma sanasi' },
-  { key: '{{SHAHAR}}',      label: 'Shahar' },
-  { key: '{{SUMMA}}',       label: 'Summa (raqamda)' },
-  { key: '{{SUMMA_MATN}}',  label: 'Summa (so\'zda)' },
-  { key: '{{MUDDAT}}',      label: 'Shartnoma muddati' },
-  { key: '{{TOLOV_TARTIBI}}', label: 'To\'lov tartibi' },
-  { key: '{{TOLOV_MUDDAT}}',  label: 'To\'lov muddati' },
-  { key: '{{PENYA_FOIZ}}',    label: 'Penya foizi' },
-]
+const PLACEHOLDER_KEYS = [
+  'ORG_NOMI', 'ORG_INN', 'ORG_RAHBAR', 'ORG_BANK', 'ORG_HISOB', 'ORG_MFO', 'ORG_MANZIL',
+  'CP_NOMI',  'CP_INN',  'CP_RAHBAR',  'CP_BANK',  'CP_HISOB',  'CP_MFO',  'CP_MANZIL',
+  'RAQAM',    'SANA',    'SHAHAR',     'SUMMA',    'SUMMA_MATN','MUDDAT',  'TOLOV_TARTIBI',
+  'TOLOV_MUDDAT', 'PENYA_FOIZ',
+] as const
 
 const SAMPLE_DATA = {
   orgNomi:   'DEMO TASHKILOT MChJ',
@@ -62,24 +44,25 @@ const SAMPLE_DATA = {
   summaMatn: "o'n million",
 }
 
-const TYPE_OPTIONS = Object.entries(CONTRACT_TYPE_CONFIG).map(([value, cfg]) => ({
-  value,
-  label: cfg.name,
-}))
-
 export default function YangiShablonPage() {
+  const t  = useTranslations('shablonlar')
+  const tc = useTranslations('contracts')
   const { currentOrg }  = useAuth()
   const router          = useRouter()
   const searchParams    = useSearchParams()
   const fromId          = searchParams.get('from')
   const textareaRef     = useRef<HTMLTextAreaElement>(null)
 
+  const TYPE_OPTIONS = Object.keys(CONTRACT_TYPE_CONFIG).map(value => ({
+    value,
+    label: tc(`types.${value}` as any),
+  }))
+
   const [name,         setName]         = useState('')
   const [contractType, setContractType] = useState<string>('OLDI_SOTDI')
   const [content,      setContent]      = useState('')
   const [previewMode,  setPreviewMode]  = useState(false)
 
-  // Load source template if copying
   useQuery({
     queryKey: ['template-source', fromId],
     queryFn:  () => api.get(`/templates/${fromId}`).then(r => r.data),
@@ -87,7 +70,7 @@ export default function YangiShablonPage() {
     onSuccess: (tpl: any) => {
       setContractType(tpl.contractType)
       setContent(tpl.content)
-      setName(tpl.name + ' (nusxa)')
+      setName(tpl.name + t('copySuffix'))
     },
   } as any)
 
@@ -119,17 +102,17 @@ export default function YangiShablonPage() {
   return (
     <div>
       <PageHeader
-        title="Yangi shablon"
-        description="O'z shartnoma shablonini yarating"
+        title={t('newTitle')}
+        description={t('newDesc')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Shablonlar', path: '/dashboard/shablonlar' },
-          { label: 'Yangi' },
+          { label: t('breadcrumb'), path: '/dashboard/shablonlar' },
+          { label: t('newTpl') },
         ]}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => router.back()}>
-              <ChevronLeft size={14} className="mr-1" />Orqaga
+              <ChevronLeft size={14} className="mr-1" />{t('back')}
             </Button>
             <Button
               size="sm"
@@ -138,31 +121,30 @@ export default function YangiShablonPage() {
               onClick={() => saveMut.mutate()}
               leftIcon={<Save size={14} />}
             >
-              Saqlash
+              {t('save')}
             </Button>
           </div>
         }
       />
 
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Sidebar */}
         <div className="w-full lg:w-56 lg:shrink-0 space-y-4">
           <Card padding="sm">
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-              Sozlamalar
+              {t('settings')}
             </p>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-[#475569] mb-1">Shablon nomi</label>
+                <label className="block text-xs font-medium text-[#475569] mb-1">{t('tplName')}</label>
                 <Input
-                  placeholder="Shablon nomi..."
+                  placeholder={t('tplNamePlace')}
                   value={name}
                   onChange={e => setName(e.target.value)}
                   className="text-xs"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[#475569] mb-1">Shartnoma turi</label>
+                <label className="block text-xs font-medium text-[#475569] mb-1">{t('contractType')}</label>
                 <Select
                   options={TYPE_OPTIONS}
                   value={contractType}
@@ -174,31 +156,30 @@ export default function YangiShablonPage() {
 
           <Card padding="sm">
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-              O'zgaruvchilar
+              {t('variables')}
             </p>
             <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
-              {PLACEHOLDERS.map(p => (
+              {PLACEHOLDER_KEYS.map(k => (
                 <button
-                  key={p.key}
-                  onClick={() => insertPlaceholder(p.key)}
+                  key={k}
+                  onClick={() => insertPlaceholder(`{{${k}}}`)}
                   className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[#F1F5F9] group transition-colors"
                 >
                   <p className="text-[10px] font-mono text-[#7C3AED] group-hover:text-[#5B21B6]">
-                    {p.key}
+                    {`{{${k}}}`}
                   </p>
-                  <p className="text-[10px] text-[#94A3B8]">{p.label}</p>
+                  <p className="text-[10px] text-[#94A3B8]">{t(`ph.${k}` as any)}</p>
                 </button>
               ))}
             </div>
           </Card>
         </div>
 
-        {/* Editor */}
         <div className="flex-1 min-w-0">
           <Card padding="none" className="overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2 border-b border-[#E2E8F0]">
               <p className="text-xs font-medium text-[#475569]">
-                {previewMode ? 'Ko\'rish rejimi (namunaviy ma\'lumotlar bilan)' : 'Muharrir'}
+                {previewMode ? t('previewMode') : t('editor')}
               </p>
               <div className="flex gap-1 bg-[#F1F5F9] rounded-lg p-0.5">
                 <button
@@ -208,7 +189,7 @@ export default function YangiShablonPage() {
                     !previewMode ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#94A3B8]'
                   )}
                 >
-                  <Code size={12} />Muharrir
+                  <Code size={12} />{t('editorTab')}
                 </button>
                 <button
                   onClick={() => setPreviewMode(true)}
@@ -217,21 +198,21 @@ export default function YangiShablonPage() {
                     previewMode ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#94A3B8]'
                   )}
                 >
-                  <Eye size={12} />Ko'rish
+                  <Eye size={12} />{t('viewTab')}
                 </button>
               </div>
             </div>
 
             {previewMode ? (
               <pre className="p-5 text-sm text-[#1E293B] font-mono whitespace-pre-wrap min-h-[600px] bg-[#FAFAFA]">
-                {preview || <span className="text-[#CBD5E1]">Matn kiriting...</span>}
+                {preview || <span className="text-[#CBD5E1]">{t('enterText')}</span>}
               </pre>
             ) : (
               <textarea
                 ref={textareaRef}
                 value={content}
                 onChange={e => setContent(e.target.value)}
-                placeholder="Shartnoma matnini kiriting. O'zgaruvchilarni chap paneldan bosib qo'shing..."
+                placeholder={t('tplPlace')}
                 className="w-full p-5 text-sm font-mono text-[#1E293B] resize-none outline-none bg-white min-h-[600px]"
                 style={{ height: Math.max(600, content.split('\n').length * 22) + 'px' }}
               />

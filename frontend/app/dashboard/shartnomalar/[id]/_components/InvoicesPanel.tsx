@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   FileText, AlertTriangle, AlertCircle, CheckCircle2,
   Plus, Upload, Trash2, ArrowRight, Sparkles,
@@ -44,16 +45,17 @@ interface Props {
   orgId:    string
 }
 
-const ALERT_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; icon: any }> = {
-  WARNING:          { color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]',           border: 'border-[#FDE68A]', label: 'Ogohlantirish', icon: AlertCircle },
-  CRITICAL:         { color: 'text-[#EA580C]', bg: 'bg-[#FFEDD5]',           border: 'border-[#FED7AA]', label: 'Kritik',        icon: AlertTriangle },
-  EXCEEDED:         { color: 'text-[#DC2626]', bg: 'bg-[#FEE2E2]',           border: 'border-[#FECACA]', label: 'Oshib ketdi',   icon: AlertTriangle },
-  CRITICAL_OVERAGE: { color: 'text-white',     bg: 'bg-[#991B1B]',           border: 'border-[#7F1D1D]', label: 'Sezilarli',     icon: AlertTriangle },
-}
-
 export function InvoicesPanel({ contract, orgId }: Props) {
+  const t = useTranslations('invoicesPanel')
   const qc = useQueryClient()
   const [addOpen, setAddOpen] = useState(false)
+
+  const ALERT_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; icon: any }> = {
+    WARNING:          { color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]', border: 'border-[#FDE68A]', label: t('alertWarning'),     icon: AlertCircle },
+    CRITICAL:         { color: 'text-[#EA580C]', bg: 'bg-[#FFEDD5]', border: 'border-[#FED7AA]', label: t('alertCritical'),    icon: AlertTriangle },
+    EXCEEDED:         { color: 'text-[#DC2626]', bg: 'bg-[#FEE2E2]', border: 'border-[#FECACA]', label: t('alertExceeded'),    icon: AlertTriangle },
+    CRITICAL_OVERAGE: { color: 'text-white',     bg: 'bg-[#991B1B]', border: 'border-[#7F1D1D]', label: t('alertSignificant'), icon: AlertTriangle },
+  }
 
   const { data: invoices = [] } = useQuery<Invoice[]>({
     queryKey: ['invoices', contract.id],
@@ -65,7 +67,7 @@ export function InvoicesPanel({ contract, orgId }: Props) {
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['invoices', contract.id] })
       qc.invalidateQueries({ queryKey: ['contract',  contract.id] })
-      toast.success("Faktura o'chirildi")
+      toast.success(t('deleted'))
     },
   })
 
@@ -79,25 +81,23 @@ export function InvoicesPanel({ contract, orgId }: Props) {
 
   return (
     <Card padding="none" className="overflow-hidden">
-      {/* Header */}
       <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileText size={14} className="text-[#94A3B8]" />
-          <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Fakturalar</p>
+          <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">{t('title')}</p>
           <span className="text-xs text-[#94A3B8]">({invoices.length})</span>
         </div>
         <div className="flex gap-2">
           <Button size="xs" variant="outline" leftIcon={<Plus size={12} />} onClick={() => setAddOpen(true)}>
-            Qo'lda qo'shish
+            {t('manualAdd')}
           </Button>
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="px-5 py-4 border-b border-[#E2E8F0]">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-medium text-[#475569]">
-            Shartnoma summasi: <span className="text-[#0F172A] font-bold">{formatCurrency(total)}</span>
+            {t('contractAmount')} <span className="text-[#0F172A] font-bold">{formatCurrency(total)}</span>
           </p>
           <p className={cn(
             'text-sm font-bold',
@@ -126,30 +126,31 @@ export function InvoicesPanel({ contract, orgId }: Props) {
         </div>
 
         <div className="flex justify-between text-xs text-[#94A3B8] mt-2">
-          <span>Ishlatildi: <strong className="text-[#475569]">{formatCurrency(used)}</strong></span>
+          <span>{t('used')} <strong className="text-[#475569]">{formatCurrency(used)}</strong></span>
           {remaining >= 0 ? (
-            <span>Qoldi: <strong className="text-[#16A34A]">{formatCurrency(remaining)}</strong></span>
+            <span>{t('remaining')} <strong className="text-[#16A34A]">{formatCurrency(remaining)}</strong></span>
           ) : (
-            <span className="text-[#DC2626]">⚠ {formatCurrency(overage)} oshib ketdi</span>
+            <span className="text-[#DC2626]">{t('exceeded', { amount: formatCurrency(overage) })}</span>
           )}
         </div>
       </div>
 
-      {/* Alert banner */}
       {alert && (
         <div className={cn('px-5 py-3 border-b flex items-start gap-3', alert.bg, alert.border)}>
           <alert.icon size={18} className={cn('shrink-0 mt-0.5', alert.color)} />
           <div className="flex-1">
             <p className={cn('text-sm font-semibold', alert.color)}>
               {contract.alertLevel === 'EXCEEDED' || contract.alertLevel === 'CRITICAL_OVERAGE'
-                ? `Shartnoma summasi ${overage > 0 ? formatCurrency(overage) + " oshib ketdi" : "oshib ketdi"}`
+                ? (overage > 0
+                    ? t('alertExceededMsgWith', { amount: formatCurrency(overage) })
+                    : t('alertExceededMsg'))
                 : contract.alertLevel === 'CRITICAL'
-                ? `Shartnoma summasi 95%dan oshdi — ${formatCurrency(remaining)} qoldi`
-                : `Shartnoma summasi 80%dan oshdi`}
+                ? t('alertCriticalMsg', { remaining: formatCurrency(remaining) })
+                : t('alertWarningMsg')}
             </p>
             {(contract.alertLevel === 'EXCEEDED' || contract.alertLevel === 'CRITICAL_OVERAGE') && (
               <p className={cn('text-xs mt-1', alert.color, 'opacity-80')}>
-                💡 Yechim: <strong>Qo'shimcha shartnoma</strong> (QOSHIMCHA) yarating va kontragentga yuboring
+                {t('alertHint', { bold: t('alertHintBold') })}
               </p>
             )}
           </div>
@@ -162,19 +163,18 @@ export function InvoicesPanel({ contract, orgId }: Props) {
                 window.location.href = `/dashboard/shartnomalar/yangi?type=QOSHIMCHA&parentId=${contract.id}&extraAmount=${overage}`
               }}
             >
-              Qo'shimcha shartnoma
+              {t('createAdditional')}
             </Button>
           )}
         </div>
       )}
 
-      {/* Invoice list */}
       {invoices.length === 0 ? (
         <div className="p-10 text-center">
           <FileText size={32} className="mx-auto text-[#CBD5E1] mb-2" />
-          <p className="text-sm text-[#94A3B8] mb-3">Bu shartnoma uchun faktura yo'q</p>
+          <p className="text-sm text-[#94A3B8] mb-3">{t('noInvoices')}</p>
           <p className="text-xs text-[#CBD5E1]">
-            Didox'dan avto-sinxronlash yoki qo'lda qo'shing
+            {t('noInvoicesHint')}
           </p>
         </div>
       ) : (
@@ -190,14 +190,14 @@ export function InvoicesPanel({ contract, orgId }: Props) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-[#0F172A] truncate">
-                    {inv.documentNumber || `Faktura #${inv.id.slice(0, 6)}`}
+                    {inv.documentNumber || `${t('title')} #${inv.id.slice(0, 6)}`}
                   </p>
                   <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#F1F5F9] text-[#475569]">
                     {inv.source}
                   </span>
                   {inv.direction === 'OUTGOING' && (
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">
-                      Bizdan
+                      {t('fromUs')}
                     </span>
                   )}
                 </div>
@@ -209,12 +209,12 @@ export function InvoicesPanel({ contract, orgId }: Props) {
               <div className="text-right shrink-0">
                 <p className="text-sm font-semibold text-[#0F172A]">{formatCurrency(Number(inv.totalAmount))}</p>
                 {Number(inv.vatAmount) > 0 && (
-                  <p className="text-[10px] text-[#94A3B8]">QQS: {formatCurrency(Number(inv.vatAmount))}</p>
+                  <p className="text-[10px] text-[#94A3B8]">{t('qqs')} {formatCurrency(Number(inv.vatAmount))}</p>
                 )}
               </div>
               <button
                 onClick={() => {
-                  if (confirm("Faktura o'chirilsinmi?")) removeMut.mutate(inv.id)
+                  if (confirm(t('deleteConfirm'))) removeMut.mutate(inv.id)
                 }}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition shrink-0"
               >
@@ -225,7 +225,6 @@ export function InvoicesPanel({ contract, orgId }: Props) {
         </div>
       )}
 
-      {/* Manual add modal */}
       <ManualAddModal
         contractId={contract.id}
         contractNumber={contract.contractNumber}
@@ -237,7 +236,6 @@ export function InvoicesPanel({ contract, orgId }: Props) {
   )
 }
 
-// ─── Qo'lda faktura qo'shish modal ──────────────────────────
 function ManualAddModal({ contractId, contractNumber, orgId, open, onClose }: {
   contractId: string
   contractNumber: string
@@ -245,6 +243,7 @@ function ManualAddModal({ contractId, contractNumber, orgId, open, onClose }: {
   open: boolean
   onClose: () => void
 }) {
+  const t = useTranslations('invoicesPanel')
   const qc = useQueryClient()
   const [form, setForm] = useState({
     documentNumber: '',
@@ -271,38 +270,38 @@ function ManualAddModal({ contractId, contractNumber, orgId, open, onClose }: {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['invoices', contractId] })
       qc.invalidateQueries({ queryKey: ['contract',  contractId] })
-      toast.success("Faktura qo'shildi")
+      toast.success(t('added'))
       onClose()
       setForm({ documentNumber: '', documentDate: new Date().toISOString().split('T')[0], amount: '', vatAmount: '', direction: 'INCOMING' })
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   return (
     <Modal
       open={open} onClose={onClose}
-      title="Faktura qo'shish"
+      title={t('modalTitle')}
       size="md"
       footer={
         <>
-          <Button variant="outline" size="sm" onClick={onClose}>Bekor</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>{t('cancel')}</Button>
           <Button size="sm" loading={createMut.isPending}
             onClick={() => createMut.mutate()} disabled={!form.amount}>
-            Qo'shish
+            {t('addBtn')}
           </Button>
         </>
       }
     >
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Faktura raqami" placeholder="EHF-12345"
+          <Input label={t('invoiceNumber')} placeholder={t('invoiceNumberPlace')}
             value={form.documentNumber} onChange={e => upd('documentNumber', e.target.value)} />
-          <Input label="Sana *" type="date"
+          <Input label={t('invoiceDate')} type="date"
             value={form.documentDate} onChange={e => upd('documentDate', e.target.value)} />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-[#374151]">Yo'nalish</label>
+          <label className="text-sm font-medium text-[#374151]">{t('direction')}</label>
           <div className="flex gap-2">
             <button
               onClick={() => upd('direction', 'INCOMING')}
@@ -313,7 +312,7 @@ function ManualAddModal({ contractId, contractNumber, orgId, open, onClose }: {
                   : 'border-[#E2E8F0] text-[#475569]'
               )}
             >
-              Bizga (xaridor)
+              {t('directionIncoming')}
             </button>
             <button
               onClick={() => upd('direction', 'OUTGOING')}
@@ -324,15 +323,15 @@ function ManualAddModal({ contractId, contractNumber, orgId, open, onClose }: {
                   : 'border-[#E2E8F0] text-[#475569]'
               )}
             >
-              Bizdan (sotuvchi)
+              {t('directionOutgoing')}
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Summa (so'm) *" type="number" placeholder="0"
+          <Input label={t('amount')} type="number" placeholder="0"
             value={form.amount} onChange={e => upd('amount', e.target.value)} />
-          <Input label="QQS (so'm)" type="number" placeholder="0"
+          <Input label={t('vat')} type="number" placeholder="0"
             value={form.vatAmount} onChange={e => upd('vatAmount', e.target.value)} />
         </div>
       </div>

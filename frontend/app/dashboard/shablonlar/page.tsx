@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                        from 'react'
+import { useTranslations }                                 from 'next-intl'
 import Link                                                from 'next/link'
 import { useRouter }                                       from 'next/navigation'
 import { FileText, Lock, Plus, Edit2, Trash2, Copy, Eye } from 'lucide-react'
@@ -29,17 +30,18 @@ interface Template {
 function ConfirmDialog({
   open, onConfirm, onCancel, loading,
 }: { open: boolean; onConfirm: () => void; onCancel: () => void; loading: boolean }) {
+  const t = useTranslations('shablonlar')
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-2xl p-6 w-80 shadow-xl">
-        <h3 className="text-base font-semibold text-[#0F172A] mb-2">Shablonni o'chirish</h3>
+        <h3 className="text-base font-semibold text-[#0F172A] mb-2">{t('deleteTitle')}</h3>
         <p className="text-sm text-[#475569] mb-5">
-          Ushbu shablonni o'chirishni tasdiqlaysizmi? Bu amalni qaytarib bo'lmaydi.
+          {t('deleteConfirm')}
         </p>
         <div className="flex gap-2 justify-end">
-          <Button variant="outline" size="sm" onClick={onCancel}>Bekor qilish</Button>
-          <Button variant="danger" size="sm" loading={loading} onClick={onConfirm}>O'chirish</Button>
+          <Button variant="outline" size="sm" onClick={onCancel}>{t('cancel')}</Button>
+          <Button variant="danger" size="sm" loading={loading} onClick={onConfirm}>{t('deleteBtn')}</Button>
         </div>
       </div>
     </div>
@@ -47,6 +49,8 @@ function ConfirmDialog({
 }
 
 export default function ShablonlarPage() {
+  const t = useTranslations('shablonlar')
+  const tc = useTranslations('contracts')
   const { currentOrg, isPro } = useAuth()
   const router                = useRouter()
   const qc                    = useQueryClient()
@@ -78,23 +82,23 @@ export default function ShablonlarPage() {
     return (
       <div>
         <PageHeader
-          title="📝 Shablonlar"
-          description="Shartnoma shablonlarini boshqaring"
+          title={t('title')}
+          description={t('description')}
           breadcrumbs={[
             { label: 'Dashboard', path: '/dashboard' },
-            { label: 'Shablonlar' },
+            { label: t('breadcrumb') },
           ]}
         />
         <Card className="flex flex-col items-center justify-center py-16 gap-4">
           <div className="w-16 h-16 rounded-full bg-[#FEF3C7] flex items-center justify-center">
             <Lock size={28} className="text-[#D97706]" />
           </div>
-          <h3 className="text-lg font-semibold text-[#0F172A]">Pro rejaga o'ting</h3>
+          <h3 className="text-lg font-semibold text-[#0F172A]">{t('lockTitle')}</h3>
           <p className="text-sm text-[#94A3B8] text-center max-w-xs">
-            Shablonlar muharriri faqat Pro rejada mavjud. O'z shablonlaringizni yarating va saqlang.
+            {t('lockDesc')}
           </p>
           <Link href="/dashboard/sozlamalar/obuna">
-            <Button>Pro rejaga o'tish</Button>
+            <Button>{t('goPro')}</Button>
           </Link>
         </Card>
       </div>
@@ -104,39 +108,38 @@ export default function ShablonlarPage() {
   return (
     <div>
       <PageHeader
-        title="📝 Shablonlar"
-        description="Shartnoma shablonlarini boshqaring"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Shablonlar' },
+          { label: t('breadcrumb') },
         ]}
         actions={
           <Link href="/dashboard/shablonlar/yangi">
-            <Button leftIcon={<Plus size={15} />}>Yangi shablon</Button>
+            <Button leftIcon={<Plus size={15} />}>{t('newTpl')}</Button>
           </Link>
         }
       />
 
-      {/* Soha bo'yicha shablonlar */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-sm font-semibold text-[#0F172A]">Soha bo'yicha shablonlar</h2>
+          <h2 className="text-sm font-semibold text-[#0F172A]">{t('industryTpls')}</h2>
           <Badge variant="success" size="sm">{INDUSTRY_TEMPLATES.length}</Badge>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {INDUSTRY_TEMPLATES.map(t => {
-            const ind = INDUSTRIES.find(i => i.key === t.industry)
+          {INDUSTRY_TEMPLATES.map(tpl => {
+            const ind = INDUSTRIES.find(i => i.key === tpl.industry)
             return (
-              <Card key={t.id} className="group flex flex-col">
+              <Card key={tpl.id} className="group flex flex-col">
                 <div className="flex items-start gap-3 flex-1">
                   <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0', ind?.color ?? 'bg-[#F1F5F9]')}>
-                    {t.industryIcon}
+                    {tpl.industryIcon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-[#0F172A]">{t.name}</p>
-                    <p className="text-xs text-[#94A3B8] mt-0.5">{t.description}</p>
+                    <p className="text-sm font-semibold text-[#0F172A]">{tpl.name}</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">{tpl.description}</p>
                     <div className="flex flex-wrap gap-1 mt-2">
-                      {t.tags.slice(0, 3).map(tag => (
+                      {tpl.tags.slice(0, 3).map(tag => (
                         <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B]">
                           {tag}
                         </span>
@@ -146,11 +149,11 @@ export default function ShablonlarPage() {
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-[#F1F5F9]">
                   <Link
-                    href={`/dashboard/shartnomalar/yangi?industryTpl=${t.id}`}
+                    href={`/dashboard/shartnomalar/yangi?industryTpl=${tpl.id}`}
                     className="flex-1"
                   >
                     <Button variant="outline" size="sm" className="w-full" leftIcon={<Copy size={13} />}>
-                      Foydalanish
+                      {t('use')}
                     </Button>
                   </Link>
                 </div>
@@ -160,10 +163,9 @@ export default function ShablonlarPage() {
         </div>
       </div>
 
-      {/* Tizim shablonlari */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-sm font-semibold text-[#0F172A]">Tizim shablonlari</h2>
+          <h2 className="text-sm font-semibold text-[#0F172A]">{t('systemTpls')}</h2>
           <Badge variant="info" size="sm">{systemTemplates.length}</Badge>
         </div>
 
@@ -174,34 +176,35 @@ export default function ShablonlarPage() {
             ))}
           </div>
         ) : systemTemplates.length === 0 ? (
-          <EmptyState icon={<FileText size={24} />} title="Tizim shablonlari yo'q" />
+          <EmptyState icon={<FileText size={24} />} title={t('noSystemTpls')} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {systemTemplates.map(t => {
-              const c = cfg(t.contractType)
+            {systemTemplates.map(tpl => {
+              const c = cfg(tpl.contractType)
+              const typeName = tc(`types.${tpl.contractType}` as any)
               return (
-                <Card key={t.id} className="relative group">
+                <Card key={tpl.id} className="relative group">
                   <div className="flex items-start gap-3">
                     <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0', c?.bg ?? 'bg-[#F1F5F9]')}>
                       {c?.icon ?? '📄'}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#0F172A] truncate">{t.name}</p>
-                      <p className="text-xs text-[#94A3B8] mt-0.5">{c?.name ?? t.contractType}</p>
+                      <p className="text-sm font-semibold text-[#0F172A] truncate">{tpl.name}</p>
+                      <p className="text-xs text-[#94A3B8] mt-0.5">{c ? typeName : tpl.contractType}</p>
                     </div>
                     <Badge variant="default" size="sm" className="shrink-0">
-                      <Lock size={10} className="mr-1" />Tizim
+                      <Lock size={10} className="mr-1" />{t('system')}
                     </Badge>
                   </div>
                   <div className="flex gap-2 mt-4">
-                    <Link href={`/dashboard/shablonlar/${t.id}/edit?view=true`} className="flex-1">
+                    <Link href={`/dashboard/shablonlar/${tpl.id}/edit?view=true`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full" leftIcon={<Eye size={13} />}>
-                        Ko'rish
+                        {t('view')}
                       </Button>
                     </Link>
-                    <Link href={`/dashboard/shablonlar/yangi?from=${t.id}`} className="flex-1">
+                    <Link href={`/dashboard/shablonlar/yangi?from=${tpl.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full" leftIcon={<Copy size={13} />}>
-                        Nusxa
+                        {t('copy')}
                       </Button>
                     </Link>
                   </div>
@@ -212,47 +215,47 @@ export default function ShablonlarPage() {
         )}
       </div>
 
-      {/* Mening shablonlarim */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-sm font-semibold text-[#0F172A]">Mening shablonlarim</h2>
+          <h2 className="text-sm font-semibold text-[#0F172A]">{t('myTpls')}</h2>
           <Badge variant="success" size="sm">{customTemplates.length}</Badge>
         </div>
 
         {customTemplates.length === 0 ? (
           <Card className="flex flex-col items-center py-12 gap-3">
             <FileText size={32} className="text-[#CBD5E1]" />
-            <p className="text-sm text-[#94A3B8]">Hali shablon yaratilmagan</p>
+            <p className="text-sm text-[#94A3B8]">{t('noTpls')}</p>
             <Link href="/dashboard/shablonlar/yangi">
-              <Button size="sm" leftIcon={<Plus size={13} />}>Shablon yaratish</Button>
+              <Button size="sm" leftIcon={<Plus size={13} />}>{t('createTpl')}</Button>
             </Link>
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {customTemplates.map(t => {
-              const c = cfg(t.contractType)
+            {customTemplates.map(tpl => {
+              const c = cfg(tpl.contractType)
+              const typeName = tc(`types.${tpl.contractType}` as any)
               return (
-                <Card key={t.id} className="group">
+                <Card key={tpl.id} className="group">
                   <div className="flex items-start gap-3">
                     <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0', c?.bg ?? 'bg-[#F1F5F9]')}>
                       {c?.icon ?? '📄'}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#0F172A] truncate">{t.name}</p>
-                      <p className="text-xs text-[#94A3B8] mt-0.5">{c?.name ?? t.contractType}</p>
+                      <p className="text-sm font-semibold text-[#0F172A] truncate">{tpl.name}</p>
+                      <p className="text-xs text-[#94A3B8] mt-0.5">{c ? typeName : tpl.contractType}</p>
                     </div>
-                    <Badge variant="success" size="sm">Mening</Badge>
+                    <Badge variant="success" size="sm">{t('mine')}</Badge>
                   </div>
                   <div className="flex gap-2 mt-4">
-                    <Link href={`/dashboard/shablonlar/${t.id}/edit`} className="flex-1">
+                    <Link href={`/dashboard/shablonlar/${tpl.id}/edit`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full" leftIcon={<Edit2 size={13} />}>
-                        Tahrirlash
+                        {t('edit')}
                       </Button>
                     </Link>
                     <Button
                       variant="outline" size="sm"
                       className="text-red-500 hover:bg-red-50 hover:border-red-200"
-                      onClick={() => setDeleteId(t.id)}
+                      onClick={() => setDeleteId(tpl.id)}
                     >
                       <Trash2 size={13} />
                     </Button>

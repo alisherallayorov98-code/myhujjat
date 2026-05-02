@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Clock, FileText } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import api      from '@/lib/api'
@@ -11,13 +12,14 @@ interface Props {
 }
 
 export function HistoryList({ history, orgId, onSelect }: Props) {
+  const t = useTranslations('seifAi')
   if (history.length === 0) return null
 
   return (
     <Card>
       <p className="text-sm font-semibold text-[#0F172A] mb-3 flex items-center gap-2">
         <Clock size={14} className="text-[#94A3B8]" />
-        Oxirgi generatsiyalar
+        {t('historyTitle')}
       </p>
       <div className="space-y-1">
         {history.slice(0, 5).map((h: any) => (
@@ -32,7 +34,7 @@ export function HistoryList({ history, orgId, onSelect }: Props) {
             <FileText size={13} className="text-[#94A3B8] mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-[#475569] truncate">{h.title}</p>
-              <p className="text-[10px] text-[#94A3B8]">{h.tokensUsed} token</p>
+              <p className="text-[10px] text-[#94A3B8]">{t('tokenUsed', { count: h.tokensUsed })}</p>
             </div>
           </button>
         ))}

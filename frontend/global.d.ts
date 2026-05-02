@@ -43,6 +43,14 @@ import type healthIndicator   from './messages/uz/healthIndicator.json'
 import type globalSearch      from './messages/uz/globalSearch.json'
 import type errorBoundary     from './messages/uz/errorBoundary.json'
 import type cookieConsent     from './messages/uz/cookieConsent.json'
+import type shareLinkModal    from './messages/uz/shareLinkModal.json'
+import type eimzoSign         from './messages/uz/eimzoSign.json'
+import type onboardingChecklist from './messages/uz/onboardingChecklist.json'
+import type joinPage          from './messages/uz/joinPage.json'
+import type cpDropdown        from './messages/uz/cpDropdown.json'
+import type invoicesPanel     from './messages/uz/invoicesPanel.json'
+import type seifAi            from './messages/uz/seifAi.json'
+import type shablonlar        from './messages/uz/shablonlar.json'
 
 type AllMessages = {
   common:            typeof common
@@ -87,6 +95,14 @@ type AllMessages = {
   globalSearch:      typeof globalSearch
   errorBoundary:     typeof errorBoundary
   cookieConsent:     typeof cookieConsent
+  shareLinkModal:    typeof shareLinkModal
+  eimzoSign:         typeof eimzoSign
+  onboardingChecklist: typeof onboardingChecklist
+  joinPage:          typeof joinPage
+  cpDropdown:        typeof cpDropdown
+  invoicesPanel:     typeof invoicesPanel
+  seifAi:            typeof seifAi
+  shablonlar:        typeof shablonlar
 }
 
 declare module 'next-intl' {
