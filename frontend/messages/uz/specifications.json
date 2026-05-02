@@ -1,0 +1,57 @@
+{
+  "title": "Spesifikatsiyalar",
+  "description": "Tovar va xizmatlar ro'yxatlari",
+  "newTitle": "Yangi spesifikatsiya",
+  "newDescription": "Tovar va xizmatlar ro'yxati + QQS",
+  "new": "Yangi",
+  "newSpec": "Yangi spesifikatsiya",
+  "noSpecs": "Spesifikatsiyalar yo'q",
+  "noSpecsDescription": "Tovar va xizmatlar ro'yxatini yarating",
+  "notFound": "Topilmadi",
+  "spec": "Spesifikatsiya",
+  "specNumber": "Spesifikatsiya №",
+  "rows": "qator",
+  "attachToContract": "Shartnomaga biriktirish",
+  "selectContract": "Shartnoma tanlang (ixtiyoriy)",
+  "noCpName": "Kontragentsiz",
+  "addRow": "Qator qo'shish",
+  "totalSummary": "Jami hisob",
+  "withoutQqs": "Jami (QQS siz):",
+  "totalQqs": "Jami QQS:",
+  "grandTotal": "Umumiy jami:",
+  "qqsLess": "QQS siz",
+  "contractLink": "Shartnoma:",
+  "form": {
+    "notes": "Izoh",
+    "notesPlaceholder": "Qo'shimcha ma'lumot...",
+    "namePlaceholder": "Tovar/xizmat nomi"
+  },
+  "table": {
+    "num": "№",
+    "name": "Nomi",
+    "nameRequired": "Nomi *",
+    "unit": "Birlik",
+    "qty": "Miqdor",
+    "price": "Narx",
+    "priceSom": "Narx (so'm)",
+    "qqs": "QQS",
+    "qqsPercent": "QQS %",
+    "qqsAmount": "QQS summa",
+    "summa": "Summa",
+    "total": "Jami",
+    "contract": "Shartnoma",
+    "rows": "Qatorlar",
+    "totalAmount": "Jami summa",
+    "date": "Sana",
+    "number": "Raqam"
+  },
+  "toast": {
+    "saved": "Spesifikatsiya saqlandi!",
+    "deleted": "O'chirildi",
+    "excelDownloaded": "Excel yuklandi",
+    "error": "Xatolik"
+  },
+  "tooltip": {
+    "excelDownload": "Excel yuklash"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "title": "Нархлар — MyHujjat.uz",
+    "description": "MyHujjat.uz тариф режалари: Бепул, Стандарт, Pro. Ўзбекистон бизнеслар учун."
+  },
+  "title": "Нархлар ва режалари",
+  "subtitle": "Ҳар бир бизнес учун мос режа",
+  "monthlyLabel": "Ойлик",
+  "yearlyLabel": "Йиллик",
+  "yearlyDiscount": "25% чегирма",
+  "popular": "Машҳур",
+  "currency": "сўм/ой",
+  "monthlyPrice": "Ойлик: {price} сўм",
+  "compareTitle": "Батафсил таққослаш",
+  "compareFeature": "Имконият",
+  "ctaTitle": "Ҳали ҳам савол борми?",
+  "ctaSubtitle": "7 кун бепул Pro синаб кўринг ёки биз билан боғланинг.",
+  "ctaButton": "Бепул бошлаш →",
+  "compareRows": [
+    { "feat": "Ойлик шартномалар", "free": "5 та", "std": "50 та", "pro": "Чексиз" },
+    { "feat": "Шаблонлар", "free": "Асосий", "std": "Барча", "pro": "Барча" },
+    { "feat": "PDF/Word экспорт", "free": "✓", "std": "✓", "pro": "✓" },
+    { "feat": "Кадрлар (HR)", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "Бухгалтер ҳужжатлар", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "Котиб ҳужжатлар", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "AI ҳужжат генерация", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Юрист ҳужжатлар", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Э-имзо (ERI)", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Didox интеграция", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Email қўллаб-қувватлаш", "free": "✓", "std": "✓", "pro": "✓" }
+  ],
+  "plans": {
+    "free": {
+      "name": "Бепул",
+      "btnText": "Бепул бошлаш"
+    },
+    "standard": {
+      "name": "Стандарт",
+      "btnText": "Танлаш"
+    },
+    "pro": {
+      "name": "Pro",
+      "btnText": "Танлаш"
+    }
+  }
+}

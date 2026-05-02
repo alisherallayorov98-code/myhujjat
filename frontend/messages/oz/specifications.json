@@ -1,0 +1,57 @@
+{
+  "title": "Спесификациялар",
+  "description": "Товар ва хизматлар рўйхатлари",
+  "newTitle": "Янги спесификация",
+  "newDescription": "Товар ва хизматлар рўйхати + ҚҚС",
+  "new": "Янги",
+  "newSpec": "Янги спесификация",
+  "noSpecs": "Спесификациялар йўқ",
+  "noSpecsDescription": "Товар ва хизматлар рўйхатини яратинг",
+  "notFound": "Топилмади",
+  "spec": "Спесификация",
+  "specNumber": "Спесификация №",
+  "rows": "қатор",
+  "attachToContract": "Шартномага бириктириш",
+  "selectContract": "Шартнома танланг (ихтиёрий)",
+  "noCpName": "Контрагентсиз",
+  "addRow": "Қатор қўшиш",
+  "totalSummary": "Жами ҳисоб",
+  "withoutQqs": "Жами (ҚҚС сиз):",
+  "totalQqs": "Жами ҚҚС:",
+  "grandTotal": "Умумий жами:",
+  "qqsLess": "ҚҚС сиз",
+  "contractLink": "Шартнома:",
+  "form": {
+    "notes": "Изоҳ",
+    "notesPlaceholder": "Қўшимча маълумот...",
+    "namePlaceholder": "Товар/хизмат номи"
+  },
+  "table": {
+    "num": "№",
+    "name": "Номи",
+    "nameRequired": "Номи *",
+    "unit": "Бирлик",
+    "qty": "Миқдор",
+    "price": "Нарх",
+    "priceSom": "Нарх (сўм)",
+    "qqs": "ҚҚС",
+    "qqsPercent": "ҚҚС %",
+    "qqsAmount": "ҚҚС сумма",
+    "summa": "Сумма",
+    "total": "Жами",
+    "contract": "Шартнома",
+    "rows": "Қаторлар",
+    "totalAmount": "Жами сумма",
+    "date": "Сана",
+    "number": "Рақам"
+  },
+  "toast": {
+    "saved": "Спесификация сақланди!",
+    "deleted": "Ўчирилди",
+    "excelDownloaded": "Excel юкланди",
+    "error": "Хатолик"
+  },
+  "tooltip": {
+    "excelDownload": "Excel юклаш"
+  }
+}

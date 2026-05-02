@@ -3,6 +3,7 @@
 import { useEffect }        from 'react'
 import dynamic              from 'next/dynamic'
 import { usePathname }      from 'next/navigation'
+import { useTranslations }  from 'next-intl'
 import { ProtectedRoute }   from '@/components/auth/ProtectedRoute'
 import { Sidebar }          from '@/components/layout/Sidebar'
 import { Header }           from '@/components/layout/Header'
@@ -20,6 +21,7 @@ import { cn }               from '@/lib/cn'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed, closeMobileSidebar } = useUIStore()
   const pathname = usePathname()
+  const t        = useTranslations('dashboard')
 
   useEffect(() => {
     closeMobileSidebar()
@@ -28,7 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ProtectedRoute>
       <a href="#main-content" className="skip-link">
-        Asosiy mazmunga o'tish
+        {t('skipToMain')}
       </a>
       <div className="min-h-screen bg-[#F8FAFC]">
         <SidebarOffset />

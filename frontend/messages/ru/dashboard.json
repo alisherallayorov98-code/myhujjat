@@ -6,5 +6,99 @@
   "contractsThisMonth": "Договоры за этот месяц",
   "totalContracts": "Всего договоров",
   "counterparties": "Контрагенты",
-  "employees": "Сотрудники"
+  "employees": "Сотрудники",
+  "skipToMain": "Перейти к основному содержимому",
+  "greetings": {
+    "night": "Доброй ночи",
+    "morning": "Доброе утро",
+    "day": "Добрый день",
+    "evening": "Добрый вечер"
+  },
+  "user": "Пользователь",
+  "orgManageDesc": "управляйте своими документами",
+  "addOrgPrompt": "Чтобы начать, добавьте организацию",
+  "limitWarning": {
+    "limitReached": "Лимит договоров на этот месяц исчерпан",
+    "fewLeft": "Осталось всего {count} договоров",
+    "upgradeText": "Для безлимитных договоров перейдите на план Стандарт или Pro",
+    "upgrade": "Upgrade"
+  },
+  "addOrgCard": {
+    "title": "Добавьте организацию",
+    "description": "Чтобы создавать документы, сначала введите данные организации",
+    "button": "Добавить организацию"
+  },
+  "stat": {
+    "totalContracts": "Всего договоров",
+    "activeCount": "{count} активных",
+    "noneYet": "Пока нет",
+    "counterparties": "Контрагенты",
+    "partners": "Партнёры",
+    "employees": "Сотрудники",
+    "activeEmployees": "Активные сотрудники",
+    "thisMonth": "Этот месяц",
+    "contractAmount": "Сумма договоров"
+  },
+  "quickCreate": "Быстрое создание",
+  "quickAction": {
+    "newContract": "Новый договор",
+    "newContractDesc": "Создайте быстро",
+    "specification": "Спецификация",
+    "specificationDesc": "С НДС",
+    "invoice": "Счёт-фактура",
+    "invoiceDesc": "Счёт на оплату",
+    "order": "Приказ",
+    "orderDesc": "HR документ"
+  },
+  "recent": {
+    "title": "Последние договоры",
+    "all": "Все",
+    "noContracts": "Договоров пока нет",
+    "firstContract": "Первый договор",
+    "noCp": "Без контрагента"
+  },
+  "ai": {
+    "title": "AI Помощник",
+    "description": "Заполните содержимое документа автоматически с помощью AI. Введите только основную информацию, остальное сделает AI.",
+    "createWithAi": "Создать с AI"
+  },
+  "status": {
+    "draft": "Черновик",
+    "active": "Активный",
+    "completed": "Завершён",
+    "cancelled": "Отменён"
+  },
+  "monthlyChart": {
+    "title": "Последние 6 месяцев",
+    "contractsCount": "{count} договоров",
+    "months": {
+      "jan": "Янв",
+      "feb": "Фев",
+      "mar": "Мар",
+      "apr": "Апр",
+      "may": "Май",
+      "jun": "Июн",
+      "jul": "Июл",
+      "aug": "Авг",
+      "sep": "Сен",
+      "oct": "Окт",
+      "nov": "Ноя",
+      "dec": "Дек"
+    }
+  },
+  "typeDistribution": {
+    "title": "Типы договоров",
+    "noContracts": "Договоров пока нет"
+  },
+  "deadlines": {
+    "title": "Ближайшие сроки",
+    "empty": "Нет ближайших сроков",
+    "allOnTrack": "Всё по плану 👌",
+    "today": "Истекает сегодня",
+    "tomorrow": "Истекает завтра",
+    "daysLeft": "Осталось {count} дн.",
+    "subscription": "Подписка {plan}",
+    "unsigned": "Не подписан: {name}",
+    "counterparty": "Контрагент"
+  }
 }

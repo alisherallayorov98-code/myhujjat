@@ -1,0 +1,23 @@
+{
+  "personalInfo": "Личные данные",
+  "changeAvatar": "Изменить фото",
+  "removeAvatar": "Удалить фото",
+  "onlyImages": "Загружайте только изображения",
+  "imageTooLarge": "Размер слишком большой — выберите другое",
+  "uploadError": "Ошибка загрузки изображения",
+  "firstName": "Имя",
+  "firstNamePlace": "Жасур",
+  "lastName": "Фамилия",
+  "lastNamePlace": "Тошматов",
+  "email": "Email",
+  "emailHint": "Email изменить нельзя",
+  "phone": "Телефон",
+  "phonePlace": "+998 90 123 45 67",
+  "interfaceLanguage": "Язык интерфейса",
+  "langUz": "O'zbekcha (lotin)",
+  "langOz": "Ўзбекча (кирилл)",
+  "langRu": "Русский",
+  "save": "Сохранить",
+  "saved": "Профиль сохранен ✓",
+  "error": "Ошибка"
+}

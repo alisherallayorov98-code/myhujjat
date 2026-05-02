@@ -1,0 +1,63 @@
+{
+  "title": "Kontragentlar",
+  "description": "Shartnoma ikkinchi tomonlari",
+  "add": "Qo'shish",
+  "addNew": "Yangi qo'shish",
+  "newCounterparty": "Yangi kontragent",
+  "editCounterparty": "Kontragentni tahrirlash",
+  "noCounterparties": "Kontragentlar yo'q",
+  "noCounterpartiesDescription": "Birinchi kontragentni qo'shing",
+  "noOrgSelected": "Tashkilot tanlanmagan",
+  "selectOrgFirst": "Avval tashkilot tanlang",
+  "searchPlaceholder": "Nom yoki STIR bo'yicha qidirish...",
+  "searchOrStirPlaceholder": "Nom yoki STIR bo'yicha qidiring...",
+  "checking": "Tekshirilmagan",
+  "active": "Faol",
+  "inactive": "Nofaol",
+  "unknown": "Noma'lum",
+  "form": {
+    "name": "Nomi *",
+    "namePlaceholder": "Kompaniya nomi",
+    "director": "Rahbar",
+    "directorPlaceholder": "Familiya Ism Otasining ismi",
+    "directorShort": "Familiya Ism",
+    "phone": "Telefon",
+    "phonePlaceholder": "+998 71 123 45 67",
+    "bankName": "Bank",
+    "bankPlaceholder": "Xalq banki",
+    "mfo": "MFO",
+    "mfoPlaceholder": "00014",
+    "bankAccount": "Hisob raqami",
+    "bankAccountPlaceholder": "20208000000000000000",
+    "address": "Manzil",
+    "addressPlaceholder": "Shahar, tuman, ko'cha",
+    "stir": "STIR",
+    "stirPlaceholder": "123456789",
+    "stirHint": "9 ta raqam"
+  },
+  "table": {
+    "name": "Nomi",
+    "stir": "STIR",
+    "director": "Rahbar",
+    "bank": "Bank",
+    "status": "Holat"
+  },
+  "dropdown": {
+    "newAdd": "Yangi qo'shish →",
+    "newAddCp": "+ Yangi kontragent qo'shish",
+    "notFound": "Topilmadi.",
+    "nameRequired": "Nomi kiritilishi shart",
+    "stirInvalid": "STIR 9 ta raqam bo'lishi kerak",
+    "stirNotFound": "STIR topilmadi",
+    "stirNotFoundManual": "STIR bo'yicha topilmadi — qo'lda kiriting",
+    "found": "Topildi",
+    "filled": "Ma'lumotlar to'ldirildi"
+  },
+  "toast": {
+    "added": "Kontragent qo'shildi",
+    "updated": "Kontragent yangilandi",
+    "noExportData": "Eksport uchun ma'lumot yo'q",
+    "excelDownloaded": "Excel yuklandi",
+    "error": "Xatolik"
+  }
+}

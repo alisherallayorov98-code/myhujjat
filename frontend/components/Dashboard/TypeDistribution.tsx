@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { PieChart } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/Card'
 import { CONTRACT_TYPE_CONFIG } from '@/lib/contractTemplates'
 
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export function TypeDistribution({ contracts }: Props) {
+  const t  = useTranslations('dashboard')
+  const tc = useTranslations('contracts')
   const data = useMemo(() => {
     const counts: Record<string, number> = {}
     contracts.forEach(c => {
@@ -25,15 +28,18 @@ export function TypeDistribution({ contracts }: Props) {
       .slice(0, 5)
       .map(([type, count]) => {
         const cfg = (CONTRACT_TYPE_CONFIG as any)[type]
+        let name = cfg?.name ?? type
+        try { name = tc(`types.${type}` as any) || name } catch {}
         return {
           type,
-          name:  cfg?.name  ?? type,
+          name,
           icon:  cfg?.icon  ?? '📄',
           bg:    cfg?.bg    ?? 'bg-[#F1F5F9]',
           color: cfg?.color ?? 'text-[#475569]',
           count,
         }
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contracts])
 
   const total = contracts.length
@@ -43,13 +49,13 @@ export function TypeDistribution({ contracts }: Props) {
     <Card padding="none" className="overflow-hidden">
       <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center gap-2">
         <PieChart size={14} className="text-[#94A3B8]" />
-        <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Shartnoma turlari</p>
+        <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">{t('typeDistribution.title')}</p>
       </div>
 
       {data.length === 0 ? (
         <div className="p-8 text-center">
           <PieChart size={28} className="mx-auto text-[#CBD5E1] mb-2" />
-          <p className="text-sm text-[#94A3B8]">Hali shartnoma yo'q</p>
+          <p className="text-sm text-[#94A3B8]">{t('typeDistribution.noContracts')}</p>
         </div>
       ) : (
         <div className="p-5 space-y-3">

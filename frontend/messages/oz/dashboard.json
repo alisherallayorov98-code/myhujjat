@@ -6,5 +6,99 @@
   "contractsThisMonth": "Бу ой шартномалар",
   "totalContracts": "Жами шартномалар",
   "counterparties": "Контрагентлар",
-  "employees": "Ходимлар"
+  "employees": "Ходимлар",
+  "skipToMain": "Асосий мазмунга ўтиш",
+  "greetings": {
+    "night": "Хайрли тун",
+    "morning": "Хайрли тонг",
+    "day": "Хайрли кун",
+    "evening": "Хайрли кеч"
+  },
+  "user": "Фойдаланувчи",
+  "orgManageDesc": "ҳужжатларингизни бошқаринг",
+  "addOrgPrompt": "Бошлаш учун ташкилот қўшинг",
+  "limitWarning": {
+    "limitReached": "Бу ой шартнома лимити тугади",
+    "fewLeft": "Фақат {count} та шартнома қолди",
+    "upgradeText": "Чексиз шартнома учун Стандарт ёки Pro режага ўтинг",
+    "upgrade": "Upgrade"
+  },
+  "addOrgCard": {
+    "title": "Ташкилот қўшинг",
+    "description": "Ҳужжат яратиш учун аввал ташкилот маълумотларини киритинг",
+    "button": "Ташкилот қўшиш"
+  },
+  "stat": {
+    "totalContracts": "Жами шартномалар",
+    "activeCount": "{count} та фаол",
+    "noneYet": "Ҳали йўқ",
+    "counterparties": "Контрагентлар",
+    "partners": "Ҳамкорлар",
+    "employees": "Ходимлар",
+    "activeEmployees": "Фаол ходимлар",
+    "thisMonth": "Бу ой",
+    "contractAmount": "Шартнома суммаси"
+  },
+  "quickCreate": "Тез яратиш",
+  "quickAction": {
+    "newContract": "Янги шартнома",
+    "newContractDesc": "Тез яратинг",
+    "specification": "Спесификация",
+    "specificationDesc": "ҚҚС билан",
+    "invoice": "Фактура",
+    "invoiceDesc": "Ҳисоб-фактура",
+    "order": "Буйруқ",
+    "orderDesc": "HR ҳужжати"
+  },
+  "recent": {
+    "title": "Сўнгги шартномалар",
+    "all": "Ҳаммаси",
+    "noContracts": "Ҳали шартнома йўқ",
+    "firstContract": "Биринчи шартнома",
+    "noCp": "Контрагент йўқ"
+  },
+  "ai": {
+    "title": "AI Ёрдамчи",
+    "description": "Ҳужжат мазмунини AI ёрдамида автоматик тўлдиринг. Фақат асосий маълумотларни киритинг, қолганини AI қилади.",
+    "createWithAi": "AI билан яратиш"
+  },
+  "status": {
+    "draft": "Қоралама",
+    "active": "Фаол",
+    "completed": "Тугаган",
+    "cancelled": "Бекор"
+  },
+  "monthlyChart": {
+    "title": "Охирги 6 ой",
+    "contractsCount": "{count} та шартнома",
+    "months": {
+      "jan": "Ян",
+      "feb": "Фев",
+      "mar": "Мар",
+      "apr": "Апр",
+      "may": "Май",
+      "jun": "Июн",
+      "jul": "Июл",
+      "aug": "Авг",
+      "sep": "Сен",
+      "oct": "Окт",
+      "nov": "Ноя",
+      "dec": "Дек"
+    }
+  },
+  "typeDistribution": {
+    "title": "Шартнома турлари",
+    "noContracts": "Ҳали шартнома йўқ"
+  },
+  "deadlines": {
+    "title": "Яқинлашаётган муддатлар",
+    "empty": "Яқинлашаётган муддат йўқ",
+    "allOnTrack": "Ҳаммаси режада 👌",
+    "today": "Бугун тугайди",
+    "tomorrow": "Эртага тугайди",
+    "daysLeft": "{count} кун қолди",
+    "subscription": "{plan} обуна",
+    "unsigned": "Имзоланмаган: {name}",
+    "counterparty": "Контрагент"
+  }
 }

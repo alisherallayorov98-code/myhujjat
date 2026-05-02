@@ -1,0 +1,41 @@
+{
+  "title": "Счета-фактуры",
+  "addManual": "Добавить вручную",
+  "addInvoice": "Добавить счёт-фактуру",
+  "noInvoices": "По этому договору нет счетов-фактур",
+  "syncHint": "Автосинхронизация с Didox или добавьте вручную",
+  "fromUs": "От нас",
+  "deleteConfirm": "Удалить счёт-фактуру?",
+  "contractAmount": "Сумма договора:",
+  "used": "Использовано:",
+  "remaining": "Осталось:",
+  "exceeded": "превышено",
+  "alert": {
+    "WARNING": "Предупреждение",
+    "CRITICAL": "Критично",
+    "EXCEEDED": "Превышено",
+    "CRITICAL_OVERAGE": "Существенно",
+    "exceededTitle": "Сумма договора превышена на {amount}",
+    "exceededTitleNoAmount": "Сумма договора превышена",
+    "criticalTitle": "Сумма договора превысила 95% — осталось {remaining}",
+    "warningTitle": "Сумма договора превысила 80%",
+    "solution": "Решение:",
+    "solutionDesc": "создайте и отправьте контрагенту",
+    "additionalContract": "Дополнительный договор"
+  },
+  "form": {
+    "number": "Номер счёта-фактуры",
+    "numberPlaceholder": "EHF-12345",
+    "date": "Дата *",
+    "direction": "Направление",
+    "incoming": "Нам (покупатель)",
+    "outgoing": "От нас (продавец)",
+    "amount": "Сумма (сум) *",
+    "vatAmount": "НДС (сум)"
+  },
+  "toast": {
+    "deleted": "Счёт-фактура удалён",
+    "added": "Счёт-фактура добавлен",
+    "error": "Ошибка"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "personalInfo": "Shaxsiy ma'lumotlar",
+  "changeAvatar": "Rasmni o'zgartirish",
+  "removeAvatar": "Rasmni olib tashlash",
+  "onlyImages": "Faqat rasm fayllarini yuklang",
+  "imageTooLarge": "Rasm hajmi juda katta — boshqasini tanlang",
+  "uploadError": "Rasm yuklashda xatolik",
+  "firstName": "Ism",
+  "firstNamePlace": "Jasur",
+  "lastName": "Familiya",
+  "lastNamePlace": "Toshmatov",
+  "email": "Email",
+  "emailHint": "Email manzilni o'zgartirish mumkin emas",
+  "phone": "Telefon",
+  "phonePlace": "+998 90 123 45 67",
+  "interfaceLanguage": "Interfeys tili",
+  "langUz": "O'zbekcha (lotin)",
+  "langOz": "Ўзбекча (кирилл)",
+  "langRu": "Русский",
+  "save": "Saqlash",
+  "saved": "Profil saqlandi ✓",
+  "error": "Xatolik"
+}

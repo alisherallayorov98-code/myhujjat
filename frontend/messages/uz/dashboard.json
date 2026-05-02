@@ -6,5 +6,99 @@
   "contractsThisMonth": "Bu oy shartnomalar",
   "totalContracts": "Jami shartnomalar",
   "counterparties": "Kontragentlar",
-  "employees": "Xodimlar"
+  "employees": "Xodimlar",
+  "skipToMain": "Asosiy mazmunga o'tish",
+  "greetings": {
+    "night": "Xayrli tun",
+    "morning": "Xayrli tong",
+    "day": "Xayrli kun",
+    "evening": "Xayrli kech"
+  },
+  "user": "Foydalanuvchi",
+  "orgManageDesc": "hujjatlaringizni boshqaring",
+  "addOrgPrompt": "Boshlash uchun tashkilot qo'shing",
+  "limitWarning": {
+    "limitReached": "Bu oy shartnoma limiti tugadi",
+    "fewLeft": "Faqat {count} ta shartnoma qoldi",
+    "upgradeText": "Cheksiz shartnoma uchun Standart yoki Pro rejaga o'ting",
+    "upgrade": "Upgrade"
+  },
+  "addOrgCard": {
+    "title": "Tashkilot qo'shing",
+    "description": "Hujjat yaratish uchun avval tashkilot ma'lumotlarini kiriting",
+    "button": "Tashkilot qo'shish"
+  },
+  "stat": {
+    "totalContracts": "Jami shartnomalar",
+    "activeCount": "{count} ta faol",
+    "noneYet": "Hali yo'q",
+    "counterparties": "Kontragentlar",
+    "partners": "Hamkorlar",
+    "employees": "Xodimlar",
+    "activeEmployees": "Faol xodimlar",
+    "thisMonth": "Bu oy",
+    "contractAmount": "Shartnoma summasi"
+  },
+  "quickCreate": "Tez yaratish",
+  "quickAction": {
+    "newContract": "Yangi shartnoma",
+    "newContractDesc": "Tez yarating",
+    "specification": "Spesifikatsiya",
+    "specificationDesc": "QQS bilan",
+    "invoice": "Faktura",
+    "invoiceDesc": "Hisob-faktura",
+    "order": "Buyruq",
+    "orderDesc": "HR hujjati"
+  },
+  "recent": {
+    "title": "So'nggi shartnomalar",
+    "all": "Hammasi",
+    "noContracts": "Hali shartnoma yo'q",
+    "firstContract": "Birinchi shartnoma",
+    "noCp": "Kontragent yo'q"
+  },
+  "ai": {
+    "title": "AI Yordamchi",
+    "description": "Hujjat mazmunini AI yordamida avtomatik to'ldiring. Faqat asosiy ma'lumotlarni kiriting, qolganini AI qiladi.",
+    "createWithAi": "AI bilan yaratish"
+  },
+  "status": {
+    "draft": "Qoralama",
+    "active": "Faol",
+    "completed": "Tugagan",
+    "cancelled": "Bekor"
+  },
+  "monthlyChart": {
+    "title": "Oxirgi 6 oy",
+    "contractsCount": "{count} ta shartnoma",
+    "months": {
+      "jan": "Yan",
+      "feb": "Fev",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Iyun",
+      "jul": "Iyul",
+      "aug": "Avg",
+      "sep": "Sen",
+      "oct": "Okt",
+      "nov": "Noy",
+      "dec": "Dek"
+    }
+  },
+  "typeDistribution": {
+    "title": "Shartnoma turlari",
+    "noContracts": "Hali shartnoma yo'q"
+  },
+  "deadlines": {
+    "title": "Yaqinlashayotgan muddatlar",
+    "empty": "Yaqinlashayotgan muddat yo'q",
+    "allOnTrack": "Hammasi rejada 👌",
+    "today": "Bugun tugaydi",
+    "tomorrow": "Ertaga tugaydi",
+    "daysLeft": "{count} kun qoldi",
+    "subscription": "{plan} obuna",
+    "unsigned": "Imzolanmagan: {name}",
+    "counterparty": "Kontragent"
+  }
 }

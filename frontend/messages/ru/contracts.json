@@ -17,5 +17,154 @@
   "exportPdf": "Скачать PDF",
   "exportWord": "Скачать Word",
   "print": "Печать",
-  "versionHistory": "История версий"
+  "versionHistory": "История версий",
+  "totalCount": "Всего: {count} договоров",
+  "filter": {
+    "search": "Поиск...",
+    "allTypes": "Все типы",
+    "allStatuses": "Все статусы",
+    "allDates": "Все даты",
+    "thisMonth": "Этот месяц",
+    "lastMonth": "Прошлый месяц",
+    "thisYear": "Этот год"
+  },
+  "statusOptions": {
+    "DRAFT": "Черновик",
+    "ACTIVE": "Активный",
+    "COMPLETED": "Завершён",
+    "CANCELLED": "Отменён"
+  },
+  "bulk": {
+    "selected": "Выбрано: {count}",
+    "makeActive": "Сделать активным",
+    "makeCompleted": "Завершён",
+    "makeCancelled": "Отменить",
+    "clear": "Очистить",
+    "confirmStatus": "Изменить статус {count} договоров на \"{status}\"?",
+    "updated": "Обновлено договоров: {count}"
+  },
+  "table": {
+    "number": "Номер",
+    "type": "Тип",
+    "counterparty": "Контрагент",
+    "date": "Дата",
+    "amount": "Сумма",
+    "status": "Статус"
+  },
+  "empty": {
+    "title": "Договоров нет",
+    "description": "Создайте первый договор"
+  },
+  "limit": {
+    "limitReached": "Лимит исчерпан"
+  },
+  "toast": {
+    "noExportData": "Нет договоров для экспорта",
+    "excelDownloaded": "Excel загружен",
+    "created": "Договор создан!",
+    "dateRequired": "Введите дату",
+    "error": "Ошибка"
+  },
+  "new_": {
+    "title": "Новый договор",
+    "selectType": "Выберите тип договора",
+    "partiesAndInfo": "Стороны и основная информация",
+    "specTitle": "Спецификация",
+    "specDesc": "Список товаров/услуг и вид договора",
+    "back": "Назад",
+    "next": "Далее →",
+    "create": "Создать →",
+    "showPreview": "Просмотр",
+    "hidePreview": "Закрыть просмотр",
+    "yourOrg": "Ваша организация",
+    "counterparty": "Контрагент",
+    "noOrgSelected": "Организация не выбрана",
+    "noCpSelected": "Контрагент не выбран",
+    "extraInfoTitle": "Дополнительные данные для {type}",
+    "specifications": "Спецификация",
+    "contractAmount": "Сумма договора",
+    "totalNoQqs": "Итого (без НДС):",
+    "qqs": "НДС:",
+    "total": "Итого:",
+    "previewTitle": "Вид договора",
+    "previewDesc": "Обновляется автоматически при вводе данных",
+    "form": {
+      "contractNumberLabel": "Номер договора",
+      "autoHint": "Пусто → автоматически",
+      "dateLabel": "Дата *",
+      "cityLabel": "Город",
+      "cityPlaceholder": "Ташкент",
+      "amountLabel": "Сумма (сум)",
+      "amountPlaceholder": "0",
+      "contractAmountLabel": "Сумма договора (сум)"
+    }
+  },
+  "stepBar": {
+    "step1": "Выбор типа",
+    "step2": "Данные",
+    "step3": "Спецификация"
+  },
+  "partyFields": {
+    "stir": "ИНН",
+    "name": "Название",
+    "director": "Руководитель",
+    "bank": "Банк",
+    "bankAccount": "Расчётный счёт",
+    "mfo": "МФО",
+    "address": "Адрес",
+    "phone": "Телефон"
+  },
+  "detail": {
+    "notFound": "Договор не найден",
+    "loading": "Загрузка",
+    "send": "Отправить",
+    "deleteContract": "Удалить договор",
+    "deleteConfirm": "Вы хотите удалить договор {number}?",
+    "signStatus": "Статус подписи",
+    "ourSignature": "Наша подпись",
+    "cpSignature": "Подпись контрагента",
+    "signedAtFormat": "{date}",
+    "contractView": "Вид договора",
+    "fullScreen": "🔍 Открыть в полноэкранном режиме",
+    "specsCount": "Спецификации ({count})",
+    "viewSpec": "Просмотр →",
+    "specName": "Спецификация",
+    "counterpartyTitle": "Контрагент",
+    "directorLabel": "Руководитель:",
+    "stirLabel": "ИНН:",
+    "statusTitle": "Статус",
+    "createdAt": "Создан",
+    "updatedAt": "Обновлён",
+    "info": {
+      "number": "Номер",
+      "date": "Дата",
+      "city": "Город",
+      "amount": "Сумма",
+      "product": "Товар/услуга"
+    }
+  },
+  "preview": {
+    "back": "Назад",
+    "fullscreen": "Полный экран",
+    "fullscreenExit": "Выйти",
+    "print": "Печать",
+    "pdf": "Скачать PDF",
+    "word": "Скачать Word",
+    "send": "Отправить",
+    "notFound": "Договор не найден"
+  },
+  "types": {
+    "OLDI_SOTDI": "Купля-продажа",
+    "XIZMAT": "Оказание услуг",
+    "IJARA": "Аренда",
+    "PUDRAT": "Подряд",
+    "QOSHIMCHA": "Дополнительный",
+    "MOLIYAVIY": "Финансовая помощь",
+    "DAVAL": "Давальческий",
+    "XALQARO": "Международный",
+    "AGENTLIK": "Агентский",
+    "TRANSPORT": "Транспортный",
+    "LIZING": "Лизинг",
+    "BOSHQA": "Прочий"
+  }
 }

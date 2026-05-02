@@ -1,0 +1,57 @@
+{
+  "title": "Спецификации",
+  "description": "Списки товаров и услуг",
+  "newTitle": "Новая спецификация",
+  "newDescription": "Список товаров и услуг + НДС",
+  "new": "Новая",
+  "newSpec": "Новая спецификация",
+  "noSpecs": "Нет спецификаций",
+  "noSpecsDescription": "Создайте список товаров и услуг",
+  "notFound": "Не найдено",
+  "spec": "Спецификация",
+  "specNumber": "Спецификация №",
+  "rows": "строк",
+  "attachToContract": "Привязать к договору",
+  "selectContract": "Выберите договор (необязательно)",
+  "noCpName": "Без контрагента",
+  "addRow": "Добавить строку",
+  "totalSummary": "Итог",
+  "withoutQqs": "Итого (без НДС):",
+  "totalQqs": "Итого НДС:",
+  "grandTotal": "Всего:",
+  "qqsLess": "Без НДС",
+  "contractLink": "Договор:",
+  "form": {
+    "notes": "Примечание",
+    "notesPlaceholder": "Дополнительная информация...",
+    "namePlaceholder": "Название товара/услуги"
+  },
+  "table": {
+    "num": "№",
+    "name": "Наименование",
+    "nameRequired": "Наименование *",
+    "unit": "Ед.",
+    "qty": "Кол-во",
+    "price": "Цена",
+    "priceSom": "Цена (сум)",
+    "qqs": "НДС",
+    "qqsPercent": "НДС %",
+    "qqsAmount": "Сумма НДС",
+    "summa": "Сумма",
+    "total": "Итого",
+    "contract": "Договор",
+    "rows": "Строки",
+    "totalAmount": "Общая сумма",
+    "date": "Дата",
+    "number": "Номер"
+  },
+  "toast": {
+    "saved": "Спецификация сохранена!",
+    "deleted": "Удалено",
+    "excelDownloaded": "Excel загружен",
+    "error": "Ошибка"
+  },
+  "tooltip": {
+    "excelDownload": "Скачать Excel"
+  }
+}

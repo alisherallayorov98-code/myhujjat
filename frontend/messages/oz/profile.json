@@ -1,0 +1,23 @@
+{
+  "personalInfo": "Шахсий маълумотлар",
+  "changeAvatar": "Расмни ўзгартириш",
+  "removeAvatar": "Расмни олиб ташлаш",
+  "onlyImages": "Фақат расм файлларини юкланг",
+  "imageTooLarge": "Расм ҳажми жуда катта — бошқасини танланг",
+  "uploadError": "Расм юклашда хатолик",
+  "firstName": "Исм",
+  "firstNamePlace": "Жасур",
+  "lastName": "Фамилия",
+  "lastNamePlace": "Тошматов",
+  "email": "Email",
+  "emailHint": "Email манзилни ўзгартириш мумкин эмас",
+  "phone": "Телефон",
+  "phonePlace": "+998 90 123 45 67",
+  "interfaceLanguage": "Интерфейс тили",
+  "langUz": "Ўзбекча (лотин)",
+  "langOz": "Ўзбекча (кирилл)",
+  "langRu": "Русский",
+  "save": "Сақлаш",
+  "saved": "Профил сақланди ✓",
+  "error": "Хатолик"
+}

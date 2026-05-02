@@ -17,5 +17,154 @@
   "exportPdf": "PDF юклаш",
   "exportWord": "Word юклаш",
   "print": "Чоп этиш",
-  "versionHistory": "Версиялар тарихи"
+  "versionHistory": "Версиялар тарихи",
+  "totalCount": "Жами: {count} та шартнома",
+  "filter": {
+    "search": "Қидириш...",
+    "allTypes": "Барча турлар",
+    "allStatuses": "Барча ҳолатлар",
+    "allDates": "Барча саналар",
+    "thisMonth": "Бу ой",
+    "lastMonth": "Ўтган ой",
+    "thisYear": "Бу йил"
+  },
+  "statusOptions": {
+    "DRAFT": "Қоралама",
+    "ACTIVE": "Фаол",
+    "COMPLETED": "Тугаган",
+    "CANCELLED": "Бекор"
+  },
+  "bulk": {
+    "selected": "{count} та танланди",
+    "makeActive": "Фаол қилиш",
+    "makeCompleted": "Тугаган",
+    "makeCancelled": "Бекор қилиш",
+    "clear": "Тозалаш",
+    "confirmStatus": "{count} та шартнома ҳолати \"{status}\" га ўзгартирилсинми?",
+    "updated": "{count} та шартнома янгиланди"
+  },
+  "table": {
+    "number": "Рақам",
+    "type": "Тур",
+    "counterparty": "Контрагент",
+    "date": "Сана",
+    "amount": "Сумма",
+    "status": "Ҳолат"
+  },
+  "empty": {
+    "title": "Шартномалар йўқ",
+    "description": "Биринчи шартномани яратинг"
+  },
+  "limit": {
+    "limitReached": "Лимит тугади"
+  },
+  "toast": {
+    "noExportData": "Экспорт учун шартнома йўқ",
+    "excelDownloaded": "Excel юкланди",
+    "created": "Шартнома яратилди!",
+    "dateRequired": "Сана киритинг",
+    "error": "Хатолик"
+  },
+  "new_": {
+    "title": "Янги шартнома",
+    "selectType": "Шартнома турини танланг",
+    "partiesAndInfo": "Томонлар ва асосий маълумотлар",
+    "specTitle": "Спесификация",
+    "specDesc": "Товарлар/хизматлар рўйхати ва шартнома кўриниши",
+    "back": "Орқага",
+    "next": "Кейинги →",
+    "create": "Яратиш →",
+    "showPreview": "Кўриш",
+    "hidePreview": "Кўришни ёпиш",
+    "yourOrg": "Сизнинг ташкилотингиз",
+    "counterparty": "Контрагент",
+    "noOrgSelected": "Ташкилот танланмаган",
+    "noCpSelected": "Контрагент танланмаган",
+    "extraInfoTitle": "{type} учун қўшимча маълумотлар",
+    "specifications": "Спесификация",
+    "contractAmount": "Шартнома суммаси",
+    "totalNoQqs": "Жами (ҚҚСсиз):",
+    "qqs": "ҚҚС:",
+    "total": "Жами:",
+    "previewTitle": "Шартнома кўриниши",
+    "previewDesc": "Маълумотлар киритилган ҳолда автоматик янгиланади",
+    "form": {
+      "contractNumberLabel": "Шартнома рақами",
+      "autoHint": "Бўш → автоматик",
+      "dateLabel": "Сана *",
+      "cityLabel": "Шаҳар",
+      "cityPlaceholder": "Тошкент",
+      "amountLabel": "Сумма (сўм)",
+      "amountPlaceholder": "0",
+      "contractAmountLabel": "Шартнома суммаси (сўм)"
+    }
+  },
+  "stepBar": {
+    "step1": "Тур танлаш",
+    "step2": "Маълумотлар",
+    "step3": "Спесификация"
+  },
+  "partyFields": {
+    "stir": "СТИР",
+    "name": "Номи",
+    "director": "Раҳбар",
+    "bank": "Банк",
+    "bankAccount": "Ҳисоб рақами",
+    "mfo": "МФО",
+    "address": "Манзил",
+    "phone": "Телефон"
+  },
+  "detail": {
+    "notFound": "Шартнома топилмади",
+    "loading": "Юкланмоқда",
+    "send": "Юбориш",
+    "deleteContract": "Шартномани ўчириш",
+    "deleteConfirm": "{number} шартномани ўчиришни тасдиқлайсизми?",
+    "signStatus": "Имзо ҳолати",
+    "ourSignature": "Бизнинг имзо",
+    "cpSignature": "Контрагент имзоси",
+    "signedAtFormat": "{date}",
+    "contractView": "Шартнома кўриниши",
+    "fullScreen": "🔍 Тўлиқ экранда очиш",
+    "specsCount": "Спесификациялар ({count})",
+    "viewSpec": "Кўриш →",
+    "specName": "Спесификация",
+    "counterpartyTitle": "Контрагент",
+    "directorLabel": "Раҳбар:",
+    "stirLabel": "СТИР:",
+    "statusTitle": "Ҳолат",
+    "createdAt": "Яратилган",
+    "updatedAt": "Ўзгартирилган",
+    "info": {
+      "number": "Рақам",
+      "date": "Сана",
+      "city": "Шаҳар",
+      "amount": "Сумма",
+      "product": "Маҳсулот/хизмат"
+    }
+  },
+  "preview": {
+    "back": "Орқага",
+    "fullscreen": "Тўлиқ экран",
+    "fullscreenExit": "Чиқиш",
+    "print": "Чоп этиш",
+    "pdf": "PDF юклаб олиш",
+    "word": "Word юклаб олиш",
+    "send": "Юбориш",
+    "notFound": "Шартнома топилмади"
+  },
+  "types": {
+    "OLDI_SOTDI": "Олди-сотди",
+    "XIZMAT": "Хизмат кўрсатиш",
+    "IJARA": "Ижара",
+    "PUDRAT": "Пудрат",
+    "QOSHIMCHA": "Қўшимча",
+    "MOLIYAVIY": "Молиявий ёрдам",
+    "DAVAL": "Давал",
+    "XALQARO": "Халқаро",
+    "AGENTLIK": "Агентлик",
+    "TRANSPORT": "Транспорт",
+    "LIZING": "Лизинг",
+    "BOSHQA": "Бошқа"
+  }
 }

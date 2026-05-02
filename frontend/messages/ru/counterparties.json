@@ -1,0 +1,63 @@
+{
+  "title": "Контрагенты",
+  "description": "Вторые стороны договоров",
+  "add": "Добавить",
+  "addNew": "Добавить новый",
+  "newCounterparty": "Новый контрагент",
+  "editCounterparty": "Редактировать контрагента",
+  "noCounterparties": "Нет контрагентов",
+  "noCounterpartiesDescription": "Добавьте первого контрагента",
+  "noOrgSelected": "Организация не выбрана",
+  "selectOrgFirst": "Сначала выберите организацию",
+  "searchPlaceholder": "Поиск по названию или ИНН...",
+  "searchOrStirPlaceholder": "Поиск по названию или ИНН...",
+  "checking": "Не проверено",
+  "active": "Активен",
+  "inactive": "Неактивен",
+  "unknown": "Неизвестно",
+  "form": {
+    "name": "Название *",
+    "namePlaceholder": "Название компании",
+    "director": "Руководитель",
+    "directorPlaceholder": "Фамилия Имя Отчество",
+    "directorShort": "Фамилия Имя",
+    "phone": "Телефон",
+    "phonePlaceholder": "+998 71 123 45 67",
+    "bankName": "Банк",
+    "bankPlaceholder": "Народный банк",
+    "mfo": "МФО",
+    "mfoPlaceholder": "00014",
+    "bankAccount": "Расчётный счёт",
+    "bankAccountPlaceholder": "20208000000000000000",
+    "address": "Адрес",
+    "addressPlaceholder": "Город, район, улица",
+    "stir": "ИНН",
+    "stirPlaceholder": "123456789",
+    "stirHint": "9 цифр"
+  },
+  "table": {
+    "name": "Название",
+    "stir": "ИНН",
+    "director": "Руководитель",
+    "bank": "Банк",
+    "status": "Статус"
+  },
+  "dropdown": {
+    "newAdd": "Добавить нового →",
+    "newAddCp": "+ Добавить нового контрагента",
+    "notFound": "Не найдено.",
+    "nameRequired": "Необходимо указать название",
+    "stirInvalid": "ИНН должен состоять из 9 цифр",
+    "stirNotFound": "ИНН не найден",
+    "stirNotFoundManual": "По ИНН не найдено — введите вручную",
+    "found": "Найдено",
+    "filled": "Данные заполнены"
+  },
+  "toast": {
+    "added": "Контрагент добавлен",
+    "updated": "Контрагент обновлён",
+    "noExportData": "Нет данных для экспорта",
+    "excelDownloaded": "Excel загружен",
+    "error": "Ошибка"
+  }
+}

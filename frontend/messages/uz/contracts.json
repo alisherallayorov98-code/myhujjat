@@ -17,5 +17,154 @@
   "exportPdf": "PDF yuklash",
   "exportWord": "Word yuklash",
   "print": "Chop etish",
-  "versionHistory": "Versiyalar tarixi"
+  "versionHistory": "Versiyalar tarixi",
+  "totalCount": "Jami: {count} ta shartnoma",
+  "filter": {
+    "search": "Qidirish...",
+    "allTypes": "Barcha turlar",
+    "allStatuses": "Barcha holatlar",
+    "allDates": "Barcha sanalar",
+    "thisMonth": "Bu oy",
+    "lastMonth": "O'tgan oy",
+    "thisYear": "Bu yil"
+  },
+  "statusOptions": {
+    "DRAFT": "Qoralama",
+    "ACTIVE": "Faol",
+    "COMPLETED": "Tugagan",
+    "CANCELLED": "Bekor"
+  },
+  "bulk": {
+    "selected": "{count} ta tanlandi",
+    "makeActive": "Faol qilish",
+    "makeCompleted": "Tugagan",
+    "makeCancelled": "Bekor qilish",
+    "clear": "Tozalash",
+    "confirmStatus": "{count} ta shartnoma holati \"{status}\" ga o'zgartirilsinmi?",
+    "updated": "{count} ta shartnoma yangilandi"
+  },
+  "table": {
+    "number": "Raqam",
+    "type": "Tur",
+    "counterparty": "Kontragent",
+    "date": "Sana",
+    "amount": "Summa",
+    "status": "Holat"
+  },
+  "empty": {
+    "title": "Shartnomalar yo'q",
+    "description": "Birinchi shartnomani yarating"
+  },
+  "limit": {
+    "limitReached": "Limit tugadi"
+  },
+  "toast": {
+    "noExportData": "Eksport uchun shartnoma yo'q",
+    "excelDownloaded": "Excel yuklandi",
+    "created": "Shartnoma yaratildi!",
+    "dateRequired": "Sana kiriting",
+    "error": "Xatolik"
+  },
+  "new_": {
+    "title": "Yangi shartnoma",
+    "selectType": "Shartnoma turini tanlang",
+    "partiesAndInfo": "Tomonlar va asosiy ma'lumotlar",
+    "specTitle": "Spesifikatsiya",
+    "specDesc": "Tovarlar/xizmatlar ro'yxati va shartnoma ko'rinishi",
+    "back": "Orqaga",
+    "next": "Keyingi →",
+    "create": "Yaratish →",
+    "showPreview": "Ko'rish",
+    "hidePreview": "Ko'rishni yopish",
+    "yourOrg": "Sizning tashkilotingiz",
+    "counterparty": "Kontragent",
+    "noOrgSelected": "Tashkilot tanlanmagan",
+    "noCpSelected": "Kontragent tanlanmagan",
+    "extraInfoTitle": "{type} uchun qo'shimcha ma'lumotlar",
+    "specifications": "Spesifikatsiya",
+    "contractAmount": "Shartnoma summasi",
+    "totalNoQqs": "Jami (QQSsiz):",
+    "qqs": "QQS:",
+    "total": "Jami:",
+    "previewTitle": "Shartnoma ko'rinishi",
+    "previewDesc": "Ma'lumotlar kiritilgan holda avtomatik yangilanadi",
+    "form": {
+      "contractNumberLabel": "Shartnoma raqami",
+      "autoHint": "Bo'sh → avtomatik",
+      "dateLabel": "Sana *",
+      "cityLabel": "Shahar",
+      "cityPlaceholder": "Toshkent",
+      "amountLabel": "Summa (so'm)",
+      "amountPlaceholder": "0",
+      "contractAmountLabel": "Shartnoma summasi (so'm)"
+    }
+  },
+  "stepBar": {
+    "step1": "Tur tanlash",
+    "step2": "Ma'lumotlar",
+    "step3": "Spesifikatsiya"
+  },
+  "partyFields": {
+    "stir": "STIR",
+    "name": "Nomi",
+    "director": "Rahbar",
+    "bank": "Bank",
+    "bankAccount": "Hisob raqami",
+    "mfo": "MFO",
+    "address": "Manzil",
+    "phone": "Telefon"
+  },
+  "detail": {
+    "notFound": "Shartnoma topilmadi",
+    "loading": "Yuklanmoqda",
+    "send": "Yuborish",
+    "deleteContract": "Shartnomani o'chirish",
+    "deleteConfirm": "{number} shartnomani o'chirishni tasdiqlaysizmi?",
+    "signStatus": "Imzo holati",
+    "ourSignature": "Bizning imzo",
+    "cpSignature": "Kontragent imzosi",
+    "signedAtFormat": "{date}",
+    "contractView": "Shartnoma ko'rinishi",
+    "fullScreen": "🔍 To'liq ekranda ochish",
+    "specsCount": "Spesifikatsiyalar ({count})",
+    "viewSpec": "Ko'rish →",
+    "specName": "Spesifikatsiya",
+    "counterpartyTitle": "Kontragent",
+    "directorLabel": "Rahbar:",
+    "stirLabel": "STIR:",
+    "statusTitle": "Holat",
+    "createdAt": "Yaratilgan",
+    "updatedAt": "O'zgartirilgan",
+    "info": {
+      "number": "Raqam",
+      "date": "Sana",
+      "city": "Shahar",
+      "amount": "Summa",
+      "product": "Mahsulot/xizmat"
+    }
+  },
+  "preview": {
+    "back": "Orqaga",
+    "fullscreen": "To'liq ekran",
+    "fullscreenExit": "Chiqish",
+    "print": "Chop etish",
+    "pdf": "PDF yuklab olish",
+    "word": "Word yuklab olish",
+    "send": "Yuborish",
+    "notFound": "Shartnoma topilmadi"
+  },
+  "types": {
+    "OLDI_SOTDI": "Oldi-sotdi",
+    "XIZMAT": "Xizmat ko'rsatish",
+    "IJARA": "Ijara",
+    "PUDRAT": "Pudrat",
+    "QOSHIMCHA": "Qo'shimcha",
+    "MOLIYAVIY": "Moliyaviy yordam",
+    "DAVAL": "Daval",
+    "XALQARO": "Xalqaro",
+    "AGENTLIK": "Agentlik",
+    "TRANSPORT": "Transport",
+    "LIZING": "Lizing",
+    "BOSHQA": "Boshqa"
+  }
 }

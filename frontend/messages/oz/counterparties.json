@@ -1,0 +1,63 @@
+{
+  "title": "Контрагентлар",
+  "description": "Шартнома иккинчи томонлари",
+  "add": "Қўшиш",
+  "addNew": "Янги қўшиш",
+  "newCounterparty": "Янги контрагент",
+  "editCounterparty": "Контрагентни таҳрирлаш",
+  "noCounterparties": "Контрагентлар йўқ",
+  "noCounterpartiesDescription": "Биринчи контрагентни қўшинг",
+  "noOrgSelected": "Ташкилот танланмаган",
+  "selectOrgFirst": "Аввал ташкилот танланг",
+  "searchPlaceholder": "Ном ёки СТИР бўйича қидириш...",
+  "searchOrStirPlaceholder": "Ном ёки СТИР бўйича қидиринг...",
+  "checking": "Текширилмаган",
+  "active": "Фаол",
+  "inactive": "Нофаол",
+  "unknown": "Номаълум",
+  "form": {
+    "name": "Номи *",
+    "namePlaceholder": "Компания номи",
+    "director": "Раҳбар",
+    "directorPlaceholder": "Фамилия Исм Отасининг исми",
+    "directorShort": "Фамилия Исм",
+    "phone": "Телефон",
+    "phonePlaceholder": "+998 71 123 45 67",
+    "bankName": "Банк",
+    "bankPlaceholder": "Халқ банки",
+    "mfo": "МФО",
+    "mfoPlaceholder": "00014",
+    "bankAccount": "Ҳисоб рақами",
+    "bankAccountPlaceholder": "20208000000000000000",
+    "address": "Манзил",
+    "addressPlaceholder": "Шаҳар, туман, кўча",
+    "stir": "СТИР",
+    "stirPlaceholder": "123456789",
+    "stirHint": "9 та рақам"
+  },
+  "table": {
+    "name": "Номи",
+    "stir": "СТИР",
+    "director": "Раҳбар",
+    "bank": "Банк",
+    "status": "Ҳолат"
+  },
+  "dropdown": {
+    "newAdd": "Янги қўшиш →",
+    "newAddCp": "+ Янги контрагент қўшиш",
+    "notFound": "Топилмади.",
+    "nameRequired": "Номи киритилиши шарт",
+    "stirInvalid": "СТИР 9 та рақам бўлиши керак",
+    "stirNotFound": "СТИР топилмади",
+    "stirNotFoundManual": "СТИР бўйича топилмади — қўлда киритинг",
+    "found": "Топилди",
+    "filled": "Маълумотлар тўлдирилди"
+  },
+  "toast": {
+    "added": "Контрагент қўшилди",
+    "updated": "Контрагент янгиланди",
+    "noExportData": "Экспорт учун маълумот йўқ",
+    "excelDownloaded": "Excel юкланди",
+    "error": "Хатолик"
+  }
+}

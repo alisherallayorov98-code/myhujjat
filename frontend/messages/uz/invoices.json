@@ -1,0 +1,41 @@
+{
+  "title": "Fakturalar",
+  "addManual": "Qo'lda qo'shish",
+  "addInvoice": "Faktura qo'shish",
+  "noInvoices": "Bu shartnoma uchun faktura yo'q",
+  "syncHint": "Didox'dan avto-sinxronlash yoki qo'lda qo'shing",
+  "fromUs": "Bizdan",
+  "deleteConfirm": "Faktura o'chirilsinmi?",
+  "contractAmount": "Shartnoma summasi:",
+  "used": "Ishlatildi:",
+  "remaining": "Qoldi:",
+  "exceeded": "oshib ketdi",
+  "alert": {
+    "WARNING": "Ogohlantirish",
+    "CRITICAL": "Kritik",
+    "EXCEEDED": "Oshib ketdi",
+    "CRITICAL_OVERAGE": "Sezilarli",
+    "exceededTitle": "Shartnoma summasi {amount} oshib ketdi",
+    "exceededTitleNoAmount": "Shartnoma summasi oshib ketdi",
+    "criticalTitle": "Shartnoma summasi 95%dan oshdi — {remaining} qoldi",
+    "warningTitle": "Shartnoma summasi 80%dan oshdi",
+    "solution": "Yechim:",
+    "solutionDesc": "yarating va kontragentga yuboring",
+    "additionalContract": "Qo'shimcha shartnoma"
+  },
+  "form": {
+    "number": "Faktura raqami",
+    "numberPlaceholder": "EHF-12345",
+    "date": "Sana *",
+    "direction": "Yo'nalish",
+    "incoming": "Bizga (xaridor)",
+    "outgoing": "Bizdan (sotuvchi)",
+    "amount": "Summa (so'm) *",
+    "vatAmount": "QQS (so'm)"
+  },
+  "toast": {
+    "deleted": "Faktura o'chirildi",
+    "added": "Faktura qo'shildi",
+    "error": "Xatolik"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "title": "Haqida — MyHujjat.uz",
+    "description": "MyHujjat.uz haqida — O'zbekiston uchun professional hujjat platformasi."
+  },
+  "title": "MyHujjat.uz haqida",
+  "subtitle": "O'zbekiston bizneslar uchun yaratilgan professional hujjat platformasi",
+  "intro": "<strong>MyHujjat.uz</strong> — O'zbekiston qonunchiligiga mos shartnomalar, HR hujjatlar, buxgalter va yuridik hujjatlarni tez va oson yaratish uchun mo'ljallangan SaaS platforma.",
+  "values": [
+    { "icon": "🎯", "title": "Missiya", "text": "O'zbekiston bizneslarini qog'ozbozlikdan xalos qilish va vaqtini tejash." },
+    { "icon": "👁", "title": "Maqsad", "text": "Har bir kichik biznes ham professional hujjatlarga ega bo'lishi kerak." },
+    { "icon": "🛡️", "title": "Xavfsizlik", "text": "Ma'lumotlar O'zbekistonning o'z serverlarida shifrlangan holda saqlanadi." },
+    { "icon": "🤝", "title": "Qo'llab-quvvatlash", "text": "Ish vaqtida texnik yordam va konsultatsiya xizmati mavjud." }
+  ],
+  "contact": {
+    "title": "Aloqa",
+    "emailLabel": "Email:",
+    "addressLabel": "Manzil:",
+    "address": "Toshkent sh., O'zbekiston"
+  },
+  "ctaButton": "Bepul boshlash →"
+}

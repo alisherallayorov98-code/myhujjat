@@ -7,6 +7,7 @@ import {
   Plus, ArrowRight, Wallet,
 } from 'lucide-react'
 import { useQuery }    from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { PageHeader }  from '@/components/layout/PageHeader'
 import { Card }        from '@/components/ui/Card'
 import { Button }      from '@/components/ui/Button'
@@ -19,37 +20,6 @@ import { UpcomingDeadlines }  from '@/components/Dashboard/UpcomingDeadlines'
 import { CONTRACT_TYPE_CONFIG } from '@/lib/contractTemplates'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { cn }          from '@/lib/cn'
-
-const QUICK_ACTIONS = [
-  {
-    icon:  FileText,
-    label: 'Yangi shartnoma',
-    desc:  'Tez yarating',
-    href:  '/dashboard/shartnomalar/yangi',
-    color: 'bg-[#DBEAFE] text-[#2563EB]',
-  },
-  {
-    icon:  ClipboardList,
-    label: 'Spesifikatsiya',
-    desc:  'QQS bilan',
-    href:  '/dashboard/spesifikatsiyalar/yangi',
-    color: 'bg-[#DCFCE7] text-[#16A34A]',
-  },
-  {
-    icon:  Calculator,
-    label: 'Faktura',
-    desc:  'Hisob-faktura',
-    href:  '/dashboard/buxgalter/faktura',
-    color: 'bg-[#FEF3C7] text-[#D97706]',
-  },
-  {
-    icon:  Users,
-    label: 'Buyruq',
-    desc:  'HR hujjati',
-    href:  '/dashboard/kotib/buyruq',
-    color: 'bg-[#EDE9FE] text-[#7C3AED]',
-  },
-]
 
 interface ContractsStats {
   total: number
@@ -67,13 +37,6 @@ interface ContractRow {
   status:         string
   counterparty?:  { name: string }
   createdAt:      string
-}
-
-const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
-  DRAFT:     { label: 'Qoralama', cls: 'bg-[#F1F5F9] text-[#475569]' },
-  ACTIVE:    { label: 'Faol',     cls: 'bg-[#DBEAFE] text-[#1D4ED8]' },
-  COMPLETED: { label: 'Tugagan',  cls: 'bg-[#DCFCE7] text-[#16A34A]' },
-  CANCELLED: { label: 'Bekor',    cls: 'bg-[#FEE2E2] text-[#DC2626]' },
 }
 
 function StatCard({ icon: Icon, label, value, color, bg, hint }: {
@@ -100,6 +63,46 @@ function StatCard({ icon: Icon, label, value, color, bg, hint }: {
 
 export default function DashboardPage() {
   const { user, currentOrg, isPro } = useAuth()
+  const t   = useTranslations('dashboard')
+  const tc  = useTranslations('contracts')
+
+  const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+    DRAFT:     { label: t('status.draft'),     cls: 'bg-[#F1F5F9] text-[#475569]' },
+    ACTIVE:    { label: t('status.active'),    cls: 'bg-[#DBEAFE] text-[#1D4ED8]' },
+    COMPLETED: { label: t('status.completed'), cls: 'bg-[#DCFCE7] text-[#16A34A]' },
+    CANCELLED: { label: t('status.cancelled'), cls: 'bg-[#FEE2E2] text-[#DC2626]' },
+  }
+
+  const QUICK_ACTIONS = [
+    {
+      icon:  FileText,
+      label: t('quickAction.newContract'),
+      desc:  t('quickAction.newContractDesc'),
+      href:  '/dashboard/shartnomalar/yangi',
+      color: 'bg-[#DBEAFE] text-[#2563EB]',
+    },
+    {
+      icon:  ClipboardList,
+      label: t('quickAction.specification'),
+      desc:  t('quickAction.specificationDesc'),
+      href:  '/dashboard/spesifikatsiyalar/yangi',
+      color: 'bg-[#DCFCE7] text-[#16A34A]',
+    },
+    {
+      icon:  Calculator,
+      label: t('quickAction.invoice'),
+      desc:  t('quickAction.invoiceDesc'),
+      href:  '/dashboard/buxgalter/faktura',
+      color: 'bg-[#FEF3C7] text-[#D97706]',
+    },
+    {
+      icon:  Users,
+      label: t('quickAction.order'),
+      desc:  t('quickAction.orderDesc'),
+      href:  '/dashboard/kotib/buyruq',
+      color: 'bg-[#EDE9FE] text-[#7C3AED]',
+    },
+  ]
 
   // ─── Statistika ─────────────────────────────────────────
   const { data: contractsStats } = useQuery<ContractsStats>({
@@ -141,9 +144,9 @@ export default function DashboardPage() {
 
   const hour = new Date().getHours()
   const greeting =
-    hour < 6  ? 'Xayrli tun'  :
-    hour < 12 ? 'Xayrli tong' :
-    hour < 17 ? 'Xayrli kun'  : 'Xayrli kech'
+    hour < 6  ? t('greetings.night')   :
+    hour < 12 ? t('greetings.morning') :
+    hour < 17 ? t('greetings.day')     : t('greetings.evening')
 
   const contractsLeft = isPro
     ? null
@@ -152,10 +155,10 @@ export default function DashboardPage() {
   return (
     <div>
       <PageHeader
-        title={`${greeting}, ${user?.firstName || 'Foydalanuvchi'}!`}
+        title={`${greeting}, ${user?.firstName || t('user')}!`}
         description={currentOrg
-          ? `${currentOrg.name} — hujjatlaringizni boshqaring`
-          : "Boshlash uchun tashkilot qo'shing"
+          ? `${currentOrg.name} — ${t('orgManageDesc')}`
+          : t('addOrgPrompt')
         }
       />
 
@@ -168,16 +171,16 @@ export default function DashboardPage() {
           <div>
             <p className="text-sm font-semibold text-[#92400E]">
               {contractsLeft === 0
-                ? 'Bu oy shartnoma limiti tugadi'
-                : `Faqat ${contractsLeft} ta shartnoma qoldi`
+                ? t('limitWarning.limitReached')
+                : t('limitWarning.fewLeft', { count: contractsLeft })
               }
             </p>
             <p className="text-xs text-[#B45309] mt-0.5">
-              Cheksiz shartnoma uchun Standart yoki Pro rejaga o'ting
+              {t('limitWarning.upgradeText')}
             </p>
           </div>
           <Link href="/dashboard/sozlamalar/obuna">
-            <Button size="sm" variant="warning" className="shrink-0">Upgrade</Button>
+            <Button size="sm" variant="warning" className="shrink-0">{t('limitWarning.upgrade')}</Button>
           </Link>
         </div>
       )}
@@ -188,12 +191,12 @@ export default function DashboardPage() {
           <div className="w-12 h-12 rounded-xl bg-[#F1F5F9] flex items-center justify-center mx-auto mb-3">
             <Plus size={20} className="text-[#94A3B8]" />
           </div>
-          <h3 className="font-display font-bold text-[#0F172A] mb-1">Tashkilot qo'shing</h3>
+          <h3 className="font-display font-bold text-[#0F172A] mb-1">{t('addOrgCard.title')}</h3>
           <p className="text-sm text-[#94A3B8] mb-4">
-            Hujjat yaratish uchun avval tashkilot ma'lumotlarini kiriting
+            {t('addOrgCard.description')}
           </p>
           <Link href="/dashboard/tashkilotlar">
-            <Button leftIcon={<Plus size={14} />}>Tashkilot qo'shish</Button>
+            <Button leftIcon={<Plus size={14} />}>{t('addOrgCard.button')}</Button>
           </Link>
         </div>
       )}
@@ -203,35 +206,35 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-3 mb-8">
           <StatCard
             icon={FileText}
-            label="Jami shartnomalar"
+            label={t('stat.totalContracts')}
             value={contractsStats?.total ?? 0}
             color="text-[#2563EB]"
             bg="bg-[#DBEAFE]"
-            hint={contractsStats?.active ? `${contractsStats.active} ta faol` : 'Hali yo\'q'}
+            hint={contractsStats?.active ? t('stat.activeCount', { count: contractsStats.active }) : t('stat.noneYet')}
           />
           <StatCard
             icon={Users}
-            label="Kontragentlar"
+            label={t('stat.counterparties')}
             value={cps.length}
             color="text-[#7C3AED]"
             bg="bg-[#EDE9FE]"
-            hint="Hamkorlar"
+            hint={t('stat.partners')}
           />
           <StatCard
             icon={Users}
-            label="Xodimlar"
+            label={t('stat.employees')}
             value={empStats?.total ?? 0}
             color="text-[#0891B2]"
             bg="bg-[#CFFAFE]"
-            hint="Faol xodimlar"
+            hint={t('stat.activeEmployees')}
           />
           <StatCard
             icon={Wallet}
-            label="Bu oy"
+            label={t('stat.thisMonth')}
             value={monthAmount > 0 ? formatCurrency(monthAmount) : "0 so'm"}
             color="text-[#16A34A]"
             bg="bg-[#DCFCE7]"
-            hint="Shartnoma summasi"
+            hint={t('stat.contractAmount')}
           />
         </div>
       )}
@@ -255,7 +258,7 @@ export default function DashboardPage() {
 
       {/* Tezkor amallar */}
       <div className="mb-8">
-        <h2 className="font-display font-bold text-[#0F172A] text-base mb-3">Tez yaratish</h2>
+        <h2 className="font-display font-bold text-[#0F172A] text-base mb-3">{t('quickCreate')}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
           {QUICK_ACTIONS.map(action => (
             <Link key={action.label} href={action.href}>
@@ -281,18 +284,18 @@ export default function DashboardPage() {
       {/* So'nggi shartnomalar — to'liq kenglikda */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-bold text-[#0F172A] text-base">So'nggi shartnomalar</h2>
+          <h2 className="font-display font-bold text-[#0F172A] text-base">{t('recent.title')}</h2>
           <Link href="/dashboard/shartnomalar" className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
-            Hammasi <ArrowRight size={12} />
+            {t('recent.all')} <ArrowRight size={12} />
           </Link>
         </div>
         <Card padding="none" className="overflow-hidden">
           {recent.length === 0 ? (
             <div className="p-10 text-center">
               <FileText size={32} className="mx-auto text-[#CBD5E1] mb-2" />
-              <p className="text-sm text-[#94A3B8] mb-3">Hali shartnoma yo'q</p>
+              <p className="text-sm text-[#94A3B8] mb-3">{t('recent.noContracts')}</p>
               <Link href="/dashboard/shartnomalar/yangi">
-                <Button size="sm" leftIcon={<Plus size={13} />}>Birinchi shartnoma</Button>
+                <Button size="sm" leftIcon={<Plus size={13} />}>{t('recent.firstContract')}</Button>
               </Link>
             </div>
           ) : (
@@ -300,6 +303,9 @@ export default function DashboardPage() {
               {recent.map(c => {
                 const cfg = (CONTRACT_TYPE_CONFIG as any)[c.contractType]
                 const st  = STATUS_LABEL[c.status] ?? STATUS_LABEL.DRAFT
+                const typeName = (() => {
+                  try { return tc(`types.${c.contractType}` as any) } catch { return cfg?.name ?? c.contractType }
+                })()
                 return (
                   <Link key={c.id} href={`/dashboard/shartnomalar/${c.id}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-[#F8FAFC] transition group">
@@ -312,7 +318,7 @@ export default function DashboardPage() {
                         <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-full', st.cls)}>{st.label}</span>
                       </div>
                       <p className="text-xs text-[#94A3B8] truncate mt-0.5">
-                        {c.counterparty?.name || 'Kontragent yo\'q'} · {formatDate(c.contractDate, 'short')}
+                        {c.counterparty?.name || t('recent.noCp')} · {formatDate(c.contractDate, 'short')}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
@@ -335,14 +341,13 @@ export default function DashboardPage() {
               <Sparkles size={24} className="text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-display font-bold text-lg mb-1">AI Yordamchi</h3>
+              <h3 className="font-display font-bold text-lg mb-1">{t('ai.title')}</h3>
               <p className="text-blue-100 text-sm mb-4">
-                Hujjat mazmunini AI yordamida avtomatik to'ldiring.
-                Faqat asosiy ma'lumotlarni kiriting, qolganini AI qiladi.
+                {t('ai.description')}
               </p>
               <Link href="/dashboard/seif/ai">
                 <Button variant="secondary" size="sm" rightIcon={<ArrowRight size={14} />}>
-                  AI bilan yaratish
+                  {t('ai.createWithAi')}
                 </Button>
               </Link>
             </div>

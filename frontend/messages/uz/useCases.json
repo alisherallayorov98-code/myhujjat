@@ -1,0 +1,290 @@
+{
+  "ui": {
+    "problemsTag": "MUAMMOLAR",
+    "solutionsTag": "YECHIM",
+    "solutionsTitle": "MyHujjat.uz qanday yordam beradi",
+    "problemsTitle": "duch keladigan vaziyatlar",
+    "featuresTitle": "Asosiy imkoniyatlar",
+    "documentsTitle": "Tayyor hujjatlar",
+    "faqTitle": "Tez-tez beriladigan savollar",
+    "ctaSecondary": "Narxlarni ko'rish",
+    "finalCtaTitle": "14 kun bepul sinab ko'ring",
+    "finalCtaSubtitle": "Karta kerak emas. Istalgan paytda bekor qilishingiz mumkin.",
+    "finalCtaButton": "Bepul boshlash"
+  },
+  "buxgalter": {
+    "metadata": {
+      "title": "Buxgalterlar uchun — MyHujjat.uz",
+      "description": "Faktura, akt sverki, hisob-faktura va barcha buxgalterlik hujjatlarini AI yordamida 1 daqiqada yarating. Didox bilan integratsiya, Excel eksport."
+    },
+    "title": "Buxgalterlar uchun",
+    "subtitle": "Buxgalterlar",
+    "hero": {
+      "headline": "Buxgalterlar uchun professional hujjat platformasi",
+      "description": "Faktura, akt sverki, shartnomalar va hisobotlarni AI yordamida bir daqiqada yarating. Didox bilan integratsiya, Excel/PDF eksport, qonunchilikka mos shablonlar.",
+      "cta": "14 kun bepul sinab ko'rish"
+    },
+    "stats": [
+      { "value": "5,000+", "label": "Buxgalter foydalanadi" },
+      { "value": "120K+", "label": "Hujjat yaratildi" },
+      { "value": "< 1 daq", "label": "Hujjat yaratish vaqti" },
+      { "value": "99.9%", "label": "Server uptime" }
+    ],
+    "problems": [
+      {
+        "title": "Excel va Word'da har safar qayta yozish",
+        "description": "Har bir mijoz uchun shablonni qo'lda to'ldirish, raqamlarni xatosiz hisoblash zerikarli va vaqt oluvchi."
+      },
+      {
+        "title": "Didox / Roaming bilan ishlash murakkab",
+        "description": "Oylik 100+ faktura — har birini qo'lda kiritish, holatini kuzatish, eslatish."
+      },
+      {
+        "title": "Qonunchilik o'zgarsa hammasi notog'ri",
+        "description": "STIR formati, QQS stavkasi, MFO — yangiliklarni kuzatib borish va shablonlarga moslash kerak."
+      }
+    ],
+    "solutions": [
+      {
+        "icon": "doc",
+        "title": "Avtomatik shablon to'ldirish",
+        "description": "Mijoz va tashkilot ma'lumotlarini bir marta kiriting — tizim har bir hujjatga avtomatik joylashtiradi."
+      },
+      {
+        "icon": "clock",
+        "title": "Didox API integratsiyasi",
+        "description": "Faktura olingan zahoti tizimga tushadi. Holatlar avtomatik kuzatiladi, eslatmalar kelib turadi."
+      },
+      {
+        "icon": "shield",
+        "title": "Qonunchilikka mos",
+        "description": "Barcha shablonlar O'zbekiston soliq qonunchiligiga ko'ra yangilanib turadi. Sizga faqat to'ldirish kifoya."
+      }
+    ],
+    "features": [
+      "Faktura yaratish (incoming/outgoing) — bir marta bosish",
+      "Akt sverki — kontragent bilan avtomatik tahlil",
+      "Didox API ulanishi — barcha fakturalar avtomatik sinxron",
+      "QQS hisoblash — to'g'ri stavka avtomatik tanlanadi",
+      "Excel eksport — 1C / Hisobchi formatlari",
+      "STIR / MFO tekshirish — soliq idora bilan onlayn tekshirish",
+      "Ko'p tashkilot bitta hisob — bir nechta firma bilan ishlash",
+      "Telegram bot — fakturalar haqida bildirishnomalar"
+    ],
+    "documents": [
+      "Hisob-faktura (oddiy va elektron)",
+      "Akt sverki (uchrashma)",
+      "Shartnoma (xizmat, oldi-sotdi, ijara)",
+      "Tovar yo'l xati (TTN)",
+      "Bajarilgan ish akti",
+      "To'lov ko'rsatmasi",
+      "Soliq hisoboti shablonlari"
+    ],
+    "faq": [
+      {
+        "q": "Didox bilan qanday ulanaman?",
+        "a": "Sozlamalar > Didox bo'limidan API kalitingiz va foydalanuvchi kalitingizni kiriting. Tizim avtomatik ulanib, fakturalaringiz har 5 daqiqada sinxronlanadi."
+      },
+      {
+        "q": "Hisob-faktura formatini o'zgartirish mumkinmi?",
+        "a": "Ha, tashkilot logotipini, rangini va imzo joyini sozlamalardan o'zgartirishingiz mumkin. PRO tarifda to'liq shablon tahriri mavjud."
+      },
+      {
+        "q": "Excel eksport qaysi formatlarda?",
+        "a": "1C, Hisobchi, oddiy XLSX — barchasi qo'llab-quvvatlanadi. Eksport bir bosishda amalga oshadi."
+      },
+      {
+        "q": "Bir nechta firma bilan ishlay olamanmi?",
+        "a": "Ha, bitta hisobdan cheksiz tashkilot qo'shishingiz mumkin. Har bir tashkilot uchun alohida fakturalar va shartnomalar saqlanadi."
+      },
+      {
+        "q": "Bepul tarifda nima bor?",
+        "a": "Bepul tarifda 5 ta hujjat oyiga, bitta tashkilot va asosiy shablonlar bor. To'liq imkoniyatlar uchun Standart yoki Pro tarifga o'ting."
+      }
+    ]
+  },
+  "yurist": {
+    "metadata": {
+      "title": "Yuristlar uchun — MyHujjat.uz",
+      "description": "Shartnomalar, da'vo arizalari, yuridik xulosalar va boshqa hujjatlarni AI yordamida bir daqiqada yarating. Magic-link e-imzo, audit log, xavfsiz arxiv."
+    },
+    "title": "Yuristlar uchun",
+    "subtitle": "Yuristlar va huquqshunoslar",
+    "hero": {
+      "headline": "Yuristlar uchun professional hujjat avtomatlashtirish",
+      "description": "Shartnomalar, da'vo arizalari, yuridik xulosalar va kelishuvlar — barchasini AI yordamida bir daqiqada yarating. Audit log, magic-link imzo, xavfsiz arxiv.",
+      "cta": "14 kun bepul sinab ko'rish"
+    },
+    "stats": [
+      { "value": "12 tur", "label": "Shartnoma turi" },
+      { "value": "50+", "label": "Yuridik shablon" },
+      { "value": "< 30s", "label": "Imzo qo'yish vaqti" },
+      { "value": "AES-256", "label": "Shifrlash" }
+    ],
+    "problems": [
+      {
+        "title": "Har bir shartnoma — kun yarim ish",
+        "description": "Standard shartnomani har safar nol'dan yozish, kontragent ma'lumotlarini topish, raqamlarni hisoblash."
+      },
+      {
+        "title": "Imzo olish — uzoq sayohat",
+        "description": "Mijoz boshqa shaharda. Hujjatni jo'natish, qaytib kelishini kutish, skanerlash, qo'shish — 3-5 kun yo'qoladi."
+      },
+      {
+        "title": "Eski versiyalar yo'qoladi",
+        "description": "Word fayli o'zgartirilgan, lekin qaysi versiya tasdiqlangan? Kim qachon o'zgartirdi? Audit yo'q."
+      }
+    ],
+    "solutions": [
+      {
+        "icon": "doc",
+        "title": "AI shablon generator",
+        "description": "Mijoz va shartnoma turini tanlang — AI to'liq matnni siz uchun yaratadi. Faqat tahrir qilib tasdiqlaysiz."
+      },
+      {
+        "icon": "clock",
+        "title": "Magic-link e-imzo",
+        "description": "Hujjatni link orqali yuboring. Mijoz brauzerda imzolaydi — 30 soniya ichida tasdiq tayyor."
+      },
+      {
+        "icon": "shield",
+        "title": "To'liq audit log",
+        "description": "Har bir o'zgarish, har bir imzo, har bir kirish — vaqtga muhrlangan ko'rinishda saqlanadi."
+      }
+    ],
+    "features": [
+      "12 turdagi shartnoma shabloni — Oldi-sotdi, Xizmat, Ijara, Pudrat va boshqalar",
+      "AI yordamchi — shartnomani so'z bilan tasvirlasangiz yozib beradi",
+      "Magic-link e-imzo — emaildan bosib, brauzerda imzo qo'yish",
+      "Audit log — har bir amal vaqt va IP bilan saqlanadi",
+      "Versiyalar tarixi — eski ko'rinishlarga qaytish",
+      "PDF/A export — sud uchun o'zgarmas format",
+      "Kontragent bazasi — bir marta kiriting, qayta foydalaning",
+      "Maxfiylik darajalari — har bir hujjatga kim kira oladi"
+    ],
+    "documents": [
+      "Oldi-sotdi shartnomasi",
+      "Xizmat ko'rsatish shartnomasi",
+      "Ijara shartnomasi",
+      "Pudrat shartnomasi",
+      "Qo'shma shartnoma",
+      "Lizing shartnomasi",
+      "Da'vo arizasi",
+      "Kelishuv bayonnomasi"
+    ],
+    "faq": [
+      {
+        "q": "Magic-link imzo qonuniy kuchga egami?",
+        "a": "Ha, hujjat bilan birgalikda imzolovchining IP, vaqt va brauzer ma'lumotlari muhrlanadi. Bu O'zbekiston Fuqarolik Kodeksi 366-moddasi bo'yicha tomonlar kelishuvi bilan kuchga ega."
+      },
+      {
+        "q": "Audit log qancha vaqt saqlanadi?",
+        "a": "Bepul tarifda 30 kun, Standart 6 oy, Pro tarifda cheksiz. Har bir yozuv shifrlangan va o'zgartirib bo'lmaydigan tarzda saqlanadi."
+      },
+      {
+        "q": "AI tomonidan yaratilgan shartnomani ishonish mumkinmi?",
+        "a": "AI faqat shablon yaratadi — siz har doim ko'rib chiqib, tasdiqlashingiz kerak. Tizim aniq O'zbekiston qonunchiligiga mos shablonlardan foydalanadi, lekin har bir holat individualdir."
+      },
+      {
+        "q": "Mijozlarim sizda ro'yxatdan o'tishi kerakmi?",
+        "a": "Yo'q, magic-link orqali imzolash uchun mijoz ro'yxatdan o'tmaydi. Ular emaildan link bosib, ismi va imzosini qo'yish kifoya."
+      },
+      {
+        "q": "Hujjatlarni qanday himoya qilasizlar?",
+        "a": "Barcha hujjatlar AES-256-GCM bilan shifrlangan, ma'lumotlar O'zbekistondagi serverlarda saqlanadi, doimiy backup. ISO 27001 mosligida tizim qurilgan."
+      }
+    ]
+  },
+  "kadrlar": {
+    "metadata": {
+      "title": "Kadrlar bo'limi uchun — MyHujjat.uz",
+      "description": "Buyruqlar, mehnat shartnomalari, ta'tillar, ishga qabul va boshqa HR hujjatlarini bir daqiqada yarating. Tashkilot va xodim ma'lumotlarini bir marta kiriting."
+    },
+    "title": "Kadrlar bo'limi uchun",
+    "subtitle": "Kadrlar va HR mutaxassislari",
+    "hero": {
+      "headline": "HR hujjatlarini avtomatlashtirilgan tarzda yarating",
+      "description": "Buyruqlar, mehnat shartnomalari, ta'tillar, ishga qabul va bo'shatish hujjatlari — barchasini bitta tizimda. Xodim ma'lumotlarini bir marta kiriting, har bir hujjatga avtomatik joylashadi.",
+      "cta": "14 kun bepul sinab ko'rish"
+    },
+    "stats": [
+      { "value": "20+", "label": "HR shabloni" },
+      { "value": "< 1 daq", "label": "Buyruq yaratish" },
+      { "value": "PDF/Word", "label": "Eksport formati" },
+      { "value": "∞", "label": "Xodimlar soni" }
+    ],
+    "problems": [
+      {
+        "title": "Har bir buyruq — qayta yozish",
+        "description": "Ta'til buyrug'i, ishga qabul, bo'shatish — Word'da har safar shablonni qayta to'ldirish."
+      },
+      {
+        "title": "Xodim ma'lumotlari tarqoq",
+        "description": "JSHSHIR, lavozim, oylik maosh — har bir buyruq uchun bazadan qidirish va kiritish kerak."
+      },
+      {
+        "title": "Imzo va arxiv chalkash",
+        "description": "Imzolangan buyruqlar Word fayli sifatida turli papkalar orasida yo'qoladi."
+      }
+    ],
+    "solutions": [
+      {
+        "icon": "doc",
+        "title": "Tayyor HR shablonlar",
+        "description": "20+ ko'p ishlatiladigan buyruq va shartnomalar shablonlari — qonunchilikka mos."
+      },
+      {
+        "icon": "clock",
+        "title": "Xodimlar bazasi",
+        "description": "Xodim ma'lumotlari bir marta kiritiladi — har bir buyruqqa avtomatik joylashtiriladi."
+      },
+      {
+        "icon": "shield",
+        "title": "Markazlashgan arxiv",
+        "description": "Barcha imzolangan hujjatlar bir joyda. Xodim, sana yoki turi bo'yicha tezda topish."
+      }
+    ],
+    "features": [
+      "Ishga qabul buyrug'i — bitta bosishda",
+      "Mehnat shartnomasi — to'liq qonunchilik talablariga mos",
+      "Ta'til buyrug'i — kun va sana avtomatik hisoblanadi",
+      "Bo'shatish buyrug'i — sabablar va ko'rsatkichlar bilan",
+      "Komandirovka buyrug'i va hisobot",
+      "Mukofot va jarima buyruqlari",
+      "Xodimlar reestri — to'liq ma'lumotlar",
+      "Kadrlar bo'limi statistikasi — kim, qachon, qancha"
+    ],
+    "documents": [
+      "Ishga qabul qilish to'g'risida buyruq",
+      "Mehnat shartnomasi",
+      "Mehnat ta'tili buyrug'i",
+      "Ishdan bo'shatish buyrug'i",
+      "Kasallik varaqasi to'g'risida buyruq",
+      "Komandirovka buyrug'i",
+      "Mukofot/jarima buyrug'i",
+      "Lavozimga o'tkazish buyrug'i"
+    ],
+    "faq": [
+      {
+        "q": "Xodim ma'lumotlarini qayerga saqlash kerak?",
+        "a": "Kadrlar > Xodimlar bo'limidan har bir xodim uchun JSHSHIR, lavozim, oylik maosh va boshqa ma'lumotlarni kiriting. Bu ma'lumotlar har bir buyruqqa avtomatik joylashtiriladi."
+      },
+      {
+        "q": "Buyruqni Word formatida olish mumkinmi?",
+        "a": "Ha, har bir hujjatni PDF yoki Word formatida yuklab olish mumkin. Imzo va muhr joylashuvini sozlamalardan o'zgartirishingiz mumkin."
+      },
+      {
+        "q": "Buyruq raqami avtomatik beriladimi?",
+        "a": "Ha, har bir buyruq turi uchun raqamlash avtomatik. Siz boshlang'ich raqamni belgilashingiz mumkin (masalan, 2026 yil 1-yanvardan boshlash)."
+      },
+      {
+        "q": "Qancha xodim qo'shishim mumkin?",
+        "a": "Bepul tarifda 10 ta, Standart 100 ta, Pro tarifda cheksiz. Xodimlar soni ko'p bo'lsa Pro tavsiya etiladi."
+      },
+      {
+        "q": "Mehnat kodeksiga o'zgarishlar yetkaziladi?",
+        "a": "Ha, qonunchilik o'zgarsa shablonlar 24 soat ichida yangilanadi. Eski shablonlar arxivda saqlanadi."
+      }
+    ]
+  }
+}

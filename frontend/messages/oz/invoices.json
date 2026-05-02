@@ -1,0 +1,41 @@
+{
+  "title": "Фактуралар",
+  "addManual": "Қўлда қўшиш",
+  "addInvoice": "Фактура қўшиш",
+  "noInvoices": "Бу шартнома учун фактура йўқ",
+  "syncHint": "Didox'дан авто-синхронлаш ёки қўлда қўшинг",
+  "fromUs": "Биздан",
+  "deleteConfirm": "Фактура ўчирилсинми?",
+  "contractAmount": "Шартнома суммаси:",
+  "used": "Ишлатилди:",
+  "remaining": "Қолди:",
+  "exceeded": "ошиб кетди",
+  "alert": {
+    "WARNING": "Огоҳлантириш",
+    "CRITICAL": "Критик",
+    "EXCEEDED": "Ошиб кетди",
+    "CRITICAL_OVERAGE": "Сезиларли",
+    "exceededTitle": "Шартнома суммаси {amount} ошиб кетди",
+    "exceededTitleNoAmount": "Шартнома суммаси ошиб кетди",
+    "criticalTitle": "Шартнома суммаси 95%дан ошди — {remaining} қолди",
+    "warningTitle": "Шартнома суммаси 80%дан ошди",
+    "solution": "Ечим:",
+    "solutionDesc": "яратинг ва контрагентга юборинг",
+    "additionalContract": "Қўшимча шартнома"
+  },
+  "form": {
+    "number": "Фактура рақами",
+    "numberPlaceholder": "EHF-12345",
+    "date": "Сана *",
+    "direction": "Йўналиш",
+    "incoming": "Бизга (харидор)",
+    "outgoing": "Биздан (сотувчи)",
+    "amount": "Сумма (сўм) *",
+    "vatAmount": "ҚҚС (сўм)"
+  },
+  "toast": {
+    "deleted": "Фактура ўчирилди",
+    "added": "Фактура қўшилди",
+    "error": "Хатолик"
+  }
+}

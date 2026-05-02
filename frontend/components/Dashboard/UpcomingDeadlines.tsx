@@ -5,6 +5,7 @@ import {
   Calendar, Clock, AlertCircle, ArrowRight, FileText, CreditCard,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { useAuth }  from '@/hooks/useAuth'
 import api          from '@/lib/api'
 import { Card }     from '@/components/ui/Card'
@@ -28,6 +29,7 @@ const ICON_MAP = {
 
 export function UpcomingDeadlines() {
   const { user, currentOrg } = useAuth()
+  const t = useTranslations('dashboard')
 
   // Yaqinlashayotgan share-link tugashi (per-contract o'tkazib bo'lmaydi — umumiy ko'rsatamiz)
   const { data: shareLinks = [] } = useQuery<any[]>({
@@ -51,7 +53,7 @@ export function UpcomingDeadlines() {
     return {
       id:       'subscription',
       type:     'subscription',
-      title:    `${sub.plan} obuna`,
+      title:    t('deadlines.subscription', { plan: sub.plan }),
       date:     expiry,
       daysLeft: days,
       link:     '/dashboard/sozlamalar/obuna',
@@ -69,7 +71,7 @@ export function UpcomingDeadlines() {
       return {
         id:       l.id,
         type:     'share-link' as const,
-        title:    `Imzolanmagan: ${l.recipientName || 'Kontragent'}`,
+        title:    t('deadlines.unsigned', { name: l.recipientName || t('deadlines.counterparty') }),
         date:     expiry,
         daysLeft: days,
         link:     `/dashboard/shartnomalar/${l.contractId}`,
@@ -86,11 +88,11 @@ export function UpcomingDeadlines() {
   if (items.length === 0) {
     return (
       <Card padding="none" className="overflow-hidden">
-        <Header />
+        <Header title={t('deadlines.title')} />
         <div className="p-8 text-center">
           <Calendar size={28} className="mx-auto text-[#CBD5E1] mb-2" />
-          <p className="text-sm text-[#94A3B8]">Yaqinlashayotgan muddat yo'q</p>
-          <p className="text-xs text-[#CBD5E1] mt-1">Hammasi rejada 👌</p>
+          <p className="text-sm text-[#94A3B8]">{t('deadlines.empty')}</p>
+          <p className="text-xs text-[#CBD5E1] mt-1">{t('deadlines.allOnTrack')}</p>
         </div>
       </Card>
     )
@@ -98,7 +100,7 @@ export function UpcomingDeadlines() {
 
   return (
     <Card padding="none" className="overflow-hidden">
-      <Header />
+      <Header title={t('deadlines.title')} />
       <div className="divide-y divide-[#F1F5F9]">
         {items.map(item => <DeadlineRow key={item.id} item={item} />)}
       </div>
@@ -106,16 +108,17 @@ export function UpcomingDeadlines() {
   )
 }
 
-function Header() {
+function Header({ title }: { title: string }) {
   return (
     <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center gap-2">
       <Calendar size={14} className="text-[#94A3B8]" />
-      <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Yaqinlashayotgan muddatlar</p>
+      <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">{title}</p>
     </div>
   )
 }
 
 function DeadlineRow({ item }: { item: DeadlineItem }) {
+  const t     = useTranslations('dashboard')
   const Icon  = ICON_MAP[item.icon]
   const urgent = item.daysLeft <= 3
   const warn   = item.daysLeft <= 7 && !urgent
@@ -138,9 +141,9 @@ function DeadlineRow({ item }: { item: DeadlineItem }) {
         <p className="text-sm font-medium text-[#0F172A] truncate">{item.title}</p>
         <p className="text-xs text-[#94A3B8] mt-0.5 flex items-center gap-1">
           <Clock size={11} />
-          {item.daysLeft === 0 ? 'Bugun tugaydi' :
-           item.daysLeft === 1 ? "Ertaga tugaydi" :
-           `${item.daysLeft} kun qoldi`}
+          {item.daysLeft === 0 ? t('deadlines.today') :
+           item.daysLeft === 1 ? t('deadlines.tomorrow') :
+           t('deadlines.daysLeft', { count: item.daysLeft })}
           <span className="text-[#CBD5E1]">·</span>
           <span>{item.date.toLocaleDateString('uz-UZ')}</span>
         </p>

@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "title": "Цены — MyHujjat.uz",
+    "description": "Тарифы MyHujjat.uz: Бесплатный, Стандарт, Pro. Для бизнеса в Узбекистане."
+  },
+  "title": "Цены и тарифы",
+  "subtitle": "Подходящий тариф для каждого бизнеса",
+  "monthlyLabel": "Помесячно",
+  "yearlyLabel": "На год",
+  "yearlyDiscount": "Скидка 25%",
+  "popular": "Популярный",
+  "currency": "сум/мес",
+  "monthlyPrice": "В месяц: {price} сум",
+  "compareTitle": "Подробное сравнение",
+  "compareFeature": "Возможность",
+  "ctaTitle": "Остались вопросы?",
+  "ctaSubtitle": "Попробуйте Pro бесплатно 7 дней или свяжитесь с нами.",
+  "ctaButton": "Начать бесплатно →",
+  "compareRows": [
+    { "feat": "Договоров в месяц", "free": "5", "std": "50", "pro": "Без лимита" },
+    { "feat": "Шаблоны", "free": "Базовые", "std": "Все", "pro": "Все" },
+    { "feat": "Экспорт в PDF/Word", "free": "✓", "std": "✓", "pro": "✓" },
+    { "feat": "Кадры (HR)", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "Бухгалтерские документы", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "Документы секретаря", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "AI-генерация документов", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Юридические документы", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "ЭЦП (ERI)", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Интеграция с Didox", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Email-поддержка", "free": "✓", "std": "✓", "pro": "✓" }
+  ],
+  "plans": {
+    "free": {
+      "name": "Бесплатный",
+      "btnText": "Начать бесплатно"
+    },
+    "standard": {
+      "name": "Стандарт",
+      "btnText": "Выбрать"
+    },
+    "pro": {
+      "name": "Pro",
+      "btnText": "Выбрать"
+    }
+  }
+}

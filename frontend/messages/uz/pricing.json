@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "title": "Narxlar — MyHujjat.uz",
+    "description": "MyHujjat.uz tarif rejalari: Bepul, Standart, Pro. O'zbekiston bizneslar uchun."
+  },
+  "title": "Narxlar va rejalari",
+  "subtitle": "Har bir biznes uchun mos reja",
+  "monthlyLabel": "Oylik",
+  "yearlyLabel": "Yillik",
+  "yearlyDiscount": "25% chegirma",
+  "popular": "Mashhur",
+  "currency": "so'm/oy",
+  "monthlyPrice": "Oylik: {price} so'm",
+  "compareTitle": "Batafsil taqqoslash",
+  "compareFeature": "Imkoniyat",
+  "ctaTitle": "Hali ham savol bormi?",
+  "ctaSubtitle": "7 kun bepul Pro sinab ko'ring yoki biz bilan bog'laning.",
+  "ctaButton": "Bepul boshlash →",
+  "compareRows": [
+    { "feat": "Oylik shartnomalar", "free": "5 ta", "std": "50 ta", "pro": "Cheksiz" },
+    { "feat": "Shablonlar", "free": "Asosiy", "std": "Barcha", "pro": "Barcha" },
+    { "feat": "PDF/Word eksport", "free": "✓", "std": "✓", "pro": "✓" },
+    { "feat": "Kadrlar (HR)", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "Buxgalter hujjatlar", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "Kotib hujjatlar", "free": "✗", "std": "✓", "pro": "✓" },
+    { "feat": "AI hujjat generatsiya", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Yurist hujjatlar", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "E-imzo (ERI)", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Didox integratsiya", "free": "✗", "std": "✗", "pro": "✓" },
+    { "feat": "Email qo'llab-quvvatlash", "free": "✓", "std": "✓", "pro": "✓" }
+  ],
+  "plans": {
+    "free": {
+      "name": "Bepul",
+      "btnText": "Bepul boshlash"
+    },
+    "standard": {
+      "name": "Standart",
+      "btnText": "Tanlash"
+    },
+    "pro": {
+      "name": "Pro",
+      "btnText": "Tanlash"
+    }
+  }
+}
