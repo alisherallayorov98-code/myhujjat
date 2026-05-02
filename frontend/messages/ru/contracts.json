@@ -120,6 +120,8 @@
     "send": "Отправить",
     "deleteContract": "Удалить договор",
     "deleteConfirm": "Вы хотите удалить договор {number}?",
+    "deleteCancel": "Отмена",
+    "deleteConfirmBtn": "Удалить",
     "signStatus": "Статус подписи",
     "ourSignature": "Наша подпись",
     "cpSignature": "Подпись контрагента",

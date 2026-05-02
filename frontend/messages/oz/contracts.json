@@ -120,6 +120,8 @@
     "send": "Юбориш",
     "deleteContract": "Шартномани ўчириш",
     "deleteConfirm": "{number} шартномани ўчиришни тасдиқлайсизми?",
+    "deleteCancel": "Бекор",
+    "deleteConfirmBtn": "Ўчириш",
     "signStatus": "Имзо ҳолати",
     "ourSignature": "Бизнинг имзо",
     "cpSignature": "Контрагент имзоси",

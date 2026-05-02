@@ -120,6 +120,8 @@
     "send": "Yuborish",
     "deleteContract": "Shartnomani o'chirish",
     "deleteConfirm": "{number} shartnomani o'chirishni tasdiqlaysizmi?",
+    "deleteCancel": "Bekor",
+    "deleteConfirmBtn": "O'chirish",
     "signStatus": "Imzo holati",
     "ourSignature": "Bizning imzo",
     "cpSignature": "Kontragent imzosi",

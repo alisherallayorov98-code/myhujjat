@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, use }                                         from 'react'
+import { useTranslations }                                       from 'next-intl'
 import Link                                                      from 'next/link'
 import { useRouter }                                             from 'next/navigation'
 import {
@@ -26,12 +27,6 @@ import { InvoicesPanel }                                        from './_compone
 import { cn }                                                    from '@/lib/cn'
 
 const STATUS_OPTIONS = ['DRAFT', 'ACTIVE', 'COMPLETED', 'CANCELLED'] as const
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT:     'Qoralama',
-  ACTIVE:    'Faol',
-  COMPLETED: 'Tugagan',
-  CANCELLED: 'Bekor',
-}
 
 function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value?: string | null }) {
   if (!value) return null
@@ -49,12 +44,20 @@ function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value
 }
 
 export default function ContractDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = useTranslations('contracts')
   const { id } = use(params)
   const { currentOrg, isPro } = useAuth()
   const router                = useRouter()
   const qc                    = useQueryClient()
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [shareOpen,     setShareOpen]     = useState(false)
+
+  const STATUS_LABELS: Record<string, string> = {
+    DRAFT:     t('statusOptions.DRAFT'),
+    ACTIVE:    t('statusOptions.ACTIVE'),
+    COMPLETED: t('statusOptions.COMPLETED'),
+    CANCELLED: t('statusOptions.CANCELLED'),
+  }
 
   const { data: contract, isLoading } = useQuery<any>({
     queryKey: ['contract', id],
@@ -90,25 +93,26 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <FileText size={40} className="text-[#CBD5E1]" />
-        <p className="text-[#94A3B8]">Shartnoma topilmadi</p>
+        <p className="text-[#94A3B8]">{t('detail.notFound')}</p>
         <Link href="/dashboard/shartnomalar">
-          <Button variant="outline" size="sm">Orqaga</Button>
+          <Button variant="outline" size="sm">{t('new_.back')}</Button>
         </Link>
       </div>
     )
   }
 
   const typeCfg  = CONTRACT_TYPE_CONFIG[contract.contractType as keyof typeof CONTRACT_TYPE_CONFIG]
+  const typeName = t(`types.${contract.contractType}` as any)
   const firstSpec = contract.specifications?.[0]
 
   return (
     <div>
       <PageHeader
         title={contract.contractNumber}
-        description={typeCfg?.name || contract.contractType}
+        description={typeName}
         breadcrumbs={[
-          { label: 'Dashboard',     path: '/dashboard' },
-          { label: 'Shartnomalar', path: '/dashboard/shartnomalar' },
+          { label: 'Dashboard',   path: '/dashboard' },
+          { label: t('title'),    path: '/dashboard/shartnomalar' },
           { label: contract.contractNumber },
         ]}
         actions={
@@ -118,14 +122,14 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
               leftIcon={<Download size={13} />}
               onClick={async () => { await exportContractPdf(contract); window.dispatchEvent(new Event('contract-downloaded')) }}
             >
-              PDF
+              {t('preview.pdf')}
             </Button>
             <Button
               variant="outline" size="sm"
               leftIcon={<Download size={13} />}
               onClick={async () => { await exportContractDocx(contract); window.dispatchEvent(new Event('contract-downloaded')) }}
             >
-              Word
+              {t('preview.word')}
             </Button>
 
             <Button
@@ -133,7 +137,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
               leftIcon={<Share2 size={13} />}
               onClick={() => setShareOpen(true)}
             >
-              Yuborish
+              {t('detail.send')}
             </Button>
 
             {isPro && !contract.signedUs && (
@@ -166,9 +170,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Asosiy ma'lumotlar */}
         <div className="lg:col-span-2 space-y-5">
-          {/* Shartnoma kartasi */}
           <Card>
             <div className="flex items-center gap-3 mb-4">
               <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0', typeCfg?.bg ?? 'bg-[#F1F5F9]')}>
@@ -176,24 +178,23 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
               </div>
               <div>
                 <h2 className="text-base font-semibold text-[#0F172A]">{contract.contractNumber}</h2>
-                <p className="text-sm text-[#94A3B8]">{typeCfg?.name}</p>
+                <p className="text-sm text-[#94A3B8]">{typeName}</p>
               </div>
               <div className="ml-auto">
                 <ContractStatusBadge status={contract.status} />
               </div>
             </div>
 
-            <InfoRow icon={Hash}          label="Raqam"          value={contract.contractNumber} />
-            <InfoRow icon={Calendar}      label="Sana"           value={formatDate(contract.contractDate, 'long')} />
-            <InfoRow icon={MapPin}        label="Shahar"         value={contract.city} />
-            <InfoRow icon={DollarSign}    label="Summa"          value={contract.amount > 0 ? formatCurrency(contract.amount) : null} />
-            <InfoRow icon={ClipboardList} label="Mahsulot/xizmat" value={contract.productName} />
+            <InfoRow icon={Hash}          label={t('detail.info.number')}    value={contract.contractNumber} />
+            <InfoRow icon={Calendar}      label={t('detail.info.date')}      value={formatDate(contract.contractDate, 'long')} />
+            <InfoRow icon={MapPin}        label={t('detail.info.city')}      value={contract.city} />
+            <InfoRow icon={DollarSign}    label={t('detail.info.amount')}    value={contract.amount > 0 ? formatCurrency(contract.amount) : null} />
+            <InfoRow icon={ClipboardList} label={t('detail.info.product')}   value={contract.productName} />
 
-            {/* Imzo holati */}
             {(contract.signedUs || contract.signedCp) && (
               <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
                 <p className="text-xs font-semibold text-[#475569] uppercase tracking-wider mb-3">
-                  Imzo holati
+                  {t('detail.signStatus')}
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -201,7 +202,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                       ? <CheckCircle size={15} className="text-[#16A34A]" />
                       : <Circle     size={15} className="text-[#E2E8F0]"  />
                     }
-                    <span className="text-sm text-[#475569]">Bizning imzo</span>
+                    <span className="text-sm text-[#475569]">{t('detail.ourSignature')}</span>
                     {contract.signedUsAt && (
                       <span className="text-xs text-[#94A3B8] ml-auto">
                         {formatDate(contract.signedUsAt, 'short')}
@@ -213,7 +214,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                       ? <CheckCircle size={15} className="text-[#16A34A]" />
                       : <Circle     size={15} className="text-[#E2E8F0]"  />
                     }
-                    <span className="text-sm text-[#475569]">Kontragent imzosi</span>
+                    <span className="text-sm text-[#475569]">{t('detail.cpSignature')}</span>
                     {contract.signedCpAt && (
                       <span className="text-xs text-[#94A3B8] ml-auto">
                         {formatDate(contract.signedCpAt, 'short')}
@@ -225,16 +226,15 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
             )}
           </Card>
 
-          {/* Shartnoma matni — chiroyli HTML render */}
           {contract.content && (
             <Card padding="none" className="overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
                 <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">
-                  Shartnoma ko'rinishi
+                  {t('detail.contractView')}
                 </p>
                 <Link href={`/dashboard/shartnomalar/${id}/preview`}>
                   <button className="flex items-center gap-1.5 text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium transition">
-                    🔍 To'liq ekranda ochish
+                    {t('detail.fullScreen')}
                   </button>
                 </Link>
               </div>
@@ -250,11 +250,10 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
             </Card>
           )}
 
-          {/* Spesifikatsiyalar */}
           {contract.specifications?.length > 0 && (
             <Card>
               <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-                Spesifikatsiyalar ({contract.specifications.length})
+                {t('detail.specsCount', { count: contract.specifications.length })}
               </p>
               <div className="space-y-2">
                 {contract.specifications.map((spec: any) => (
@@ -267,7 +266,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                       <ClipboardList size={15} className="text-[#94A3B8] group-hover:text-[#2563EB]" />
                       <div>
                         <p className="text-sm font-medium text-[#0F172A]">
-                          {spec.specNumber || 'Spesifikatsiya'}
+                          {spec.specNumber || t('detail.specName')}
                         </p>
                         <p className="text-xs text-[#94A3B8]">
                           {formatDate(spec.createdAt, 'short')}
@@ -275,14 +274,13 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs text-[#2563EB] opacity-0 group-hover:opacity-100">Ko'rish →</span>
+                    <span className="text-xs text-[#2563EB] opacity-0 group-hover:opacity-100">{t('detail.viewSpec')}</span>
                   </Link>
                 ))}
               </div>
             </Card>
           )}
 
-          {/* Fakturalar nazorati (Didox/Roaming integratsiyasi) */}
           <InvoicesPanel
             contract={{
               id:             contract.id,
@@ -296,13 +294,11 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
           />
         </div>
 
-        {/* O'ng panel */}
         <div className="space-y-5">
-          {/* Kontragent */}
           {contract.counterparty && (
             <Card>
               <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-                Kontragent
+                {t('detail.counterpartyTitle')}
               </p>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] flex items-center justify-center shrink-0">
@@ -311,12 +307,12 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
                 <div>
                   <p className="text-sm font-semibold text-[#0F172A]">{contract.counterparty.name}</p>
                   {contract.counterparty.inn && (
-                    <p className="text-xs text-[#94A3B8]">STIR: {contract.counterparty.inn}</p>
+                    <p className="text-xs text-[#94A3B8]">{t('detail.stirLabel')} {contract.counterparty.inn}</p>
                   )}
                 </div>
               </div>
               {contract.counterparty.director && (
-                <p className="text-xs text-[#475569]">Rahbar: {contract.counterparty.director}</p>
+                <p className="text-xs text-[#475569]">{t('detail.directorLabel')} {contract.counterparty.director}</p>
               )}
               {contract.counterparty.address && (
                 <p className="text-xs text-[#94A3B8] mt-1">{contract.counterparty.address}</p>
@@ -324,10 +320,9 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
             </Card>
           )}
 
-          {/* Holat o'zgartirish */}
           <Card>
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-              Holat
+              {t('detail.statusTitle')}
             </p>
             <div className="space-y-1.5">
               {STATUS_OPTIONS.map(s => (
@@ -352,15 +347,14 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
             </div>
           </Card>
 
-          {/* Yaratilgan sana */}
           <Card padding="sm">
-            <p className="text-xs text-[#94A3B8]">Yaratilgan</p>
+            <p className="text-xs text-[#94A3B8]">{t('detail.createdAt')}</p>
             <p className="text-sm font-medium text-[#0F172A] mt-0.5">
               {formatDate(contract.createdAt, 'long')}
             </p>
             {contract.updatedAt !== contract.createdAt && (
               <>
-                <p className="text-xs text-[#94A3B8] mt-2">O'zgartirilgan</p>
+                <p className="text-xs text-[#94A3B8] mt-2">{t('detail.updatedAt')}</p>
                 <p className="text-sm font-medium text-[#0F172A] mt-0.5">
                   {formatDate(contract.updatedAt, 'long')}
                 </p>
@@ -370,31 +364,29 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
         </div>
       </div>
 
-      {/* Yuborish modal */}
       <ShareLinkModal
         contractId={id}
         open={shareOpen}
         onClose={() => setShareOpen(false)}
       />
 
-      {/* O'chirish tasdiqlash */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl p-6 w-80 shadow-xl">
-            <h3 className="text-base font-semibold text-[#0F172A] mb-2">Shartnomani o'chirish</h3>
+            <h3 className="text-base font-semibold text-[#0F172A] mb-2">{t('detail.deleteContract')}</h3>
             <p className="text-sm text-[#475569] mb-5">
-              {contract.contractNumber} shartnomani o'chirishni tasdiqlaysizmi?
+              {t('detail.deleteConfirm', { number: contract.contractNumber })}
             </p>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(false)}>
-                Bekor
+                {t('detail.deleteCancel')}
               </Button>
               <Button
                 variant="danger" size="sm"
                 loading={deleteMut.isPending}
                 onClick={() => deleteMut.mutate()}
               >
-                O'chirish
+                {t('detail.deleteConfirmBtn')}
               </Button>
             </div>
           </div>

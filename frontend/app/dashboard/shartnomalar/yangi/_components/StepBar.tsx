@@ -1,10 +1,11 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/cn'
 
-const STEPS = ['Tur tanlash', "Ma'lumotlar", 'Spesifikatsiya']
-
 export function StepBar({ step }: { step: number }) {
+  const t = useTranslations('contracts.stepBar')
+  const STEPS = [t('step1'), t('step2'), t('step3')]
   return (
     <div className="flex items-center gap-0 mb-6">
       {STEPS.map((label, i) => (
