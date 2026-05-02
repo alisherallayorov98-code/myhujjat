@@ -2,6 +2,7 @@
 
 import { useState }                                     from 'react'
 import Link                                              from 'next/link'
+import { useTranslations }                               from 'next-intl'
 import {
   Archive, Search, FileText, Sparkles, ClipboardList, Eye,
 } from 'lucide-react'
@@ -58,15 +59,16 @@ function DocTypeIcon({ type, subType }: { type: string; subType: string }) {
   )
 }
 
-const STAT_CARDS = [
-  { key: 'total',     label: 'Jami hujjatlar', Icon: Archive,       color: 'text-[#2563EB]', bg: 'bg-[#DBEAFE]' },
-  { key: 'contracts', label: 'Shartnomalar',   Icon: FileText,       color: 'text-[#16A34A]', bg: 'bg-[#DCFCE7]' },
-  { key: 'aiDocs',    label: 'AI hujjatlar',   Icon: Sparkles,       color: 'text-[#7C3AED]', bg: 'bg-[#EDE9FE]' },
-  { key: 'specs',     label: 'Spesifikatsiya', Icon: ClipboardList,  color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]' },
-]
-
 export default function SeifPage() {
+  const t = useTranslations('vault')
   const { currentOrg } = useAuth()
+
+  const STAT_CARDS = [
+    { key: 'total',     label: t('totalDocs'),  Icon: Archive,       color: 'text-[#2563EB]', bg: 'bg-[#DBEAFE]' },
+    { key: 'contracts', label: t('contracts'),  Icon: FileText,       color: 'text-[#16A34A]', bg: 'bg-[#DCFCE7]' },
+    { key: 'aiDocs',    label: t('aiDocs'),     Icon: Sparkles,       color: 'text-[#7C3AED]', bg: 'bg-[#EDE9FE]' },
+    { key: 'specs',     label: t('specs'),      Icon: ClipboardList,  color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]' },
+  ]
 
   const [search,     setSearch]     = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -97,19 +99,19 @@ export default function SeifPage() {
   const totalPages = Math.ceil((data?.meta?.total ?? 0) / 30)
 
   const TYPE_FILTERS = [
-    { id: 'all',      label: 'Hammasi',      count: stats?.total     ?? 0 },
-    { id: 'contract', label: 'Shartnomalar', count: stats?.contracts ?? 0 },
-    { id: 'ai',       label: 'AI hujjatlar', count: stats?.aiDocs    ?? 0 },
+    { id: 'all',      label: t('all'),         count: stats?.total     ?? 0 },
+    { id: 'contract', label: t('contracts'),   count: stats?.contracts ?? 0 },
+    { id: 'ai',       label: t('aiDocs'),      count: stats?.aiDocs    ?? 0 },
   ]
 
   return (
     <div>
       <PageHeader
-        title="🗄️ Seif"
-        description="Barcha hujjatlaringiz bir joyda"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Seif' },
+          { label: t('breadcrumb') },
         ]}
       />
 
@@ -133,7 +135,7 @@ export default function SeifPage() {
       {/* Filtrlar */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <Input
-          placeholder="Hujjat qidirish..."
+          placeholder={t('searchPlace')}
           leftIcon={<Search size={15} />}
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1) }}
@@ -172,7 +174,7 @@ export default function SeifPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
-                {['Hujjat', 'Tur', 'Kontragent', 'Sana', 'Summa', 'Holat', ''].map(h => (
+                {[t('tableHujjat'), t('tableTur'), t('tableKontragent'), t('tableSana'), t('tableSumma'), t('tableHolat'), ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                     {h}
                   </th>
@@ -187,12 +189,8 @@ export default function SeifPage() {
                   <td colSpan={7}>
                     <EmptyState
                       icon={<Archive size={28} />}
-                      title="Hujjatlar yo'q"
-                      description={
-                        search
-                          ? "Qidiruv bo'yicha hujjat topilmadi"
-                          : "Hujjatlar yaratganingizdan so'ng bu yerda ko'rinadi"
-                      }
+                      title={t('noDocs')}
+                      description={search ? t('noDocsSearch') : t('noDocsDesc')}
                     />
                   </td>
                 </tr>
@@ -215,7 +213,7 @@ export default function SeifPage() {
                       <td className="px-4 py-3">
                         <Badge variant={doc.type === 'ai' ? 'info' : 'default'} size="sm">
                           {doc.type === 'ai'
-                            ? 'AI'
+                            ? t('ai')
                             : cfg?.name ?? doc.subType
                           }
                         </Badge>
@@ -230,7 +228,7 @@ export default function SeifPage() {
                       <td className="px-4 py-3">
                         {doc.type === 'contract'
                           ? <ContractStatusBadge status={doc.status} />
-                          : <Badge variant="success" size="sm">Tayyor</Badge>
+                          : <Badge variant="success" size="sm">{t('ready')}</Badge>
                         }
                       </td>
                       <td className="px-4 py-3">
