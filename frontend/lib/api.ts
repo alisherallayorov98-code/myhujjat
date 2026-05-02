@@ -1,4 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import toast from 'react-hot-toast'
 
 // Past internet uchun timeout — 60s yetarli, cheksiz emas
 const REQUEST_TIMEOUT = 60_000
@@ -74,6 +75,15 @@ api.interceptors.response.use(
       if (original._retryCount <= MAX_RETRY_NETWORK) {
         await new Promise(r => setTimeout(r, backoffDelay(original._retryCount - 1)))
         return api(original)
+      }
+      // Retry tugagandan keyin foydalanuvchini bir marta ogohlantiramiz
+      // (har komponent o'z toast.error'ini chaqirishidan saqlanadi).
+      // id orqali dedup — ko'p so'rov bir vaqtda fail bo'lsa bitta toast chiqadi.
+      if (typeof window !== 'undefined') {
+        toast.error('Internet aloqasi yo\'q yoki server javob bermadi', {
+          id: 'network-error',
+          duration: 4000,
+        })
       }
     }
 

@@ -57,15 +57,19 @@ export function StirInput({
 
   useEffect(() => {
     const clean = value.replace(/\D/g, '')
-    if (autoSearch && clean.length === 9 && clean !== prevVal.current) {
-      prevVal.current = clean
-      doSearch(clean)
-    }
     if (clean.length < 9) {
       setResult(null)
       setError('')
       prevVal.current = ''
+      return
     }
+    if (!autoSearch || clean.length !== 9 || clean === prevVal.current) return
+    // Debounce: foydalanuvchi yana yozayotgan bo'lsa, 400ms kutamiz
+    const timer = setTimeout(() => {
+      prevVal.current = clean
+      doSearch(clean)
+    }, 400)
+    return () => clearTimeout(timer)
   }, [value, autoSearch])
 
   const doSearch = async (inn: string) => {

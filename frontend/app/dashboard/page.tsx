@@ -350,10 +350,13 @@ export default function DashboardPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-[#0F172A] truncate">{c.contractNumber}</p>
+                        <p className="text-sm font-medium text-[#0F172A] truncate" title={c.contractNumber}>{c.contractNumber}</p>
                         <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-full', st.cls)}>{st.label}</span>
                       </div>
-                      <p className="text-xs text-[#94A3B8] truncate mt-0.5">
+                      <p
+                        className="text-xs text-[#94A3B8] truncate mt-0.5"
+                        title={c.counterparty?.name || t('recent.noCp')}
+                      >
                         {c.counterparty?.name || t('recent.noCp')} · {formatDate(c.contractDate, 'short')}
                       </p>
                     </div>
