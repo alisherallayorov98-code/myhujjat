@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef }      from 'react'
+import { useTranslations }                  from 'next-intl'
 import { Save, Camera, Trash2, Loader2 }    from 'lucide-react'
 import { useMutation }                      from '@tanstack/react-query'
 import { Card }                             from '@/components/ui/Card'
@@ -10,12 +11,6 @@ import { useAuth }                          from '@/hooks/useAuth'
 import api                                  from '@/lib/api'
 import toast                                from 'react-hot-toast'
 import { cn }                               from '@/lib/cn'
-
-const LANGUAGES = [
-  { value: 'uz', label: "O'zbekcha (lotin)" },
-  { value: 'oz', label: 'Ўзбекча (кирилл)' },
-  { value: 'ru', label: 'Русский' },
-]
 
 const MAX_AVATAR_BYTES = 500_000 // 500KB
 
@@ -44,10 +39,17 @@ async function compressImage(file: File): Promise<string> {
 }
 
 export default function ProfilPage() {
+  const t = useTranslations('profile')
   const { user, loadUser } = useAuth()
   const fileRef = useRef<HTMLInputElement>(null)
   const [avatarUrl,    setAvatarUrl]    = useState<string | null>(null)
   const [uploading,    setUploading]    = useState(false)
+
+  const LANGUAGES = [
+    { value: 'uz', label: t('langUz') },
+    { value: 'oz', label: t('langOz') },
+    { value: 'ru', label: t('langRu') },
+  ]
 
   const [form, setForm] = useState({
     firstName: '',
@@ -73,9 +75,9 @@ export default function ProfilPage() {
       api.put('/users/profile', { ...form, ...(extra ?? {}) }),
     onSuccess: () => {
       loadUser()
-      toast.success('Profil saqlandi ✓')
+      toast.success(t('saved'))
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const upd = (key: string, val: string) =>
@@ -83,23 +85,23 @@ export default function ProfilPage() {
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    e.target.value = '' // reset so same file can be re-selected
+    e.target.value = ''
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      toast.error('Faqat rasm fayllarini yuklang')
+      toast.error(t('onlyImages'))
       return
     }
     setUploading(true)
     try {
       const dataUrl = await compressImage(file)
       if (dataUrl.length > MAX_AVATAR_BYTES) {
-        toast.error('Rasm hajmi juda katta — boshqasini tanlang')
+        toast.error(t('imageTooLarge'))
         return
       }
       setAvatarUrl(dataUrl)
       mutation.mutate({ avatarUrl: dataUrl })
     } catch {
-      toast.error('Rasm yuklashda xatolik')
+      toast.error(t('uploadError'))
     } finally {
       setUploading(false)
     }
@@ -118,7 +120,7 @@ export default function ProfilPage() {
   return (
     <div className="space-y-5 max-w-lg">
       <Card>
-        <h2 className="font-bold text-[#0F172A] mb-4">Shaxsiy ma'lumotlar</h2>
+        <h2 className="font-bold text-[#0F172A] mb-4">{t('personalInfo')}</h2>
 
         {/* Avatar */}
         <div className="flex items-center gap-4 mb-5">
@@ -139,7 +141,7 @@ export default function ProfilPage() {
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#2563EB] hover:bg-[#1D4ED8] rounded-full flex items-center justify-center border-2 border-white transition disabled:opacity-60"
-              title="Rasmni o'zgartirish"
+              title={t('changeAvatar')}
             >
               {uploading
                 ? <Loader2 size={12} className="text-white animate-spin" />
@@ -166,7 +168,7 @@ export default function ProfilPage() {
                 onClick={handleAvatarRemove}
                 className="text-xs text-[#DC2626] hover:underline mt-1 flex items-center gap-1"
               >
-                <Trash2 size={11} /> Rasmni olib tashlash
+                <Trash2 size={11} /> {t('removeAvatar')}
               </button>
             )}
           </div>
@@ -175,35 +177,35 @@ export default function ProfilPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Ism"
+              label={t('firstName')}
               value={form.firstName}
               onChange={e => upd('firstName', e.target.value)}
-              placeholder="Jasur"
+              placeholder={t('firstNamePlace')}
             />
             <Input
-              label="Familiya"
+              label={t('lastName')}
               value={form.lastName}
               onChange={e => upd('lastName', e.target.value)}
-              placeholder="Toshmatov"
+              placeholder={t('lastNamePlace')}
             />
           </div>
 
           <Input
-            label="Email"
+            label={t('email')}
             value={user?.email || ''}
             disabled
-            hint="Email manzilni o'zgartirish mumkin emas"
+            hint={t('emailHint')}
           />
 
           <Input
-            label="Telefon"
+            label={t('phone')}
             value={form.phone}
             onChange={e => upd('phone', e.target.value)}
-            placeholder="+998 90 123 45 67"
+            placeholder={t('phonePlace')}
           />
 
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-[#374151]">Interfeys tili</label>
+            <label className="block text-sm font-medium text-[#374151]">{t('interfaceLanguage')}</label>
             <div className="flex gap-2 flex-wrap">
               {LANGUAGES.map(lang => (
                 <button
@@ -227,7 +229,7 @@ export default function ProfilPage() {
             loading={mutation.isPending}
             onClick={() => mutation.mutate(undefined)}
           >
-            Saqlash
+            {t('save')}
           </Button>
         </div>
       </Card>

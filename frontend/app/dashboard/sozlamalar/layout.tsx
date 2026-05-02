@@ -2,29 +2,31 @@
 
 import Link            from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { User, Lock, Building2, CreditCard, Bell, Activity, Users, UserCheck, Link2 } from 'lucide-react'
 import { cn }          from '@/lib/cn'
 
-const SETTINGS_NAV = [
-  { id: 'profil',      label: 'Profil',           icon: User,        path: '/dashboard/sozlamalar/profil'                  },
-  { id: 'xavfsizlik',  label: 'Xavfsizlik',        icon: Lock,        path: '/dashboard/sozlamalar/xavfsizlik'              },
-  { id: 'tashkilot',   label: 'Tashkilot',          icon: Building2,   path: '/dashboard/sozlamalar/tashkilot'               },
-  { id: 'tasischilar', label: "Ta'sischilar",       icon: UserCheck,   path: '/dashboard/sozlamalar/tashkilot/tasischilar'   },
-  { id: 'azolar',      label: "A'zolar",            icon: Users,       path: '/dashboard/sozlamalar/tashkilot/azolar'        },
-  { id: 'didox',       label: 'Didox integratsiya', icon: Link2,       path: '/dashboard/sozlamalar/didox'                   },
-  { id: 'obuna',       label: "Obuna va to'lov",    icon: CreditCard,  path: '/dashboard/sozlamalar/obuna'                   },
-  { id: 'xabarnoma',   label: 'Bildirishnomalar',   icon: Bell,        path: '/dashboard/sozlamalar/xabarnoma'               },
-  { id: 'audit',       label: 'Faoliyat tarixi',    icon: Activity,    path: '/dashboard/sozlamalar/audit'                   },
-]
-
 export default function SozlamalarLayout({ children }: { children: React.ReactNode }) {
+  const t        = useTranslations('settings')
   const pathname = usePathname()
+
+  const SETTINGS_NAV = [
+    { id: 'profil',      label: t('navProfil'),      icon: User,        path: '/dashboard/sozlamalar/profil'                  },
+    { id: 'xavfsizlik',  label: t('navXavfsizlik'),  icon: Lock,        path: '/dashboard/sozlamalar/xavfsizlik'              },
+    { id: 'tashkilot',   label: t('navTashkilot'),   icon: Building2,   path: '/dashboard/sozlamalar/tashkilot'               },
+    { id: 'tasischilar', label: t('navTasischilar'), icon: UserCheck,   path: '/dashboard/sozlamalar/tashkilot/tasischilar'   },
+    { id: 'azolar',      label: t('navAzolar'),      icon: Users,       path: '/dashboard/sozlamalar/tashkilot/azolar'        },
+    { id: 'didox',       label: t('navDidox'),       icon: Link2,       path: '/dashboard/sozlamalar/didox'                   },
+    { id: 'obuna',       label: t('navObuna'),       icon: CreditCard,  path: '/dashboard/sozlamalar/obuna'                   },
+    { id: 'xabarnoma',   label: t('navXabarnoma'),   icon: Bell,        path: '/dashboard/sozlamalar/xabarnoma'               },
+    { id: 'audit',       label: t('navAudit'),       icon: Activity,    path: '/dashboard/sozlamalar/audit'                   },
+  ]
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="font-bold text-[#0F172A] text-2xl">Sozlamalar</h1>
-        <p className="text-sm text-[#94A3B8] mt-1">Hisob va tashkilot sozlamalarini boshqaring</p>
+        <h1 className="font-bold text-[#0F172A] text-2xl">{t('title')}</h1>
+        <p className="text-sm text-[#94A3B8] mt-1">{t('description')}</p>
       </div>
 
       <div className="flex gap-6">
