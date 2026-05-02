@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }    from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Plus, Building2, Star, Edit2, Trash2,
 } from 'lucide-react'
@@ -20,6 +21,8 @@ import type { Organization } from '@/lib/types'
 import { OrgFormModal } from './_components/OrgFormModal'
 
 export default function TashkilotlarPage() {
+  const t  = useTranslations('organizations')
+  const tu = useTranslations('ui')
   const { setCurrentOrg, currentOrg } = useAuth()
   const qc = useQueryClient()
 
@@ -41,7 +44,7 @@ export default function TashkilotlarPage() {
       qc.invalidateQueries({ queryKey: ['organizations'] })
       const org = orgs.find(o => o.id === id)
       if (org) setCurrentOrg(org)
-      toast.success("Default tashkilot o'rnatildi")
+      toast.success(t('toast.defaultSet'))
     }
   })
 
@@ -49,7 +52,7 @@ export default function TashkilotlarPage() {
     mutationFn: (id: string) => api.delete(`/organizations/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['organizations'] })
-      toast.success("Tashkilot o'chirildi")
+      toast.success(t('toast.deleted'))
       setDeleteOrg(null)
     }
   })
@@ -57,15 +60,15 @@ export default function TashkilotlarPage() {
   return (
     <div>
       <PageHeader
-        title="Tashkilotlar"
-        description="Tashkilotlaringizni boshqaring"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Tashkilotlar' }
+          { label: t('title') }
         ]}
         actions={
           <Button leftIcon={<Plus size={14} />} size="sm" onClick={() => setAddModal(true)}>
-            Qo'shish
+            {t('add')}
           </Button>
         }
       />
@@ -79,9 +82,9 @@ export default function TashkilotlarPage() {
       ) : orgs.length === 0 ? (
         <EmptyState
           icon={<Building2 size={28} />}
-          title="Tashkilot yo'q"
-          description="Hujjat yaratish uchun avval tashkilotingizni qo'shing"
-          action={{ label: "Tashkilot qo'shish", onClick: () => setAddModal(true) }}
+          title={t('noOrgs')}
+          description={t('noOrgsDescription')}
+          action={{ label: t('addOrg'), onClick: () => setAddModal(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -93,6 +96,7 @@ export default function TashkilotlarPage() {
               onSetDefault={() => setDefaultMutation.mutate(org.id)}
               onEdit={() => setEditOrg(org)}
               onDelete={() => setDeleteOrg(org)}
+              t={t}
             />
           ))}
 
@@ -101,7 +105,7 @@ export default function TashkilotlarPage() {
             className="min-h-[160px] rounded-xl border-2 border-dashed border-[#E2E8F0] hover:border-[#2563EB]/40 hover:bg-[#DBEAFE]/10 transition-all flex flex-col items-center justify-center gap-2 text-[#94A3B8] hover:text-[#2563EB]"
           >
             <Plus size={24} />
-            <span className="text-sm font-medium">Tashkilot qo'shish</span>
+            <span className="text-sm font-medium">{t('addOrg')}</span>
           </button>
         </div>
       )}
@@ -116,24 +120,24 @@ export default function TashkilotlarPage() {
         <Modal
           open={!!deleteOrg}
           onClose={() => setDeleteOrg(null)}
-          title="Tashkilotni o'chirish"
+          title={t('deleteOrg')}
           size="sm"
           footer={
             <>
               <Button variant="outline" size="sm" onClick={() => setDeleteOrg(null)}>
-                Bekor qilish
+                {tu('cancel')}
               </Button>
               <Button variant="danger" size="sm"
                 loading={deleteMutation.isPending}
                 onClick={() => deleteMutation.mutate(deleteOrg.id)}>
-                O'chirish
+                {tu('delete')}
               </Button>
             </>
           }
         >
           <p className="text-sm text-[#475569]">
-            <strong>{deleteOrg.name}</strong> tashkilotini o'chirmoqchimisiz?
-            Bu amal orqali barcha shartnomalar va hujjatlar ham o'chiriladi.
+            <strong>{deleteOrg.name}</strong> {t('deleteConfirm')}
+            {' '}{t('deleteWarning')}
           </p>
         </Modal>
       )}
@@ -147,16 +151,17 @@ interface OrgCardProps {
   onSetDefault: () => void
   onEdit:       () => void
   onDelete:     () => void
+  t:             ReturnType<typeof useTranslations<'organizations'>>
 }
 
-function OrgCard({ org, isCurrent, onSetDefault, onEdit, onDelete }: OrgCardProps) {
+function OrgCard({ org, isCurrent, onSetDefault, onEdit, onDelete, t }: OrgCardProps) {
   return (
     <Card className={cn('relative', isCurrent && 'border-[#2563EB]/40 bg-[#DBEAFE]/10')}>
       {org.isDefault && (
         <div className="absolute top-3 right-3">
           <Badge variant="primary" size="sm">
             <Star size={10} className="mr-1 fill-current" />
-            Asosiy
+            {t('primary')}
           </Badge>
         </div>
       )}
@@ -169,7 +174,7 @@ function OrgCard({ org, isCurrent, onSetDefault, onEdit, onDelete }: OrgCardProp
         </div>
         <div className="flex-1 min-w-0 pr-8">
           <p className="font-display font-bold text-[#0F172A] truncate">{org.name}</p>
-          {org.inn && <p className="text-xs text-[#94A3B8]">STIR: {org.inn}</p>}
+          {org.inn && <p className="text-xs text-[#94A3B8]">{t('stir')}: {org.inn}</p>}
         </div>
       </div>
 
@@ -186,7 +191,7 @@ function OrgCard({ org, isCurrent, onSetDefault, onEdit, onDelete }: OrgCardProp
             className="flex items-center gap-1 text-xs text-[#94A3B8] hover:text-[#2563EB] transition-colors"
           >
             <Star size={13} />
-            Asosiy qilish
+            {t('makePrimary')}
           </button>
         )}
         <div className="flex-1" />

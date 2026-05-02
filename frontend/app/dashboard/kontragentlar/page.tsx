@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }    from 'react'
+import { useTranslations } from 'next-intl'
 import { Plus, Users, Search, Edit2, AlertCircle, Download } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }   from '@tanstack/react-query'
 import { PageHeader }   from '@/components/layout/PageHeader'
@@ -15,7 +16,6 @@ import { useAuth }      from '@/hooks/useAuth'
 import api              from '@/lib/api'
 import { exportCounterpartiesExcel } from '@/lib/export/listExport'
 import toast            from 'react-hot-toast'
-import { cn }           from '@/lib/cn'
 
 interface Counterparty {
   id:             string
@@ -30,15 +30,14 @@ interface Counterparty {
   stirStatus?:    'active' | 'inactive' | 'unknown'
 }
 
-// ============================================
-// KONTRAGENT FORM MODAL
-// ============================================
 function CpFormModal({ cp, open, onClose, orgId }: {
   cp?:     Counterparty | null
   open:    boolean
   onClose: () => void
   orgId:   string
 }) {
+  const t      = useTranslations('counterparties')
+  const tu     = useTranslations('ui')
   const qc     = useQueryClient()
   const isEdit = !!cp
 
@@ -59,10 +58,10 @@ function CpFormModal({ cp, open, onClose, orgId }: {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['counterparties'] })
-      toast.success(isEdit ? 'Kontragent yangilandi' : "Kontragent qo'shildi")
+      toast.success(isEdit ? t('toast.updated') : t('toast.added'))
       onClose()
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
   })
 
   const handleStirData = (data: StirData) => {
@@ -82,20 +81,19 @@ function CpFormModal({ cp, open, onClose, orgId }: {
   return (
     <Modal
       open={open} onClose={onClose}
-      title={isEdit ? 'Kontragentni tahrirlash' : 'Yangi kontragent'}
+      title={isEdit ? t('editCounterparty') : t('newCounterparty')}
       size="lg"
       footer={
         <>
-          <Button variant="outline" size="sm" onClick={onClose}>Bekor qilish</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>{tu('cancel')}</Button>
           <Button size="sm" loading={mutation.isPending}
             onClick={() => mutation.mutate(form)} disabled={!form.name}>
-            {isEdit ? 'Saqlash' : "Qo'shish"}
+            {isEdit ? tu('save') : t('add')}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        {/* STIR — auto-fill */}
         <StirInput
           value={form.inn}
           onChange={v => upd('inn', v)}
@@ -104,31 +102,29 @@ function CpFormModal({ cp, open, onClose, orgId }: {
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input label="Nomi *" placeholder="Kompaniya nomi"
+          <Input label={t('form.name')} placeholder={t('form.namePlaceholder')}
             value={form.name} onChange={e => upd('name', e.target.value)} required />
-          <Input label="Rahbar" placeholder="Familiya Ism Otasining ismi"
+          <Input label={t('form.director')} placeholder={t('form.directorPlaceholder')}
             value={form.directorName} onChange={e => upd('directorName', e.target.value)} />
-          <Input label="Telefon" placeholder="+998 71 123 45 67"
+          <Input label={t('form.phone')} placeholder={t('form.phonePlaceholder')}
             value={form.phone} onChange={e => upd('phone', e.target.value)} />
-          <Input label="Bank" placeholder="Xalq banki"
+          <Input label={t('form.bankName')} placeholder={t('form.bankPlaceholder')}
             value={form.bankName} onChange={e => upd('bankName', e.target.value)} />
-          <Input label="MFO" placeholder="00014"
+          <Input label={t('form.mfo')} placeholder={t('form.mfoPlaceholder')}
             value={form.mfo} onChange={e => upd('mfo', e.target.value)} />
-          <Input label="Hisob raqami" placeholder="20208000000000000000"
+          <Input label={t('form.bankAccount')} placeholder={t('form.bankAccountPlaceholder')}
             value={form.bankAccount} onChange={e => upd('bankAccount', e.target.value)} />
         </div>
 
-        <Input label="Manzil" placeholder="Shahar, tuman, ko'cha"
+        <Input label={t('form.address')} placeholder={t('form.addressPlaceholder')}
           value={form.address} onChange={e => upd('address', e.target.value)} />
       </div>
     </Modal>
   )
 }
 
-// ============================================
-// ASOSIY SAHIFA
-// ============================================
 export default function KontragentlarPage() {
+  const t = useTranslations('counterparties')
   const { currentOrg } = useAuth()
   const [search,   setSearch]   = useState('')
   const [addModal, setAddModal] = useState(false)
@@ -154,8 +150,8 @@ export default function KontragentlarPage() {
     return (
       <EmptyState
         icon={<AlertCircle size={28} />}
-        title="Tashkilot tanlanmagan"
-        description="Avval tashkilot tanlang"
+        title={t('noOrgSelected')}
+        description={t('selectOrgFirst')}
       />
     )
   }
@@ -163,24 +159,24 @@ export default function KontragentlarPage() {
   return (
     <div>
       <PageHeader
-        title="Kontragentlar"
-        description="Shartnoma ikkinchi tomonlari"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Kontragentlar' }
+          { label: t('title') }
         ]}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" leftIcon={<Download size={14} />}
               onClick={() => {
-                if (filtered.length === 0) { toast.error("Eksport uchun ma'lumot yo'q"); return }
+                if (filtered.length === 0) { toast.error(t('toast.noExportData')); return }
                 exportCounterpartiesExcel(filtered, currentOrg?.name || 'tashkilot')
-                toast.success('Excel yuklandi')
+                toast.success(t('toast.excelDownloaded'))
               }}>
               Excel
             </Button>
             <Button leftIcon={<Plus size={14} />} size="sm" onClick={() => setAddModal(true)}>
-              Qo'shish
+              {t('add')}
             </Button>
           </div>
         }
@@ -188,7 +184,7 @@ export default function KontragentlarPage() {
 
       <div className="mb-4">
         <Input
-          placeholder="Nom yoki STIR bo'yicha qidirish..."
+          placeholder={t('searchPlaceholder')}
           leftIcon={<Search size={15} />}
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -201,7 +197,7 @@ export default function KontragentlarPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
-                {['Nomi', 'STIR', 'Rahbar', 'Bank', 'Holat', ''].map(h => (
+                {[t('table.name'), t('table.stir'), t('table.director'), t('table.bank'), t('table.status'), ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                     {h}
                   </th>
@@ -218,9 +214,9 @@ export default function KontragentlarPage() {
                   <td colSpan={6}>
                     <EmptyState
                       icon={<Users size={24} />}
-                      title="Kontragentlar yo'q"
-                      description="Birinchi kontragentni qo'shing"
-                      action={{ label: "Qo'shish", onClick: () => setAddModal(true) }}
+                      title={t('noCounterparties')}
+                      description={t('noCounterpartiesDescription')}
+                      action={{ label: t('add'), onClick: () => setAddModal(true) }}
                     />
                   </td>
                 </tr>
@@ -248,11 +244,11 @@ export default function KontragentlarPage() {
                           }
                           dot size="sm"
                         >
-                          {cp.stirStatus === 'active'   ? 'Faol' :
-                           cp.stirStatus === 'inactive' ? 'Nofaol' : "Noma'lum"}
+                          {cp.stirStatus === 'active'   ? t('active') :
+                           cp.stirStatus === 'inactive' ? t('inactive') : t('unknown')}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-[#94A3B8]">Tekshirilmagan</span>
+                        <span className="text-xs text-[#94A3B8]">{t('checking')}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">

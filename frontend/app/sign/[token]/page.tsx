@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
+import { useTranslations }       from 'next-intl'
 import {
   CheckCircle2, FileText, Building2, Calendar, AlertCircle,
   Sparkles, ArrowRight, Loader2, Shield,
@@ -25,6 +26,7 @@ interface ShareLinkView {
 }
 
 export default function PublicSignPage({ params }: { params: Promise<{ token: string }> }) {
+  const t = useTranslations('sign')
   const { token } = use(params)
   const [signerName,  setSignerName]  = useState('')
   const [signerEmail, setSignerEmail] = useState('')
@@ -40,13 +42,12 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
     mutationFn: () => api.post(`/share-links/public/${token}/sign`, { signerName: signerName.trim(), signerEmail: signerEmail.trim() || undefined }),
     onSuccess: () => {
       setSigned(true)
-      toast.success('Imzo qabul qilindi! ✓')
+      toast.success(t('toastSuccess'))
       refetch()
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toastError')),
   })
 
-  // Recipient name'ni avtomatik to'ldirish
   useEffect(() => {
     if (data?.recipient?.name && !signerName) setSignerName(data.recipient.name)
     if (data?.recipient?.email && !signerEmail) setSignerEmail(data.recipient.email)
@@ -67,12 +68,12 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
           <div className="w-14 h-14 rounded-full bg-[#FEE2E2] flex items-center justify-center mx-auto mb-4">
             <AlertCircle size={26} className="text-[#DC2626]" />
           </div>
-          <h2 className="font-display font-bold text-[#0F172A] text-lg mb-2">Havola mavjud emas</h2>
+          <h2 className="font-display font-bold text-[#0F172A] text-lg mb-2">{t('errorTitle')}</h2>
           <p className="text-sm text-[#475569] mb-6">
-            Bu havola yopilgan, muddati tugagan yoki noto'g'ri.
+            {t('errorMessage')}
           </p>
           <Link href="/">
-            <Button>Bosh sahifaga</Button>
+            <Button>{t('backToHome')}</Button>
           </Link>
         </div>
       </div>
@@ -95,7 +96,7 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
           </Link>
           <div className="flex items-center gap-2 text-xs text-[#475569]">
             <Shield size={13} className="text-[#16A34A]" />
-            <span className="hidden sm:inline">Xavfsiz havola</span>
+            <span className="hidden sm:inline">{t('secureLink')}</span>
           </div>
         </div>
       </header>
@@ -106,14 +107,14 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
           <div className="flex items-center gap-2 mb-1">
             <FileText size={14} className="text-[#94A3B8]" />
             <p className="text-xs text-[#94A3B8] uppercase tracking-wider font-semibold">
-              Sizga shartnoma yuborildi
+              {t('heroLabel')}
             </p>
           </div>
           <h1 className="font-display font-black text-[#0F172A] text-xl sm:text-2xl">
-            {contract.contractNumber || 'Shartnoma'}
+            {contract.contractNumber || t('fallbackContractTitle')}
           </h1>
           <p className="text-sm text-[#475569] mt-1">
-            <strong>{contract.organization?.name}</strong> tomonidan yuborilgan
+            {t.rich('sentBy', { name: contract.organization?.name || '', strong: (chunks) => <strong>{chunks}</strong> })}
           </p>
         </div>
 
@@ -123,7 +124,7 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
             <Card padding="none" className="overflow-hidden">
               <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between">
                 <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">
-                  Shartnoma ko'rinishi
+                  {t('previewLabel')}
                 </p>
                 <div className="flex items-center gap-3 text-xs text-[#94A3B8]">
                   <span className="flex items-center gap-1">
@@ -151,10 +152,12 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
                     <CheckCircle2 size={28} className="text-white" />
                   </div>
                   <h3 className="font-display font-bold text-[#15803D] text-base mb-1">
-                    Imzolandi! ✓
+                    {t('signedTitle')}
                   </h3>
                   <p className="text-sm text-[#166534]">
-                    {data.signerName || signerName || 'Siz'} tomonidan
+                    {data.signerName || signerName
+                      ? t('signedBy', { name: data.signerName || signerName })
+                      : t('signedByYou')}
                     {data.signedAt && ` ${formatDate(data.signedAt, 'long')}`}
                   </p>
                 </div>
@@ -166,25 +169,25 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
                     <FileText size={18} className="text-[#2563EB]" />
                   </div>
                   <div>
-                    <h3 className="font-display font-bold text-[#0F172A] text-base">Shartnomani imzolang</h3>
+                    <h3 className="font-display font-bold text-[#0F172A] text-base">{t('signTitle')}</h3>
                     <p className="text-xs text-[#94A3B8] mt-0.5">
-                      Shartnoma matnini ko'rib chiqing va ismingizni kiriting
+                      {t('signSubtitle')}
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <Input
-                    label="Ismingiz *"
-                    placeholder="Familiya Ism Otasining ismi"
+                    label={t('nameLabel')}
+                    placeholder={t('namePlaceholder')}
                     value={signerName}
                     onChange={e => setSignerName(e.target.value)}
                     required
                   />
                   <Input
-                    label="Email (ixtiyoriy)"
+                    label={t('emailLabel')}
                     type="email"
-                    placeholder="email@company.uz"
+                    placeholder={t('emailPlaceholder')}
                     value={signerEmail}
                     onChange={e => setSignerEmail(e.target.value)}
                   />
@@ -196,12 +199,11 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
                     onClick={() => signMut.mutate()}
                     leftIcon={<CheckCircle2 size={16} />}
                   >
-                    Tasdiqlayman va imzolayman
+                    {t('signButton')}
                   </Button>
 
                   <p className="text-[11px] text-[#94A3B8] text-center leading-relaxed">
-                    Imzolash orqali siz shartnoma shartlariga rozilik bildirgan hisoblanasiz.
-                    Imzo vaqti va IP manzilingiz qayd qilinadi.
+                    {t('signFooter')}
                   </p>
                 </div>
               </Card>
@@ -210,7 +212,7 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
             {/* Yuboruvchi haqida */}
             <Card padding="sm">
               <p className="text-[10px] font-semibold text-[#94A3B8] uppercase tracking-wider mb-2">
-                Yuboruvchi
+                {t('senderLabel')}
               </p>
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#F1F5F9] flex items-center justify-center shrink-0">
@@ -219,7 +221,7 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#0F172A] truncate">{contract.organization?.name}</p>
                   {contract.organization?.inn && (
-                    <p className="text-xs text-[#94A3B8]">STIR: {contract.organization.inn}</p>
+                    <p className="text-xs text-[#94A3B8]">{t('innLabel')} {contract.organization.inn}</p>
                   )}
                 </div>
               </div>
@@ -232,12 +234,12 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
                   <Sparkles size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-display font-bold text-sm">Siz ham hujjat yarating</p>
+                  <p className="font-display font-bold text-sm">{t('promoTitle')}</p>
                   <p className="text-xs text-blue-100 mt-1 leading-relaxed">
-                    AI yordamida 1 daqiqada professional shartnoma. Bepul boshlang.
+                    {t('promoSubtitle')}
                   </p>
                   <Link href="/register" className="inline-flex items-center gap-1 mt-3 text-xs font-semibold bg-white text-[#2563EB] px-3 py-1.5 rounded-lg">
-                    Bepul ro'yxatdan o'tish <ArrowRight size={12} />
+                    {t('promoButton')} <ArrowRight size={12} />
                   </Link>
                 </div>
               </div>
@@ -248,8 +250,8 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
 
       <footer className="text-center py-6 text-xs text-[#94A3B8]">
         <p>
-          MyHujjat.uz orqali yaratilgan ·{' '}
-          <Link href="/" className="text-[#2563EB] hover:underline">Saytga o'tish</Link>
+          {t('footerText')} ·{' '}
+          <Link href="/" className="text-[#2563EB] hover:underline">{t('footerLink')}</Link>
         </p>
       </footer>
     </div>
