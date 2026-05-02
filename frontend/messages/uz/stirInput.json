@@ -1,0 +1,22 @@
+{
+  "stirNotFound": "STIR bo'yicha ma'lumot topilmadi",
+  "jshshirNotFound": "JSHSHIR bo'yicha ma'lumot topilmadi",
+  "autoSearchHint": "9 raqam kiritilganda avtomatik qidiradi",
+  "checkBtn": "Tekshirish",
+  "retitle": "Qayta qidirish",
+  "active": "Faol",
+  "inactive": "Nofaol",
+  "director": "Rahbar",
+  "tax": "Soliq",
+  "address": "Manzil",
+  "accountant": "Hisobchi",
+  "qqsNumber": "QQS raqami",
+  "activity": "Faoliyat",
+  "regDate": "Ro'yxat sanasi",
+  "ustavCapital": "Ustav kapitali",
+  "som": "so'm",
+  "less": "Kamroq",
+  "more": "Ko'proq",
+  "accept": "✓ Qabul qilish",
+  "jshshir14Hint": "14 ta raqam — avtomatik qidiradi"
+}
