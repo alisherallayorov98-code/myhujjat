@@ -1,6 +1,7 @@
 'use client'
 
 import Link           from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Plus, ClipboardList, Download } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }  from '@/components/layout/PageHeader'
@@ -16,6 +17,7 @@ import { exportSpecExcel } from '@/lib/export/specExport'
 import toast           from 'react-hot-toast'
 
 export default function SpesifikatsiyalarPage() {
+  const t = useTranslations('specifications')
   const { currentOrg } = useAuth()
   const qc             = useQueryClient()
 
@@ -34,7 +36,7 @@ export default function SpesifikatsiyalarPage() {
       api.delete(`/specifications/${id}?orgId=${currentOrg?.id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['specifications'] })
-      toast.success("O'chirildi")
+      toast.success(t('toast.deleted'))
     },
   })
 
@@ -46,21 +48,21 @@ export default function SpesifikatsiyalarPage() {
       items:       spec.items || [],
       notes:       spec.notes,
     })
-    toast.success('Excel yuklandi')
+    toast.success(t('toast.excelDownloaded'))
   }
 
   return (
     <div>
       <PageHeader
-        title="Spesifikatsiyalar"
-        description="Tovar va xizmatlar ro'yxatlari"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Spesifikatsiyalar' },
+          { label: t('title') },
         ]}
         actions={
           <Link href="/dashboard/spesifikatsiyalar/yangi">
-            <Button leftIcon={<Plus size={14} />} size="sm">Yangi</Button>
+            <Button leftIcon={<Plus size={14} />} size="sm">{t('new')}</Button>
           </Link>
         }
       />
@@ -74,10 +76,10 @@ export default function SpesifikatsiyalarPage() {
       ) : specs.length === 0 ? (
         <EmptyState
           icon={<ClipboardList size={28} />}
-          title="Spesifikatsiyalar yo'q"
-          description="Tovar va xizmatlar ro'yxatini yarating"
+          title={t('noSpecs')}
+          description={t('noSpecsDescription')}
           action={{
-            label:   'Yangi spesifikatsiya',
+            label:   t('newSpec'),
             onClick: () => window.location.href = '/dashboard/spesifikatsiyalar/yangi',
           }}
         />
@@ -87,7 +89,7 @@ export default function SpesifikatsiyalarPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#E2E8F0]">
-                  {['Raqam', 'Shartnoma', 'Qatorlar', 'Jami summa', 'Sana', ''].map(h => (
+                  {[t('table.number'), t('table.contract'), t('table.rows'), t('table.totalAmount'), t('table.date'), ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                       {h}
                     </th>
@@ -114,7 +116,7 @@ export default function SpesifikatsiyalarPage() {
                         }
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="default" size="sm">{items.length} qator</Badge>
+                        <Badge variant="default" size="sm">{items.length} {t('rows')}</Badge>
                       </td>
                       <td className="px-4 py-3 text-sm font-semibold tabular-nums text-[#0F172A]">
                         {formatCurrency(totals.umumiy)}
@@ -127,7 +129,7 @@ export default function SpesifikatsiyalarPage() {
                           <button
                             onClick={() => handleExcel(spec)}
                             className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-colors"
-                            title="Excel yuklash"
+                            title={t('tooltip.excelDownload')}
                           >
                             <Download size={14} />
                           </button>

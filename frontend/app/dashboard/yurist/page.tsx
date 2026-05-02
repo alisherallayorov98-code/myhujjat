@@ -2,6 +2,7 @@
 
 import { useState }   from 'react'
 import Link           from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Lock, Zap }  from 'lucide-react'
 import { useQuery }   from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -71,6 +72,7 @@ const DOC_GENERATOR_MAP: Record<string, (d: YuristData) => string> = {
 }
 
 export default function YuristPage() {
+  const t = useTranslations('lawyer')
   const { currentOrg, isPro } = useAuth()
   const [selectedDoc,  setSelectedDoc]  = useState<string | null>(null)
   const [preview,      setPreview]      = useState('')
@@ -144,9 +146,9 @@ export default function YuristPage() {
       const opts = { title: previewTitle, content: preview, orgName: currentOrg?.name }
       if (type === 'pdf') await exportContractPdf(opts)
       else                await exportContractDocx(opts)
-      toast.success(`${type === 'pdf' ? 'PDF' : 'Word'} yuklandi ✓`)
+      toast.success(`${type === 'pdf' ? 'PDF' : 'Word'} ✓`)
     } catch {
-      toast.error('Eksport xatosi')
+      toast.error(t('exportError'))
     } finally {
       setLoading(false)
     }
@@ -156,21 +158,20 @@ export default function YuristPage() {
   if (!isPro) {
     return (
       <div>
-        <PageHeader title="⚖️ Yurist bo'limi" breadcrumbs={[
+        <PageHeader title={t('title')} breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Yurist' },
+          { label: t('breadcrumb') },
         ]} />
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
           <div className="w-20 h-20 rounded-2xl bg-[#FEF3C7] border border-[#FDE68A] flex items-center justify-center mb-6">
             <Lock size={32} className="text-[#D97706]" />
           </div>
-          <h2 className="font-semibold text-[#0F172A] text-2xl mb-3">Pro rejada mavjud</h2>
+          <h2 className="font-semibold text-[#0F172A] text-2xl mb-3">{t('proLockTitle')}</h2>
           <p className="text-[#475569] text-base max-w-md leading-relaxed mb-6">
-            Pretenziya, da'vo arizasi, ishonch qog'ozi va boshqa yuridik hujjatlar
-            yaratish uchun Pro rejaga o'ting.
+            {t('proLockDesc')}
           </p>
           <Link href="/dashboard/sozlamalar/obuna">
-            <Button leftIcon={<Zap size={15} />}>Pro rejaga o'tish</Button>
+            <Button leftIcon={<Zap size={15} />}>{t('switchToPro')}</Button>
           </Link>
         </div>
       </div>
@@ -181,11 +182,11 @@ export default function YuristPage() {
   return (
     <div>
       <PageHeader
-        title="⚖️ Yurist bo'limi"
-        description="Yuridik hujjatlarni yarating"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Yurist' },
+          { label: t('breadcrumb') },
         ]}
       />
 
@@ -196,16 +197,16 @@ export default function YuristPage() {
           <Card>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[#0F172A]">
-                {selectedDoc === 'pretenziya' ? 'Pretenziya' :
-                 selectedDoc === 'davo_ariza' ? "Da'vo arizasi" :
-                 selectedDoc === 'ishonch_qogoz' ? "Ishonch qog'ozi" :
-                 'Kelishuv bitimi'}
+                {selectedDoc === 'pretenziya' ? t('pretenziyaName') :
+                 selectedDoc === 'davo_ariza' ? t('davoArizaName') :
+                 selectedDoc === 'ishonch_qogoz' ? t('ishonchQogozName') :
+                 t('kelishuvName')}
               </h3>
               <button
                 onClick={() => { setSelectedDoc(null); setPreview('') }}
                 className="text-xs text-[#94A3B8] hover:text-[#475569] transition-colors"
               >
-                ← Orqaga
+                ← {t('back')}
               </button>
             </div>
             <YuristFormFields
@@ -215,7 +216,7 @@ export default function YuristPage() {
               cps={cps}
             />
             <Button fullWidth onClick={handleGenerate} className="mt-4">
-              Hujjat shakllantirish
+              {t('generateDocument')}
             </Button>
           </Card>
 
