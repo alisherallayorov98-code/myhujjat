@@ -61,7 +61,7 @@ export function PWAInstallPrompt() {
   if (!show || !deferredPrompt) return null
 
   return (
-    <div className="fixed inset-x-4 bottom-4 md:inset-auto md:bottom-6 md:left-6 md:max-w-sm z-50 bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl p-4 animate-scale-in">
+    <div className="fixed top-20 inset-x-4 md:top-20 md:right-6 md:inset-auto md:max-w-sm z-50 bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl p-4 animate-scale-in">
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shrink-0">
           <Smartphone size={20} className="text-white" />

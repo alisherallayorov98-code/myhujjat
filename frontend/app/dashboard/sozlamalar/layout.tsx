@@ -29,8 +29,31 @@ export default function SozlamalarLayout({ children }: { children: React.ReactNo
         <p className="text-sm text-[#94A3B8] mt-1">{t('description')}</p>
       </div>
 
-      <div className="flex gap-6">
-        <aside className="w-52 shrink-0">
+      {/* Mobile: gorizontal scroll-tabs (kichik ekranda layout buzilmasligi uchun) */}
+      <div className="md:hidden mb-4 -mx-4 px-4 overflow-x-auto">
+        <nav className="flex gap-1 min-w-max">
+          {SETTINGS_NAV.map(item => {
+            const isActive = pathname === item.path
+            return (
+              <Link key={item.id} href={item.path}>
+                <div className={cn(
+                  'flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs whitespace-nowrap transition-all',
+                  isActive
+                    ? 'bg-[#DBEAFE] text-[#2563EB] font-medium'
+                    : 'text-[#475569] hover:bg-[#F1F5F9]'
+                )}>
+                  <item.icon size={14} className="shrink-0" />
+                  {item.label}
+                </div>
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
+
+      {/* Desktop: yon panel */}
+      <div className="md:flex md:gap-6">
+        <aside className="hidden md:block md:w-52 md:shrink-0">
           <nav className="space-y-0.5">
             {SETTINGS_NAV.map(item => {
               const isActive = pathname === item.path

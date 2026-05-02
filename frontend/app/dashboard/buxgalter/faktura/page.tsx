@@ -326,9 +326,14 @@ export default function FakturaPage() {
 
           <div>
             <p className="text-sm font-semibold text-[#0F172A] mb-2">{t('preview')}</p>
-            <div className="h-[480px] overflow-auto rounded-xl border border-[#E2E8F0] bg-[#FAFAFA] p-4">
+            <div className="h-[480px] overflow-auto rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] p-3">
               {preview ? (
-                <pre className="whitespace-pre-wrap text-xs leading-relaxed text-[#0F172A] font-mono">{preview}</pre>
+                <div
+                  className="bg-white shadow-sm mx-auto p-6 leading-relaxed text-[#0F172A]"
+                  style={{ fontFamily: '"Times New Roman", serif', fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}
+                >
+                  {preview}
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-[#94A3B8] text-sm">
                   {t('previewHint')}

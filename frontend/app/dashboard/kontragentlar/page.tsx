@@ -192,6 +192,16 @@ export default function KontragentlarPage() {
         />
       </div>
 
+      {!isLoading && filtered.length === 0 && (
+        <EmptyState
+          icon={<Users size={28} />}
+          title={t('noCounterparties')}
+          description={t('noCounterpartiesDescription')}
+          action={{ label: t('add'), onClick: () => setAddModal(true) }}
+        />
+      )}
+
+      {(isLoading || filtered.length > 0) && (
       <Card padding="none">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -209,17 +219,6 @@ export default function KontragentlarPage() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRowSkeleton key={i} cols={6} />
                 ))
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6}>
-                    <EmptyState
-                      icon={<Users size={24} />}
-                      title={t('noCounterparties')}
-                      description={t('noCounterpartiesDescription')}
-                      action={{ label: t('add'), onClick: () => setAddModal(true) }}
-                    />
-                  </td>
-                </tr>
               ) : (
                 filtered.map(cp => (
                   <tr key={cp.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group">
@@ -266,6 +265,7 @@ export default function KontragentlarPage() {
           </table>
         </div>
       </Card>
+      )}
 
       <CpFormModal
         key={editCp?.id ?? (addModal ? 'new' : 'closed')}
