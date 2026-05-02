@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo }                              from 'react'
+import { useTranslations }                                from 'next-intl'
 import { useQuery, useMutation, useQueryClient }          from '@tanstack/react-query'
 import { useAuth }                                        from '@/hooks/useAuth'
 import api from '@/lib/api'
@@ -30,6 +31,7 @@ const EMPTY_DATA: BuyruqData = {
 }
 
 export default function BuyruqPage() {
+  const t = useTranslations('secretary')
   const { currentOrg: activeOrg } = useAuth()
   const qc              = useQueryClient()
   const [step, setStep] = useState<Step>('list')
@@ -37,6 +39,8 @@ export default function BuyruqPage() {
   const [form, setForm] = useState<BuyruqData>({ ...EMPTY_DATA })
   const [copied, setCopied]   = useState(false)
   const [saving, setSaving]   = useState(false)
+
+  const buyruqLabel = (val: string) => t(`buyruqType_${val}` as any)
 
   const { data: docs = [], isLoading } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id, 'BUYRUQ'],
@@ -72,7 +76,7 @@ export default function BuyruqPage() {
     if (!activeOrg) return
     setSaving(true)
     try {
-      const typeLabel = BUYRUQ_TYPES.find(t => t.value === kind)?.label ?? 'Buyruq'
+      const typeLabel = buyruqLabel(kind)
       await api.post('/documents', {
         organizationId: activeOrg.id,
         type:           'BUYRUQ',
@@ -89,7 +93,7 @@ export default function BuyruqPage() {
   }
 
   async function handlePdf() {
-    const typeLabel = BUYRUQ_TYPES.find(t => t.value === kind)?.label ?? 'Buyruq'
+    const typeLabel = buyruqLabel(kind)
     await exportContractPdf({
       title:   `${typeLabel} № ${form.raqam}`,
       content: preview,
@@ -98,7 +102,7 @@ export default function BuyruqPage() {
   }
 
   async function handleDocx() {
-    const typeLabel = BUYRUQ_TYPES.find(t => t.value === kind)?.label ?? 'Buyruq'
+    const typeLabel = buyruqLabel(kind)
     await exportContractDocx({
       title:   `${typeLabel} № ${form.raqam}`,
       content: preview,
@@ -117,38 +121,41 @@ export default function BuyruqPage() {
     FINAL: 'bg-green-100 text-green-700',
     SENT:  'bg-blue-100 text-blue-700',
   }
-  const STATUS_LBL: Record<string, string> = { DRAFT: 'Qoralama', FINAL: 'Tayyor', SENT: 'Yuborildi' }
+  const STATUS_LBL: Record<string, string> = {
+    DRAFT: t('statusDraft'),
+    FINAL: t('statusFinal'),
+    SENT:  t('statusSent'),
+  }
 
-  // ── LIST ────────────────────────────────────────────────────────────────
   if (step === 'list') return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Buyruqlar</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('buyruqlar')}</h1>
         <button
           onClick={initNew}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
         >
-          <Plus className="w-4 h-4" /> Yangi buyruq
+          <Plus className="w-4 h-4" /> {t('yangiBuyruq')}
         </button>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200">
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400">Yuklanmoqda…</div>
+          <div className="p-12 text-center text-gray-400">{t('yuklanmoqda')}</div>
         ) : docs.length === 0 ? (
           <div className="p-16 text-center">
             <FileText className="w-14 h-14 mx-auto text-gray-200 mb-4" />
-            <p className="text-gray-500 font-medium">Buyruqlar yo'q</p>
-            <p className="text-gray-400 text-sm mt-1">Yangi buyruq yarating</p>
+            <p className="text-gray-500 font-medium">{t('buyruqlarYoq')}</p>
+            <p className="text-gray-400 text-sm mt-1">{t('yangiBuyruqYarating')}</p>
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left border-b border-gray-100">
-                <th className="px-5 py-3 font-medium text-gray-500">Raqam</th>
-                <th className="px-5 py-3 font-medium text-gray-500">Sarlavha</th>
-                <th className="px-5 py-3 font-medium text-gray-500">Sana</th>
-                <th className="px-5 py-3 font-medium text-gray-500">Status</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('raqam')}</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('sarlavha')}</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('sana')}</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('status')}</th>
                 <th className="px-5 py-3"></th>
               </tr>
             </thead>
@@ -180,146 +187,140 @@ export default function BuyruqPage() {
     </div>
   )
 
-  // ── FORM + PREVIEW ──────────────────────────────────────────────────────
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <button onClick={() => setStep('list')} className="text-gray-400 hover:text-gray-700 transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Yangi buyruq</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('yangiBuyruq')}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Form */}
         <div className="space-y-5">
-          {/* Type selector */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
-            <p className="text-sm font-medium text-gray-700 mb-3">Buyruq turi</p>
+            <p className="text-sm font-medium text-gray-700 mb-3">{t('buyruqTuri')}</p>
             <div className="grid grid-cols-2 gap-2">
-              {BUYRUQ_TYPES.map(t => (
+              {BUYRUQ_TYPES.map(b => (
                 <button
-                  key={t.value}
-                  onClick={() => setKind(t.value)}
+                  key={b.value}
+                  onClick={() => setKind(b.value)}
                   className={`flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${
-                    kind === t.value
+                    kind === b.value
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-200 hover:border-gray-300 text-gray-600'
                   }`}
                 >
-                  <span>{t.icon}</span> {t.label}
+                  <span>{b.icon}</span> {buyruqLabel(b.value)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Fields */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
-            <p className="text-sm font-medium text-gray-700">Ma'lumotlar</p>
+            <p className="text-sm font-medium text-gray-700">{t('malumotlar')}</p>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Buyruq raqami" value={form.raqam}
+              <Field label={t('buyruqRaqami')} value={form.raqam}
                 onChange={v => updateForm('raqam', v)} placeholder="001" />
-              <Field label="Sana" value={form.sana} type="text"
+              <Field label={t('sana')} value={form.sana} type="text"
                 onChange={v => updateForm('sana', v)} placeholder="dd.mm.yyyy" />
             </div>
 
-            <Field label="Tashkilot nomi" value={form.orgNomi}
-              onChange={v => updateForm('orgNomi', v)} placeholder="Tashkilot nomi" />
-            <Field label="Rahbar F.I.O" value={form.orgRahbar}
-              onChange={v => updateForm('orgRahbar', v)} placeholder="Rahbar ismi" />
-            <Field label="Xodim F.I.O" value={form.xodimIsm}
-              onChange={v => updateForm('xodimIsm', v)} placeholder="Xodim ismi" />
-            <Field label="Lavozim" value={form.xodimLavozim}
-              onChange={v => updateForm('xodimLavozim', v)} placeholder="Lavozim" />
+            <Field label={t('tashkilotNomi')} value={form.orgNomi}
+              onChange={v => updateForm('orgNomi', v)} placeholder={t('tashkilotNomi')} />
+            <Field label={t('rahbarFio')} value={form.orgRahbar}
+              onChange={v => updateForm('orgRahbar', v)} placeholder={t('rahbarIsmi')} />
+            <Field label={t('xodimFio')} value={form.xodimIsm}
+              onChange={v => updateForm('xodimIsm', v)} placeholder={t('xodimIsmi')} />
+            <Field label={t('lavozim')} value={form.xodimLavozim}
+              onChange={v => updateForm('xodimLavozim', v)} placeholder={t('lavozim')} />
 
             {['ISHGA_QABUL', 'LAVOZIM_OZGARTIRISH'].includes(kind) && (
               <>
-                <Field label="Bo'lim" value={form.xodimBolim ?? ''}
-                  onChange={v => updateForm('xodimBolim', v)} placeholder="Bo'lim nomi" />
-                <Field label="Ish boshlash sanasi" value={form.ishBoshi ?? ''}
+                <Field label={t('bolim')} value={form.xodimBolim ?? ''}
+                  onChange={v => updateForm('xodimBolim', v)} placeholder={t('bolimNomi')} />
+                <Field label={t('ishBoshlashSanasi')} value={form.ishBoshi ?? ''}
                   onChange={v => updateForm('ishBoshi', v)} placeholder="dd.mm.yyyy" />
-                <Field label="Maosh (so'm)" value={form.maosh ?? ''}
+                <Field label={t('maoshSom')} value={form.maosh ?? ''}
                   onChange={v => updateForm('maosh', v)} placeholder="5 000 000" />
               </>
             )}
 
             {kind === 'ISHDAN_BOSHATISH' && (
               <>
-                <Field label="Ishdan bo'shatish sanasi" value={form.ishOxiri ?? ''}
+                <Field label={t('ishdanBoshatishSanasi')} value={form.ishOxiri ?? ''}
                   onChange={v => updateForm('ishOxiri', v)} placeholder="dd.mm.yyyy" />
-                <Field label="Sabab" value={form.sabab ?? ''}
-                  onChange={v => updateForm('sabab', v)} placeholder="O'z xohishiga ko'ra..." />
+                <Field label={t('sabab')} value={form.sabab ?? ''}
+                  onChange={v => updateForm('sabab', v)} placeholder={t('sababiPlace')} />
               </>
             )}
 
             {kind === 'MUKOFOT' && (
               <>
-                <Field label="Sabab" value={form.sabab ?? ''}
-                  onChange={v => updateForm('sabab', v)} placeholder="Vijdonli mehnati uchun..." />
-                <Field label="Mukofot miqdori (so'm)" value={form.maosh ?? ''}
+                <Field label={t('sabab')} value={form.sabab ?? ''}
+                  onChange={v => updateForm('sabab', v)} placeholder={t('vijdonliMehnat')} />
+                <Field label={t('mukofotMiqdori')} value={form.maosh ?? ''}
                   onChange={v => updateForm('maosh', v)} placeholder="1 000 000" />
               </>
             )}
 
             {kind === 'BOSHQA' && (
               <>
-                <Field label="Mavzu" value={form.mavzu ?? ''}
-                  onChange={v => updateForm('mavzu', v)} placeholder="Buyruq mavzusi" />
-                <TextareaField label="Mazmun" value={form.sabab ?? ''}
-                  onChange={v => updateForm('sabab', v)} placeholder="Buyruq mazmuni..." />
+                <Field label={t('mavzu')} value={form.mavzu ?? ''}
+                  onChange={v => updateForm('mavzu', v)} placeholder={t('buyruqMavzusi')} />
+                <TextareaField label={t('mazmun')} value={form.sabab ?? ''}
+                  onChange={v => updateForm('sabab', v)} placeholder={t('buyruqMazmuni')} />
               </>
             )}
 
-            <TextareaField label="Qo'shimcha (ixtiyoriy)" value={form.qoshimcha ?? ''}
-              onChange={v => updateForm('qoshimcha', v)} placeholder="Qo'shimcha bandlar..." />
-            <Field label="Asos (ixtiyoriy)" value={form.asosiy ?? ''}
-              onChange={v => updateForm('asosiy', v)} placeholder="Mehnat shartnomasi..." />
+            <TextareaField label={t('qoshimcha')} value={form.qoshimcha ?? ''}
+              onChange={v => updateForm('qoshimcha', v)} placeholder={t('qoshimchaBandlar')} />
+            <Field label={t('asos')} value={form.asosiy ?? ''}
+              onChange={v => updateForm('asosiy', v)} placeholder={t('mehnatShartnomasi')} />
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <button
               onClick={() => handleSave('DRAFT')}
               disabled={saving}
               className="flex items-center gap-2 flex-1 justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
             >
-              <Save className="w-4 h-4" /> Qoralama
+              <Save className="w-4 h-4" /> {t('qoralama')}
             </button>
             <button
               onClick={() => handleSave('FINAL')}
               disabled={saving}
               className="flex items-center gap-2 flex-1 justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
             >
-              <Check className="w-4 h-4" /> Saqlash
+              <Check className="w-4 h-4" /> {t('saqlash')}
             </button>
           </div>
         </div>
 
-        {/* Preview */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Eye className="w-4 h-4" /> Ko'rinish
+              <Eye className="w-4 h-4" /> {t('korinish')}
             </p>
             <div className="flex gap-2">
               <button onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-2.5 py-1.5 rounded-lg transition-colors">
                 {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Nusxa olindi' : 'Nusxa'}
+                {copied ? t('nusxaOlindi') : t('nusxa')}
               </button>
               <button onClick={handleDocx}
                 className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2.5 py-1.5 rounded-lg transition-colors">
-                <Download className="w-3.5 h-3.5" /> Word
+                <Download className="w-3.5 h-3.5" /> {t('word')}
               </button>
               <button onClick={handlePdf}
                 className="flex items-center gap-1.5 text-xs text-red-600 hover:text-red-800 border border-red-200 px-2.5 py-1.5 rounded-lg transition-colors">
-                <Download className="w-3.5 h-3.5" /> PDF
+                <Download className="w-3.5 h-3.5" /> {t('pdf')}
               </button>
             </div>
           </div>
           <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[500px]">
-            <pre className="text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed">{preview || 'Ma\'lumotlarni to\'ldiring…'}</pre>
+            <pre className="text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed">{preview || t('malumotlarToldiring')}</pre>
           </div>
         </div>
       </div>

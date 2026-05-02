@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                      from 'react'
+import { useTranslations }                               from 'next-intl'
 import { Plus, Download, Check }                         from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
@@ -22,6 +23,7 @@ import { cn }                                             from '@/lib/cn'
 const today = () => new Date().toISOString().split('T')[0]
 
 export default function TolovGrafigiPage() {
+  const t = useTranslations('accountant')
   const qc               = useQueryClient()
   const { currentOrg }   = useAuth()
   const [modal, setModal] = useState(false)
@@ -73,15 +75,15 @@ export default function TolovGrafigiPage() {
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tolov-grafik'] })
-      toast.success("To'lov grafigi saqlandi ✓")
+      toast.success(t('grafikSaved'))
       setModal(false)
       setRows([])
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   async function handleExcel() {
-    if (!rows.length) { toast.error('Avval hisoblang'); return }
+    if (!rows.length) { toast.error(t('calcFirst')); return }
     const items = rows.map(r => ({
       nomi:     `${r.oy}-oy (${r.sana})`,
       birlik:   "to'lov",
@@ -97,7 +99,7 @@ export default function TolovGrafigiPage() {
       items,
       notes: `Asosiy qarz: ${formatCurrency(parseFloat(form.asosiyQarz) || 0)}, Foiz: ${form.foizStavka}%, Muddat: ${form.tolovSoni} oy`,
     })
-    toast.success('Excel yuklandi ✓')
+    toast.success('Excel ✓')
   }
 
   const jamiTolov        = rows.reduce((s, r) => s + r.jami, 0)
@@ -112,16 +114,16 @@ export default function TolovGrafigiPage() {
   return (
     <div>
       <PageHeader
-        title="📅 To'lov grafigi"
-        description="Qarz bo'yicha oylik to'lov jadvali"
+        title={t('tolovGrafigiTitle')}
+        description={t('tolovGrafigiPageDesc')}
         breadcrumbs={[
-          { label: 'Dashboard',  path: '/dashboard' },
-          { label: 'Buxgalter', path: '/dashboard/buxgalter' },
-          { label: "To'lov grafigi" },
+          { label: 'Dashboard',     path: '/dashboard' },
+          { label: t('breadcrumb'), path: '/dashboard/buxgalter' },
+          { label: t('tolovGrafigiLabel') },
         ]}
         actions={
           <Button leftIcon={<Plus size={14} />} size="sm" onClick={openModal}>
-            Yangi grafik
+            {t('newGrafik')}
           </Button>
         }
       />
@@ -129,9 +131,9 @@ export default function TolovGrafigiPage() {
       {grafiklar.length === 0 && !isLoading ? (
         <EmptyState
           icon={<span className="text-3xl">📅</span>}
-          title="Grafiklar yo'q"
-          description="Birinchi to'lov grafigini yarating"
-          action={{ label: 'Yangi grafik', onClick: openModal }}
+          title={t('noGrafiklar')}
+          description={t('createFirstGrafik')}
+          action={{ label: t('newGrafik'), onClick: openModal }}
         />
       ) : (
         <Card padding="none">
@@ -146,7 +148,12 @@ export default function TolovGrafigiPage() {
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#0F172A]">{doc.title}</p>
                     <p className="text-xs text-[#94A3B8]">
-                      {docRows.length} oy · {formatCurrency(jamiSum)} · To'landi: {tolangan}/{docRows.length}
+                      {t('monthsSummary', {
+                        months: docRows.length,
+                        sum:    formatCurrency(jamiSum),
+                        paid:   tolangan,
+                        total:  docRows.length,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -159,11 +166,11 @@ export default function TolovGrafigiPage() {
       <Modal
         open={modal}
         onClose={() => setModal(false)}
-        title="Yangi to'lov grafigi"
+        title={t('newGrafik')}
         size="xl"
         footer={
           <div className="flex gap-2 w-full">
-            <Button variant="outline" size="sm" onClick={() => setModal(false)}>Yopish</Button>
+            <Button variant="outline" size="sm" onClick={() => setModal(false)}>{t('close')}</Button>
             <div className="flex-1" />
             {rows.length > 0 && (
               <Button variant="secondary" size="sm" leftIcon={<Download size={13} />} onClick={handleExcel}>
@@ -172,45 +179,43 @@ export default function TolovGrafigiPage() {
             )}
             {rows.length > 0 && (
               <Button size="sm" loading={mutation.isPending} onClick={() => mutation.mutate()}>
-                Saqlash
+                {t('save')}
               </Button>
             )}
           </div>
         }
       >
-        {/* Sozlamalar */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5">
-          <Input label="Kontragent nomi" placeholder="Toshmatov MChJ"
+          <Input label={t('kontragentNomi')} placeholder={t('kontragentPlace')}
             value={form.cpNomi} onChange={e => setForm(f => ({ ...f, cpNomi: e.target.value }))} />
-          <Input label="Asosiy qarz (so'm) *" type="number" placeholder="10 000 000"
+          <Input label={t('asosiyQarz')} type="number" placeholder={t('asosiyQarzPlace')}
             value={form.asosiyQarz} onChange={e => setForm(f => ({ ...f, asosiyQarz: e.target.value }))} />
-          <Input label="To'lov soni (oy) *" type="number" placeholder="12"
+          <Input label={t('tolovSoni')} type="number" placeholder={t('tolovSoniPlace')}
             value={form.tolovSoni} onChange={e => setForm(f => ({ ...f, tolovSoni: e.target.value }))} />
-          <Input label="Foiz stavkasi (%)" type="number" placeholder="0 = foizsiz"
+          <Input label={t('foizStavka')} type="number" placeholder={t('foizStavkaPlace')}
             value={form.foizStavka} onChange={e => setForm(f => ({ ...f, foizStavka: e.target.value }))} />
-          <Input label="Boshlanish sanasi" type="date"
+          <Input label={t('boshlashSana')} type="date"
             value={form.boshlashSana} onChange={e => setForm(f => ({ ...f, boshlashSana: e.target.value }))} />
-          <Input label="Shartnoma (ixtiyoriy)" placeholder="№ SH-2025-001"
+          <Input label={t('shartnoma')} placeholder={t('shartnomaPlace')}
             value={form.shartnoma} onChange={e => setForm(f => ({ ...f, shartnoma: e.target.value }))} />
         </div>
 
         <Button fullWidth variant="secondary"
           onClick={handleCalc}
           disabled={!form.asosiyQarz || !form.tolovSoni}>
-          Grafikni hisoblash
+          {t('calcGrafik')}
         </Button>
 
-        {/* Jadval */}
         {rows.length > 0 && (
           <div className="mt-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-bold text-[#0F172A]">To'lov jadvali</p>
+              <p className="text-sm font-bold text-[#0F172A]">{t('tolovJadvali')}</p>
               <div className="flex gap-3 text-xs">
                 <span className="text-[#16A34A] font-medium">
-                  To'landi: {formatCurrency(jamiTolanganSum)}
+                  {t('tolandi', { sum: formatCurrency(jamiTolanganSum) })}
                 </span>
                 <span className="text-[#94A3B8]">
-                  Jami: {formatCurrency(jamiTolov)}
+                  {t('jamiSum', { sum: formatCurrency(jamiTolov) })}
                 </span>
               </div>
             </div>
@@ -219,7 +224,7 @@ export default function TolovGrafigiPage() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                    {['Oy', 'Sana', 'Asosiy', 'Foiz', 'Jami', 'Qoldiq', 'Holat'].map(h => (
+                    {[t('tableOy'), t('tableSana'), t('tableAsosiy'), t('tableFoiz'), t('tableJami'), t('tableQoldiq'), t('tableHolat')].map(h => (
                       <th key={h} className="px-3 py-2.5 text-left text-xs font-semibold text-[#94A3B8] uppercase">
                         {h}
                       </th>
@@ -247,7 +252,7 @@ export default function TolovGrafigiPage() {
                               : 'bg-[#F1F5F9] text-[#94A3B8] hover:bg-[#E2E8F0]'
                           )}
                         >
-                          {row.tolangan ? <><Check size={11} /> To'landi</> : 'Belgilash'}
+                          {row.tolangan ? <><Check size={11} /> {t('tolanganLbl')}</> : t('belgilash')}
                         </button>
                       </td>
                     </tr>
@@ -257,7 +262,7 @@ export default function TolovGrafigiPage() {
             </div>
 
             <div className="mt-3 p-3 bg-[#F8FAFC] rounded-lg text-xs text-[#94A3B8] italic">
-              Jami: {formatAmountWords(jamiTolov)}
+              {t('jamiSum', { sum: formatAmountWords(jamiTolov) })}
             </div>
           </div>
         )}

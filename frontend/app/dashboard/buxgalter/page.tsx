@@ -1,43 +1,46 @@
 'use client'
 
 import Link                from 'next/link'
+import { useTranslations } from 'next-intl'
 import { ArrowRight }      from 'lucide-react'
 import { PageHeader }      from '@/components/layout/PageHeader'
 import { Card }            from '@/components/ui/Card'
 
-const MODULES = [
-  {
-    href:  '/dashboard/buxgalter/faktura',
-    icon:  '🧾',
-    label: 'Faktura',
-    desc:  "Hisob-faktura yaratish, QQS bilan",
-    color: 'bg-[#DCFCE7]',
-  },
-  {
-    href:  '/dashboard/buxgalter/akt-sverki',
-    icon:  '📊',
-    label: 'Akt-sverka',
-    desc:  "O'zaro hisob-kitob tekshirish hujjati",
-    color: 'bg-[#FEF3C7]',
-  },
-  {
-    href:  '/dashboard/buxgalter/tolov-grafigi',
-    icon:  '📅',
-    label: "To'lov grafigi",
-    desc:  "Qarz bo'yicha oylik to'lov jadvali",
-    color: 'bg-[#EDE9FE]',
-  },
-]
-
 export default function BuxgalterPage() {
+  const t = useTranslations('accountant')
+
+  const MODULES = [
+    {
+      href:  '/dashboard/buxgalter/faktura',
+      icon:  '🧾',
+      label: t('fakturaLabel'),
+      desc:  t('fakturaDesc'),
+      color: 'bg-[#DCFCE7]',
+    },
+    {
+      href:  '/dashboard/buxgalter/akt-sverki',
+      icon:  '📊',
+      label: t('aktSverkaLabel'),
+      desc:  t('aktSverkaDesc'),
+      color: 'bg-[#FEF3C7]',
+    },
+    {
+      href:  '/dashboard/buxgalter/tolov-grafigi',
+      icon:  '📅',
+      label: t('tolovGrafigiLabel'),
+      desc:  t('tolovGrafigiDesc'),
+      color: 'bg-[#EDE9FE]',
+    },
+  ]
+
   return (
     <div>
       <PageHeader
-        title="💼 Buxgalter bo'limi"
-        description="Faktura, akt-sverka va to'lov grafigi"
+        title={t('title')}
+        description={t('description')}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Buxgalter' },
+          { label: t('breadcrumb') },
         ]}
       />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

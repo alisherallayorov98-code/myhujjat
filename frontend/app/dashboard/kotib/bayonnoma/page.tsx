@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo }                     from 'react'
+import { useTranslations }                       from 'next-intl'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth }                           from '@/hooks/useAuth'
 import api from '@/lib/api'
@@ -29,6 +30,7 @@ const EMPTY: BayonnomData = {
 }
 
 export default function BayonnomPage() {
+  const t = useTranslations('secretary')
   const { currentOrg: activeOrg } = useAuth()
   const qc              = useQueryClient()
   const [step, setStep] = useState<Step>('list')
@@ -36,6 +38,8 @@ export default function BayonnomPage() {
   const [form, setForm] = useState<BayonnomData>({ ...EMPTY })
   const [copied, setCopied]  = useState(false)
   const [saving, setSaving]  = useState(false)
+
+  const bayonnomaLabel = (val: string) => t(`bayonnomaType_${val}` as any)
 
   const { data: docs = [], isLoading } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id, 'BAYONNOMA'],
@@ -70,7 +74,7 @@ export default function BayonnomPage() {
     if (!activeOrg) return
     setSaving(true)
     try {
-      const typeLabel = BAYONNOMA_TYPES.find(t => t.value === kind)?.label ?? 'Bayonnoma'
+      const typeLabel = bayonnomaLabel(kind)
       await api.post('/documents', {
         organizationId: activeOrg.id,
         type:           'BAYONNOMA',
@@ -87,12 +91,12 @@ export default function BayonnomPage() {
   }
 
   async function handlePdf() {
-    const label = BAYONNOMA_TYPES.find(t => t.value === kind)?.label ?? 'Bayonnoma'
+    const label = bayonnomaLabel(kind)
     await exportContractPdf({ title: `${label} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
   }
 
   async function handleDocx() {
-    const label = BAYONNOMA_TYPES.find(t => t.value === kind)?.label ?? 'Bayonnoma'
+    const label = bayonnomaLabel(kind)
     await exportContractDocx({ title: `${label} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
   }
 
@@ -107,38 +111,41 @@ export default function BayonnomPage() {
     FINAL: 'bg-green-100 text-green-700',
     SENT:  'bg-blue-100 text-blue-700',
   }
-  const STATUS_LBL: Record<string, string> = { DRAFT: 'Qoralama', FINAL: 'Tayyor', SENT: 'Yuborildi' }
+  const STATUS_LBL: Record<string, string> = {
+    DRAFT: t('statusDraft'),
+    FINAL: t('statusFinal'),
+    SENT:  t('statusSent'),
+  }
 
-  // ── LIST ────────────────────────────────────────────────────────────────
   if (step === 'list') return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Bayonnomalar</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('bayonnomalar')}</h1>
         <button
           onClick={initNew}
           className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
         >
-          <Plus className="w-4 h-4" /> Yangi bayonnoma
+          <Plus className="w-4 h-4" /> {t('yangiBayonnoma')}
         </button>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200">
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400">Yuklanmoqda…</div>
+          <div className="p-12 text-center text-gray-400">{t('yuklanmoqda')}</div>
         ) : docs.length === 0 ? (
           <div className="p-16 text-center">
             <Users className="w-14 h-14 mx-auto text-gray-200 mb-4" />
-            <p className="text-gray-500 font-medium">Bayonnomalar yo'q</p>
-            <p className="text-gray-400 text-sm mt-1">Yangi bayonnoma yarating</p>
+            <p className="text-gray-500 font-medium">{t('bayonnomalarYoq')}</p>
+            <p className="text-gray-400 text-sm mt-1">{t('yangiBayonnomaYarating')}</p>
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left border-b border-gray-100">
-                <th className="px-5 py-3 font-medium text-gray-500">Raqam</th>
-                <th className="px-5 py-3 font-medium text-gray-500">Sarlavha</th>
-                <th className="px-5 py-3 font-medium text-gray-500">Sana</th>
-                <th className="px-5 py-3 font-medium text-gray-500">Status</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('raqam')}</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('sarlavha')}</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('sana')}</th>
+                <th className="px-5 py-3 font-medium text-gray-500">{t('status')}</th>
                 <th className="px-5 py-3"></th>
               </tr>
             </thead>
@@ -170,127 +177,121 @@ export default function BayonnomPage() {
     </div>
   )
 
-  // ── FORM + PREVIEW ──────────────────────────────────────────────────────
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <button onClick={() => setStep('list')} className="text-gray-400 hover:text-gray-700 transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Yangi bayonnoma</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('yangiBayonnoma')}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Form */}
         <div className="space-y-5">
-          {/* Type */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
-            <p className="text-sm font-medium text-gray-700 mb-3">Bayonnoma turi</p>
+            <p className="text-sm font-medium text-gray-700 mb-3">{t('bayonnomaTuri')}</p>
             <div className="grid grid-cols-1 gap-2">
-              {BAYONNOMA_TYPES.map(t => (
+              {BAYONNOMA_TYPES.map(b => (
                 <button
-                  key={t.value}
-                  onClick={() => setKind(t.value)}
+                  key={b.value}
+                  onClick={() => setKind(b.value)}
                   className={`flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${
-                    kind === t.value
+                    kind === b.value
                       ? 'border-purple-500 bg-purple-50 text-purple-700'
                       : 'border-gray-200 hover:border-gray-300 text-gray-600'
                   }`}
                 >
-                  <span>{t.icon}</span> {t.label}
+                  <span>{b.icon}</span> {bayonnomaLabel(b.value)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Fields */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
-            <p className="text-sm font-medium text-gray-700">Ma'lumotlar</p>
+            <p className="text-sm font-medium text-gray-700">{t('malumotlar')}</p>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Bayonnoma raqami" value={form.raqam}
+              <Field label={t('bayonnomaRaqami')} value={form.raqam}
                 onChange={v => update('raqam', v)} placeholder="001" />
-              <Field label="Sana" value={form.sana}
+              <Field label={t('sana')} value={form.sana}
                 onChange={v => update('sana', v)} placeholder="dd.mm.yyyy" />
             </div>
 
-            <Field label="Tashkilot nomi" value={form.orgNomi}
-              onChange={v => update('orgNomi', v)} placeholder="Tashkilot nomi" />
+            <Field label={t('tashkilotNomi')} value={form.orgNomi}
+              onChange={v => update('orgNomi', v)} placeholder={t('tashkilotNomi')} />
 
             {kind === 'QABUL_TOPSHIRISH' ? (
               <>
-                <Field label="Topshiruvchi" value={form.rahbar}
-                  onChange={v => update('rahbar', v)} placeholder="F.I.O" />
-                <Field label="Qabul qiluvchi" value={form.kotib}
-                  onChange={v => update('kotib', v)} placeholder="F.I.O" />
-                <TextareaField label="Topshirildi / Qabul qilindi" value={form.mavzu}
-                  onChange={v => update('mavzu', v)} placeholder="Topshirilgan ashyolar ro'yxati..." />
-                <TextareaField label="Holati va miqdori" value={form.muhokama}
-                  onChange={v => update('muhokama', v)} placeholder="Holat tavsifi..." />
-                <TextareaField label="Izohlar va qarorlar" value={form.qaror}
-                  onChange={v => update('qaror', v)} placeholder="Qarorlar..." />
+                <Field label={t('topshiruvchi')} value={form.rahbar}
+                  onChange={v => update('rahbar', v)} placeholder={t('fio')} />
+                <Field label={t('qabulQiluvchi')} value={form.kotib}
+                  onChange={v => update('kotib', v)} placeholder={t('fio')} />
+                <TextareaField label={t('topshirildi')} value={form.mavzu}
+                  onChange={v => update('mavzu', v)} placeholder={t('topshirildiPlace')} />
+                <TextareaField label={t('holatiMiqdori')} value={form.muhokama}
+                  onChange={v => update('muhokama', v)} placeholder={t('holatiPlace')} />
+                <TextareaField label={t('izohlarQarorlar')} value={form.qaror}
+                  onChange={v => update('qaror', v)} placeholder={t('qarorlar')} />
               </>
             ) : (
               <>
-                <Field label="Yig'ilish raisi / Rahbar" value={form.rahbar}
-                  onChange={v => update('rahbar', v)} placeholder="F.I.O" />
-                <Field label="Kotib" value={form.kotib}
-                  onChange={v => update('kotib', v)} placeholder="F.I.O" />
-                <TextareaField label="Ishtirokchilar" value={form.ishtirokchilar}
-                  onChange={v => update('ishtirokchilar', v)} placeholder="Ishtirokchilar ro'yxati..." />
-                <Field label="Mavzu" value={form.mavzu}
-                  onChange={v => update('mavzu', v)} placeholder="Yig'ilish mavzusi" />
-                <TextareaField label="Eshitildi / Muhokama" value={form.muhokama}
-                  onChange={v => update('muhokama', v)} placeholder="Muhokama qilingan masalalar..." />
-                <TextareaField label="Qaror qilindi" value={form.qaror}
-                  onChange={v => update('qaror', v)} placeholder="Qabul qilingan qarorlar..." />
+                <Field label={t('yigilishRaisi')} value={form.rahbar}
+                  onChange={v => update('rahbar', v)} placeholder={t('fio')} />
+                <Field label={t('kotib')} value={form.kotib}
+                  onChange={v => update('kotib', v)} placeholder={t('fio')} />
+                <TextareaField label={t('ishtirokchilar')} value={form.ishtirokchilar}
+                  onChange={v => update('ishtirokchilar', v)} placeholder={t('ishtirokchilarRoyxati')} />
+                <Field label={t('mavzu')} value={form.mavzu}
+                  onChange={v => update('mavzu', v)} placeholder={t('yigilishMavzusi')} />
+                <TextareaField label={t('muhokama')} value={form.muhokama}
+                  onChange={v => update('muhokama', v)} placeholder={t('muhokamaPlace')} />
+                <TextareaField label={t('qaror')} value={form.qaror}
+                  onChange={v => update('qaror', v)} placeholder={t('qarorPlace')} />
               </>
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <button
               onClick={() => handleSave('DRAFT')}
               disabled={saving}
               className="flex items-center gap-2 flex-1 justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
             >
-              <Save className="w-4 h-4" /> Qoralama
+              <Save className="w-4 h-4" /> {t('qoralama')}
             </button>
             <button
               onClick={() => handleSave('FINAL')}
               disabled={saving}
               className="flex items-center gap-2 flex-1 justify-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
             >
-              <Check className="w-4 h-4" /> Saqlash
+              <Check className="w-4 h-4" /> {t('saqlash')}
             </button>
           </div>
         </div>
 
-        {/* Preview */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Eye className="w-4 h-4" /> Ko'rinish
+              <Eye className="w-4 h-4" /> {t('korinish')}
             </p>
             <div className="flex gap-2">
               <button onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-2.5 py-1.5 rounded-lg transition-colors">
                 {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Nusxa olindi' : 'Nusxa'}
+                {copied ? t('nusxaOlindi') : t('nusxa')}
               </button>
               <button onClick={handleDocx}
                 className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2.5 py-1.5 rounded-lg transition-colors">
-                <Download className="w-3.5 h-3.5" /> Word
+                <Download className="w-3.5 h-3.5" /> {t('word')}
               </button>
               <button onClick={handlePdf}
                 className="flex items-center gap-1.5 text-xs text-red-600 hover:text-red-800 border border-red-200 px-2.5 py-1.5 rounded-lg transition-colors">
-                <Download className="w-3.5 h-3.5" /> PDF
+                <Download className="w-3.5 h-3.5" /> {t('pdf')}
               </button>
             </div>
           </div>
           <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[500px]">
-            <pre className="text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed">{preview || 'Ma\'lumotlarni to\'ldiring…'}</pre>
+            <pre className="text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed">{preview || t('malumotlarToldiring')}</pre>
           </div>
         </div>
       </div>

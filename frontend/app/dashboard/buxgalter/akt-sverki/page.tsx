@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                      from 'react'
+import { useTranslations }                               from 'next-intl'
 import { Plus, Save, Download, RefreshCw, Trash2 }       from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
@@ -23,6 +24,7 @@ const today = () => new Date().toISOString().split('T')[0]
 const EMPTY_MOV: AktSverkaMovement = { sana: '', hujjat: '', debet: 0, kredit: 0 }
 
 export default function AktSverkiPage() {
+  const t = useTranslations('accountant')
   const qc               = useQueryClient()
   const { currentOrg }   = useAuth()
   const [modal, setModal] = useState(false)
@@ -94,25 +96,25 @@ export default function AktSverkiPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['akt-sverki'] })
-      toast.success('Akt-sverka saqlandi ✓')
+      toast.success(t('aktSverkaSaved'))
       setModal(false)
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   return (
     <div>
       <PageHeader
-        title="📊 Akt-sverka"
-        description="O'zaro hisob-kitob tekshirish hujjati"
+        title={t('aktSverkaTitle')}
+        description={t('aktSverkaPageDesc')}
         breadcrumbs={[
-          { label: 'Dashboard',  path: '/dashboard' },
-          { label: 'Buxgalter', path: '/dashboard/buxgalter' },
-          { label: 'Akt-sverka' },
+          { label: 'Dashboard',     path: '/dashboard' },
+          { label: t('breadcrumb'), path: '/dashboard/buxgalter' },
+          { label: t('aktSverkaLabel') },
         ]}
         actions={
           <Button leftIcon={<Plus size={14} />} size="sm" onClick={() => { setPreview(''); setModal(true) }}>
-            Yangi akt-sverka
+            {t('newAktSverka')}
           </Button>
         }
       />
@@ -120,16 +122,16 @@ export default function AktSverkiPage() {
       {aktlar.length === 0 && !isLoading ? (
         <EmptyState
           icon={<span className="text-3xl">📊</span>}
-          title="Akt-sverkalar yo'q"
-          description="Birinchi akt-sverkani yarating"
-          action={{ label: 'Yangi akt-sverka', onClick: () => setModal(true) }}
+          title={t('noAktSverkas')}
+          description={t('createFirstAktSverka')}
+          action={{ label: t('newAktSverka'), onClick: () => setModal(true) }}
         />
       ) : (
         <Card padding="none">
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
-                {['Raqam', 'Sarlavha', 'Davr', 'Sana', ''].map(h => (
+                {[t('tableRaqam'), t('tableSarlavha'), t('tableDavr'), t('tableSana'), ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                     {h}
                   </th>
@@ -163,13 +165,13 @@ export default function AktSverkiPage() {
       <Modal
         open={modal}
         onClose={() => setModal(false)}
-        title="Yangi akt-sverka"
+        title={t('newAktSverka')}
         size="xl"
         footer={
           <div className="flex gap-2 w-full">
-            <Button variant="outline" size="sm" onClick={() => setModal(false)}>Yopish</Button>
+            <Button variant="outline" size="sm" onClick={() => setModal(false)}>{t('close')}</Button>
             <div className="flex-1" />
-            <Button variant="secondary" size="sm" leftIcon={<RefreshCw size={13} />} onClick={handlePreview}>Ko'rish</Button>
+            <Button variant="secondary" size="sm" leftIcon={<RefreshCw size={13} />} onClick={handlePreview}>{t('view')}</Button>
             <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
               onClick={() => {
                 const text = generateAktSverkaText(buildData())
@@ -178,28 +180,26 @@ export default function AktSverkiPage() {
               PDF
             </Button>
             <Button size="sm" leftIcon={<Save size={13} />} loading={mutation.isPending} onClick={() => mutation.mutate()}>
-              Saqlash
+              {t('save')}
             </Button>
           </div>
         }
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Chap: Form */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <Input label="Raqam" placeholder="Avtomatik"
+              <Input label={t('raqam')} placeholder={t('raqamPlace')}
                 value={form.raqam} onChange={e => setForm(f => ({ ...f, raqam: e.target.value }))} />
-              <Input label="Sana" type="date"
+              <Input label={t('sana')} type="date"
                 value={form.sana} onChange={e => setForm(f => ({ ...f, sana: e.target.value }))} />
             </div>
-            <Input label="Davr" placeholder="2025-yil I-chorak"
+            <Input label={t('davr')} placeholder={t('davrPlace')}
               value={form.davr} onChange={e => setForm(f => ({ ...f, davr: e.target.value }))} />
 
-            {/* Kontragent */}
             <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-3">
-              <p className="text-xs font-semibold text-[#475569] uppercase tracking-wide">Kontragent</p>
+              <p className="text-xs font-semibold text-[#475569] uppercase tracking-wide">{t('kontragent')}</p>
               <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-[#374151]">Kontragent tanlash</label>
+                <label className="block text-xs font-medium text-[#374151]">{t('selectKontragent')}</label>
                 <select
                   onChange={e => {
                     const cp = cps.find((c: any) => c.id === e.target.value)
@@ -207,30 +207,29 @@ export default function AktSverkiPage() {
                   }}
                   className="w-full h-9 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
                 >
-                  <option value="">Tanlang...</option>
+                  <option value="">{t('selectPlace')}</option>
                   {cps.map((cp: any) => <option key={cp.id} value={cp.id}>{cp.name}</option>)}
                 </select>
               </div>
-              <Input label="Kontragent nomi" placeholder="MChJ nomi"
+              <Input label={t('kontragentNomi')} placeholder={t('kontragentNomiPlace')}
                 value={form.cpNomi} onChange={e => setForm(f => ({ ...f, cpNomi: e.target.value }))} />
               <div className="grid grid-cols-2 gap-2">
-                <Input label="INN" placeholder="123456789"
+                <Input label={t('inn')} placeholder={t('innPlace')}
                   value={form.cpInn} onChange={e => setForm(f => ({ ...f, cpInn: e.target.value }))} />
-                <Input label="Rahbar" placeholder="F.I.O"
+                <Input label={t('rahbar')} placeholder={t('rahbarPlace')}
                   value={form.cpRahbar} onChange={e => setForm(f => ({ ...f, cpRahbar: e.target.value }))} />
               </div>
             </div>
 
-            <Input label="Boshlanish qoldig'i (so'm)" type="number" placeholder="0"
+            <Input label={t('boshlangichQoldiq')} type="number" placeholder="0"
               value={form.boshlangichQoldiq} onChange={e => setForm(f => ({ ...f, boshlangichQoldiq: e.target.value }))} />
 
-            {/* Harakatlar jadvali */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-[#0F172A]">Harakatlar</p>
+                <p className="text-sm font-semibold text-[#0F172A]">{t('harakatlar')}</p>
                 <button onClick={() => setMovements(p => [...p, { ...EMPTY_MOV }])}
                   className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
-                  <Plus size={12} /> Qo'shish
+                  <Plus size={12} /> {t('addItem')}
                 </button>
               </div>
               <div className="space-y-2">
@@ -238,19 +237,19 @@ export default function AktSverkiPage() {
                   <div key={i} className="grid grid-cols-11 gap-1.5 items-center">
                     <input value={mov.sana}
                       onChange={e => updateMov(i, 'sana', e.target.value)}
-                      placeholder="Sana" type="date"
+                      placeholder={t('movSana')} type="date"
                       className="col-span-3 h-8 text-xs rounded-lg border border-[#E2E8F0] px-2 focus:outline-none" />
                     <input value={mov.hujjat}
                       onChange={e => updateMov(i, 'hujjat', e.target.value)}
-                      placeholder="Hujjat"
+                      placeholder={t('movHujjat')}
                       className="col-span-3 h-8 text-xs rounded-lg border border-[#E2E8F0] px-2 focus:outline-none" />
                     <input type="number" value={mov.debet || ''}
                       onChange={e => updateMov(i, 'debet', parseFloat(e.target.value) || 0)}
-                      placeholder="Debet"
+                      placeholder={t('movDebet')}
                       className="col-span-2 h-8 text-xs rounded-lg border border-[#E2E8F0] px-2 focus:outline-none text-right tabular-nums" />
                     <input type="number" value={mov.kredit || ''}
                       onChange={e => updateMov(i, 'kredit', parseFloat(e.target.value) || 0)}
-                      placeholder="Kredit"
+                      placeholder={t('movKredit')}
                       className="col-span-2 h-8 text-xs rounded-lg border border-[#E2E8F0] px-2 focus:outline-none text-right tabular-nums" />
                     <button onClick={() => movements.length > 1 && setMovements(p => p.filter((_, idx) => idx !== i))}
                       className="col-span-1 h-8 flex items-center justify-center text-[#CBD5E1] hover:text-[#DC2626] transition-colors">
@@ -262,15 +261,14 @@ export default function AktSverkiPage() {
             </div>
           </div>
 
-          {/* O'ng: Preview */}
           <div>
-            <p className="text-sm font-semibold text-[#0F172A] mb-2">Ko'rib chiqish</p>
+            <p className="text-sm font-semibold text-[#0F172A] mb-2">{t('preview')}</p>
             <div className="h-[480px] overflow-auto rounded-xl border border-[#E2E8F0] bg-[#FAFAFA] p-4">
               {preview ? (
                 <pre className="whitespace-pre-wrap text-xs leading-relaxed text-[#0F172A] font-mono">{preview}</pre>
               ) : (
                 <div className="flex items-center justify-center h-full text-[#94A3B8] text-sm">
-                  Ma'lumotlarni to'ldiring va "Ko'rish" bosing
+                  {t('previewHint')}
                 </div>
               )}
             </div>

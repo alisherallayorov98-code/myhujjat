@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                      from 'react'
+import { useTranslations }                               from 'next-intl'
 import { Plus, Save, Download, RefreshCw }               from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
@@ -23,6 +24,7 @@ import toast                                              from 'react-hot-toast'
 const today = () => new Date().toISOString().split('T')[0]
 
 export default function FakturaPage() {
+  const t = useTranslations('accountant')
   const qc               = useQueryClient()
   const { currentOrg }   = useAuth()
   const [modal, setModal] = useState(false)
@@ -114,13 +116,13 @@ export default function FakturaPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['fakturalar'] })
-      toast.success('Faktura saqlandi ✓')
+      toast.success(t('fakturaSaved'))
       setModal(false)
       setItems([newSpecItem()])
       setForm({ raqam: '', sana: today(), cpId: '', notes: '', shartnoma: '' })
       setPreview('')
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   function openModal() {
@@ -133,16 +135,16 @@ export default function FakturaPage() {
   return (
     <div>
       <PageHeader
-        title="🧾 Faktura"
-        description="Hisob-faktura yaratish"
+        title={t('fakturaTitle')}
+        description={t('fakturaPageDesc')}
         breadcrumbs={[
-          { label: 'Dashboard',  path: '/dashboard' },
-          { label: 'Buxgalter', path: '/dashboard/buxgalter' },
-          { label: 'Faktura' },
+          { label: 'Dashboard',     path: '/dashboard' },
+          { label: t('breadcrumb'), path: '/dashboard/buxgalter' },
+          { label: t('fakturaLabel') },
         ]}
         actions={
           <Button leftIcon={<Plus size={14} />} size="sm" onClick={openModal}>
-            Yangi faktura
+            {t('newFaktura')}
           </Button>
         }
       />
@@ -150,16 +152,16 @@ export default function FakturaPage() {
       {fakturalar.length === 0 && !isLoading ? (
         <EmptyState
           icon={<span className="text-3xl">🧾</span>}
-          title="Fakturalar yo'q"
-          description="Birinchi fakturani yarating"
-          action={{ label: 'Yangi faktura', onClick: openModal }}
+          title={t('noFakturas')}
+          description={t('createFirstFaktura')}
+          action={{ label: t('newFaktura'), onClick: openModal }}
         />
       ) : (
         <Card padding="none">
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
-                {['Raqam', 'Sarlavha', 'Summa', 'Sana', ''].map(h => (
+                {[t('tableRaqam'), t('tableSarlavha'), t('tableSumma'), t('tableSana'), ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                     {h}
                   </th>
@@ -201,14 +203,14 @@ export default function FakturaPage() {
       <Modal
         open={modal}
         onClose={() => setModal(false)}
-        title="Yangi faktura"
+        title={t('newFaktura')}
         size="xl"
         footer={
           <div className="flex gap-2 w-full">
-            <Button variant="outline" size="sm" onClick={() => setModal(false)}>Yopish</Button>
+            <Button variant="outline" size="sm" onClick={() => setModal(false)}>{t('close')}</Button>
             <div className="flex-1" />
             <Button variant="secondary" size="sm" leftIcon={<RefreshCw size={13} />} onClick={() => buildPreview()}>
-              Ko'rish
+              {t('view')}
             </Button>
             <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
               onClick={() => {
@@ -220,47 +222,45 @@ export default function FakturaPage() {
             <Button size="sm" leftIcon={<Save size={13} />}
               loading={mutation.isPending}
               onClick={() => mutation.mutate()}>
-              Saqlash
+              {t('save')}
             </Button>
           </div>
         }
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Chap: Form */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <Input label="Raqam" placeholder="Avtomatik"
+              <Input label={t('raqam')} placeholder={t('raqamPlace')}
                 value={form.raqam} onChange={e => setForm(f => ({ ...f, raqam: e.target.value }))} />
-              <Input label="Sana" type="date"
+              <Input label={t('sana')} type="date"
                 value={form.sana} onChange={e => setForm(f => ({ ...f, sana: e.target.value }))} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[#374151]">Xaridor (kontragent)</label>
+              <label className="block text-sm font-medium text-[#374151]">{t('buyer')}</label>
               <select
                 value={form.cpId}
                 onChange={e => setForm(f => ({ ...f, cpId: e.target.value }))}
                 className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
               >
-                <option value="">Kontragent tanlang</option>
+                <option value="">{t('selectCp')}</option>
                 {cps.map((cp: any) => (
                   <option key={cp.id} value={cp.id}>{cp.name}</option>
                 ))}
               </select>
             </div>
 
-            <Input label="Shartnoma (ixtiyoriy)" placeholder="№ SH-2025-001"
+            <Input label={t('shartnoma')} placeholder={t('shartnomaPlace')}
               value={form.shartnoma} onChange={e => setForm(f => ({ ...f, shartnoma: e.target.value }))} />
 
-            {/* Tovarlar */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-[#0F172A]">Tovarlar / Xizmatlar</p>
+                <p className="text-sm font-semibold text-[#0F172A]">{t('tovarlarServices')}</p>
                 <button
                   onClick={() => setItems(p => [...p, newSpecItem()])}
                   className="text-xs text-[#2563EB] hover:underline flex items-center gap-1"
                 >
-                  <Plus size={12} /> Qo'shish
+                  <Plus size={12} /> {t('addItem')}
                 </button>
               </div>
 
@@ -270,19 +270,19 @@ export default function FakturaPage() {
                     <input
                       value={item.nomi}
                       onChange={e => updateItem(i, 'nomi', e.target.value)}
-                      placeholder="Nomi"
+                      placeholder={t('itemName')}
                       className="col-span-4 h-8 text-xs rounded-lg border border-[#E2E8F0] px-2 focus:outline-none focus:border-[#2563EB]"
                     />
                     <input type="number"
                       value={item.miqdori || ''}
                       onChange={e => updateItem(i, 'miqdori', parseFloat(e.target.value) || 0)}
-                      placeholder="Miq."
+                      placeholder={t('itemQty')}
                       className="col-span-2 h-8 text-xs rounded-lg border border-[#E2E8F0] px-2 focus:outline-none text-right tabular-nums"
                     />
                     <input type="number"
                       value={item.narxi || ''}
                       onChange={e => updateItem(i, 'narxi', parseFloat(e.target.value) || 0)}
-                      placeholder="Narx"
+                      placeholder={t('itemPrice')}
                       className="col-span-3 h-8 text-xs rounded-lg border border-[#E2E8F0] px-2 focus:outline-none text-right tabular-nums"
                     />
                     <select
@@ -306,33 +306,32 @@ export default function FakturaPage() {
 
               <div className="mt-3 pt-3 border-t border-[#E2E8F0] space-y-1">
                 <div className="flex justify-between text-xs text-[#475569]">
-                  <span>Jami:</span>
-                  <span className="tabular-nums">{totals.jami.toLocaleString('uz-UZ')} so'm</span>
+                  <span>{t('jami')}</span>
+                  <span className="tabular-nums">{totals.jami.toLocaleString('uz-UZ')} {t('som')}</span>
                 </div>
                 <div className="flex justify-between text-xs text-[#D97706]">
-                  <span>QQS:</span>
-                  <span className="tabular-nums">{totals.jamiQqs.toLocaleString('uz-UZ')} so'm</span>
+                  <span>{t('qqs')}</span>
+                  <span className="tabular-nums">{totals.jamiQqs.toLocaleString('uz-UZ')} {t('som')}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-[#0F172A]">
-                  <span>Umumiy:</span>
-                  <span className="tabular-nums">{totals.umumiy.toLocaleString('uz-UZ')} so'm</span>
+                  <span>{t('umumiy')}</span>
+                  <span className="tabular-nums">{totals.umumiy.toLocaleString('uz-UZ')} {t('som')}</span>
                 </div>
               </div>
             </div>
 
-            <Input label="Izoh" placeholder="Qo'shimcha ma'lumot..."
+            <Input label={t('izoh')} placeholder={t('izohPlace')}
               value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
           </div>
 
-          {/* O'ng: Preview */}
           <div>
-            <p className="text-sm font-semibold text-[#0F172A] mb-2">Ko'rib chiqish</p>
+            <p className="text-sm font-semibold text-[#0F172A] mb-2">{t('preview')}</p>
             <div className="h-[480px] overflow-auto rounded-xl border border-[#E2E8F0] bg-[#FAFAFA] p-4">
               {preview ? (
                 <pre className="whitespace-pre-wrap text-xs leading-relaxed text-[#0F172A] font-mono">{preview}</pre>
               ) : (
                 <div className="flex items-center justify-center h-full text-[#94A3B8] text-sm">
-                  Ma'lumotlarni to'ldiring va "Ko'rish" bosing
+                  {t('previewHint')}
                 </div>
               )}
             </div>
