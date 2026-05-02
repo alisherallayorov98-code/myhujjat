@@ -1,0 +1,21 @@
+{
+  "title": "Договоры",
+  "new": "Новый договор",
+  "number": "Номер договора",
+  "date": "Дата",
+  "type": "Тип",
+  "counterparty": "Контрагент",
+  "amount": "Сумма",
+  "status": "Статус",
+  "statusDraft": "Черновик",
+  "statusActive": "Активный",
+  "statusSigned": "Подписан",
+  "statusExpired": "Истёк срок",
+  "statusCancelled": "Отменён",
+  "selectType": "Выберите тип договора",
+  "fillData": "Заполните данные",
+  "exportPdf": "Скачать PDF",
+  "exportWord": "Скачать Word",
+  "print": "Печать",
+  "versionHistory": "История версий"
+}

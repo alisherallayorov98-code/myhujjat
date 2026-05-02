@@ -2,6 +2,7 @@
 
 import { useState }                          from 'react'
 import Link                                  from 'next/link'
+import { useTranslations }                   from 'next-intl'
 import { Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react'
 import { useAuth }                           from '@/hooks/useAuth'
 import { Button }                            from '@/components/ui/Button'
@@ -10,6 +11,9 @@ import { Logo }                              from '@/components/shared/Logo'
 import toast                                 from 'react-hot-toast'
 
 export default function LoginPage() {
+  const t   = useTranslations('auth')
+  const tv  = useTranslations('validation')
+
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [showPwd,  setShowPwd]  = useState(false)
@@ -21,8 +25,8 @@ export default function LoginPage() {
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (!email.trim())       errs.email    = 'Email kiriting'
-    if (password.length < 6) errs.password = 'Parol juda qisqa'
+    if (!email.trim())       errs.email    = tv('emailRequired')
+    if (password.length < 6) errs.password = tv('passwordTooShort')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -33,19 +37,19 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await login(email, password, needs2FA ? code : undefined)
-      toast.success('Xush kelibsiz!')
+      toast.success(t('loginWelcome'))
     } catch (err: any) {
       const data = err?.response?.data
       if (data?.requires2FA) {
         setNeeds2FA(true)
         setErrors({})
-        if (code) toast.error("Kod noto'g'ri")
+        if (code) toast.error(t('twoFactorWrongCode'))
         setCode('')
       } else {
-        const msg = data?.message || 'Xatolik yuz berdi'
-        toast.error(typeof msg === 'string' ? msg : 'Xatolik yuz berdi')
-        if (typeof msg === 'string' && (msg.includes('parol') || msg.includes('Email'))) {
-          setErrors({ password: "Email yoki parol noto'g'ri" })
+        const msg = data?.message || t('genericError')
+        toast.error(typeof msg === 'string' ? msg : t('genericError'))
+        if (typeof msg === 'string' && (msg.includes('parol') || msg.includes('Email') || msg.includes('password'))) {
+          setErrors({ password: t('invalidCredentials') })
         }
       }
     } finally {
@@ -61,19 +65,18 @@ export default function LoginPage() {
 
         <div className="space-y-6">
           <h1 className="font-display font-black text-white text-4xl leading-tight">
-            Hujjatlaringiz<br />
-            <span className="text-blue-200">xavfsiz qo'lda</span>
+            {t('loginSidebarTitle')}<br />
+            <span className="text-blue-200">{t('loginSidebarTitleHighlight')}</span>
           </h1>
           <p className="text-blue-100 text-lg leading-relaxed max-w-sm">
-            Shartnomalar, faktiralar, buyruqlar va boshqa rasmiy hujjatlarni
-            AI yordamida tez va to'g'ri yarating.
+            {t('loginSidebarDescription')}
           </p>
 
           <div className="grid grid-cols-3 gap-4 pt-4">
             {[
-              { label: 'Foydalanuvchi',   value: '5,000+' },
-              { label: 'Hujjat yaratildi', value: '120K+' },
-              { label: 'Shablon',          value: '50+'   },
+              { label: t('statUsers'),     value: '5,000+' },
+              { label: t('statDocuments'), value: '120K+' },
+              { label: t('statTemplates'), value: '50+'   },
             ].map(stat => (
               <div key={stat.label} className="bg-white/10 rounded-xl p-3 text-center">
                 <p className="font-display font-black text-white text-xl">{stat.value}</p>
@@ -83,7 +86,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-blue-300 text-sm">© 2025 MyHujjat.uz — O'zbekiston hujjat platformasi</p>
+        <p className="text-blue-300 text-sm">{t('copyright')}</p>
       </div>
 
       {/* O'ng tomon — Form */}
@@ -95,17 +98,17 @@ export default function LoginPage() {
 
           <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-8">
             <div className="mb-8">
-              <h2 className="font-display font-black text-[#0F172A] text-2xl mb-1.5">Kirish</h2>
-              <p className="text-[#94A3B8] text-sm">Hisobingizga kiring</p>
+              <h2 className="font-display font-black text-[#0F172A] text-2xl mb-1.5">{t('login')}</h2>
+              <p className="text-[#94A3B8] text-sm">{t('loginSubtitle')}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {!needs2FA ? (
                 <>
                   <Input
-                    label="Email"
+                    label={t('email')}
                     type="email"
-                    placeholder="email@company.uz"
+                    placeholder={t('emailPlaceholder')}
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     error={errors.email}
@@ -115,9 +118,9 @@ export default function LoginPage() {
                   />
 
                   <Input
-                    label="Parol"
+                    label={t('password')}
                     type={showPwd ? 'text' : 'password'}
-                    placeholder="••••••••"
+                    placeholder={t('passwordPlaceholder')}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     error={errors.password}
@@ -139,7 +142,7 @@ export default function LoginPage() {
                       href="/forgot-password"
                       className="text-sm text-[#2563EB] hover:text-[#1D4ED8] font-medium transition-colors"
                     >
-                      Parolni unutdingizmi?
+                      {t('forgotPassword')}
                     </Link>
                   </div>
 
@@ -150,7 +153,7 @@ export default function LoginPage() {
                     loading={loading}
                     rightIcon={<ArrowRight size={18} />}
                   >
-                    Kirish
+                    {t('loginButton')}
                   </Button>
                 </>
               ) : (
@@ -158,16 +161,16 @@ export default function LoginPage() {
                   <div className="flex items-start gap-3 p-3 bg-[#DBEAFE] border border-[#BFDBFE] rounded-xl">
                     <ShieldCheck size={20} className="text-[#2563EB] shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-[#1E40AF]">Ikki bosqichli tasdiqlash</p>
+                      <p className="text-sm font-semibold text-[#1E40AF]">{t('twoFactorTitle')}</p>
                       <p className="text-xs text-[#3B82F6] mt-0.5">
-                        Authenticator ilovasidan 6 raqamli kod yoki backup kodni kiriting
+                        {t('twoFactorDesc')}
                       </p>
                     </div>
                   </div>
 
                   <Input
-                    label="Kod"
-                    placeholder="123 456"
+                    label={t('twoFactorCode')}
+                    placeholder={t('twoFactorPlaceholder')}
                     value={code}
                     onChange={e => setCode(e.target.value)}
                     autoFocus
@@ -183,7 +186,7 @@ export default function LoginPage() {
                     loading={loading}
                     rightIcon={<ArrowRight size={18} />}
                   >
-                    Tasdiqlash
+                    {t('twoFactorVerify')}
                   </Button>
 
                   <button
@@ -191,7 +194,7 @@ export default function LoginPage() {
                     onClick={() => { setNeeds2FA(false); setCode('') }}
                     className="block w-full text-center text-xs text-[#94A3B8] hover:text-[#475569]"
                   >
-                    ← Boshqa hisob bilan kirish
+                    {t('twoFactorBackToLogin')}
                   </button>
                 </>
               )}
@@ -202,23 +205,23 @@ export default function LoginPage() {
                 <div className="w-full border-t border-[#E2E8F0]" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-xs text-[#94A3B8]">yoki</span>
+                <span className="bg-white px-3 text-xs text-[#94A3B8]">{t('or')}</span>
               </div>
             </div>
 
             <p className="text-center text-sm text-[#475569]">
-              Hisob yo'qmi?{' '}
+              {t('noAccountQuestion')}{' '}
               <Link href="/register" className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold transition-colors">
-                Ro'yxatdan o'ting
+                {t('registerLink')}
               </Link>
             </p>
           </div>
 
           {/* Demo kirish */}
           <div className="mt-4 p-4 bg-[#DBEAFE] rounded-xl border border-[#BFDBFE]">
-            <p className="text-sm text-[#1D4ED8] font-medium mb-2">Demo kirish</p>
+            <p className="text-sm text-[#1D4ED8] font-medium mb-2">{t('demoTitle')}</p>
             <p className="text-xs text-[#3B82F6] mb-3">
-              Tizimni sinab ko'rish uchun demo hisobdan foydalaning
+              {t('demoDescription')}
             </p>
             <Button
               variant="outline"
@@ -229,7 +232,7 @@ export default function LoginPage() {
                 setPassword('demo12345')
               }}
             >
-              Demo ma'lumotlarni to'ldirish
+              {t('demoCredentials')}
             </Button>
           </div>
         </div>

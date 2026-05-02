@@ -2,6 +2,7 @@
 
 import { useState }    from 'react'
 import Link            from 'next/link'
+import { useTranslations } from 'next-intl'
 import {
   Menu, ChevronDown,
   Building2, Plus, Check, Settings,
@@ -18,6 +19,7 @@ import { HealthIndicator }    from '@/components/HealthIndicator/HealthIndicator
 import { cn }                 from '@/lib/cn'
 
 export function Header() {
+  const t = useTranslations('header')
   const { openMobileSidebar, sidebarCollapsed } = useUIStore()
   const { user, currentOrg, organizations, logout, setCurrentOrg } = useAuth()
   const [orgOpen,  setOrgOpen]  = useState(false)
@@ -35,7 +37,7 @@ export function Header() {
       <button
         onClick={openMobileSidebar}
         className="lg:hidden p-2 rounded-lg text-[#94A3B8] hover:bg-[#F1F5F9]"
-        aria-label="Menyuni ochish"
+        aria-label={t('openMenu')}
       >
         <Menu size={20} />
       </button>
@@ -59,7 +61,7 @@ export function Header() {
         >
           <Building2 size={14} className="text-[#2563EB] shrink-0" />
           <span className="text-sm font-medium text-[#0F172A] truncate">
-            {currentOrg?.name || "Tashkilot yo'q"}
+            {currentOrg?.name || t('noOrg')}
           </span>
           <ChevronDown size={14} className="text-[#94A3B8] shrink-0" />
         </button>
@@ -71,7 +73,7 @@ export function Header() {
               <div className="p-2 space-y-0.5">
                 {organizations.length === 0 && (
                   <p className="text-xs text-[#94A3B8] text-center py-3">
-                    Tashkilot yo'q
+                    {t('noOrg')}
                   </p>
                 )}
                 {organizations.map(org => (
@@ -87,7 +89,7 @@ export function Header() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[#0F172A] truncate">{org.name}</p>
-                      {org.inn && <p className="text-xs text-[#94A3B8]">STIR: {org.inn}</p>}
+                      {org.inn && <p className="text-xs text-[#94A3B8]">{t('tin')}: {org.inn}</p>}
                     </div>
                     {currentOrg?.id === org.id && (
                       <Check size={14} className="text-[#2563EB] shrink-0" />
@@ -103,7 +105,7 @@ export function Header() {
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[#2563EB] hover:bg-[#DBEAFE] transition-colors"
                   >
                     <Plus size={14} />
-                    Tashkilot qo'shish
+                    {t('addOrg')}
                   </button>
                 </Link>
               </div>
@@ -153,9 +155,9 @@ export function Header() {
 
               <div className="p-2 space-y-0.5">
                 {[
-                  { icon: User,       label: 'Profil',     href: '/dashboard/profil' },
-                  { icon: CreditCard, label: 'Obuna',      href: '/dashboard/sozlamalar/obuna' },
-                  { icon: Settings,   label: 'Sozlamalar', href: '/dashboard/sozlamalar' },
+                  { icon: User,       label: t('profile'),      href: '/dashboard/profil' },
+                  { icon: CreditCard, label: t('subscription'), href: '/dashboard/sozlamalar/obuna' },
+                  { icon: Settings,   label: t('settings'),     href: '/dashboard/sozlamalar' },
                 ].map(item => (
                   <Link key={item.label} href={item.href}>
                     <button
@@ -175,7 +177,7 @@ export function Header() {
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#DC2626] hover:bg-[#FEE2E2] transition-colors"
                 >
                   <LogOut size={15} />
-                  Chiqish
+                  {t('logout')}
                 </button>
               </div>
             </div>

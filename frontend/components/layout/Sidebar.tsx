@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import Link                      from 'next/link'
 import { usePathname }           from 'next/navigation'
+import { useTranslations }       from 'next-intl'
 import {
   ChevronDown, PanelLeftClose, PanelLeftOpen,
   Lock, Zap, LogOut, X
@@ -25,8 +26,14 @@ function NavItemComponent({
   collapsed: boolean
 }) {
   const pathname  = usePathname()
+  const tNav      = useTranslations('nav')
   const { isPro } = useAuth()
   const [open, setOpen] = useState(false)
+
+  // Translated label — agar nav.json'da kalit bo'lsa o'sha, yo'q bo'lsa fallback (item.label)
+  const translatedLabel = (() => {
+    try { return tNav(item.id as any) } catch { return item.label }
+  })()
 
   const isActive    = pathname === item.path || pathname.startsWith(item.path + '/')
   const isLocked    = item.proOnly && !isPro
@@ -67,7 +74,7 @@ function NavItemComponent({
 
       {!collapsed && (
         <>
-          <span className="flex-1 truncate">{item.label}</span>
+          <span className="flex-1 truncate">{translatedLabel}</span>
           {item.badge && <Badge variant="primary" size="sm">{item.badge}</Badge>}
           {isLocked && <Lock size={12} className="text-[#94A3B8]" />}
           {hasChildren && (
@@ -85,7 +92,7 @@ function NavItemComponent({
       {/* Tooltip qo'llanadi collapsed holda */}
       {collapsed && (
         <div className="absolute left-full ml-2 px-2 py-1 bg-[#0F172A] text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-          {item.label}
+          {translatedLabel}
         </div>
       )}
     </div>
@@ -98,23 +105,27 @@ function NavItemComponent({
       {/* Children */}
       {hasChildren && !collapsed && (open || hasActiveChild) && (
         <div className="mt-0.5 space-y-0.5">
-          {item.children!.map(child => (
-            <Link key={child.id} href={child.path}>
-              <div className={cn(
-                'flex items-center gap-2 pl-10 pr-3 py-2 rounded-lg text-xs',
-                'cursor-pointer transition-all',
-                pathname === child.path
-                  ? 'bg-[#DBEAFE] text-[#1D4ED8] font-medium'
-                  : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
-              )}>
+          {item.children!.map(child => {
+            let childLabel = child.label
+            try { childLabel = tNav(child.id as any) } catch {}
+            return (
+              <Link key={child.id} href={child.path}>
                 <div className={cn(
-                  'w-1.5 h-1.5 rounded-full shrink-0',
-                  pathname === child.path ? 'bg-[#2563EB]' : 'bg-[#CBD5E1]'
-                )} />
-                {child.label}
-              </div>
-            </Link>
-          ))}
+                  'flex items-center gap-2 pl-10 pr-3 py-2 rounded-lg text-xs',
+                  'cursor-pointer transition-all',
+                  pathname === child.path
+                    ? 'bg-[#DBEAFE] text-[#1D4ED8] font-medium'
+                    : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]'
+                )}>
+                  <div className={cn(
+                    'w-1.5 h-1.5 rounded-full shrink-0',
+                    pathname === child.path ? 'bg-[#2563EB]' : 'bg-[#CBD5E1]'
+                  )} />
+                  {childLabel}
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
@@ -125,6 +136,7 @@ function NavItemComponent({
 // ASOSIY SIDEBAR
 // ============================================
 export function Sidebar() {
+  const t  = useTranslations('sidebar')
   const {
     sidebarCollapsed, toggleSidebar,
     sidebarMobileOpen, closeMobileSidebar
@@ -180,14 +192,14 @@ export function Sidebar() {
         <div className="mx-3 mb-3 p-3 bg-gradient-to-br from-[#DBEAFE] to-[#EDE9FE] rounded-xl border border-[#BFDBFE]">
           <div className="flex items-center gap-2 mb-1.5">
             <Zap size={14} className="text-[#2563EB]" />
-            <span className="text-xs font-bold text-[#1D4ED8]">Pro ga o'ting</span>
+            <span className="text-xs font-bold text-[#1D4ED8]">{t('upgradeToPro')}</span>
           </div>
           <p className="text-[10px] text-[#3B82F6] mb-2">
-            AI generatsiya, E-imzo, Didox va ko'proq
+            {t('upgradeBenefits')}
           </p>
           <Link href="/dashboard/sozlamalar/obuna">
             <button className="w-full py-1.5 text-xs font-semibold bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition-colors">
-              Upgrade
+              {t('upgradeButton')}
             </button>
           </Link>
         </div>
@@ -211,7 +223,7 @@ export function Sidebar() {
           )}
         >
           <LogOut size={18} className="shrink-0" />
-          {!sidebarCollapsed && <span>Chiqish</span>}
+          {!sidebarCollapsed && <span>{t('logout')}</span>}
         </button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useState }            from 'react'
 import Link                    from 'next/link'
+import { useTranslations }     from 'next-intl'
 import { ArrowLeft, Mail }     from 'lucide-react'
 import { useAuth }             from '@/hooks/useAuth'
 import { Button }              from '@/components/ui/Button'
@@ -10,6 +11,7 @@ import { Logo }                from '@/components/shared/Logo'
 import toast                   from 'react-hot-toast'
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth')
   const [email,   setEmail]   = useState('')
   const [loading, setLoading] = useState(false)
   const [sent,    setSent]    = useState(false)
@@ -23,7 +25,7 @@ export default function ForgotPasswordPage() {
       await forgotPassword(email)
       setSent(true)
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Xatolik')
+      toast.error(err?.response?.data?.message || t('genericError'))
     } finally {
       setLoading(false)
     }
@@ -37,14 +39,16 @@ export default function ForgotPasswordPage() {
             <Mail size={28} className="text-[#2563EB]" />
           </div>
           <h2 className="font-display font-black text-[#0F172A] text-xl mb-2">
-            Email yuborildi!
+            {t('forgotSentTitle')}
           </h2>
           <p className="text-[#475569] text-sm mb-6 leading-relaxed">
-            <strong>{email}</strong> manziliga parol tiklash havolasi yuborildi.
+            {t.rich('forgotSentDescription', {
+              email: () => <strong>{email}</strong>,
+            })}
           </p>
           <Link href="/login">
             <Button variant="outline" fullWidth leftIcon={<ArrowLeft size={16} />}>
-              Kirishga qaytish
+              {t('backToLogin')}
             </Button>
           </Link>
         </div>
@@ -62,25 +66,25 @@ export default function ForgotPasswordPage() {
         <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-lg p-8">
           <div className="mb-6">
             <h2 className="font-display font-black text-[#0F172A] text-2xl mb-1">
-              Parolni tiklash
+              {t('forgotTitle')}
             </h2>
             <p className="text-[#94A3B8] text-sm">
-              Emailingizga tiklash havolasi yuboramiz
+              {t('forgotSubtitle')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Email"
+              label={t('email')}
               type="email"
-              placeholder="email@company.uz"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
               autoFocus
             />
             <Button type="submit" fullWidth size="lg" loading={loading}>
-              Havola yuborish
+              {t('forgotButton')}
             </Button>
           </form>
 
@@ -89,7 +93,7 @@ export default function ForgotPasswordPage() {
             className="flex items-center justify-center gap-2 mt-6 text-sm text-[#94A3B8] hover:text-[#475569] transition-colors"
           >
             <ArrowLeft size={14} />
-            Kirishga qaytish
+            {t('backToLogin')}
           </Link>
         </div>
       </div>

@@ -1,4 +1,7 @@
 import type { NextConfig } from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 
 const config: NextConfig = {
   output: 'standalone',  // Docker uchun — ozgina image hajmi (~120MB vs ~1GB)
@@ -11,4 +14,4 @@ const config: NextConfig = {
   },
 }
 
-export default config
+export default withNextIntl(config)

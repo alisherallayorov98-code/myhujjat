@@ -1,0 +1,21 @@
+{
+  "title": "Shartnomalar",
+  "new": "Yangi shartnoma",
+  "number": "Shartnoma raqami",
+  "date": "Sana",
+  "type": "Turi",
+  "counterparty": "Kontragent",
+  "amount": "Summa",
+  "status": "Holat",
+  "statusDraft": "Qoralama",
+  "statusActive": "Faol",
+  "statusSigned": "Imzolangan",
+  "statusExpired": "Muddati o'tgan",
+  "statusCancelled": "Bekor qilingan",
+  "selectType": "Shartnoma turini tanlang",
+  "fillData": "Ma'lumotlarni to'ldiring",
+  "exportPdf": "PDF yuklash",
+  "exportWord": "Word yuklash",
+  "print": "Chop etish",
+  "versionHistory": "Versiyalar tarixi"
+}

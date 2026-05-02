@@ -1,0 +1,19 @@
+{
+  "save": "Saqlash",
+  "cancel": "Bekor qilish",
+  "delete": "O'chirish",
+  "edit": "Tahrirlash",
+  "create": "Yaratish",
+  "search": "Qidirish",
+  "loading": "Yuklanmoqda...",
+  "error": "Xatolik yuz berdi",
+  "success": "Muvaffaqiyatli",
+  "confirm": "Tasdiqlash",
+  "back": "Orqaga",
+  "next": "Keyingi",
+  "close": "Yopish",
+  "download": "Yuklab olish",
+  "preview": "Ko'rib chiqish",
+  "noData": "Ma'lumot topilmadi",
+  "required": "Majburiy maydon"
+}

@@ -2,27 +2,29 @@
 
 import Link            from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   LayoutDashboard, FileText,
   Archive, Sparkles, Menu
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
-const BOTTOM_NAV = [
-  { icon: LayoutDashboard, label: 'Bosh',      path: '/dashboard',              exact: true  },
-  { icon: FileText,        label: 'Shartnoma', path: '/dashboard/shartnomalar', exact: false },
-  { icon: Sparkles,        label: 'AI',        path: '/dashboard/ai',           exact: false },
-  { icon: Archive,         label: 'Seif',      path: '/dashboard/seif',         exact: false },
-  { icon: Menu,            label: 'Menu',      path: '/dashboard/menu',         exact: false },
-]
-
 export function BottomNav() {
+  const t        = useTranslations('mobileNav')
   const pathname = usePathname()
+
+  const items = [
+    { icon: LayoutDashboard, label: t('home'),      path: '/dashboard',              exact: true  },
+    { icon: FileText,        label: t('contracts'), path: '/dashboard/shartnomalar', exact: false },
+    { icon: Sparkles,        label: t('ai'),        path: '/dashboard/ai',           exact: false },
+    { icon: Archive,         label: t('safe'),      path: '/dashboard/seif',         exact: false },
+    { icon: Menu,            label: t('menu'),      path: '/dashboard/menu',         exact: false },
+  ]
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-[#E2E8F0] safe-bottom">
       <div className="flex">
-        {BOTTOM_NAV.map(item => {
+        {items.map(item => {
           const isActive = item.exact
             ? pathname === item.path
             : pathname === item.path || pathname.startsWith(item.path + '/')

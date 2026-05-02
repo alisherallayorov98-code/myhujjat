@@ -1,0 +1,11 @@
+{
+  "required": "Bu maydon to'ldirilishi shart",
+  "emailInvalid": "Email manzil noto'g'ri",
+  "passwordShort": "Parol kamida 6 ta belgi",
+  "passwordMismatch": "Parollar mos emas",
+  "networkError": "Internet aloqasi yo'q",
+  "unauthorized": "Kirish taqiqlangan",
+  "forbidden": "Ruxsat yo'q",
+  "notFound": "Topilmadi",
+  "serverError": "Server xatosi"
+}

@@ -1,0 +1,256 @@
+{
+  "metadata": {
+    "title": "MyHujjat.uz — O'zbekiston uchun hujjat platformasi",
+    "description": "Shartnomalar, HR hujjatlar, yuridik hujjatlar, e-imzo — barchasi bir joyda. O'zbekiston qonunchiligiga mos professional hujjatlarni bir daqiqada yarating.",
+    "ogTitle": "MyHujjat.uz — O'zbekiston uchun hujjat platformasi",
+    "ogDescription": "AI yordamida 1 daqiqada professional shartnoma. Shartnomalar, fakturalar, e-imzo.",
+    "twitterDescription": "O'zbekiston uchun hujjat platformasi"
+  },
+  "header": {
+    "kimUchun": "Kim uchun",
+    "buxgalter": "Buxgalterlar uchun",
+    "yurist": "Yuristlar uchun",
+    "kadrlar": "Kadrlar bo'limi uchun",
+    "narxlar": "Narxlar",
+    "haqida": "Haqida",
+    "login": "Kirish",
+    "register": "Bepul boshlash"
+  },
+  "footer": {
+    "tagline": "O'zbekiston bizneslar uchun professional hujjat yaratish platformasi. Shartnomalar, HR, yurist, buxgalter hujjatlarini bir daqiqada yarating.",
+    "kimUchun": "Kim uchun",
+    "kompaniya": "Kompaniya",
+    "haqida": "Haqida",
+    "narxlar": "Narxlar",
+    "yordam": "Yordam markazi",
+    "terms": "Foydalanish shartlari",
+    "privacy": "Maxfiylik siyosati",
+    "copyright": "Barcha huquqlar himoyalangan.",
+    "termsShort": "Shartlar",
+    "privacyShort": "Maxfiylik",
+    "city": "Toshkent"
+  },
+  "badge": "O'zbekistonning birinchi AI hujjat platformasi",
+  "hero": {
+    "title1": "Hujjatlar yaratishni",
+    "title2": "soddalashtirdik",
+    "subtitle1": "Shartnoma, faktura, buyruq va boshqa rasmiy hujjatlarni AI yordamida",
+    "subtitleAccent": "1 daqiqada",
+    "subtitle2": "yarating. O'zbekiston qonunchiligiga to'liq mos.",
+    "ctaPrimary": "Bepul boshlash",
+    "ctaSecondary": "Demo hisobni sinash",
+    "footnote": "Karta talab qilinmaydi · 14 kun bepul Pro · Istalgan vaqtda bekor qilish mumkin",
+    "liveCounterPrefix": "Bugun",
+    "liveCounterSuffix": "ta hujjat yaratildi"
+  },
+  "preview": {
+    "sidebar": {
+      "home": "Bosh sahifa",
+      "contracts": "Shartnomalar",
+      "counterparties": "Kontragentlar",
+      "specifications": "Spesifikatsiya",
+      "organizations": "Tashkilotlar",
+      "hr": "Kadrlar (HR)",
+      "accounting": "Buxgalter",
+      "lawyer": "Yurist",
+      "settings": "Sozlamalar"
+    },
+    "stats": {
+      "contracts": "Shartnomalar",
+      "counterparties": "Kontragentlar",
+      "employees": "Xodimlar",
+      "thisMonth": "Bu oy"
+    },
+    "docs": {
+      "row1": "Oldi-sotdi #27/04",
+      "row1Cp": "\"JASURBEK ZUXRIDDIN\" MCHJ",
+      "row2": "Hisob-faktura FAK-251",
+      "row2Cp": "Demo Trading LLC",
+      "row3": "Mehnat shartnomasi #15",
+      "row3Cp": "Aliyev O.",
+      "row4": "Akt sverki #8",
+      "row4Cp": "ABC Logistics"
+    }
+  },
+  "documentTypes": {
+    "intro": "50+ tayyor shablon · har biri qonunchilikka mos",
+    "list": [
+      { "icon": "📑", "label": "Oldi-sotdi" },
+      { "icon": "🤝", "label": "Xizmat" },
+      { "icon": "🏢", "label": "Ijara" },
+      { "icon": "🛠️", "label": "Pudrat" },
+      { "icon": "🚛", "label": "Transport" },
+      { "icon": "🌍", "label": "Xalqaro" },
+      { "icon": "💰", "label": "Hisob-faktura" },
+      { "icon": "📋", "label": "Akt sverki" },
+      { "icon": "🧾", "label": "To'lov grafigi" },
+      { "icon": "👤", "label": "Mehnat shart." },
+      { "icon": "📝", "label": "Ishga qabul" },
+      { "icon": "🏖️", "label": "Ta'til" },
+      { "icon": "🚪", "label": "Bo'shatish" },
+      { "icon": "🗳️", "label": "Bayonnoma" },
+      { "icon": "⚖️", "label": "Da'vo arizasi" },
+      { "icon": "📜", "label": "Ishonch qog'ozi" },
+      { "icon": "🔁", "label": "Qo'shimcha" },
+      { "icon": "💼", "label": "Agentlik" }
+    ]
+  },
+  "departments": {
+    "tag": "KIM UCHUN",
+    "title": "Har bo'lim uchun maxsus",
+    "subtitle": "Tashkilotingizning har bo'limi o'z ehtiyojiga mos vositalardan foydalanadi",
+    "more": "Batafsil",
+    "items": {
+      "hr": {
+        "title": "Kadrlar bo'limi",
+        "desc": "Mehnat shartnomalari, ishga qabul/bo'shatish buyruqlari, ta'til hujjatlari",
+        "bullets": ["20+ HR shabloni", "JSHSHIR avto-tekshirish", "Xodimlar reestri"]
+      },
+      "accounting": {
+        "title": "Buxgalterlar uchun",
+        "desc": "Faktura, akt sverki, Didox integratsiyasi va QQS hisobotlari",
+        "bullets": ["Didox API ulanishi", "Excel/PDF eksport", "QQS avtomatik"]
+      },
+      "lawyer": {
+        "title": "Yuristlar uchun",
+        "desc": "12 turdagi shartnoma, da'vo arizasi, magic-link e-imzo va audit log",
+        "bullets": ["Magic-link imzo", "To'liq audit log", "AES-256 shifrlash"]
+      },
+      "management": {
+        "title": "Boshqaruv uchun",
+        "desc": "Bayonnoma, qaror va kotib hujjatlari + statistik hisobotlar",
+        "bullets": ["Yig'ilish bayonnomasi", "Avtomatik raqamlash", "Dashboard analitika"]
+      }
+    }
+  },
+  "howItWorks": {
+    "tag": "QANDAY ISHLAYDI",
+    "title": "3 qadamda professional hujjat",
+    "subtitle": "Murakkab sozlash va o'rganish kerak emas — hoziroq boshlash mumkin",
+    "steps": [
+      {
+        "n": "01",
+        "title": "Tashkilotni qo'shing",
+        "desc": "STIR raqamingizni kiriting — ma'lumotlar Soliq APIdan avtomatik to'ldiriladi"
+      },
+      {
+        "n": "02",
+        "title": "Hujjat turini tanlang",
+        "desc": "50+ tayyor shablon yoki Mira AI bilan ovozli buyruq orqali yarating"
+      },
+      {
+        "n": "03",
+        "title": "Imzo va eksport",
+        "desc": "PDF/Word'da yuklab oling yoki magic-link orqali kontragentga yuboring"
+      }
+    ],
+    "mira": {
+      "title": "Mira AI ovozli yordamchi",
+      "badge": "YANGI",
+      "desc1": "Klaviaturadan ham foydalanmang — gapirib hujjat yarating.",
+      "example": "\"Toshmatovga sotib olish shartnomasi 5 million so'm\"",
+      "desc2": "deb aytasiz, Mira hammasini o'zi to'ldiradi.",
+      "footnote": "Pro tarifda mavjud"
+    }
+  },
+  "comparison": {
+    "tag": "FARQI BOR",
+    "title": "Word'dan farqi nimada?",
+    "subtitle": "Hujjatni qo'lda yozish va bizning platforma — taqqoslang",
+    "us": "MyHujjat.uz",
+    "them": "Word/Excel qo'lda",
+    "rows": [
+      ["Hujjat yaratish vaqti", "< 1 daqiqa", "20-40 daqiqa"],
+      ["Mijoz ma'lumotlari", "STIR orqali avto", "Qo'lda kiritish"],
+      ["QQS va summa hisobi", "Avtomatik", "Excel/kalkulyator"],
+      ["Tayyor shablonlar", "50+ professional", "Internet'dan qidirish"],
+      ["Ko'p tashkilot bilan ish", "Cheksiz", "Har birini alohida"],
+      ["Imzo qo'yish", "Magic-link / ERI", "Pochta yoki qo'lda"],
+      ["Arxiv va qidiruv", "Markaziy + tezkor", "Word fayllar tarqoq"],
+      ["Versiyalar tarixi", "Avtomatik audit", "Eski versiya yo'qoladi"]
+    ]
+  },
+  "features": {
+    "tag": "IMKONIYATLAR",
+    "title": "Biznes uchun hamma narsa",
+    "items": [
+      { "title": "STIR avtomatik", "desc": "9 raqam yozsangiz Soliq APIdan ma'lumotlar avtomatik" },
+      { "title": "AES-256 shifrlash", "desc": "Ma'lumotlar O'zbekiston serverida xavfsiz" },
+      { "title": "PDF + Word + Excel", "desc": "Har bir hujjat 3 formatda eksport" },
+      { "title": "Tezkor qidiruv", "desc": "Ming hujjat ichidan 1 soniyada topish" },
+      { "title": "24/7 ishonchli", "desc": "99.9% uptime, doimiy backup" },
+      { "title": "Statistika", "desc": "Daromad, hujjat soni, kontragentlar" },
+      { "title": "2FA + audit log", "desc": "Har bir kirish va o'zgarish saqlanadi" },
+      { "title": "PWA + Mobile", "desc": "Telefonga o'rnatilgan kabi ishlaydi" },
+      { "title": "3 til (UZ/RU/EN)", "desc": "Ko'p tilli interfeys" }
+    ]
+  },
+  "testimonials": {
+    "tag": "MIJOZLAR FIKRI",
+    "title": "Bizga ishongan kompaniyalar",
+    "items": [
+      {
+        "name": "Jamshid Karimov",
+        "role": "Direktor, Toshkent",
+        "initial": "J",
+        "text": "Shartnomalarni 10 daqiqadan 1 daqiqaga qisqartirdi. Endi yarim soat tejaymiz."
+      },
+      {
+        "name": "Dilnoza Yusupova",
+        "role": "HR manager, Samarqand",
+        "initial": "D",
+        "text": "Mehnat shartnomalari va buyruqlar avtomatik to'ldirilyapti. Juda qulay!"
+      },
+      {
+        "name": "Bobur Hasanov",
+        "role": "Yurist, Namangan",
+        "initial": "B",
+        "text": "Pretenziya va da'vo arizalarini bir daqiqada tayyor. Pro rejaga o'taman."
+      }
+    ]
+  },
+  "pricing": {
+    "tag": "NARXLAR",
+    "title": "Sodda va halol narx",
+    "subtitle": "Yashirin to'lovlar yo'q · Yillikda 25% chegirma",
+    "popular": "Mashhur",
+    "currency": "so'm",
+    "monthly": "/oy",
+    "plans": {
+      "free": {
+        "name": "Bepul",
+        "btnText": "Bepul boshlash",
+        "features": ["5 ta hujjat/oy", "Asosiy shablonlar", "PDF + Word eksport", "Email qo'llab-quvvatlash"]
+      },
+      "standard": {
+        "name": "Standart",
+        "btnText": "Tanlash",
+        "features": ["50 ta hujjat/oy", "Barcha 50+ shablon", "Kadrlar (HR)", "Buxgalter hujjatlar", "Kotib hujjatlar", "Telegram bot"]
+      },
+      "pro": {
+        "name": "Pro",
+        "btnText": "Tanlash",
+        "features": ["Cheksiz hujjat", "Mira AI ovozli yordamchi", "Magic-link e-imzo", "Yurist hujjatlar", "Didox integratsiya", "Avtomatik 2FA + audit"]
+      }
+    }
+  },
+  "faq": {
+    "tag": "KO'P SO'RALADIGAN",
+    "title": "Tez-tez beriladigan savollar",
+    "items": [
+      { "q": "Bepul rejada nima mavjud?", "a": "Oyiga 5 ta hujjat, asosiy shablonlar, PDF va Word eksport, bitta tashkilot." },
+      { "q": "Mira AI ovozli yordamchi qanday ishlaydi?", "a": "O'zbek tilida \"Toshmatov uchun shartnoma 5 mln so'm\" deb gapirsangiz, AI hujjatni o'zi yaratadi va to'ldiradi. Pro rejada mavjud." },
+      { "q": "Magic-link imzo qonuniy kuchga egami?", "a": "Ha, O'zbekiston Fuqarolik Kodeksi 366-moddasi bo'yicha. Imzolovchining IP, vaqt va brauzer ma'lumotlari muhrlanadi." },
+      { "q": "Ma'lumotlarim xavfsizmi?", "a": "Ma'lumotlar O'zbekistondagi serverlarda AES-256 bilan shifrlangan. Doimiy backup, audit log mavjud." },
+      { "q": "Didox bilan qanday integratsiya?", "a": "Sozlamalardan API kalitingizni kiriting — fakturalar avtomatik sinxronlanadi, holatlar real vaqtda yangilanadi." },
+      { "q": "To'lov qanday amalga oshiriladi?", "a": "Click va Payme orqali oylik yoki yillik (yillikda 25% chegirma)." }
+    ]
+  },
+  "finalCta": {
+    "title": "Bugun boshlang",
+    "subtitle": "14 kun bepul Pro rejani sinab ko'ring. Karta talab qilinmaydi, istalgan paytda bekor qila olasiz.",
+    "ctaPrimary": "Bepul ro'yxatdan o'tish",
+    "ctaSecondary": "Yordam markazi",
+    "stats": "5,000+ foydalanuvchi · 120K+ hujjat yaratildi · 99.9% uptime"
+  }
+}

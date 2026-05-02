@@ -1,0 +1,16 @@
+{
+  "required": "Bu maydon to'ldirilishi shart",
+  "emailRequired": "Email kiriting",
+  "emailInvalid": "Email manzili noto'g'ri",
+  "passwordRequired": "Parolni kiriting",
+  "passwordTooShort": "Parol juda qisqa",
+  "passwordMinLength": "Kamida 8 ta belgi bo'lishi kerak",
+  "passwordsNotMatch": "Parollar mos emas",
+  "firstNameRequired": "Ismingizni kiriting",
+  "lastNameRequired": "Familiyangizni kiriting",
+  "agreeRequired": "Shartlarga rozilik kerak",
+  "codeRequired": "Kodni kiriting",
+  "codeInvalid": "Kod noto'g'ri",
+  "fieldTooShort": "Juda qisqa",
+  "fieldTooLong": "Juda uzun"
+}

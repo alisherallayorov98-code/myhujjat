@@ -3,6 +3,7 @@
 import { useState }                            from 'react'
 import Link                                    from 'next/link'
 import { useRouter }                           from 'next/navigation'
+import { useTranslations }                    from 'next-intl'
 import { Eye, EyeOff, ArrowRight, CheckCircle, Circle } from 'lucide-react'
 import { useAuth }                             from '@/hooks/useAuth'
 import { Button }                              from '@/components/ui/Button'
@@ -12,14 +13,15 @@ import { cn }                                  from '@/lib/cn'
 import toast                                   from 'react-hot-toast'
 
 function PasswordStrength({ password }: { password: string }) {
+  const t = useTranslations('auth')
   const checks = [
-    { label: 'Kamida 8 ta belgi', ok: password.length >= 8     },
-    { label: 'Katta harf',        ok: /[A-Z]/.test(password)   },
-    { label: 'Raqam',             ok: /[0-9]/.test(password)   },
+    { label: t('passwordCheckLength'),    ok: password.length >= 8     },
+    { label: t('passwordCheckUppercase'), ok: /[A-Z]/.test(password)   },
+    { label: t('passwordCheckNumber'),    ok: /[0-9]/.test(password)   },
   ]
   const score  = checks.filter(c => c.ok).length
   const colors = ['', 'bg-[#DC2626]', 'bg-[#D97706]', 'bg-[#16A34A]']
-  const labels = ['', 'Zaif', "O'rtacha", 'Kuchli']
+  const labels = ['', t('passwordStrengthWeak'), t('passwordStrengthMedium'), t('passwordStrengthStrong')]
 
   if (!password) return null
 
@@ -60,6 +62,8 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 export default function RegisterPage() {
+  const t   = useTranslations('auth')
+  const tv  = useTranslations('validation')
   const router     = useRouter()
   const { register } = useAuth()
 
@@ -76,11 +80,11 @@ export default function RegisterPage() {
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (!form.firstName.trim())      errs.firstName = 'Ismingizni kiriting'
-    if (!form.email.trim())          errs.email     = 'Email kiriting'
-    if (form.password.length < 8)    errs.password  = 'Kamida 8 ta belgi'
-    if (form.password !== form.confirm) errs.confirm = 'Parollar mos emas'
-    if (!form.agree)                 errs.agree     = 'Shartlarga rozilik kerak'
+    if (!form.firstName.trim())      errs.firstName = tv('firstNameRequired')
+    if (!form.email.trim())          errs.email     = tv('emailRequired')
+    if (form.password.length < 8)    errs.password  = tv('passwordMinLength')
+    if (form.password !== form.confirm) errs.confirm = tv('passwordsNotMatch')
+    if (!form.agree)                 errs.agree     = tv('agreeRequired')
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -98,9 +102,11 @@ export default function RegisterPage() {
       })
       setSuccess(true)
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Xatolik yuz berdi'
+      const msg = err?.response?.data?.message || t('genericError')
       toast.error(msg)
-      if (msg.includes('email')) setErrors({ email: "Bu email allaqachon ro'yxatda" })
+      if (typeof msg === 'string' && msg.toLowerCase().includes('email')) {
+        setErrors({ email: t('emailAlreadyExists') })
+      }
     } finally {
       setLoading(false)
     }
@@ -114,13 +120,15 @@ export default function RegisterPage() {
             <CheckCircle size={32} className="text-[#16A34A]" />
           </div>
           <h2 className="font-display font-black text-[#0F172A] text-xl mb-2">
-            Ro'yxatdan o'tdingiz!
+            {t('registerSuccessTitle')}
           </h2>
           <p className="text-[#475569] text-sm mb-6 leading-relaxed">
-            <strong>{form.email}</strong> manziliga tasdiqlash xabari yuborildi.
+            {t.rich('registerSuccessDescription', {
+              email: () => <strong>{form.email}</strong>,
+            })}
           </p>
           <Button fullWidth onClick={() => router.push('/login')} rightIcon={<ArrowRight size={16} />}>
-            Kirishga o'tish
+            {t('goToLogin')}
           </Button>
         </div>
       </div>
@@ -137,16 +145,16 @@ export default function RegisterPage() {
         <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-8">
           <div className="mb-6">
             <h2 className="font-display font-black text-[#0F172A] text-2xl mb-1">
-              Ro'yxatdan o'tish
+              {t('register')}
             </h2>
-            <p className="text-[#94A3B8] text-sm">Bepul hisob yarating</p>
+            <p className="text-[#94A3B8] text-sm">{t('registerSubtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Ism"
-                placeholder="Alisher"
+                label={t('firstName')}
+                placeholder={t('firstNamePlaceholder')}
                 value={form.firstName}
                 onChange={e => set('firstName', e.target.value)}
                 error={errors.firstName}
@@ -154,17 +162,17 @@ export default function RegisterPage() {
                 autoFocus
               />
               <Input
-                label="Familiya"
-                placeholder="Toshmatov"
+                label={t('lastName')}
+                placeholder={t('lastNamePlaceholder')}
                 value={form.lastName}
                 onChange={e => set('lastName', e.target.value)}
               />
             </div>
 
             <Input
-              label="Email"
+              label={t('email')}
               type="email"
-              placeholder="email@company.uz"
+              placeholder={t('emailPlaceholder')}
               value={form.email}
               onChange={e => set('email', e.target.value)}
               error={errors.email}
@@ -174,9 +182,9 @@ export default function RegisterPage() {
 
             <div>
               <Input
-                label="Parol"
+                label={t('password')}
                 type={showPwd ? 'text' : 'password'}
-                placeholder="Kamida 8 ta belgi"
+                placeholder={t('passwordHint')}
                 value={form.password}
                 onChange={e => set('password', e.target.value)}
                 error={errors.password}
@@ -196,9 +204,9 @@ export default function RegisterPage() {
             </div>
 
             <Input
-              label="Parolni tasdiqlang"
+              label={t('confirmPassword')}
               type="password"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
               value={form.confirm}
               onChange={e => set('confirm', e.target.value)}
               error={errors.confirm}
@@ -222,32 +230,32 @@ export default function RegisterPage() {
                   )}
                 </div>
                 <span className="text-sm text-[#475569]">
-                  <Link href="/terms" className="text-[#2563EB] hover:underline">Foydalanish shartlari</Link>
-                  {' '}va{' '}
-                  <Link href="/privacy" className="text-[#2563EB] hover:underline">Maxfiylik siyosati</Link>
-                  ga roziman
+                  <Link href="/terms" className="text-[#2563EB] hover:underline">{t('termsOfUse')}</Link>
+                  {t('termsAgreementMiddle')}
+                  <Link href="/privacy" className="text-[#2563EB] hover:underline">{t('privacyPolicy')}</Link>
+                  {t('termsAgreementEnd')}
                 </span>
               </label>
               {errors.agree && <p className="text-xs text-[#DC2626] mt-1">⚠ {errors.agree}</p>}
             </div>
 
             <Button type="submit" fullWidth size="lg" loading={loading} rightIcon={<ArrowRight size={18} />}>
-              Ro'yxatdan o'tish
+              {t('registerButton')}
             </Button>
           </form>
 
           <p className="text-center text-sm text-[#475569] mt-6">
-            Hisob bormi?{' '}
+            {t('hasAccountQuestion')}{' '}
             <Link href="/login" className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold">
-              Kirish
+              {t('loginLink')}
             </Link>
           </p>
         </div>
 
         <div className="mt-4 p-4 bg-[#F0FDF4] rounded-xl border border-[#BBF7D0]">
-          <p className="text-sm text-[#15803D] font-medium">Bepul plan bilan boshlang</p>
+          <p className="text-sm text-[#15803D] font-medium">{t('freePlanTitle')}</p>
           <p className="text-xs text-[#16A34A] mt-1">
-            Oyiga 3 ta shartnoma • Asosiy shablonlar • PDF eksport
+            {t('freePlanDescription')}
           </p>
         </div>
       </div>

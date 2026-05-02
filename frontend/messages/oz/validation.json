@@ -1,0 +1,16 @@
+{
+  "required": "Бу майдон тўлдирилиши шарт",
+  "emailRequired": "Электрон почтани киритинг",
+  "emailInvalid": "Электрон почта манзили нотўғри",
+  "passwordRequired": "Паролни киритинг",
+  "passwordTooShort": "Парол жуда қисқа",
+  "passwordMinLength": "Камида 8 та белги бўлиши керак",
+  "passwordsNotMatch": "Пароллар мос эмас",
+  "firstNameRequired": "Исмингизни киритинг",
+  "lastNameRequired": "Фамилиянгизни киритинг",
+  "agreeRequired": "Шартларга розилик керак",
+  "codeRequired": "Кодни киритинг",
+  "codeInvalid": "Код нотўғри",
+  "fieldTooShort": "Жуда қисқа",
+  "fieldTooLong": "Жуда узун"
+}

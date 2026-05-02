@@ -1,0 +1,11 @@
+{
+  "required": "Бу майдон тўлдирилиши шарт",
+  "emailInvalid": "Электрон почта манзили нотўғри",
+  "passwordShort": "Парол камида 6 та белги",
+  "passwordMismatch": "Паролlar мос эмас",
+  "networkError": "Интернет алоқаси йўқ",
+  "unauthorized": "Кириш тақиқланган",
+  "forbidden": "Рухсат йўқ",
+  "notFound": "Топилмади",
+  "serverError": "Сервер хатоси"
+}

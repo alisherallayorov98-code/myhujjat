@@ -1,0 +1,16 @@
+{
+  "required": "Это поле обязательно для заполнения",
+  "emailRequired": "Введите электронную почту",
+  "emailInvalid": "Неверный адрес электронной почты",
+  "passwordRequired": "Введите пароль",
+  "passwordTooShort": "Пароль слишком короткий",
+  "passwordMinLength": "Минимум 8 символов",
+  "passwordsNotMatch": "Пароли не совпадают",
+  "firstNameRequired": "Введите Ваше имя",
+  "lastNameRequired": "Введите Вашу фамилию",
+  "agreeRequired": "Необходимо согласиться с условиями",
+  "codeRequired": "Введите код",
+  "codeInvalid": "Неверный код",
+  "fieldTooShort": "Слишком короткое значение",
+  "fieldTooLong": "Слишком длинное значение"
+}

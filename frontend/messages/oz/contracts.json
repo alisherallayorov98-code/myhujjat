@@ -1,0 +1,21 @@
+{
+  "title": "Шартномалар",
+  "new": "Янги шартнома",
+  "number": "Шартнома рақами",
+  "date": "Сана",
+  "type": "Тури",
+  "counterparty": "Контрагент",
+  "amount": "Сумма",
+  "status": "Ҳолат",
+  "statusDraft": "Қоралама",
+  "statusActive": "Фаол",
+  "statusSigned": "Имзоланган",
+  "statusExpired": "Муддати ўтган",
+  "statusCancelled": "Бекор қилинган",
+  "selectType": "Шартнома турини танланг",
+  "fillData": "Маълумотларни тўлдиринг",
+  "exportPdf": "PDF юклаш",
+  "exportWord": "Word юклаш",
+  "print": "Чоп этиш",
+  "versionHistory": "Версиялар тарихи"
+}
