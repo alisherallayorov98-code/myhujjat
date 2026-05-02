@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                      from 'react'
+import { useTranslations }                               from 'next-intl'
 import { FileText, UserCheck, UserX, ArrowRight }        from 'lucide-react'
 import { useQuery }                                       from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
@@ -22,49 +23,50 @@ import { formatAmountWords } from '@/lib/formatters'
 import toast                 from 'react-hot-toast'
 import { cn }                from '@/lib/cn'
 
-const HR_DOCS = [
-  {
-    id:    'ishga_qabul',
-    name:  "Ishga qabul buyrug'i",
-    icon:  UserCheck,
-    color: 'text-[#16A34A]',
-    bg:    'bg-[#DCFCE7]',
-    desc:  "Yangi xodimni ishga qabul qilish uchun rasmiy buyruq",
-  },
-  {
-    id:    'mehnat_shartnoma',
-    name:  'Mehnat shartnomasi',
-    icon:  FileText,
-    color: 'text-[#2563EB]',
-    bg:    'bg-[#DBEAFE]',
-    desc:  "Xodim va tashkilot o'rtasidagi to'liq mehnat shartnomasi",
-  },
-  {
-    id:    'tatil',
-    name:  "Ta'til buyrug'i",
-    icon:  FileText,
-    color: 'text-[#D97706]',
-    bg:    'bg-[#FEF3C7]',
-    desc:  "Yillik asosiy yoki qo'shimcha ta'til berish buyrug'i",
-  },
-  {
-    id:    'boshatish',
-    name:  "Ishdan bo'shatish",
-    icon:  UserX,
-    color: 'text-[#DC2626]',
-    bg:    'bg-[#FEE2E2]',
-    desc:  "Xodimni ishdan bo'shatish buyrug'i",
-  },
-]
-
 const today = () => new Date().toISOString().split('T')[0]
 
 export default function HRHujjatlarPage() {
+  const t = useTranslations('hr')
   const { currentOrg }  = useAuth()
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null)
   const [preview, setPreview]         = useState('')
   const [previewTitle, setPreviewTitle] = useState('')
   const [loading, setLoading]         = useState(false)
+
+  const HR_DOCS = [
+    {
+      id:    'ishga_qabul',
+      name:  t('ishgaQabulName'),
+      icon:  UserCheck,
+      color: 'text-[#16A34A]',
+      bg:    'bg-[#DCFCE7]',
+      desc:  t('ishgaQabulDesc'),
+    },
+    {
+      id:    'mehnat_shartnoma',
+      name:  t('mehnatShartnomaName'),
+      icon:  FileText,
+      color: 'text-[#2563EB]',
+      bg:    'bg-[#DBEAFE]',
+      desc:  t('mehnatShartnomaDesc'),
+    },
+    {
+      id:    'tatil',
+      name:  t('tatilName'),
+      icon:  FileText,
+      color: 'text-[#D97706]',
+      bg:    'bg-[#FEF3C7]',
+      desc:  t('tatilDesc'),
+    },
+    {
+      id:    'boshatish',
+      name:  t('boshatishName'),
+      icon:  UserX,
+      color: 'text-[#DC2626]',
+      bg:    'bg-[#FEE2E2]',
+      desc:  t('boshatishDesc'),
+    },
+  ]
 
   const [form, setForm] = useState({
     xodimId:          '',
@@ -131,19 +133,19 @@ export default function HRHujjatlarPage() {
     switch (selectedDoc) {
       case 'ishga_qabul':
         content = generateIshgaQabulBuyruq(d)
-        title   = `Ishga qabul buyrug'i № ${d.raqam}`
+        title   = `${t('ishgaQabulName')} № ${d.raqam}`
         break
       case 'mehnat_shartnoma':
         content = generateMehnatShartnoma(d)
-        title   = `Mehnat shartnomasi № ${d.raqam}`
+        title   = `${t('mehnatShartnomaName')} № ${d.raqam}`
         break
       case 'tatil':
         content = generateTatilBuyruq(d)
-        title   = `Ta'til buyrug'i № ${d.raqam}`
+        title   = `${t('tatilName')} № ${d.raqam}`
         break
       case 'boshatish':
         content = generateIshdanBoshtirish(d)
-        title   = `Ishdan bo'shatish buyrug'i № ${d.raqam}`
+        title   = `${t('boshatishName')} № ${d.raqam}`
         break
     }
 
@@ -156,9 +158,9 @@ export default function HRHujjatlarPage() {
     setLoading(true)
     try {
       await exportContractPdf({ title: previewTitle, content: preview, orgName: currentOrg?.name })
-      toast.success('PDF yuklandi ✓')
+      toast.success(t('pdfDownloaded'))
     } catch {
-      toast.error('Xatolik')
+      toast.error(t('error'))
     } finally {
       setLoading(false)
     }
@@ -169,9 +171,9 @@ export default function HRHujjatlarPage() {
     setLoading(true)
     try {
       await exportContractDocx({ title: previewTitle, content: preview, orgName: currentOrg?.name })
-      toast.success('Word yuklandi ✓')
+      toast.success(t('wordDownloaded'))
     } catch {
-      toast.error('Xatolik')
+      toast.error(t('error'))
     } finally {
       setLoading(false)
     }
@@ -183,12 +185,12 @@ export default function HRHujjatlarPage() {
   return (
     <div>
       <PageHeader
-        title="HR Hujjatlar"
-        description="Kadrlar bo'limi hujjatlarini yarating"
+        title={t('hrDocsTitle')}
+        description={t('hrDocsDesc')}
         breadcrumbs={[
-          { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Kadrlar',   path: '/dashboard/kadrlar' },
-          { label: 'Hujjatlar' },
+          { label: 'Dashboard',     path: '/dashboard' },
+          { label: t('breadcrumb'), path: '/dashboard/kadrlar' },
+          { label: t('hrDocsBreadcrumb') },
         ]}
       />
 
@@ -206,7 +208,7 @@ export default function HRHujjatlarPage() {
               <p className="font-semibold text-[#0F172A] mb-1">{doc.name}</p>
               <p className="text-xs text-[#94A3B8] leading-relaxed">{doc.desc}</p>
               <div className="flex items-center gap-1 mt-3 text-xs text-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity">
-                <span>Yaratish</span>
+                <span>{t('create')}</span>
                 <ArrowRight size={12} />
               </div>
             </button>
@@ -214,7 +216,6 @@ export default function HRHujjatlarPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Forma */}
           <Card>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[#0F172A]">
@@ -224,105 +225,103 @@ export default function HRHujjatlarPage() {
                 onClick={() => { setSelectedDoc(null); setPreview('') }}
                 className="text-xs text-[#94A3B8] hover:text-[#475569] transition-colors"
               >
-                ← Orqaga
+                ← {t('back')}
               </button>
             </div>
 
             <div className="space-y-4">
-              {/* Xodim tanlash */}
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-[#374151]">Xodim *</label>
+                <label className="block text-sm font-medium text-[#374151]">{t('selectEmployee')}</label>
                 <select
                   value={form.xodimId}
                   onChange={e => upd('xodimId', e.target.value)}
                   className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
                 >
-                  <option value="">Xodimni tanlang</option>
+                  <option value="">{t('selectEmployeePlace')}</option>
                   {employees.map((emp: any) => (
                     <option key={emp.id} value={emp.id}>
-                      {emp.ism} — {emp.lavozim || "lavozim yo'q"}
+                      {emp.ism} — {emp.lavozim || t('noLavozim')}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Input label="Buyruq raqami" value={form.raqam}
+                <Input label={t('buyruqRaqam')} value={form.raqam}
                   onChange={e => upd('raqam', e.target.value)} />
-                <Input label="Sana" type="date" value={form.sana}
+                <Input label={t('sana')} type="date" value={form.sana}
                   onChange={e => upd('sana', e.target.value)} />
               </div>
 
               <Input
-                label="Lavozim"
-                placeholder={selectedEmployee?.lavozim || 'Lavozim'}
+                label={t('lavozim')}
+                placeholder={selectedEmployee?.lavozim || t('lavozim')}
                 value={form.lavozim}
                 onChange={e => upd('lavozim', e.target.value)}
               />
               <Input
-                label="Bo'lim"
-                placeholder={selectedEmployee?.bolim || "Bo'lim (ixtiyoriy)"}
+                label={t('bolim')}
+                placeholder={selectedEmployee?.bolim || t('bolimPlace')}
                 value={form.bolim}
                 onChange={e => upd('bolim', e.target.value)}
               />
               <Input
-                label="Oylik maosh (so'm)"
+                label={t('monthlySalary')}
                 type="number"
                 placeholder={selectedEmployee?.maosh || '0'}
                 value={form.maosh}
                 onChange={e => upd('maosh', e.target.value)}
               />
-              <Input label="Ish boshlagan sana" type="date"
+              <Input label={t('ishBoshi')} type="date"
                 value={form.ishBoshi} onChange={e => upd('ishBoshi', e.target.value)} />
 
               {selectedDoc === 'tatil' && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <Input label="Ta'til boshi" type="date"
+                  <Input label={t('tatilBoshi')} type="date"
                     value={form.tatilBoshi} onChange={e => upd('tatilBoshi', e.target.value)} />
-                  <Input label="Ta'til oxiri" type="date"
+                  <Input label={t('tatilOxiri')} type="date"
                     value={form.tatilOxiri} onChange={e => upd('tatilOxiri', e.target.value)} />
-                  <Input label="Kunlar soni"
+                  <Input label={t('tatilKunlar')}
                     value={form.tatilKunlar} onChange={e => upd('tatilKunlar', e.target.value)} />
                 </div>
               )}
 
               {selectedDoc === 'boshatish' && (
                 <div className="space-y-3">
-                  <Input label="Bo'shatish sanasi" type="date"
+                  <Input label={t('boshatishSana')} type="date"
                     value={form.boshatishSana} onChange={e => upd('boshatishSana', e.target.value)} />
-                  <Input label="Sababi"
+                  <Input label={t('boshatishSabab')}
                     value={form.boshatishSababi} onChange={e => upd('boshatishSababi', e.target.value)} />
                 </div>
               )}
 
               {selectedDoc === 'mehnat_shartnoma' && (
                 <div className="grid grid-cols-2 gap-3">
-                  <Input label="Shartnoma muddati" value={form.shartnomaMuddat}
+                  <Input label={t('shartnomaMuddat')} value={form.shartnomaMuddat}
                     onChange={e => upd('shartnomaMuddat', e.target.value)}
-                    placeholder="belgilanmagan muddatga" />
-                  <Input label="Sinov muddati" value={form.sinovMuddat}
+                    placeholder={t('shartnomaMuddatPlace')} />
+                  <Input label={t('sinovMuddat')} value={form.sinovMuddat}
                     onChange={e => upd('sinovMuddat', e.target.value)}
-                    placeholder="3 (uch) oy" />
+                    placeholder={t('sinovMuddatPlace')} />
                 </div>
               )}
 
               <Button fullWidth onClick={handleGenerate} leftIcon={<FileText size={15} />}>
-                Hujjat shakllantirish
+                {t('generateDocument')}
               </Button>
             </div>
           </Card>
 
-          {/* Preview */}
           <Card padding="none">
             <div className="flex items-center justify-between px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-              <p className="text-sm font-semibold text-[#0F172A]">Ko'rib chiqish</p>
+              <p className="text-sm font-semibold text-[#0F172A]">{t('preview')}</p>
               {preview && (
                 <div className="flex gap-2">
                   <Button size="xs" variant="outline" loading={loading} onClick={handlePdf}>
-                    PDF
+                    {t('pdf')}
                   </Button>
                   <Button size="xs" variant="outline" loading={loading} onClick={handleDocx}>
-                    Word
+                    {t('word')}
                   </Button>
                 </div>
               )}
@@ -339,7 +338,7 @@ export default function HRHujjatlarPage() {
                 <div className="flex items-center justify-center h-64 text-[#94A3B8]">
                   <div className="text-center">
                     <FileText size={32} className="mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">Hujjat ko'rinishi bu yerda chiqadi</p>
+                    <p className="text-sm">{t('previewPlaceholder')}</p>
                   </div>
                 </div>
               )}
