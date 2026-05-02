@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                 from 'react'
+import { useTranslations }          from 'next-intl'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Modal }                    from '@/components/ui/Modal'
 import { Button }                   from '@/components/ui/Button'
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export function OrgFormModal({ org, open, onClose }: Props) {
+  const t  = useTranslations('organizations')
+  const tu = useTranslations('ui')
   const qc     = useQueryClient()
   const isEdit = !!org
 
@@ -43,10 +46,10 @@ export function OrgFormModal({ org, open, onClose }: Props) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['organizations'] })
-      toast.success(isEdit ? 'Tashkilot yangilandi' : "Tashkilot qo'shildi")
+      toast.success(isEdit ? t('toast.updated') : t('toast.added'))
       onClose()
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
   })
 
   const handleStirData = (data: StirData) => {
@@ -69,14 +72,14 @@ export function OrgFormModal({ org, open, onClose }: Props) {
   return (
     <Modal
       open={open} onClose={onClose}
-      title={isEdit ? 'Tashkilotni tahrirlash' : 'Yangi tashkilot'}
+      title={isEdit ? t('editOrg') : t('newOrg')}
       size="lg"
       footer={
         <>
-          <Button variant="outline" size="sm" onClick={onClose}>Bekor qilish</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>{tu('cancel')}</Button>
           <Button size="sm" loading={mutation.isPending}
             onClick={() => mutation.mutate(form)} disabled={!form.name}>
-            {isEdit ? 'Saqlash' : "Qo'shish"}
+            {isEdit ? tu('save') : t('add')}
           </Button>
         </>
       }
@@ -85,7 +88,7 @@ export function OrgFormModal({ org, open, onClose }: Props) {
         {!isEdit && (
           <div>
             <p className="text-sm font-semibold text-[#0F172A] mb-2">
-              STIR orqali avtomatik to'ldirish
+              {t('stirAutoFill')}
             </p>
             <StirInput
               value={form.inn}
@@ -97,54 +100,54 @@ export function OrgFormModal({ org, open, onClose }: Props) {
         )}
 
         <div className={cn(!isEdit && 'border-t border-[#E2E8F0] pt-4')}>
-          <p className="text-sm font-semibold text-[#0F172A] mb-3">Asosiy ma'lumotlar</p>
+          <p className="text-sm font-semibold text-[#0F172A] mb-3">{t('mainInfo')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Tashkilot nomi *" placeholder="Toshmatov Savdo MChJ"
+            <Input label={t('form.name')} placeholder={t('form.namePlaceholder')}
               value={form.name} onChange={e => upd('name', e.target.value)} required />
             {isEdit && (
-              <Input label="STIR" placeholder="123456789" hint="9 ta raqam"
+              <Input label={t('form.stir')} placeholder="123456789" hint={t('form.stirHint')}
                 value={form.inn} onChange={e => upd('inn', e.target.value.replace(/\D/g, '').slice(0, 9))} />
             )}
-            <Input label="Rahbar ismi" placeholder="Toshmatov Alisher Bekovich"
+            <Input label={t('form.directorName')} placeholder={t('form.directorPlaceholder')}
               value={form.directorName} onChange={e => upd('directorName', e.target.value)} />
             <JshshirInput
-              label="Rahbar JSHSHIR"
+              label={t('form.directorPinfl')}
               value={form.directorPinfl}
               onChange={v => upd('directorPinfl', v)}
               onData={d => upd('directorName', d.fullName || form.directorName)}
             />
-            <Input label="Telefon" placeholder="+998 71 123 45 67"
+            <Input label={t('form.phone')} placeholder={t('form.phonePlaceholder')}
               value={form.phone} onChange={e => upd('phone', e.target.value)} />
-            <Input label="Bosh hisobchi" placeholder="Rahimova Dilnoza"
+            <Input label={t('form.chiefAccountant')} placeholder={t('form.chiefAccountantPlaceholder')}
               value={form.chiefAccountant} onChange={e => upd('chiefAccountant', e.target.value)} />
           </div>
           <div className="mt-4">
-            <Input label="Yuridik manzil" placeholder="Toshkent sh., Yunusobod t., Amir Temur ko'chasi, 108"
+            <Input label={t('form.address')} placeholder={t('form.addressPlaceholder')}
               value={form.address} onChange={e => upd('address', e.target.value)} />
           </div>
         </div>
 
         <div className="border-t border-[#E2E8F0] pt-4">
-          <p className="text-sm font-semibold text-[#0F172A] mb-3">Bank ma'lumotlari</p>
+          <p className="text-sm font-semibold text-[#0F172A] mb-3">{t('bankInfo')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input label="Bank nomi" placeholder="Xalq banki"
+            <Input label={t('form.bankName')} placeholder={t('form.bankPlaceholder')}
               value={form.bankName} onChange={e => upd('bankName', e.target.value)} />
-            <Input label="MFO" placeholder="00014"
+            <Input label={t('form.mfo')} placeholder={t('form.mfoPlaceholder')}
               value={form.mfo} onChange={e => upd('mfo', e.target.value.replace(/\D/g, '').slice(0, 5))} />
             <div className="sm:col-span-2">
-              <Input label="Hisob raqami" placeholder="20208000000000000000"
+              <Input label={t('form.bankAccount')} placeholder={t('form.bankAccountPlaceholder')}
                 value={form.bankAccount} onChange={e => upd('bankAccount', e.target.value)} />
             </div>
           </div>
         </div>
 
         <div className="border-t border-[#E2E8F0] pt-4">
-          <p className="text-sm font-semibold text-[#0F172A] mb-3">QQS</p>
+          <p className="text-sm font-semibold text-[#0F172A] mb-3">{t('qqs')}</p>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="QQS to'lovchisi raqami" placeholder="302060000000"
+            <Input label={t('qqsPayer')} placeholder={t('form.qqsRegPlaceholder')}
               value={form.qqsReg} onChange={e => upd('qqsReg', e.target.value)} />
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[#374151]">QQS stavkasi</label>
+              <label className="text-sm font-medium text-[#374151]">{t('qqsRate')}</label>
               <select
                 value={form.qqsStavka}
                 onChange={e => upd('qqsStavka', e.target.value)}

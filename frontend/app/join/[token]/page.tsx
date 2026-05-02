@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect }                from 'react'
+import { useTranslations }          from 'next-intl'
 import { useParams, useRouter }     from 'next/navigation'
 import { useMutation }              from '@tanstack/react-query'
 import { Loader2 }                  from 'lucide-react'
@@ -9,6 +10,7 @@ import api                          from '@/lib/api'
 import toast                        from 'react-hot-toast'
 
 export default function JoinPage() {
+  const t = useTranslations('joinPage')
   const params = useParams()
   const router = useRouter()
   const { user } = useAuth()
@@ -17,11 +19,11 @@ export default function JoinPage() {
   const joinMutation = useMutation({
     mutationFn: () => api.post('/orgs/join', { token }),
     onSuccess:  () => {
-      toast.success("Tashkilotga qo'shildingiz! ✓")
+      toast.success(t('joined'))
       router.push('/dashboard')
     },
     onError: (e: any) => {
-      toast.error(e?.response?.data?.message || 'Xatolik')
+      toast.error(e?.response?.data?.message || t('error'))
       router.push('/dashboard')
     },
   })
@@ -36,7 +38,7 @@ export default function JoinPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
       <div className="text-center">
         <Loader2 size={32} className="animate-spin text-[#2563EB] mx-auto mb-3" />
-        <p className="text-[#475569]">Tashkilotga qo'shilmoqdasiz...</p>
+        <p className="text-[#475569]">{t('joining')}</p>
       </div>
     </div>
   )

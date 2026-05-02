@@ -1,0 +1,20 @@
+{
+  "stepOrgLabel": "Tashkilotingizni qo'shing",
+  "stepOrgDesc": "STIR orqali avtomatik to'ldiring",
+  "stepOrgCta": "Tashkilot qo'shish",
+  "stepCpLabel": "Birinchi kontragentni qo'shing",
+  "stepCpDesc": "Hamkor yoki mijoz ma'lumotlari",
+  "stepCpCta": "Kontragent qo'shish",
+  "stepContractLabel": "Birinchi shartnomani yarating",
+  "stepContractDesc": "12 ta shartnoma turidan birini tanlang",
+  "stepContractCta": "Shartnoma yaratish",
+  "stepDownloadLabel": "Hujjatni yuklab oling",
+  "stepDownloadDesc": "PDF yoki Word formatida",
+  "stepDownloadCta": "Hujjatni ochish",
+  "congratsTitle": "Tabriklaymiz! 🎉",
+  "congratsDesc": "Siz boshlash uchun barcha qadamlarni bajardingiz. Endi MyHujjat.uz dan to'liq foydalaning.",
+  "close": "Yopish",
+  "guideTitle": "Boshlash bo'yicha yo'l-yo'riq",
+  "progress": "{done}/{total} qadam bajarildi",
+  "dismiss": "Bekor qilish"
+}

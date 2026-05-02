@@ -1,0 +1,17 @@
+{
+  "triggerBtn": "Подписать через E-imzo",
+  "modalTitle": "Подписание через E-imzo",
+  "cancel": "Отмена",
+  "signBtn": "Подписать",
+  "connecting": "Подключение к E-imzo...",
+  "notInstalledTitle": "Приложение E-imzo не найдено",
+  "notInstalledDesc": "Установите приложение E-imzo и попробуйте снова.",
+  "downloadLink": "Скачать на e-imzo.uz →",
+  "selectKey": "Выберите электронный ключ",
+  "noKeys": "Ключи не найдены",
+  "keyValidUntil": "{type} — действует до: {date}",
+  "successMsg": "Успешно подписано!",
+  "successToast": "Подпись успешна: {signer}",
+  "invalidSignature": "Недействительная подпись",
+  "signError": "Ошибка при подписании"
+}

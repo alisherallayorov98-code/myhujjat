@@ -1,0 +1,20 @@
+{
+  "stepOrgLabel": "Добавьте организацию",
+  "stepOrgDesc": "Заполните автоматически по ИНН (STIR)",
+  "stepOrgCta": "Добавить организацию",
+  "stepCpLabel": "Добавьте первого контрагента",
+  "stepCpDesc": "Данные партнёра или клиента",
+  "stepCpCta": "Добавить контрагента",
+  "stepContractLabel": "Создайте первый договор",
+  "stepContractDesc": "Выберите один из 12 типов договоров",
+  "stepContractCta": "Создать договор",
+  "stepDownloadLabel": "Скачайте документ",
+  "stepDownloadDesc": "В формате PDF или Word",
+  "stepDownloadCta": "Открыть документ",
+  "congratsTitle": "Поздравляем! 🎉",
+  "congratsDesc": "Вы выполнили все начальные шаги. Теперь используйте MyHujjat.uz в полной мере.",
+  "close": "Закрыть",
+  "guideTitle": "Руководство по началу работы",
+  "progress": "{done}/{total} шагов выполнено",
+  "dismiss": "Отменить"
+}

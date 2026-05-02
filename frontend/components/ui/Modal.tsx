@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useCallback } from 'react'
+import { useTranslations }        from 'next-intl'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { Button } from './Button'
@@ -117,11 +118,12 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   open, onClose, onConfirm,
   title, description,
-  confirmText = 'Tasdiqlash',
-  cancelText  = 'Bekor qilish',
+  confirmText,
+  cancelText,
   variant     = 'danger',
   loading     = false,
 }: ConfirmDialogProps) {
+  const t = useTranslations('ui')
   return (
     <Modal
       open={open}
@@ -130,10 +132,10 @@ export function ConfirmDialog({
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose}>
-            {cancelText}
+            {cancelText ?? t('cancel')}
           </Button>
           <Button variant={variant} size="sm" loading={loading} onClick={onConfirm}>
-            {confirmText}
+            {confirmText ?? t('confirm')}
           </Button>
         </>
       }

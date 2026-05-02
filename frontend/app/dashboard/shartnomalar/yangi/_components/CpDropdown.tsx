@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useTranslations }              from 'next-intl'
 import { Search, Loader2, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input }  from '@/components/ui/Input'
@@ -18,6 +19,7 @@ interface CpDropdownProps {
 }
 
 export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropdownProps) {
+  const t = useTranslations('cpDropdown')
   const [search,    setSearch]    = useState('')
   const [open,      setOpen]      = useState(false)
   const [loading,   setLoading]   = useState(false)
@@ -42,7 +44,6 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // Auto-search when exactly 9 digits entered (no Enter needed)
   useEffect(() => {
     const digs = search.replace(/\D/g, '')
     if (digs.length < 9) { prevStir.current = ''; return }
@@ -85,9 +86,9 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
       onChange(cp.id, cp.name)
       setSearch(cp.name)
       setOpen(false)
-      toast.success(`Topildi: ${cp.name}`)
+      toast.success(t('found', { name: cp.name }))
     } catch {
-      toast.error("STIR bo'yicha topilmadi — qo'lda kiriting")
+      toast.error(t('stirNotFound'))
       setQuickAdd(true)
       setNewCp(p => ({ ...p, inn: digs }))
       setOpen(false)
@@ -128,18 +129,18 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
 
   async function handleStirLookup() {
     const inn = newCp.inn.trim()
-    if (!/^\d{9}$/.test(inn)) { toast.error("STIR 9 ta raqam bo'lishi kerak"); return }
+    if (!/^\d{9}$/.test(inn)) { toast.error(t('stir9Required')); return }
     setLoading(true)
     try {
       const { data } = await api.get(`/stir/${inn}`)
       setNewCp(p => ({ ...p, name: data.name || p.name, directorName: data.directorName || p.directorName, address: data.address || p.address, phone: data.phone || p.phone }))
-      toast.success("Ma'lumotlar to'ldirildi")
-    } catch { toast.error("STIR topilmadi") }
+      toast.success(t('dataAutofilled'))
+    } catch { toast.error(t('stirNotFoundShort')) }
     finally { setLoading(false) }
   }
 
   async function handleQuickAddSave() {
-    if (!newCp.name.trim()) { toast.error('Nomi kiritilishi shart'); return }
+    if (!newCp.name.trim()) { toast.error(t('nameRequired')); return }
     setSavingCp(true)
     try {
       const { data } = await api.post('/counterparties', { organizationId: orgId, ...newCp })
@@ -149,8 +150,8 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
       setSearch(cp.name)
       setQuickAdd(false)
       setNewCp({ name: '', inn: '', directorName: '', address: '', phone: '', bankName: '', bankAccount: '', mfo: '' })
-      toast.success("Kontragent qo'shildi")
-    } catch (e: any) { toast.error(e?.response?.data?.message || 'Xatolik') }
+      toast.success(t('cpAdded'))
+    } catch (e: any) { toast.error(e?.response?.data?.message || t('error')) }
     finally { setSavingCp(false) }
   }
 
@@ -158,33 +159,33 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
     return (
       <div className="border border-[#E2E8F0] rounded-xl p-4 space-y-3 bg-[#F8FAFC]">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-sm font-semibold text-[#0F172A]">Yangi kontragent</p>
+          <p className="text-sm font-semibold text-[#0F172A]">{t('newCp')}</p>
           <button onClick={() => setQuickAdd(false)} className="text-[#94A3B8] hover:text-[#475569]"><X size={16} /></button>
         </div>
         <div className="flex gap-2">
-          <Input label="STIR" placeholder="123456789" value={newCp.inn}
+          <Input label={t('stir')} placeholder={t('stirPlace')} value={newCp.inn}
             onChange={e => setNewCp(p => ({ ...p, inn: e.target.value.replace(/\D/g, '').slice(0, 9) }))}
-            hint="9 ta raqam" />
+            hint={t('stirHint')} />
           <div className="flex items-end pb-0.5">
             <Button size="sm" variant="secondary" loading={loading} onClick={handleStirLookup} disabled={newCp.inn.length !== 9}>
               <Search size={14} />
             </Button>
           </div>
         </div>
-        <Input label="Nomi *" value={newCp.name} onChange={e => setNewCp(p => ({ ...p, name: e.target.value }))} placeholder="Kompaniya nomi" />
-        <Input label="Rahbar" value={newCp.directorName} onChange={e => setNewCp(p => ({ ...p, directorName: e.target.value }))} placeholder="Familiya Ism" />
-        <Input label="Manzil" value={newCp.address} onChange={e => setNewCp(p => ({ ...p, address: e.target.value }))} />
+        <Input label={t('name')} value={newCp.name} onChange={e => setNewCp(p => ({ ...p, name: e.target.value }))} placeholder={t('namePlace')} />
+        <Input label={t('director')} value={newCp.directorName} onChange={e => setNewCp(p => ({ ...p, directorName: e.target.value }))} placeholder={t('directorPlace')} />
+        <Input label={t('address')} value={newCp.address} onChange={e => setNewCp(p => ({ ...p, address: e.target.value }))} />
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Bank" value={newCp.bankName} onChange={e => setNewCp(p => ({ ...p, bankName: e.target.value }))} />
-          <Input label="MFO" value={newCp.mfo} onChange={e => setNewCp(p => ({ ...p, mfo: e.target.value }))} />
+          <Input label={t('bank')} value={newCp.bankName} onChange={e => setNewCp(p => ({ ...p, bankName: e.target.value }))} />
+          <Input label={t('mfo')} value={newCp.mfo} onChange={e => setNewCp(p => ({ ...p, mfo: e.target.value }))} />
           <div className="col-span-2">
-            <Input label="Hisob raqami" value={newCp.bankAccount} onChange={e => setNewCp(p => ({ ...p, bankAccount: e.target.value }))} />
+            <Input label={t('bankAccount')} value={newCp.bankAccount} onChange={e => setNewCp(p => ({ ...p, bankAccount: e.target.value }))} />
           </div>
         </div>
         <div className="flex gap-2 pt-1">
-          <Button size="sm" variant="outline" onClick={() => setQuickAdd(false)}>Bekor</Button>
+          <Button size="sm" variant="outline" onClick={() => setQuickAdd(false)}>{t('cancel')}</Button>
           <Button size="sm" loading={savingCp} onClick={handleQuickAddSave} disabled={!newCp.name.trim()}>
-            Saqlash
+            {t('save')}
           </Button>
         </div>
       </div>
@@ -199,7 +200,7 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
           onChange={e => { setSearch(e.target.value); setOpen(!!e.target.value.trim() || true); if (e.target.value === '') onChange('', '') }}
           onFocus={() => setOpen(true)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleEnter() } if (e.key === 'Escape') setOpen(false) }}
-          placeholder="Nom yoki STIR bo'yicha qidiring..."
+          placeholder={t('searchPlace')}
           disabled={loading}
           className={cn(
             'w-full h-10 rounded-lg text-sm pl-9 pr-3 border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 bg-white transition',
@@ -224,21 +225,21 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
               className="w-full text-left px-3 py-2.5 text-sm hover:bg-[#F8FAFC] transition border-b border-[#F1F5F9] last:border-0"
             >
               <p className="font-medium text-[#0F172A]">{cp.name}</p>
-              {cp.inn && <p className="text-xs text-[#94A3B8]">STIR: {cp.inn}</p>}
+              {cp.inn && <p className="text-xs text-[#94A3B8]">{t('stirLabel')} {cp.inn}</p>}
             </button>
           ))}
           {filtered.length === 0 && search.trim() && (
             <div className="px-3 py-3 text-sm text-[#94A3B8]">
-              Topilmadi.{' '}
+              {t('notFound')}{' '}
               <button className="text-[#2563EB] hover:underline" onMouseDown={e => e.preventDefault()} onClick={() => { setOpen(false); setQuickAdd(true); if (/^\d+$/.test(search.trim())) setNewCp(p => ({ ...p, inn: search.trim() })) }}>
-                Yangi qo'shish →
+                {t('addNew')}
               </button>
             </div>
           )}
           {filtered.length === 0 && !search.trim() && (
             <div className="px-3 py-3 text-sm text-[#94A3B8] text-center">
               <button className="text-[#2563EB] hover:underline" onMouseDown={e => e.preventDefault()} onClick={() => { setOpen(false); setQuickAdd(true) }}>
-                + Yangi kontragent qo'shish
+                {t('addNewCp')}
               </button>
             </div>
           )}

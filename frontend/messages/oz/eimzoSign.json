@@ -1,0 +1,17 @@
+{
+  "triggerBtn": "E-имзо билан имзолаш",
+  "modalTitle": "E-имзо билан имзолаш",
+  "cancel": "Бекор қилиш",
+  "signBtn": "Имзолаш",
+  "connecting": "E-имзо билан уланилмоқда...",
+  "notInstalledTitle": "E-имзо иловаси топилмади",
+  "notInstalledDesc": "E-имзо иловасини ўрнатинг ва қайта уриниб кўринг.",
+  "downloadLink": "e-imzo.uz сайтидан юклаш →",
+  "selectKey": "Электрон калит танланг",
+  "noKeys": "Калит топилмади",
+  "keyValidUntil": "{type} — муддати: {date}",
+  "successMsg": "Муваффақиятли имзоланди!",
+  "successToast": "Имзо муваффақиятли: {signer}",
+  "invalidSignature": "Имзо яроқсиз",
+  "signError": "Имзолашда хатолик"
+}

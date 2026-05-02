@@ -1,0 +1,17 @@
+{
+  "triggerBtn": "E-imzo bilan imzolash",
+  "modalTitle": "E-imzo bilan imzolash",
+  "cancel": "Bekor qilish",
+  "signBtn": "Imzolash",
+  "connecting": "E-imzo bilan ulanilmoqda...",
+  "notInstalledTitle": "E-imzo ilovasi topilmadi",
+  "notInstalledDesc": "E-imzo ilovasini o'rnating va qayta urunib ko'ring.",
+  "downloadLink": "e-imzo.uz saytidan yuklash →",
+  "selectKey": "Elektron kalit tanlang",
+  "noKeys": "Kalit topilmadi",
+  "keyValidUntil": "{type} — muddati: {date}",
+  "successMsg": "Muvaffaqiyatli imzolandi!",
+  "successToast": "Imzo muvaffaqiyatli: {signer}",
+  "invalidSignature": "Imzo yaroqsiz",
+  "signError": "Imzolashda xatolik"
+}

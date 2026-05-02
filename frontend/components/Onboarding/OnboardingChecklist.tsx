@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations }      from 'next-intl'
 import Link                    from 'next/link'
 import {
   CheckCircle2, Circle, Building2, Users,
@@ -27,12 +28,12 @@ type Step = {
 }
 
 export function OnboardingChecklist() {
+  const t = useTranslations('onboardingChecklist')
   const { user, currentOrg, organizations } = useAuth()
   const [dismissed,  setDismissed]  = useState(true)
   const [downloaded, setDownloaded] = useState(false)
   const [collapsed,  setCollapsed]  = useState(false)
 
-  // localStorage state
   useEffect(() => {
     setDismissed(localStorage.getItem(DISMISS_KEY) === '1')
     setDownloaded(localStorage.getItem(DOWNLOADED_KEY) === '1')
@@ -54,38 +55,38 @@ export function OnboardingChecklist() {
     {
       id:    'org',
       icon:  Building2,
-      label: 'Tashkilotingizni qo\'shing',
-      desc:  'STIR orqali avtomatik to\'ldiring',
+      label: t('stepOrgLabel'),
+      desc:  t('stepOrgDesc'),
       done:  organizations.length > 0,
       href:  '/dashboard/tashkilotlar',
-      cta:   "Tashkilot qo'shish",
+      cta:   t('stepOrgCta'),
     },
     {
       id:    'cp',
       icon:  Users,
-      label: 'Birinchi kontragentni qo\'shing',
-      desc:  "Hamkor yoki mijoz ma'lumotlari",
+      label: t('stepCpLabel'),
+      desc:  t('stepCpDesc'),
       done:  cps.length > 0,
       href:  '/dashboard/kontragentlar',
-      cta:   "Kontragent qo'shish",
+      cta:   t('stepCpCta'),
     },
     {
       id:    'contract',
       icon:  FileText,
-      label: 'Birinchi shartnomani yarating',
-      desc:  '12 ta shartnoma turidan birini tanlang',
+      label: t('stepContractLabel'),
+      desc:  t('stepContractDesc'),
       done:  (contractsStats?.total ?? 0) > 0,
       href:  '/dashboard/shartnomalar/yangi',
-      cta:   'Shartnoma yaratish',
+      cta:   t('stepContractCta'),
     },
     {
       id:    'download',
       icon:  Download,
-      label: 'Hujjatni yuklab oling',
-      desc:  "PDF yoki Word formatida",
+      label: t('stepDownloadLabel'),
+      desc:  t('stepDownloadDesc'),
       done:  downloaded,
       href:  '/dashboard/shartnomalar',
-      cta:   'Hujjatni ochish',
+      cta:   t('stepDownloadCta'),
     },
   ]
 
@@ -93,7 +94,6 @@ export function OnboardingChecklist() {
   const allDone   = doneCount === steps.length
   const progress  = Math.round((doneCount / steps.length) * 100)
 
-  // Auto-detect download (when user navigates to detail page and downloads)
   useEffect(() => {
     function onDownload() {
       localStorage.setItem(DOWNLOADED_KEY, '1')
@@ -106,7 +106,6 @@ export function OnboardingChecklist() {
   if (dismissed) return null
   if (!user)     return null
   if (allDone) {
-    // Auto-mark as dismissed after completion
     return (
       <Card className="mb-6 bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] border-[#BBF7D0]">
         <div className="flex items-center gap-4">
@@ -114,15 +113,15 @@ export function OnboardingChecklist() {
             <Sparkles size={22} className="text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="font-display font-bold text-[#15803D] text-base">Tabriklaymiz! 🎉</h3>
+            <h3 className="font-display font-bold text-[#15803D] text-base">{t('congratsTitle')}</h3>
             <p className="text-sm text-[#166534] mt-0.5">
-              Siz boshlash uchun barcha qadamlarni bajardingiz. Endi MyHujjat.uz dan to'liq foydalaning.
+              {t('congratsDesc')}
             </p>
           </div>
           <button
             onClick={() => { localStorage.setItem(DISMISS_KEY, '1'); setDismissed(true) }}
             className="p-2 rounded-lg text-[#15803D] hover:bg-[#BBF7D0] transition shrink-0"
-            aria-label="Yopish"
+            aria-label={t('close')}
           >
             <X size={16} />
           </button>
@@ -142,8 +141,8 @@ export function OnboardingChecklist() {
             <Sparkles size={16} className="text-[#2563EB]" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-display font-bold text-[#0F172A] text-sm">Boshlash bo'yicha yo'l-yo'riq</h3>
-            <p className="text-xs text-[#475569] mt-0.5">{doneCount}/{steps.length} qadam bajarildi</p>
+            <h3 className="font-display font-bold text-[#0F172A] text-sm">{t('guideTitle')}</h3>
+            <p className="text-xs text-[#475569] mt-0.5">{t('progress', { done: doneCount, total: steps.length })}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <div className="w-24 h-1.5 bg-white/60 rounded-full overflow-hidden">
@@ -158,8 +157,8 @@ export function OnboardingChecklist() {
         <button
           onClick={() => { localStorage.setItem(DISMISS_KEY, '1'); setDismissed(true) }}
           className="ml-3 p-1.5 rounded-lg text-[#475569] hover:bg-white/60 transition shrink-0"
-          aria-label="Yopish"
-          title="Bekor qilish"
+          aria-label={t('close')}
+          title={t('dismiss')}
         >
           <X size={14} />
         </button>

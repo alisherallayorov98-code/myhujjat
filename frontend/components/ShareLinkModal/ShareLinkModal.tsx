@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations }      from 'next-intl'
 import {
   Share2, Copy, Check, ExternalLink, Trash2,
   Loader2, Calendar, Eye, CheckCircle2, X,
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export function ShareLinkModal({ contractId, open, onClose }: Props) {
+  const t = useTranslations('shareLinkModal')
   const qc = useQueryClient()
   const [name,    setName]    = useState('')
   const [email,   setEmail]   = useState('')
@@ -58,17 +60,17 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['share-links', contractId] })
-      toast.success('Havola yaratildi')
+      toast.success(t('linkCreated'))
       setName(''); setEmail(''); setPhone('')
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const revokeMut = useMutation({
     mutationFn: (id: string) => api.delete(`/share-links/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['share-links', contractId] })
-      toast.success('Havola bekor qilindi')
+      toast.success(t('linkRevoked'))
     },
   })
 
@@ -82,65 +84,63 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
     try {
       await navigator.clipboard.writeText(url)
       setCopied(token)
-      toast.success("Havola nusxalandi")
+      toast.success(t('linkCopied'))
       setTimeout(() => setCopied(null), 1500)
     } catch {
-      toast.error("Nusxalash imkoni bo'lmadi")
+      toast.error(t('copyFailed'))
     }
   }
 
   function shareTelegram(token: string, recipName?: string | null) {
     const url  = makeUrl(token)
-    const text = `Salom${recipName ? `, ${recipName}` : ''}! Sizga shartnoma yuborildi:\n${url}`
+    const text = t('telegramText', { name: recipName ? `, ${recipName}` : '', url })
     window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank')
   }
 
   return (
     <Modal
       open={open} onClose={onClose}
-      title="Kontragentga yuborish"
+      title={t('title')}
       size="lg"
     >
       <div className="space-y-5">
         <div className="bg-[#F0F9FF] border border-[#BFDBFE] rounded-xl p-3.5 text-xs text-[#1E40AF]">
-          💡 Maxfiy havola yaratiladi. Kontragent hisob ochmasdan shartnomani ko'radi va imzolaydi.
-          Imzo va vaqt avtomatik qayd etiladi.
+          {t('info')}
         </div>
 
-        {/* New link form */}
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-[#0F172A]">Yangi havola</p>
+          <p className="text-sm font-semibold text-[#0F172A]">{t('newLink')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Kontragent ismi (ixtiyoriy)"
-              placeholder="Toshmatov Akbar"
+              label={t('recipientName')}
+              placeholder={t('recipientNamePlace')}
               value={name}
               onChange={e => setName(e.target.value)}
             />
             <Input
-              label="Email (ixtiyoriy)"
+              label={t('email')}
               type="email"
-              placeholder="email@company.uz"
+              placeholder={t('emailPlace')}
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
             <Input
-              label="Telefon (ixtiyoriy)"
-              placeholder="+998 90 123 45 67"
+              label={t('phone')}
+              placeholder={t('phonePlace')}
               value={phone}
               onChange={e => setPhone(e.target.value)}
             />
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-[#374151]">Amal qilish muddati</label>
+              <label className="block text-sm font-medium text-[#374151]">{t('duration')}</label>
               <select
                 value={days}
                 onChange={e => setDays(Number(e.target.value))}
                 className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
               >
-                <option value={7}>7 kun</option>
-                <option value={30}>30 kun</option>
-                <option value={60}>60 kun</option>
-                <option value={90}>90 kun</option>
+                <option value={7}>{t('days7')}</option>
+                <option value={30}>{t('days30')}</option>
+                <option value={60}>{t('days60')}</option>
+                <option value={90}>{t('days90')}</option>
               </select>
             </div>
           </div>
@@ -149,14 +149,13 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
             loading={createMut.isPending}
             onClick={() => createMut.mutate()}
           >
-            Havola yaratish
+            {t('createLink')}
           </Button>
         </div>
 
-        {/* Existing links */}
         <div className="border-t border-[#E2E8F0] pt-4">
           <p className="text-sm font-semibold text-[#0F172A] mb-3">
-            Mavjud havolalar ({links.length})
+            {t('existingLinks', { count: links.length })}
           </p>
 
           {isLoading ? (
@@ -165,7 +164,7 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
             </div>
           ) : links.length === 0 ? (
             <p className="text-sm text-[#94A3B8] text-center py-4">
-              Hali havola yaratilmagan
+              {t('noLinks')}
             </p>
           ) : (
             <div className="space-y-2">
@@ -187,23 +186,23 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-medium text-[#0F172A]">
-                            {link.recipientName || 'Kontragent'}
+                            {link.recipientName || t('defaultRecipient')}
                           </p>
                           {isSigned && (
                             <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#16A34A] text-white">
                               <CheckCircle2 size={10} className="inline mr-0.5" />
-                              Imzolandi
+                              {t('signed')}
                             </span>
                           )}
                           {isExpired && !isSigned && (
                             <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#DC2626] text-white">
-                              Muddati o'tgan
+                              {t('expired')}
                             </span>
                           )}
                           {link.viewedAt && !isSigned && (
                             <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#DBEAFE] text-[#1D4ED8]">
                               <Eye size={10} className="inline mr-0.5" />
-                              Ko'rildi · {link.viewCount}x
+                              {t('viewedCount', { count: link.viewCount })}
                             </span>
                           )}
                         </div>
@@ -212,14 +211,14 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
                         )}
                         {isSigned && link.signerName && (
                           <p className="text-xs text-[#15803D] mt-0.5">
-                            ✓ {link.signerName} tomonidan {formatDate(link.signedAt!, 'short')}
+                            {t('signedBy', { name: link.signerName, date: formatDate(link.signedAt!, 'short') })}
                           </p>
                         )}
                       </div>
                       <button
                         onClick={() => revokeMut.mutate(link.id)}
                         className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition shrink-0"
-                        title="Bekor qilish"
+                        title={t('revokeBtn')}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -234,21 +233,21 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
                       <button
                         onClick={() => copyLink(link.token)}
                         className="p-1.5 rounded-lg bg-[#DBEAFE] text-[#1D4ED8] hover:bg-[#BFDBFE] transition shrink-0"
-                        title="Nusxalash"
+                        title={t('copyBtn')}
                       >
                         {copied === link.token ? <Check size={13} /> : <Copy size={13} />}
                       </button>
                       <button
                         onClick={() => shareTelegram(link.token, link.recipientName)}
                         className="p-1.5 rounded-lg bg-[#0088cc]/10 text-[#0088cc] hover:bg-[#0088cc]/20 transition shrink-0"
-                        title="Telegram orqali yuborish"
+                        title={t('telegramBtn')}
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
                       </button>
                       <a
                         href={url} target="_blank" rel="noopener noreferrer"
                         className="p-1.5 rounded-lg bg-[#F1F5F9] text-[#475569] hover:bg-[#E2E8F0] transition shrink-0"
-                        title="Ochish"
+                        title={t('openBtn')}
                       >
                         <ExternalLink size={13} />
                       </a>
@@ -256,7 +255,7 @@ export function ShareLinkModal({ contractId, open, onClose }: Props) {
 
                     <p className="text-[10px] text-[#94A3B8] mt-2 flex items-center gap-1">
                       <Calendar size={10} />
-                      {isExpired ? 'Tugagan' : 'Amal qilish'}: {formatDate(link.expiresAt, 'short')}
+                      {isExpired ? t('expiredLabel') : t('expiresLabel')}: {formatDate(link.expiresAt, 'short')}
                     </p>
                   </div>
                 )

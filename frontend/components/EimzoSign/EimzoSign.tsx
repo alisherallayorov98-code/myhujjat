@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect }                               from 'react'
+import { useTranslations }                                   from 'next-intl'
 import { Shield, CheckCircle, AlertCircle, Key, Loader2 }   from 'lucide-react'
 import { Button }                                            from '@/components/ui/Button'
 import { Modal }                                             from '@/components/ui/Modal'
@@ -16,6 +17,7 @@ interface EimzoSignProps {
 }
 
 export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) {
+  const t = useTranslations('eimzoSign')
   const [open,        setOpen]        = useState(false)
   const [installed,   setInstalled]   = useState<boolean | null>(null)
   const [keys,        setKeys]        = useState<EimzoKey[]>([])
@@ -53,15 +55,15 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
       })
       if (data.success) {
         setStatus('success')
-        toast.success(`Imzo muvaffaqiyatli: ${data.signer}`)
+        toast.success(t('successToast', { signer: data.signer }))
         setTimeout(() => { setOpen(false); onSigned() }, 1500)
       } else {
         setStatus('error')
-        toast.error('Imzo yaroqsiz')
+        toast.error(t('invalidSignature'))
       }
     } catch (error: any) {
       setStatus('error')
-      toast.error(error?.message || 'Imzolashda xatolik')
+      toast.error(error?.message || t('signError'))
     } finally {
       setLoading(false)
     }
@@ -85,18 +87,18 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
         leftIcon={<Shield size={14} />}
         onClick={() => setOpen(true)}
       >
-        E-imzo bilan imzolash
+        {t('triggerBtn')}
       </Button>
 
       <Modal
         open={open}
         onClose={handleClose}
-        title="E-imzo bilan imzolash"
+        title={t('modalTitle')}
         size="sm"
         footer={
           <>
             <Button variant="outline" size="sm" onClick={handleClose}>
-              Bekor qilish
+              {t('cancel')}
             </Button>
             <Button
               size="sm"
@@ -105,7 +107,7 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
               onClick={handleSign}
               leftIcon={<Shield size={14} />}
             >
-              Imzolash
+              {t('signBtn')}
             </Button>
           </>
         }
@@ -114,7 +116,7 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
           {status === 'connecting' && (
             <div className="flex items-center gap-2 text-sm text-[#475569]">
               <Loader2 size={16} className="animate-spin text-[#2563EB]" />
-              E-imzo bilan ulanilmoqda...
+              {t('connecting')}
             </div>
           )}
 
@@ -123,9 +125,9 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
               <div className="flex items-start gap-2">
                 <AlertCircle size={18} className="text-[#D97706] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-[#92400E]">E-imzo ilovasi topilmadi</p>
+                  <p className="text-sm font-semibold text-[#92400E]">{t('notInstalledTitle')}</p>
                   <p className="text-xs text-[#B45309] mt-1">
-                    E-imzo ilovasini o'rnating va qayta urunib ko'ring.
+                    {t('notInstalledDesc')}
                   </p>
                   <a
                     href="https://e-imzo.uz"
@@ -133,7 +135,7 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
                     rel="noopener noreferrer"
                     className="text-xs text-[#2563EB] hover:underline mt-1 block"
                   >
-                    e-imzo.uz saytidan yuklash →
+                    {t('downloadLink')}
                   </a>
                 </div>
               </div>
@@ -143,9 +145,9 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
           {installed && status !== 'connecting' && (
             <>
               <div>
-                <p className="text-sm font-medium text-[#374151] mb-2">Elektron kalit tanlang</p>
+                <p className="text-sm font-medium text-[#374151] mb-2">{t('selectKey')}</p>
                 {keys.length === 0 ? (
-                  <p className="text-sm text-[#94A3B8]">Kalit topilmadi</p>
+                  <p className="text-sm text-[#94A3B8]">{t('noKeys')}</p>
                 ) : (
                   <div className="space-y-2">
                     {keys.map(key => {
@@ -167,7 +169,7 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
                           )} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-[#0F172A] truncate">{cn_}</p>
-                            <p className="text-xs text-[#94A3B8]">{key.type} — muddati: {key.notAfter}</p>
+                            <p className="text-xs text-[#94A3B8]">{t('keyValidUntil', { type: key.type, date: key.notAfter })}</p>
                           </div>
                           {selectedKey?.alias === key.alias && (
                             <CheckCircle size={16} className="text-[#2563EB] shrink-0" />
@@ -182,7 +184,7 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
               {status === 'success' && (
                 <div className="flex items-center gap-2 text-[#16A34A] bg-[#F0FDF4] p-3 rounded-lg">
                   <CheckCircle size={18} />
-                  <span className="text-sm font-medium">Muvaffaqiyatli imzolandi!</span>
+                  <span className="text-sm font-medium">{t('successMsg')}</span>
                 </div>
               )}
             </>

@@ -1,0 +1,20 @@
+{
+  "stepOrgLabel": "Ташкилотингизни қўшинг",
+  "stepOrgDesc": "СТИР орқали автоматик тўлдиринг",
+  "stepOrgCta": "Ташкилот қўшиш",
+  "stepCpLabel": "Биринчи контрагентни қўшинг",
+  "stepCpDesc": "Ҳамкор ёки мижоз маълумотлари",
+  "stepCpCta": "Контрагент қўшиш",
+  "stepContractLabel": "Биринчи шартномани яратинг",
+  "stepContractDesc": "12 та шартнома туридан бирини танланг",
+  "stepContractCta": "Шартнома яратиш",
+  "stepDownloadLabel": "Ҳужжатни юклаб олинг",
+  "stepDownloadDesc": "PDF ёки Word форматида",
+  "stepDownloadCta": "Ҳужжатни очиш",
+  "congratsTitle": "Табриклаймиз! 🎉",
+  "congratsDesc": "Сиз бошлаш учун барча қадамларни бажардингиз. Энди MyHujjat.uz дан тўлиқ фойдаланинг.",
+  "close": "Ёпиш",
+  "guideTitle": "Бошлаш бўйича йўл-йўриқ",
+  "progress": "{done}/{total} қадам бажарилди",
+  "dismiss": "Бекор қилиш"
+}
