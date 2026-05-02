@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                      from 'react'
+import { useTranslations }                               from 'next-intl'
 import { Plus, Users, Search, Edit2, Trash2, Building2, Download } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
@@ -28,9 +29,6 @@ interface Employee {
   tugilganSana?: string
 }
 
-// ============================================
-// XODIM FORM MODAL
-// ============================================
 function XodimModal({
   xodim, open, onClose, orgId,
 }: {
@@ -39,6 +37,7 @@ function XodimModal({
   onClose: () => void
   orgId:   string
 }) {
+  const t  = useTranslations('hr')
   const qc     = useQueryClient()
   const isEdit = !!xodim
 
@@ -64,10 +63,10 @@ function XodimModal({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['employees'] })
       qc.invalidateQueries({ queryKey: ['employees-stats'] })
-      toast.success(isEdit ? 'Xodim yangilandi' : "Xodim qo'shildi ✓")
+      toast.success(isEdit ? t('employeeUpdated') : t('employeeAdded'))
       onClose()
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   async function checkPinfl() {
@@ -77,10 +76,10 @@ function XodimModal({
       const { data } = await api.get(`/stir/pinfl/${form.jshshir}`)
       if (data.fullName) {
         setForm(f => ({ ...f, ism: data.fullName }))
-        toast.success('JSHSHIR topildi')
+        toast.success(t('jshshirFound'))
       }
     } catch {
-      toast.error("JSHSHIR bo'yicha ma'lumot topilmadi")
+      toast.error(t('jshshirNotFound'))
     } finally {
       setPinflLoading(false)
     }
@@ -93,14 +92,14 @@ function XodimModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Xodimni tahrirlash' : 'Yangi xodim'}
+      title={isEdit ? t('editEmployee') : t('newEmployee')}
       size="lg"
       footer={
         <>
-          <Button variant="outline" size="sm" onClick={onClose}>Bekor</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>{t('cancel')}</Button>
           <Button size="sm" loading={mutation.isPending} disabled={!form.ism}
             onClick={() => mutation.mutate(form)}>
-            {isEdit ? 'Saqlash' : "Qo'shish"}
+            {isEdit ? t('save') : t('add')}
           </Button>
         </>
       }
@@ -109,50 +108,48 @@ function XodimModal({
         <div className="flex gap-2 items-end">
           <div className="flex-1">
             <Input
-              label="JSHSHIR (PINFL)"
-              placeholder="14 ta raqam"
+              label={t('jshshir')}
+              placeholder={t('jshshirPlace')}
               value={form.jshshir}
               onChange={e => upd('jshshir', e.target.value.replace(/\D/g, '').slice(0, 14))}
-              hint="JSHSHIR bo'yicha ism avtomatik to'ldiriladi"
+              hint={t('jshshirHint')}
             />
           </div>
           <Button size="sm" variant="secondary"
             loading={pinflLoading}
             disabled={form.jshshir.length !== 14}
             onClick={checkPinfl}>
-            Tekshirish
+            {t('check')}
           </Button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input label="To'liq ism *" placeholder="Familiya Ism Otasining ismi"
+          <Input label={t('fullName')} placeholder={t('fullNamePlace')}
             value={form.ism} onChange={e => upd('ism', e.target.value)} required />
-          <Input label="Passport" placeholder="AB 1234567"
+          <Input label={t('passport')} placeholder={t('passportPlace')}
             value={form.passport} onChange={e => upd('passport', e.target.value)} />
-          <Input label="Lavozim" placeholder="Dasturchi, buxgalter..."
+          <Input label={t('lavozim')} placeholder={t('lavozimPlace')}
             value={form.lavozim} onChange={e => upd('lavozim', e.target.value)} />
-          <Input label="Bo'lim" placeholder="IT, Moliya, HR..."
+          <Input label={t('bolim')} placeholder={t('bolimPlace')}
             value={form.bolim} onChange={e => upd('bolim', e.target.value)} />
-          <Input label="Oylik maosh (so'm)" placeholder="5000000" type="number"
+          <Input label={t('monthlySalary')} placeholder={t('salaryPlace')} type="number"
             value={form.maosh} onChange={e => upd('maosh', e.target.value)} />
-          <Input label="Ish boshlagan sana" type="date"
+          <Input label={t('ishBoshi')} type="date"
             value={form.ishBoshi} onChange={e => upd('ishBoshi', e.target.value)} />
-          <Input label="Telefon" placeholder="+998 90 123 45 67"
+          <Input label={t('phone')} placeholder={t('phonePlace')}
             value={form.tel} onChange={e => upd('tel', e.target.value)} />
-          <Input label="Tug'ilgan sana" type="date"
+          <Input label={t('birthDate')} type="date"
             value={form.tugilganSana} onChange={e => upd('tugilganSana', e.target.value)} />
         </div>
-        <Input label="Manzil" placeholder="Toshkent shahar, Yunusobod tumani..."
+        <Input label={t('address')} placeholder={t('addressPlace')}
           value={form.manzil} onChange={e => upd('manzil', e.target.value)} />
       </div>
     </Modal>
   )
 }
 
-// ============================================
-// ASOSIY SAHIFA
-// ============================================
 export default function KadrlarPage() {
+  const t = useTranslations('hr')
   const { currentOrg } = useAuth()
   const qc             = useQueryClient()
 
@@ -181,34 +178,34 @@ export default function KadrlarPage() {
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['employees'] })
       qc.invalidateQueries({ queryKey: ['employees-stats'] })
-      toast.success("Xodim o'chirildi")
+      toast.success(t('employeeDeleted'))
     },
   })
 
   return (
     <div>
       <PageHeader
-        title="Kadrlar (HR)"
-        description={`Jami ${employees.length} ta xodim`}
+        title={t('title')}
+        description={t('totalEmployees', { count: employees.length })}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Kadrlar' },
+          { label: t('breadcrumb') },
         ]}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" leftIcon={<Download size={14} />}
               onClick={() => {
-                if (employees.length === 0) { toast.error("Eksport uchun xodim yo'q"); return }
+                if (employees.length === 0) { toast.error(t('noEmployeesExport')); return }
                 exportEmployeesExcel(employees, currentOrg?.name || 'tashkilot')
-                toast.success('Excel yuklandi')
+                toast.success(t('excelDownloaded'))
               }}>
-              Excel
+              {t('excel')}
             </Button>
             <Link href="/dashboard/kadrlar/hujjat">
-              <Button variant="secondary" size="sm">HR Hujjatlar</Button>
+              <Button variant="secondary" size="sm">{t('hrDocuments')}</Button>
             </Link>
             <Button leftIcon={<Plus size={14} />} size="sm" onClick={() => setAddModal(true)}>
-              Xodim qo'shish
+              {t('addEmployee')}
             </Button>
           </div>
         }
@@ -223,7 +220,7 @@ export default function KadrlarPage() {
             </div>
             <div>
               <p className="text-xl font-bold text-[#0F172A]">{stats.active}</p>
-              <p className="text-xs text-[#94A3B8]">Faol xodimlar</p>
+              <p className="text-xs text-[#94A3B8]">{t('activeEmployees')}</p>
             </div>
           </Card>
           <Card className="flex items-center gap-3">
@@ -232,7 +229,7 @@ export default function KadrlarPage() {
             </div>
             <div>
               <p className="text-xl font-bold text-[#0F172A]">{stats.bolimlar?.length ?? 0}</p>
-              <p className="text-xs text-[#94A3B8]">Bo'limlar</p>
+              <p className="text-xs text-[#94A3B8]">{t('departments')}</p>
             </div>
           </Card>
         </div>
@@ -241,7 +238,7 @@ export default function KadrlarPage() {
       {/* Qidiruv */}
       <div className="mb-4">
         <Input
-          placeholder="Ism, lavozim yoki bo'lim bo'yicha..."
+          placeholder={t('searchPlace')}
           leftIcon={<Search size={15} />}
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -255,7 +252,7 @@ export default function KadrlarPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
-                {["Xodim", "Lavozim", "Bo'lim", "Maosh", "Ish boshlagan", "Telefon", ""].map(h => (
+                {[t('tableEmployee'), t('tableLavozim'), t('tableBolim'), t('tableSalary'), t('tableIshBoshi'), t('tablePhone'), ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                     {h}
                   </th>
@@ -270,9 +267,9 @@ export default function KadrlarPage() {
                   <td colSpan={7}>
                     <EmptyState
                       icon={<Users size={28} />}
-                      title="Xodimlar yo'q"
-                      description="Birinchi xodimni qo'shing"
-                      action={{ label: "Xodim qo'shish", onClick: () => setAddModal(true) }}
+                      title={t('noEmployees')}
+                      description={t('addFirstEmployee')}
+                      action={{ label: t('addEmployee'), onClick: () => setAddModal(true) }}
                     />
                   </td>
                 </tr>
@@ -298,7 +295,7 @@ export default function KadrlarPage() {
                       }
                     </td>
                     <td className="px-4 py-3 text-sm tabular-nums text-[#0F172A]">
-                      {emp.maosh ? Number(emp.maosh).toLocaleString('uz-UZ') + " so'm" : '—'}
+                      {emp.maosh ? Number(emp.maosh).toLocaleString('uz-UZ') + ` ${t('som')}` : '—'}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#94A3B8]">
                       {emp.ishBoshi ? new Date(emp.ishBoshi).toLocaleDateString('uz-UZ') : '—'}
@@ -314,7 +311,7 @@ export default function KadrlarPage() {
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm(`${emp.ism}ni o'chirmoqchimisiz?`)) {
+                            if (confirm(t('deleteConfirm', { name: emp.ism }))) {
                               deleteMutation.mutate(emp.id)
                             }
                           }}
