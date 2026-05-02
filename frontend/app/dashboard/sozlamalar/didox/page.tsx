@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }       from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Link2, CheckCircle2, AlertCircle, Loader2, Info, ExternalLink,
 } from 'lucide-react'
@@ -20,6 +21,7 @@ interface Status {
 }
 
 export default function DidoxIntegrationPage() {
+  const t = useTranslations('settings')
   const { currentOrg } = useAuth()
   const qc = useQueryClient()
   const [apiKey,  setApiKey]  = useState('')
@@ -35,17 +37,17 @@ export default function DidoxIntegrationPage() {
     mutationFn: () => api.post('/didox/connect', { apiKey, userKey }),
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['didox-status'] })
-      toast.success('Didox ulandi ✓')
+      toast.success(t('didoxConnected2'))
       setApiKey(''); setUserKey('')
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const disconnectMut = useMutation({
     mutationFn: () => api.delete('/didox/disconnect'),
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['didox-status'] })
-      toast.success('Didox uzildi')
+      toast.success(t('didoxDisconnected'))
     },
   })
 
@@ -60,7 +62,7 @@ export default function DidoxIntegrationPage() {
       toast.success(`${data.created} yangi, ${data.updated} yangilandi`)
       qc.invalidateQueries({ queryKey: ['didox-status'] })
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Sinxronlash xatosi')
+      toast.error(err?.response?.data?.message || t('didoxSyncError'))
     } finally {
       setSyncing(false)
     }
@@ -70,9 +72,9 @@ export default function DidoxIntegrationPage() {
     <div className="max-w-2xl space-y-5">
       {/* Sarlavha */}
       <div>
-        <h2 className="font-display text-xl font-black text-[#0F172A]">Didox integratsiyasi</h2>
+        <h2 className="font-display text-xl font-black text-[#0F172A]">{t('didoxTitle')}</h2>
         <p className="text-sm text-[#475569] mt-1">
-          Didox API orqali fakturalarni avtomatik sinxronlash va shartnoma summasini nazorat qilish
+          {t('didoxDesc')}
         </p>
       </div>
 
@@ -89,15 +91,15 @@ export default function DidoxIntegrationPage() {
                 <CheckCircle2 size={18} className="text-[#16A34A]" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-[#0F172A]">Didox ulangan</p>
+                <p className="font-semibold text-[#0F172A]">{t('didoxConnected')}</p>
                 <p className="text-xs text-[#94A3B8]">
-                  Oxirgi sinxronlash:{' '}
-                  {status.lastSync ? formatDate(status.lastSync, 'long') : 'hali yo\'q'}
+                  {t('didoxLastSync')}{' '}
+                  {status.lastSync ? formatDate(status.lastSync, 'long') : t('didoxNoSync')}
                 </p>
               </div>
               <Button size="sm" variant="danger" onClick={() => disconnectMut.mutate()}
                 loading={disconnectMut.isPending}>
-                Uzish
+                {t('didoxDisconnect')}
               </Button>
             </div>
 
@@ -105,7 +107,7 @@ export default function DidoxIntegrationPage() {
               <div className="p-3 bg-[#FEE2E2] border border-[#FECACA] rounded-lg flex items-start gap-2">
                 <AlertCircle size={14} className="text-[#DC2626] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-semibold text-[#991B1B]">Sinxronlash xatosi:</p>
+                  <p className="text-xs font-semibold text-[#991B1B]">{t('didoxSyncError')}</p>
                   <p className="text-xs text-[#7F1D1D] mt-0.5">{status.error}</p>
                 </div>
               </div>
@@ -113,12 +115,12 @@ export default function DidoxIntegrationPage() {
 
             <Button fullWidth onClick={handleSync} loading={syncing}
               leftIcon={<Link2 size={14} />}>
-              Hozir sinxronlash (oxirgi 30 kun)
+              {t('didoxSyncNow')}
             </Button>
 
             <div className="text-xs text-[#94A3B8] flex items-center gap-1.5">
               <Info size={12} />
-              Avtomatik sinxronlash har 30 daqiqada amalga oshiriladi
+              {t('didoxAutoSync')}
             </div>
           </div>
         ) : (
@@ -128,21 +130,21 @@ export default function DidoxIntegrationPage() {
                 <Link2 size={18} className="text-[#94A3B8]" />
               </div>
               <div>
-                <p className="font-semibold text-[#0F172A]">Didox ulanmagan</p>
-                <p className="text-xs text-[#94A3B8]">Ulash uchun API kalitlarini kiriting</p>
+                <p className="font-semibold text-[#0F172A]">{t('didoxNotConnected')}</p>
+                <p className="text-xs text-[#94A3B8]">{t('didoxEnterKeys')}</p>
               </div>
             </div>
 
             <Input
-              label="api-key (partner-token)"
-              placeholder="01890b96-a513-4557-..."
+              label={t('didoxApiKey')}
+              placeholder={t('didoxApiKeyPlace')}
               value={apiKey}
               onChange={e => setApiKey(e.target.value)}
-              hint="Didox dan oling: Sozlamalar → API integratsiya"
+              hint={t('didoxApiKeyHint')}
             />
             <Input
-              label="user-key (yuridik shaxs identifikatori)"
-              placeholder="01890b96-a513-4557-..."
+              label={t('didoxUserKey')}
+              placeholder={t('didoxApiKeyPlace')}
               value={userKey}
               onChange={e => setUserKey(e.target.value)}
             />
@@ -154,7 +156,7 @@ export default function DidoxIntegrationPage() {
               onClick={() => connectMut.mutate()}
               leftIcon={<Link2 size={14} />}
             >
-              Ulash
+              {t('didoxConnect')}
             </Button>
           </div>
         )}
@@ -163,7 +165,7 @@ export default function DidoxIntegrationPage() {
       {/* Yo'riqnoma */}
       <Card>
         <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-          API kalit qanday olish?
+          {t('didoxHowToTitle')}
         </p>
         <ol className="space-y-2 text-sm text-[#475569]">
           <li className="flex gap-2">
@@ -171,32 +173,31 @@ export default function DidoxIntegrationPage() {
             <span><a href="https://didox.uz" target="_blank" rel="noopener noreferrer"
               className="text-[#2563EB] hover:underline inline-flex items-center gap-1">
               didox.uz <ExternalLink size={11} />
-            </a> ga kirib hisob oching (yoki E-imzo bilan kiring)</span>
+            </a> {t('didoxStep1')}</span>
           </li>
           <li className="flex gap-2">
             <span className="font-bold text-[#2563EB]">2.</span>
-            <span>Sozlamalar → API integratsiya bo'limini tanlang</span>
+            <span>{t('didoxStep2')}</span>
           </li>
           <li className="flex gap-2">
             <span className="font-bold text-[#2563EB]">3.</span>
-            <span>"Yangi token yaratish" tugmasini bosing</span>
+            <span>{t('didoxStep3')}</span>
           </li>
           <li className="flex gap-2">
             <span className="font-bold text-[#2563EB]">4.</span>
-            <span><strong>api-key</strong> va <strong>user-key</strong> ni nusxalab, yuqoridagi maydonlarga joylang</span>
+            <span><strong>api-key</strong> {t('didoxStep4Pre')} <strong>user-key</strong> {t('didoxStep4Post')}</span>
           </li>
           <li className="flex gap-2">
             <span className="font-bold text-[#2563EB]">5.</span>
-            <span>"Ulash" tugmasini bosing — tayyor!</span>
+            <span>{t('didoxStep5')}</span>
           </li>
         </ol>
 
         <div className="mt-4 p-3 bg-[#F0F9FF] border border-[#BFDBFE] rounded-lg flex items-start gap-2">
           <Info size={14} className="text-[#2563EB] shrink-0 mt-0.5" />
           <div className="text-xs text-[#1E40AF]">
-            <strong>API access</strong> Didox tomonidan alohida so'rov asosida beriladi. Agar "API integratsiya"
-            bo'limi sizda ko'rinmasa, <a href="mailto:support@didox.uz" className="underline">support@didox.uz</a>
-            yoki Telegram <a href="https://t.me/didox_uz" target="_blank" rel="noopener noreferrer" className="underline">@didox_uz</a> ga yozing.
+            <strong>API access</strong> {t('didoxAccessNotice')} <a href="mailto:support@didox.uz" className="underline">support@didox.uz</a>{' '}
+            {t('didoxOrTelegram')} <a href="https://t.me/didox_uz" target="_blank" rel="noopener noreferrer" className="underline">@didox_uz</a> {t('didoxOrWrite')}
           </div>
         </div>
       </Card>
@@ -204,18 +205,14 @@ export default function DidoxIntegrationPage() {
       {/* Funksional bo'limlar */}
       <Card>
         <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
-          Bu integratsiya nima beradi?
+          {t('didoxBenefitsTitle')}
         </p>
         <div className="space-y-3 text-sm">
           {[
-            { icon: '📥', title: 'Avtomatik faktura sinxronlash',
-              desc: "Didox dagi barcha fakturalar har 30 daqiqada bizning saytga yuklanadi" },
-            { icon: '🎯', title: 'Shartnoma bo\'yicha avtomatik bog\'lash',
-              desc: "Faktura ichidagi shartnoma raqami bo'yicha avtomatik bog'lanadi" },
-            { icon: '🚨', title: 'Summa nazorati va ogohlantirish',
-              desc: "Faktura summasi shartnoma summasidan oshib ketsa darhol xabar olasiz" },
-            { icon: '📊', title: 'Hisobot va tahlil',
-              desc: "Har bir shartnoma bo'yicha qancha foiz ishlatilgani ko'rinadi" },
+            { icon: '📥', title: t('didoxBenefit1Title'), desc: t('didoxBenefit1Desc') },
+            { icon: '🎯', title: t('didoxBenefit2Title'), desc: t('didoxBenefit2Desc') },
+            { icon: '🚨', title: t('didoxBenefit3Title'), desc: t('didoxBenefit3Desc') },
+            { icon: '📊', title: t('didoxBenefit4Title'), desc: t('didoxBenefit4Desc') },
           ].map(item => (
             <div key={item.title} className="flex items-start gap-3">
               <div className="text-2xl shrink-0">{item.icon}</div>
