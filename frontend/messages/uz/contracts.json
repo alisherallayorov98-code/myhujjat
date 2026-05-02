@@ -63,6 +63,7 @@
     "excelDownloaded": "Excel yuklandi",
     "created": "Shartnoma yaratildi!",
     "dateRequired": "Sana kiriting",
+    "orgRequired": "Avval tashkilot qo'shing",
     "error": "Xatolik"
   },
   "new_": {

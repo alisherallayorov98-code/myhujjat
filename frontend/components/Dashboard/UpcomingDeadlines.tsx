@@ -4,10 +4,8 @@ import Link from 'next/link'
 import {
   Calendar, Clock, AlertCircle, ArrowRight, FileText, CreditCard,
 } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { useAuth }  from '@/hooks/useAuth'
-import api          from '@/lib/api'
 import { Card }     from '@/components/ui/Card'
 import { cn }       from '@/lib/cn'
 
@@ -28,19 +26,12 @@ const ICON_MAP = {
 }
 
 export function UpcomingDeadlines() {
-  const { user, currentOrg } = useAuth()
+  const { user } = useAuth()
   const t = useTranslations('dashboard')
 
-  // Yaqinlashayotgan share-link tugashi (per-contract o'tkazib bo'lmaydi — umumiy ko'rsatamiz)
-  const { data: shareLinks = [] } = useQuery<any[]>({
-    queryKey: ['share-links-all', currentOrg?.id],
-    queryFn:  async () => {
-      // share links faqat per-contract topiladi — hozircha bo'sh array qaytaramiz
-      // (kelajakda alohida endpoint qo'shilishi mumkin)
-      return []
-    },
-    enabled: !!currentOrg?.id,
-  })
+  // Yaqinlashayotgan share-link tugashi — hozir alohida endpoint yo'q,
+  // kelajakda /share-links/expiring qo'shilsa shu yerda yoqiladi.
+  const shareLinks: any[] = []
 
   // Obuna muddati
   const subItem: DeadlineItem | null = (() => {

@@ -1,10 +1,11 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link                from 'next/link'
 import {
   FileText, ClipboardList, Calculator,
   Users, Sparkles,
-  Plus, ArrowRight, Wallet,
+  Plus, ArrowRight, Wallet, X,
 } from 'lucide-react'
 import { useQuery }    from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
@@ -152,6 +153,14 @@ export default function DashboardPage() {
     ? null
     : 3 - (user?.subscription?.contractCount || 0)
 
+  // Limit ogohlantirish — bir oy davomida bir marta yopiladi (kalit: oy + qoldiq)
+  const currentLimitKey = `${new Date().getFullYear()}-${new Date().getMonth()}-${contractsLeft}`
+  const [limitDismissed, setLimitDismissed] = useState<string>('')
+  useEffect(() => {
+    const saved = localStorage.getItem('limit_warning_dismissed') || ''
+    setLimitDismissed(saved)
+  }, [])
+
   return (
     <div>
       <PageHeader
@@ -165,8 +174,8 @@ export default function DashboardPage() {
       {/* Onboarding checklist (faqat yangi foydalanuvchilarga) */}
       <OnboardingChecklist />
 
-      {/* Limit ogohlantirish */}
-      {contractsLeft !== null && contractsLeft <= 1 && (
+      {/* Limit ogohlantirish — dismissable */}
+      {contractsLeft !== null && contractsLeft <= 1 && limitDismissed !== currentLimitKey && (
         <div className="mb-6 p-4 bg-[#FEF3C7] border border-[#FDE68A] rounded-xl flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-[#92400E]">
@@ -179,9 +188,21 @@ export default function DashboardPage() {
               {t('limitWarning.upgradeText')}
             </p>
           </div>
-          <Link href="/dashboard/sozlamalar/obuna">
-            <Button size="sm" variant="warning" className="shrink-0">{t('limitWarning.upgrade')}</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/sozlamalar/obuna">
+              <Button size="sm" variant="warning" className="shrink-0">{t('limitWarning.upgrade')}</Button>
+            </Link>
+            <button
+              onClick={() => {
+                localStorage.setItem('limit_warning_dismissed', currentLimitKey)
+                setLimitDismissed(currentLimitKey)
+              }}
+              className="p-1.5 rounded text-[#B45309] hover:bg-[#FDE68A] transition-colors shrink-0"
+              aria-label="Yopish"
+            >
+              <X size={14} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -260,14 +281,28 @@ export default function DashboardPage() {
       <div className="mb-8">
         <h2 className="font-display font-bold text-[#0F172A] text-base mb-3">{t('quickCreate')}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
-          {QUICK_ACTIONS.map(action => (
-            <Link key={action.label} href={action.href}>
-              <div className={cn(
-                'p-4 rounded-xl bg-white border border-[#E2E8F0]',
-                'hover:border-[#2563EB]/30 hover:shadow-md',
-                'transition-all duration-200 cursor-pointer',
-                'flex flex-col gap-2.5'
-              )}>
+          {QUICK_ACTIONS.map(action => {
+            const disabled = !currentOrg || (contractsLeft !== null && contractsLeft <= 0)
+            const reason   = !currentOrg
+              ? t('addOrgPrompt')
+              : (contractsLeft !== null && contractsLeft <= 0)
+                ? t('limitWarning.limitReached')
+                : ''
+            const Wrapper = disabled ? 'div' : Link
+            const wrapperProps: any = disabled ? {} : { href: action.href }
+            return (
+              <Wrapper key={action.label} {...wrapperProps}>
+                <div
+                  title={reason}
+                  className={cn(
+                    'p-4 rounded-xl bg-white border border-[#E2E8F0]',
+                    'transition-all duration-200',
+                    'flex flex-col gap-2.5',
+                    disabled
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:border-[#2563EB]/30 hover:shadow-md cursor-pointer',
+                  )}
+                >
                 <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center', action.color)}>
                   <action.icon size={18} />
                 </div>
@@ -275,9 +310,10 @@ export default function DashboardPage() {
                   <p className="text-sm font-semibold text-[#0F172A]">{action.label}</p>
                   <p className="text-xs text-[#94A3B8]">{action.desc}</p>
                 </div>
-              </div>
-            </Link>
-          ))}
+                </div>
+              </Wrapper>
+            )
+          })}
         </div>
       </div>
 

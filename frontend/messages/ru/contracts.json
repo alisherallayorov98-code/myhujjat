@@ -63,6 +63,7 @@
     "excelDownloaded": "Excel загружен",
     "created": "Договор создан!",
     "dateRequired": "Введите дату",
+    "orgRequired": "Сначала добавьте организацию",
     "error": "Ошибка"
   },
   "new_": {

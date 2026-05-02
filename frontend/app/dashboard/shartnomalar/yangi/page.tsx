@@ -39,6 +39,15 @@ export default function YangiShartnoma() {
   const qc             = useQueryClient()
   const { currentOrg } = useAuth()
 
+  // Tashkilot yo'q bo'lsa, avval qo'shishni so'rab dashboard'ga qaytaramiz.
+  useEffect(() => {
+    if (currentOrg === null) {
+      toast.error(t('toast.orgRequired'))
+      router.replace('/dashboard/tashkilotlar?required=1')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentOrg])
+
   const [step,    setStep]    = useState<1 | 2 | 3>(1)
   const [type,    setType]    = useState<ContractType>('OLDI_SOTDI')
   const [preview, setPreview] = useState(false)
