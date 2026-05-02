@@ -11,6 +11,8 @@
   "spec": "Spesifikatsiya",
   "specNumber": "Spesifikatsiya №",
   "rows": "qator",
+  "back": "Orqaga",
+  "save": "Saqlash",
   "attachToContract": "Shartnomaga biriktirish",
   "selectContract": "Shartnoma tanlang (ixtiyoriy)",
   "noCpName": "Kontragentsiz",

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations }     from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
 import Link           from 'next/link'
 import { ArrowLeft, Download, Edit2, FileText } from 'lucide-react'
@@ -15,6 +16,7 @@ import { exportSpecExcel } from '@/lib/export/specExport'
 import toast          from 'react-hot-toast'
 
 export default function SpecDetailPage() {
+  const t              = useTranslations('specifications')
   const params         = useParams()
   const router         = useRouter()
   const { currentOrg } = useAuth()
@@ -33,7 +35,7 @@ export default function SpecDetailPage() {
     return <div className="h-64 bg-[#F1F5F9] rounded-xl animate-pulse" />
   }
   if (!spec) {
-    return <p className="text-center text-[#94A3B8] py-16">Topilmadi</p>
+    return <p className="text-center text-[#94A3B8] py-16">{t('notFound')}</p>
   }
 
   const items  = spec.items || []
@@ -47,23 +49,23 @@ export default function SpecDetailPage() {
       items,
       notes:       spec.notes,
     })
-    toast.success('Excel yuklandi')
+    toast.success(t('toast.excelDownloaded'))
   }
 
   return (
     <div>
       <PageHeader
-        title={`Spesifikatsiya № ${spec.specNumber}`}
+        title={`${t('specNumber')} ${spec.specNumber}`}
         description={formatDate(spec.createdAt, 'long')}
         breadcrumbs={[
-          { label: 'Dashboard',         path: '/dashboard' },
-          { label: 'Spesifikatsiyalar', path: '/dashboard/spesifikatsiyalar' },
+          { label: 'Dashboard',     path: '/dashboard' },
+          { label: t('title'),      path: '/dashboard/spesifikatsiyalar' },
           { label: spec.specNumber },
         ]}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" leftIcon={<ArrowLeft size={14} />} onClick={() => router.back()}>
-              Orqaga
+              {t('back')}
             </Button>
             <Button variant="secondary" size="sm" leftIcon={<Download size={14} />} onClick={handleExcel}>
               Excel
@@ -76,7 +78,7 @@ export default function SpecDetailPage() {
         <div className="mb-4 p-3 bg-[#DBEAFE]/50 border border-[#BFDBFE] rounded-xl flex items-center gap-2">
           <FileText size={16} className="text-[#2563EB]" />
           <p className="text-sm text-[#1D4ED8]">
-            Shartnoma:{' '}
+            {t('contractLink')}{' '}
             <Link href={`/dashboard/shartnomalar/${spec.contract.id}`} className="font-semibold hover:underline">
               № {spec.contract.contractNumber}
             </Link>
@@ -89,7 +91,7 @@ export default function SpecDetailPage() {
           <table className="w-full min-w-[800px]">
             <thead>
               <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                {['№', 'Nomi', 'Birlik', 'Miqdor', 'Narx', 'QQS %', 'QQS summa', 'Jami'].map(h => (
+                {[t('table.num'), t('table.name'), t('table.unit'), t('table.qty'), t('table.price'), t('table.qqsPercent'), t('table.qqsAmount'), t('table.total')].map(h => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider text-left last:text-right">
                     {h}
                   </th>
@@ -108,7 +110,7 @@ export default function SpecDetailPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-center">
                     {item.qqsFoiz === 'siz'
-                      ? <span className="text-[#94A3B8]">QQS siz</span>
+                      ? <span className="text-[#94A3B8]">{t('qqsLess')}</span>
                       : <span className="text-[#D97706] font-medium">{item.qqsFoiz}%</span>
                     }
                   </td>
@@ -129,15 +131,15 @@ export default function SpecDetailPage() {
         <Card className="w-full max-w-sm">
           <div className="space-y-2.5">
             <div className="flex justify-between text-sm">
-              <span className="text-[#475569]">Jami (QQS siz):</span>
+              <span className="text-[#475569]">{t('withoutQqs')}</span>
               <span className="tabular-nums font-medium">{totals.jami.toLocaleString('uz-UZ')} so'm</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-[#475569]">Jami QQS:</span>
+              <span className="text-[#475569]">{t('totalQqs')}</span>
               <span className="tabular-nums text-[#D97706] font-medium">{totals.jamiQqs.toLocaleString('uz-UZ')} so'm</span>
             </div>
             <div className="border-t border-[#E2E8F0] pt-2.5 flex justify-between">
-              <span className="font-bold text-[#0F172A]">Umumiy jami:</span>
+              <span className="font-bold text-[#0F172A]">{t('grandTotal')}</span>
               <span className="tabular-nums font-black text-[#0F172A] text-lg">{totals.umumiy.toLocaleString('uz-UZ')} so'm</span>
             </div>
             <p className="text-xs text-[#94A3B8] italic">{formatAmountWords(totals.umumiy)}</p>
