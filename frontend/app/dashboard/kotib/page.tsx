@@ -40,8 +40,8 @@ export default function KotibPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Kotib bo'limi</h1>
-        <p className="text-gray-500 mt-1">Buyruqlar va bayonnomalarni yarating va boshqaring</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+        <p className="text-gray-500 mt-1">{t('description')}</p>
       </div>
 
       {/* Module cards */}
@@ -54,14 +54,14 @@ export default function KotibPage() {
             <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors mt-1" />
           </div>
           <div className="mt-4">
-            <h2 className="text-lg font-semibold text-gray-900">Buyruqlar</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('buyruqlar')}</h2>
             <p className="text-sm text-gray-500 mt-1">
-              Ishga qabul, ishdan bo'shatish, lavozim o'zgartirish va boshqa buyruqlar
+              {t('buyruqlarDesc')}
             </p>
           </div>
           <div className="mt-4 pt-4 border-t border-gray-100">
             <span className="text-2xl font-bold text-blue-600">{buyruqCount}</span>
-            <span className="text-sm text-gray-400 ml-1">ta hujjat</span>
+            <span className="text-sm text-gray-400 ml-1">{t('tHujjat')}</span>
           </div>
         </Link>
 
@@ -73,14 +73,14 @@ export default function KotibPage() {
             <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-purple-500 transition-colors mt-1" />
           </div>
           <div className="mt-4">
-            <h2 className="text-lg font-semibold text-gray-900">Bayonnomalar</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('bayonnomalar')}</h2>
             <p className="text-sm text-gray-500 mt-1">
-              Yig'ilish bayonnomasi, qabul-topshirish va boshqa bayonnomalar
+              {t('bayonnomalarDesc')}
             </p>
           </div>
           <div className="mt-4 pt-4 border-t border-gray-100">
             <span className="text-2xl font-bold text-purple-600">{bayonnomCount}</span>
-            <span className="text-sm text-gray-400 ml-1">ta hujjat</span>
+            <span className="text-sm text-gray-400 ml-1">{t('tHujjat')}</span>
           </div>
         </Link>
       </div>
@@ -88,14 +88,14 @@ export default function KotibPage() {
       {/* Recent documents */}
       <div className="bg-white rounded-2xl border border-gray-200">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Oxirgi hujjatlar</h2>
+          <h2 className="font-semibold text-gray-900">{t('oxirgiHujjatlar')}</h2>
           <div className="flex gap-2">
             <Link href="/dashboard/kotib/buyruq" className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
-              <Plus className="w-4 h-4" /> Buyruq
+              <Plus className="w-4 h-4" /> {t('buyruq')}
             </Link>
             <span className="text-gray-300">|</span>
             <Link href="/dashboard/kotib/bayonnoma" className="flex items-center gap-1 text-sm text-purple-600 hover:underline">
-              <Plus className="w-4 h-4" /> Bayonnoma
+              <Plus className="w-4 h-4" /> {t('bayonnoma')}
             </Link>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function KotibPage() {
         {recent.length === 0 ? (
           <div className="p-12 text-center text-gray-400">
             <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p>Hali hujjat yo'q</p>
+            <p>{t('haliHujjatYoq')}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-50">

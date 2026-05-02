@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                from 'react'
+import { useTranslations }         from 'next-intl'
 import { Mail, Smartphone, Save, Bell, BellOff, Send } from 'lucide-react'
 import { Card }                    from '@/components/ui/Card'
 import { Button }                  from '@/components/ui/Button'
@@ -32,6 +33,7 @@ function Toggle({ checked, onChange }: ToggleProps) {
 }
 
 export default function XabarnomaSahifasi() {
+  const t = useTranslations('notifications')
   const [settings, setSettings] = useState({
     emailObuna:      true,
     emailShartnoma:  false,
@@ -50,14 +52,14 @@ export default function XabarnomaSahifasi() {
     try {
       if (push.subscribed) {
         await push.unsubscribe()
-        toast.success("Brauzer bildirishnomalari o'chirildi")
+        toast.success(t('browserDisabled'))
       } else {
         const r = await push.subscribe()
-        if (r.ok) toast.success('Brauzer bildirishnomalari yoqildi ✓')
-        else toast.error(r.error || 'Xatolik')
+        if (r.ok) toast.success(t('browserEnabled'))
+        else toast.error(r.error || t('error'))
       }
     } catch (e: any) {
-      toast.error('Xatolik yuz berdi')
+      toast.error(t('errorOccurred'))
     } finally {
       setPushBusy(false)
     }
@@ -68,13 +70,13 @@ export default function XabarnomaSahifasi() {
       <Card>
         <div className="flex items-center gap-2 mb-4">
           <Mail size={16} className="text-[#2563EB]" />
-          <h2 className="font-bold text-[#0F172A] text-sm">Email bildirishnomalar</h2>
+          <h2 className="font-bold text-[#0F172A] text-sm">{t('emailNotificationsTitle')}</h2>
         </div>
         <div className="space-y-4">
           {[
-            { key: 'emailObuna',      label: 'Obuna tugash eslatmasi',  desc: '3 kun oldin xabar' },
-            { key: 'emailShartnoma',  label: 'Yangi shartnoma',          desc: 'Shartnoma yaratilganda' },
-            { key: 'emailXavfsizlik', label: 'Xavfsizlik xabarlari',    desc: "Yangi kirish, parol o'zgarish" },
+            { key: 'emailObuna',      label: t('emailObunaLabel'),    desc: t('emailObunaDesc')    },
+            { key: 'emailShartnoma',  label: t('emailContractLabel'), desc: t('emailContractDesc') },
+            { key: 'emailXavfsizlik', label: t('emailSecurityLabel'), desc: t('emailSecurityDesc') },
           ].map(item => (
             <div key={item.key} className="flex items-center justify-between gap-4">
               <div>
@@ -94,21 +96,21 @@ export default function XabarnomaSahifasi() {
       <Card>
         <div className="flex items-center gap-2 mb-4">
           <Bell size={16} className="text-[#2563EB]" />
-          <h2 className="font-bold text-[#0F172A] text-sm">Brauzer bildirishnomalari</h2>
+          <h2 className="font-bold text-[#0F172A] text-sm">{t('browserNotificationsTitle')}</h2>
         </div>
 
         {!push.supported ? (
           <p className="text-xs text-[#94A3B8] leading-relaxed">
-            Sizning brauzeringiz push bildirishnomalarni qo'llab-quvvatlamaydi.
+            {t('browserNotSupported')}
           </p>
         ) : push.permission === 'denied' ? (
           <p className="text-xs text-[#DC2626] leading-relaxed">
-            Brauzer sozlamalarida bildirishnomalarga ruxsat berilmagan. Iltimos, brauzer sozlamalarini tekshiring.
+            {t('browserDenied')}
           </p>
         ) : (
           <div className="space-y-3">
             <p className="text-xs text-[#94A3B8] leading-relaxed">
-              Yangi shartnomalar, fakturalar va muhim hodisalar haqida brauzeringizga real vaqtda xabar qabul qiling.
+              {t('browserDesc')}
             </p>
             <div className="flex gap-2">
               <Button
@@ -118,7 +120,7 @@ export default function XabarnomaSahifasi() {
                 loading={pushBusy}
                 onClick={togglePush}
               >
-                {push.subscribed ? "O'chirish" : 'Yoqish'}
+                {push.subscribed ? t('disable') : t('enable')}
               </Button>
               {push.subscribed && (
                 <Button
@@ -127,10 +129,10 @@ export default function XabarnomaSahifasi() {
                   leftIcon={<Send size={13} />}
                   onClick={async () => {
                     await push.sendTest()
-                    toast.success('Test bildirishnoma yuborildi')
+                    toast.success(t('testSent'))
                   }}
                 >
-                  Test
+                  {t('test')}
                 </Button>
               )}
             </div>
@@ -141,12 +143,12 @@ export default function XabarnomaSahifasi() {
       <Card>
         <div className="flex items-center gap-2 mb-4">
           <Smartphone size={16} className="text-[#2563EB]" />
-          <h2 className="font-bold text-[#0F172A] text-sm">Push bildirishnomalar turlari</h2>
+          <h2 className="font-bold text-[#0F172A] text-sm">{t('pushTypesTitle')}</h2>
         </div>
         <div className="space-y-4">
           {[
-            { key: 'pushYangi', label: 'Yangi xabar',     desc: 'Support javoblari' },
-            { key: 'pushObuna', label: 'Obuna yangilash', desc: "To'lov tasdiqlandi" },
+            { key: 'pushYangi', label: t('pushNewLabel'),   desc: t('pushNewDesc') },
+            { key: 'pushObuna', label: t('pushObunaLabel'), desc: t('pushObunaDesc') },
           ].map(item => (
             <div key={item.key} className="flex items-center justify-between gap-4">
               <div>
@@ -164,9 +166,9 @@ export default function XabarnomaSahifasi() {
 
       <Button
         leftIcon={<Save size={14} />}
-        onClick={() => toast.success('Sozlamalar saqlandi ✓')}
+        onClick={() => toast.success(t('saved'))}
       >
-        Saqlash
+        {t('save')}
       </Button>
     </div>
   )

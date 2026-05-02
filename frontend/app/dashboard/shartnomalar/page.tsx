@@ -2,6 +2,7 @@
 
 import { useState, useMemo }       from 'react'
 import Link                        from 'next/link'
+import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Download, ChevronLeft, ChevronRight, Calendar, Trash2,
@@ -26,6 +27,7 @@ type SortOrder = 'asc' | 'desc'
 type DateRange = 'all' | 'thisMonth' | 'lastMonth' | 'thisYear'
 
 export default function ShartnomalarPage() {
+  const t = useTranslations('contracts')
   const { currentOrg, canCreate } = useAuth()
   const qc = useQueryClient()
 
@@ -64,8 +66,9 @@ export default function ShartnomalarPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['contracts'] })
+      const count = selected.size
       setSelected(new Set())
-      toast.success(`${selected.size} ta shartnoma yangilandi`)
+      toast.success(t('bulk.updated', { count }))
     },
   })
 
@@ -134,25 +137,26 @@ export default function ShartnomalarPage() {
   }
 
   function handleExportExcel() {
-    if (contracts.length === 0) { toast.error("Eksport uchun shartnoma yo'q"); return }
+    if (contracts.length === 0) { toast.error(t('toast.noExportData')); return }
     exportContractsExcel(contracts, currentOrg?.name || 'tashkilot')
-    toast.success("Excel yuklandi")
+    toast.success(t('toast.excelDownloaded'))
   }
 
   function handleBulkStatus(status: string) {
     if (selected.size === 0) return
-    if (!confirm(`${selected.size} ta shartnoma holati "${status}" ga o'zgartirilsinmi?`)) return
+    const statusLabel = (t.raw as any)('statusOptions')[status] || status
+    if (!confirm(t('bulk.confirmStatus', { count: selected.size, status: statusLabel }))) return
     bulkStatusMut.mutate({ ids: Array.from(selected), status })
   }
 
   return (
     <div>
       <PageHeader
-        title="Shartnomalar"
-        description={`Jami: ${data?.meta?.total || 0} ta shartnoma`}
+        title={t('title')}
+        description={t('totalCount', { count: data?.meta?.total || 0 })}
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: 'Shartnomalar' },
+          { label: t('title') },
         ]}
         actions={
           <div className="flex gap-2">
@@ -161,8 +165,8 @@ export default function ShartnomalarPage() {
             </Button>
             <Link href="/dashboard/shartnomalar/yangi">
               <Button leftIcon={<Plus size={14} />} size="sm" disabled={!canCreate}
-                title={!canCreate ? 'Limit tugadi' : ''}>
-                Yangi shartnoma
+                title={!canCreate ? t('limit.limitReached') : ''}>
+                {t('new')}
               </Button>
             </Link>
           </div>
@@ -172,7 +176,7 @@ export default function ShartnomalarPage() {
       {/* Filtrlar */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">
         <Input
-          placeholder="Qidirish..."
+          placeholder={t('filter.search')}
           leftIcon={<Search size={15} />}
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1) }}
@@ -180,25 +184,25 @@ export default function ShartnomalarPage() {
         />
         <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1) }}
           className="h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
-          <option value="">Barcha turlar</option>
+          <option value="">{t('filter.allTypes')}</option>
           {Object.entries(CONTRACT_TYPE_CONFIG).map(([key, cfg]) => (
             <option key={key} value={key}>{cfg.name}</option>
           ))}
         </select>
         <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
           className="h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
-          <option value="">Barcha holatlar</option>
-          <option value="DRAFT">Qoralama</option>
-          <option value="ACTIVE">Faol</option>
-          <option value="COMPLETED">Tugagan</option>
-          <option value="CANCELLED">Bekor</option>
+          <option value="">{t('filter.allStatuses')}</option>
+          <option value="DRAFT">{t('statusOptions.DRAFT')}</option>
+          <option value="ACTIVE">{t('statusOptions.ACTIVE')}</option>
+          <option value="COMPLETED">{t('statusOptions.COMPLETED')}</option>
+          <option value="CANCELLED">{t('statusOptions.CANCELLED')}</option>
         </select>
         <select value={dateRange} onChange={e => setDateRange(e.target.value as DateRange)}
           className="h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
-          <option value="all">Barcha sanalar</option>
-          <option value="thisMonth">Bu oy</option>
-          <option value="lastMonth">O'tgan oy</option>
-          <option value="thisYear">Bu yil</option>
+          <option value="all">{t('filter.allDates')}</option>
+          <option value="thisMonth">{t('filter.thisMonth')}</option>
+          <option value="lastMonth">{t('filter.lastMonth')}</option>
+          <option value="thisYear">{t('filter.thisYear')}</option>
         </select>
       </div>
 
@@ -206,20 +210,20 @@ export default function ShartnomalarPage() {
       {selected.size > 0 && (
         <div className="mb-3 p-3 bg-[#DBEAFE] border border-[#BFDBFE] rounded-xl flex items-center gap-3">
           <span className="text-sm font-medium text-[#1E40AF]">
-            {selected.size} ta tanlandi
+            {t('bulk.selected', { count: selected.size })}
           </span>
           <div className="flex-1" />
           <Button size="xs" variant="outline" onClick={() => handleBulkStatus('ACTIVE')}>
-            Faol qilish
+            {t('bulk.makeActive')}
           </Button>
           <Button size="xs" variant="outline" onClick={() => handleBulkStatus('COMPLETED')}>
-            Tugagan
+            {t('bulk.makeCompleted')}
           </Button>
           <Button size="xs" variant="outline" onClick={() => handleBulkStatus('CANCELLED')}>
-            Bekor qilish
+            {t('bulk.makeCancelled')}
           </Button>
           <Button size="xs" variant="outline" onClick={() => setSelected(new Set())}>
-            Tozalash
+            {t('bulk.clear')}
           </Button>
         </div>
       )}
@@ -237,12 +241,12 @@ export default function ShartnomalarPage() {
                     className="rounded"
                   />
                 </th>
-                <ThSort label="Raqam"     col="contractNumber" sortKey={sortKey} sortOrder={sortOrder} onClick={toggleSort} />
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">Tur</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">Kontragent</th>
-                <ThSort label="Sana"     col="contractDate" sortKey={sortKey} sortOrder={sortOrder} onClick={toggleSort} />
-                <ThSort label="Summa"    col="amount"        sortKey={sortKey} sortOrder={sortOrder} onClick={toggleSort} align="right" />
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">Holat</th>
+                <ThSort label={t('table.number')}     col="contractNumber" sortKey={sortKey} sortOrder={sortOrder} onClick={toggleSort} />
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('table.type')}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('table.counterparty')}</th>
+                <ThSort label={t('table.date')}     col="contractDate" sortKey={sortKey} sortOrder={sortOrder} onClick={toggleSort} />
+                <ThSort label={t('table.amount')}    col="amount"        sortKey={sortKey} sortOrder={sortOrder} onClick={toggleSort} align="right" />
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('table.status')}</th>
                 <th className="w-12" />
               </tr>
             </thead>
@@ -256,10 +260,10 @@ export default function ShartnomalarPage() {
                   <td colSpan={8}>
                     <EmptyState
                       icon={<FileText size={28} />}
-                      title="Shartnomalar yo'q"
-                      description="Birinchi shartnomani yarating"
+                      title={t('empty.title')}
+                      description={t('empty.description')}
                       action={{
-                        label: 'Yangi shartnoma',
+                        label: t('new'),
                         onClick: () => window.location.href = '/dashboard/shartnomalar/yangi',
                       }}
                     />
