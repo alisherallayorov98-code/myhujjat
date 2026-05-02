@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                              from 'react'
+import { useTranslations }                       from 'next-intl'
 import { Link2, UserMinus, Copy, Check, Users, Shield }  from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card }                                  from '@/components/ui/Card'
@@ -11,18 +12,19 @@ import { useAuth }                               from '@/hooks/useAuth'
 import api                                       from '@/lib/api'
 import toast                                     from 'react-hot-toast'
 
-const ROLE_LABELS: Record<string, { label: string; variant: any; desc: string }> = {
-  OWNER:      { label: 'Egasi',     variant: 'primary', desc: 'To\'liq nazorat' },
-  ACCOUNTANT: { label: 'Buxgalter', variant: 'warning', desc: 'Faktura, hisobotlar' },
-  MEMBER:     { label: "A'zo",      variant: 'default', desc: 'Ko\'rish va yaratish' },
-}
-
 export default function AzolarPage() {
+  const t = useTranslations('settings')
   const { currentOrg, user: me } = useAuth()
   const qc             = useQueryClient()
   const [copied,     setCopied]     = useState(false)
   const [inviteUrl,  setInviteUrl]  = useState('')
   const [inviteRole, setInviteRole] = useState('MEMBER')
+
+  const ROLE_LABELS: Record<string, { label: string; variant: any; desc: string }> = {
+    OWNER:      { label: t('roleOwner'),      variant: 'primary', desc: t('roleOwnerDesc') },
+    ACCOUNTANT: { label: t('roleAccountant'), variant: 'warning', desc: t('roleAccountantDesc') },
+    MEMBER:     { label: t('roleMember'),     variant: 'default', desc: t('roleMemberDesc') },
+  }
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ['org-members', currentOrg?.id],
@@ -39,9 +41,9 @@ export default function AzolarPage() {
       api.post(`/orgs/${currentOrg?.id}/members/invite`, { role }),
     onSuccess: (res: any) => {
       setInviteUrl(res.data.url)
-      toast.success('Invite link yaratildi')
+      toast.success(t('inviteCreated'))
     },
-    onError: () => toast.error('Xatolik'),
+    onError: () => toast.error(t('error')),
   })
 
   const removeMutation = useMutation({
@@ -49,9 +51,9 @@ export default function AzolarPage() {
       api.delete(`/orgs/${currentOrg?.id}/members/${memberId}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['org-members'] })
-      toast.success("A'zo o'chirildi")
+      toast.success(t('memberRemoved'))
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const roleMutation = useMutation({
@@ -59,9 +61,9 @@ export default function AzolarPage() {
       api.put(`/orgs/${currentOrg?.id}/members/${memberId}/role`, { role }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['org-members'] })
-      toast.success('Rol yangilandi')
+      toast.success(t('roleUpdated'))
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const copyInvite = async () => {
@@ -70,7 +72,6 @@ export default function AzolarPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Joriy foydalanuvchi OWNER mi? (faqat OWNER rol va o'chirish qila oladi)
   const myMember = members.find((m: any) => m.user?.id === me?.id)
   const isOwner  = myMember?.role === 'OWNER'
 
@@ -78,9 +79,9 @@ export default function AzolarPage() {
     <div className="max-w-2xl space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="font-display font-bold text-[#0F172A]">Tashkilot a'zolari</h2>
+          <h2 className="font-display font-bold text-[#0F172A]">{t('azolarTitle')}</h2>
           <p className="text-xs text-[#94A3B8] mt-0.5">
-            {members.length} ta a'zo
+            {t('azolarCount', { count: members.length })}
           </p>
         </div>
 
@@ -88,8 +89,8 @@ export default function AzolarPage() {
           <div className="flex items-center gap-2">
             <Select
               options={[
-                { value: 'MEMBER',     label: "A'zo" },
-                { value: 'ACCOUNTANT', label: 'Buxgalter' },
+                { value: 'MEMBER',     label: t('roleMember') },
+                { value: 'ACCOUNTANT', label: t('roleAccountant') },
               ]}
               value={inviteRole}
               onChange={e => setInviteRole(e.target.value)}
@@ -101,7 +102,7 @@ export default function AzolarPage() {
               loading={inviteMutation.isPending}
               onClick={() => inviteMutation.mutate(inviteRole)}
             >
-              Invite link
+              {t('inviteLink')}
             </Button>
           </div>
         )}
@@ -115,10 +116,10 @@ export default function AzolarPage() {
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#1E40AF]">
-                Invite link tayyor — 7 kun amal qiladi
+                {t('inviteLinkReady')}
               </p>
               <p className="text-xs text-[#3B82F6] mt-0.5 mb-2">
-                Bu havolani siz taklif qilmoqchi bo'lgan odamga yuboring
+                {t('inviteLinkDesc')}
               </p>
               <div className="flex items-center gap-2">
                 <input
@@ -141,15 +142,14 @@ export default function AzolarPage() {
         </Card>
       )}
 
-      {/* Rol haqida qisqa ma'lumot */}
       <Card>
         <div className="flex items-start gap-3 mb-3">
           <Shield size={16} className="text-[#94A3B8] mt-0.5" />
           <div className="text-xs text-[#475569] leading-relaxed">
-            <strong className="text-[#0F172A]">Rollar:</strong> {' '}
-            <span className="text-[#2563EB]">Egasi</span> — to'liq nazorat;{' '}
-            <span className="text-[#D97706]">Buxgalter</span> — faktura va hisobotlar;{' '}
-            <span className="text-[#475569]">A'zo</span> — ko'rish va yaratish.
+            <strong className="text-[#0F172A]">{t('rolesInfoLabel')}</strong> {' '}
+            <span className="text-[#2563EB]">{t('roleOwner')}</span> — {t('roleOwnerDesc').toLowerCase()};{' '}
+            <span className="text-[#D97706]">{t('roleAccountant')}</span> — {t('roleAccountantDesc').toLowerCase()};{' '}
+            <span className="text-[#475569]">{t('roleMember')}</span> — {t('roleMemberDesc').toLowerCase()}.
           </div>
         </div>
       </Card>
@@ -158,13 +158,13 @@ export default function AzolarPage() {
         <div className="divide-y divide-[#F1F5F9]">
           {isLoading ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-[#94A3B8]">Yuklanmoqda...</p>
+              <p className="text-sm text-[#94A3B8]">{t('azolarLoading')}</p>
             </div>
           ) : members.length === 0 ? (
             <div className="py-12 px-4 text-center">
               <Users size={28} className="text-[#CBD5E1] mx-auto mb-3" />
-              <p className="text-sm font-semibold text-[#0F172A]">A'zolar yo'q</p>
-              <p className="text-xs text-[#94A3B8] mt-1">Invite link orqali a'zo qo'shing</p>
+              <p className="text-sm font-semibold text-[#0F172A]">{t('azolarEmpty')}</p>
+              <p className="text-xs text-[#94A3B8] mt-1">{t('azolarEmptyDesc')}</p>
             </div>
           ) : members.map((member: any) => {
             const isMe = member.user?.id === me?.id
@@ -180,16 +180,16 @@ export default function AzolarPage() {
                     <p className="text-sm font-medium text-[#0F172A] truncate">
                       {member.user
                         ? `${member.user.firstName || ''} ${member.user.lastName || ''}`.trim() || member.user.email
-                        : member.invitedEmail || "Kutilmoqda"}
+                        : member.invitedEmail || t('pending')}
                     </p>
                     {isMe && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F1F5F9] text-[#475569] font-medium">
-                        Siz
+                        {t('you')}
                       </span>
                     )}
                     {member.status === 'PENDING' && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#D97706] font-medium">
-                        Kutilmoqda
+                        {t('pending')}
                       </span>
                     )}
                   </div>
@@ -204,8 +204,8 @@ export default function AzolarPage() {
                     onChange={e => roleMutation.mutate({ memberId: member.id, role: e.target.value })}
                     className="text-xs h-8 px-2 rounded-lg border border-[#E2E8F0] bg-white text-[#475569] outline-none focus:border-[#2563EB]"
                   >
-                    <option value="MEMBER">A'zo</option>
-                    <option value="ACCOUNTANT">Buxgalter</option>
+                    <option value="MEMBER">{t('roleMember')}</option>
+                    <option value="ACCOUNTANT">{t('roleAccountant')}</option>
                   </select>
                 ) : (
                   <Badge variant={ROLE_LABELS[member.role]?.variant || 'default'} size="sm">
@@ -216,10 +216,10 @@ export default function AzolarPage() {
                 {isOwner && member.role !== 'OWNER' && !isMe && (
                   <button
                     onClick={() => {
-                      if (confirm("A'zoni o'chirilsinmi?")) removeMutation.mutate(member.id)
+                      if (confirm(t('removeMember'))) removeMutation.mutate(member.id)
                     }}
                     className="p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
-                    title="O'chirish"
+                    title={t('deleteRm')}
                   >
                     <UserMinus size={13} />
                   </button>

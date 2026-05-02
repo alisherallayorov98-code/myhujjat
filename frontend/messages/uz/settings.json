@@ -172,6 +172,7 @@
   "memberRemoved": "A'zo o'chirildi",
   "roleUpdated": "Rol yangilandi",
   "rolesInfo": "<b>Rollar:</b> <a>Egasi</a> — to'liq nazorat; <b1>Buxgalter</b1> — faktura va hisobotlar; <b2>A'zo</b2> — ko'rish va yaratish.",
+  "rolesInfoLabel": "Rollar:",
   "azolarLoading": "Yuklanmoqda...",
   "azolarEmpty": "A'zolar yo'q",
   "azolarEmptyDesc": "Invite link orqali a'zo qo'shing",

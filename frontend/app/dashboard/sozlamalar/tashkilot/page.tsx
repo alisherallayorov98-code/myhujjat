@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect }             from 'react'
+import { useTranslations }                 from 'next-intl'
 import { Save, Building2 }                 from 'lucide-react'
 import { useMutation }                     from '@tanstack/react-query'
 import { Card }                            from '@/components/ui/Card'
@@ -11,6 +12,7 @@ import api                                 from '@/lib/api'
 import toast                               from 'react-hot-toast'
 
 export default function TashkilotSozlamalarPage() {
+  const t = useTranslations('settings')
   const { currentOrg, loadUser } = useAuth()
 
   const [form, setForm] = useState({
@@ -44,9 +46,9 @@ export default function TashkilotSozlamalarPage() {
       api.put(`/users/organizations/${currentOrg?.id}`, form),
     onSuccess: () => {
       loadUser()
-      toast.success("Tashkilot ma'lumotlari saqlandi ✓")
+      toast.success(t('orgSaved'))
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const upd = (key: string, val: string) =>
@@ -55,7 +57,7 @@ export default function TashkilotSozlamalarPage() {
   if (!currentOrg) {
     return (
       <div className="text-sm text-[#94A3B8] p-4">
-        Tashkilot tanlanmagan
+        {t('orgNotSelected')}
       </div>
     )
   }
@@ -65,38 +67,38 @@ export default function TashkilotSozlamalarPage() {
       <Card>
         <div className="flex items-center gap-2 mb-4">
           <Building2 size={18} className="text-[#2563EB]" />
-          <h2 className="font-bold text-[#0F172A]">Tashkilot ma'lumotlari</h2>
+          <h2 className="font-bold text-[#0F172A]">{t('orgSettingsTitle')}</h2>
         </div>
 
         <div className="space-y-4">
           <Input
-            label="Tashkilot nomi *"
+            label={t('orgName')}
             value={form.name}
             onChange={e => upd('name', e.target.value)}
-            hint={currentOrg.inn ? `STIR: ${currentOrg.inn}` : undefined}
+            hint={currentOrg.inn ? t('stirHint', { inn: currentOrg.inn }) : undefined}
           />
           <Input
-            label="Rahbar F.I.O."
-            placeholder="Toshmatov Jasur Baxtiyorovich"
+            label={t('directorName')}
+            placeholder={t('directorPlace')}
             value={form.directorName}
             onChange={e => upd('directorName', e.target.value)}
           />
           <Input
-            label="Manzil"
-            placeholder="Toshkent sh., Yunusobod t., ..."
+            label={t('address')}
+            placeholder={t('addressPlace')}
             value={form.address}
             onChange={e => upd('address', e.target.value)}
           />
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Telefon"
-              placeholder="+998 71 123 45 67"
+              label={t('phone')}
+              placeholder={t('phonePlace')}
               value={form.phone}
               onChange={e => upd('phone', e.target.value)}
             />
             <Input
-              label="OKED"
-              placeholder="62010"
+              label={t('oked')}
+              placeholder={t('okedPlace')}
               value={form.oked}
               onChange={e => upd('oked', e.target.value)}
             />
@@ -105,24 +107,24 @@ export default function TashkilotSozlamalarPage() {
       </Card>
 
       <Card>
-        <h3 className="font-bold text-[#0F172A] text-sm mb-4">Bank rekvizitlari</h3>
+        <h3 className="font-bold text-[#0F172A] text-sm mb-4">{t('bankInfo')}</h3>
         <div className="space-y-4">
           <Input
-            label="Bank nomi"
-            placeholder="Xalq banki"
+            label={t('bankName')}
+            placeholder={t('bankNamePlace')}
             value={form.bankName}
             onChange={e => upd('bankName', e.target.value)}
           />
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Hisob raqami"
-              placeholder="20208000000000000001"
+              label={t('bankAccount')}
+              placeholder={t('bankAccountPlace')}
               value={form.bankAccount}
               onChange={e => upd('bankAccount', e.target.value)}
             />
             <Input
-              label="MFO"
-              placeholder="00014"
+              label={t('mfo')}
+              placeholder={t('mfoPlace')}
               value={form.mfo}
               onChange={e => upd('mfo', e.target.value)}
             />
@@ -136,7 +138,7 @@ export default function TashkilotSozlamalarPage() {
         disabled={!form.name}
         onClick={() => mutation.mutate()}
       >
-        Saqlash
+        {t('save')}
       </Button>
     </div>
   )

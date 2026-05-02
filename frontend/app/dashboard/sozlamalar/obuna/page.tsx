@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }           from 'react'
+import { useTranslations }    from 'next-intl'
 import { useSearchParams }    from 'next/navigation'
 import { Check, Zap, CreditCard, CheckCircle } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
@@ -14,66 +15,60 @@ import { formatCurrency, formatDate } from '@/lib/formatters'
 import toast                  from 'react-hot-toast'
 import { cn }                 from '@/lib/cn'
 
-// ============================================
-// TARIF REJALARI
-// ============================================
-const PLANS_CONFIG = [
+const PLANS_CONFIG_BASE = [
   {
     key:   'FREE',
-    name:  'Bepul',
+    nameKey:  'planFreeName',
     price: { '1m': 0, '3m': 0, '12m': 0 },
     color: 'border-[#E2E8F0]',
-    badge: null as string | null,
+    badgeKey: null as string | null,
     features: [
-      { text: 'Oyiga 3 ta shartnoma',  ok: true  },
-      { text: 'Asosiy shablonlar',      ok: true  },
-      { text: 'PDF eksport',            ok: true  },
-      { text: 'STIR tekshirish',        ok: true  },
-      { text: 'AI hujjat generatsiya',  ok: false },
-      { text: 'E-imzo (ERI)',           ok: false },
-      { text: 'Didox integratsiya',     ok: false },
-      { text: 'Shablon muharriri',      ok: false },
+      { textKey: 'feature3PerMonth',     ok: true  },
+      { textKey: 'featureBasicTemplates', ok: true  },
+      { textKey: 'featurePdfExport',     ok: true  },
+      { textKey: 'featureStir',          ok: true  },
+      { textKey: 'featureAi',            ok: false },
+      { textKey: 'featureEsign',         ok: false },
+      { textKey: 'featureDidox',         ok: false },
+      { textKey: 'featureTplEditor',     ok: false },
     ],
   },
   {
     key:   'STANDARD',
-    name:  'Standart',
+    nameKey:  'planStdName',
     price: { '1m': 149_000, '3m': 399_000, '12m': 1_490_000 },
     color: 'border-[#2563EB]/40',
-    badge: 'Mashhur',
+    badgeKey: 'popular',
     features: [
-      { text: 'Oyiga 50 ta shartnoma',  ok: true  },
-      { text: 'Barcha shablonlar',       ok: true  },
-      { text: 'PDF + DOCX eksport',      ok: true  },
-      { text: 'STIR tekshirish',         ok: true  },
-      { text: "QQS hisoblash",           ok: true  },
-      { text: "Ko'p tashkilot",          ok: true  },
-      { text: 'AI hujjat generatsiya',   ok: false },
-      { text: 'E-imzo (ERI)',            ok: false },
+      { textKey: 'feature50PerMonth',    ok: true  },
+      { textKey: 'featureAllTemplates',  ok: true  },
+      { textKey: 'featurePdfDocx',       ok: true  },
+      { textKey: 'featureStir',          ok: true  },
+      { textKey: 'featureQqs',           ok: true  },
+      { textKey: 'featureMultiOrg',      ok: true  },
+      { textKey: 'featureAi',            ok: false },
+      { textKey: 'featureEsign',         ok: false },
     ],
   },
   {
     key:   'PRO',
-    name:  'Pro',
+    nameKey:  'planProName',
     price: { '1m': 299_000, '3m': 799_000, '12m': 2_990_000 },
     color: 'border-[#7C3AED]/40',
-    badge: 'Eng yaxshi',
+    badgeKey: 'best',
     features: [
-      { text: 'Cheksiz shartnomalar',        ok: true },
-      { text: 'AI hujjat generatsiya',       ok: true },
-      { text: 'E-imzo (ERI)',                ok: true },
-      { text: 'Didox integratsiya',          ok: true },
-      { text: 'Shablon muharriri',           ok: true },
-      { text: "Yurist bo'limi",              ok: true },
-      { text: "Ustuvor qo'llab-quvvatlash",  ok: true },
-      { text: 'API kirish',                  ok: true },
+      { textKey: 'featureUnlimited',        ok: true },
+      { textKey: 'featureAi',               ok: true },
+      { textKey: 'featureEsign',            ok: true },
+      { textKey: 'featureDidox',            ok: true },
+      { textKey: 'featureTplEditor',        ok: true },
+      { textKey: 'featureLawyer',           ok: true },
+      { textKey: 'featurePrioritySupport',  ok: true },
+      { textKey: 'featureApi',              ok: true },
     ],
   },
 ]
 
-// ============================================
-// TO'LOV MODAL
-// ============================================
 function PaymentModal({
   planKey, period, open, onClose,
 }: {
@@ -82,11 +77,12 @@ function PaymentModal({
   open:    boolean
   onClose: () => void
 }) {
+  const t = useTranslations('settings')
   const [loading, setLoading] = useState<string | null>(null)
 
-  const plan        = PLANS_CONFIG.find(p => p.key === planKey)
+  const plan        = PLANS_CONFIG_BASE.find(p => p.key === planKey)
   const price       = plan?.price[period] || 0
-  const periodLabel = period === '1m' ? '1 oy' : period === '3m' ? '3 oy' : '1 yil'
+  const periodLabel = period === '1m' ? t('month1') : period === '3m' ? t('month3') : t('year1')
 
   const handlePay = async (provider: 'click' | 'payme') => {
     const pKey = `${planKey.toLowerCase()}_${period}`
@@ -95,7 +91,7 @@ function PaymentModal({
       const { data } = await api.get(`/payments/url/${provider}/${pKey}`)
       if (data.url) window.location.href = data.url
     } catch {
-      toast.error("To'lov URL olishda xatolik")
+      toast.error(t('paymentUrlError'))
     } finally {
       setLoading(null)
     }
@@ -108,10 +104,14 @@ function PaymentModal({
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-scale-in">
         <h3 className="font-bold text-[#0F172A] text-lg mb-1">
-          To'lov tizimini tanlang
+          {t('selectPaymentTitle')}
         </h3>
         <p className="text-sm text-[#94A3B8] mb-4">
-          {plan?.name} reja — {periodLabel} — {formatCurrency(price)}
+          {t('planAndPeriod', {
+            plan: plan ? t(plan.nameKey as any) : '',
+            period: periodLabel,
+            price: formatCurrency(price),
+          })}
         </p>
 
         <div className="space-y-3">
@@ -125,7 +125,7 @@ function PaymentModal({
             </div>
             <div className="text-left flex-1">
               <p className="font-semibold text-[#0F172A]">Click</p>
-              <p className="text-xs text-[#94A3B8]">Visa, Mastercard, Uzcard, Humo</p>
+              <p className="text-xs text-[#94A3B8]">{t('clickDesc')}</p>
             </div>
             {loading === 'click' && (
               <div className="w-5 h-5 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
@@ -142,7 +142,7 @@ function PaymentModal({
             </div>
             <div className="text-left flex-1">
               <p className="font-semibold text-[#0F172A]">Payme</p>
-              <p className="text-xs text-[#94A3B8]">Uzcard, Humo, Visa</p>
+              <p className="text-xs text-[#94A3B8]">{t('paymeDesc')}</p>
             </div>
             {loading === 'payme' && (
               <div className="w-5 h-5 border-2 border-[#00C5B0] border-t-transparent rounded-full animate-spin" />
@@ -154,17 +154,15 @@ function PaymentModal({
           onClick={onClose}
           className="w-full mt-3 py-2 text-sm text-[#94A3B8] hover:text-[#475569] transition-colors"
         >
-          Bekor qilish
+          {t('cancel')}
         </button>
       </div>
     </div>
   )
 }
 
-// ============================================
-// ASOSIY SAHIFA
-// ============================================
 export default function ObunaPage() {
+  const t = useTranslations('settings')
   const searchParams = useSearchParams()
   const { user }     = useAuth()
   const [period,   setPeriod]   = useState<'1m' | '3m' | '12m'>('1m')
@@ -183,46 +181,44 @@ export default function ObunaPage() {
   const demoMutation = useMutation({
     mutationFn: () => api.post('/payments/demo'),
     onSuccess: () => {
-      toast.success('7 kunlik Pro demo faollashtirildi!')
+      toast.success(t('demoActivated'))
       refetch()
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const periodSavings: Record<string, string> = {
-    '1m': '', '3m': '11% tejash', '12m': '17% tejash',
+    '1m': '', '3m': t('save11'), '12m': t('save17'),
   }
 
   return (
     <div>
       <PageHeader
-        title="Obuna va to'lov"
-        description="Reja va narxlar"
+        title={t('obunaTitle')}
+        description={t('obunaDesc')}
         breadcrumbs={[
-          { label: 'Dashboard',  path: '/dashboard' },
-          { label: 'Sozlamalar', path: '/dashboard/sozlamalar' },
-          { label: 'Obuna' },
+          { label: 'Dashboard',   path: '/dashboard' },
+          { label: t('title'),    path: '/dashboard/sozlamalar' },
+          { label: t('obunaBreadcrumb') },
         ]}
       />
 
-      {/* To'lov muvaffaqiyatli */}
       {paymentStatus === 'success' && (
         <div className="mb-6 p-4 bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl flex items-center gap-3">
           <CheckCircle size={20} className="text-[#16A34A]" />
           <div>
-            <p className="font-semibold text-[#15803D]">To'lov muvaffaqiyatli!</p>
-            <p className="text-sm text-[#16A34A]">Obunangiz faollashtirildi.</p>
+            <p className="font-semibold text-[#15803D]">{t('paymentSuccess')}</p>
+            <p className="text-sm text-[#16A34A]">{t('paymentSuccessDesc')}</p>
           </div>
         </div>
       )}
 
-      {/* Joriy obuna holati */}
       {subStats && (
         <div className="mb-8 p-5 bg-white rounded-2xl border border-[#E2E8F0] shadow-sm">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <p className="font-bold text-[#0F172A] text-lg">Joriy reja:</p>
+                <p className="font-bold text-[#0F172A] text-lg">{t('currentPlan')}</p>
                 <Badge
                   variant={
                     subStats.plan === 'PRO'  ? 'warning' :
@@ -234,7 +230,7 @@ export default function ObunaPage() {
               </div>
               {subStats.expiresAt && (
                 <p className="text-sm text-[#94A3B8]">
-                  Muddati: {formatDate(subStats.expiresAt, 'long')}
+                  {t('expiresAt', { date: formatDate(subStats.expiresAt, 'long') })}
                 </p>
               )}
             </div>
@@ -243,7 +239,7 @@ export default function ObunaPage() {
               <p className="text-2xl font-black text-[#0F172A]">
                 {subStats.limit === -1 ? '∞' : `${subStats.contractCount}/${subStats.limit}`}
               </p>
-              <p className="text-xs text-[#94A3B8]">shartnoma (bu oy)</p>
+              <p className="text-xs text-[#94A3B8]">{t('thisMonth')}</p>
               {subStats.limit !== -1 && (
                 <div className="w-32 h-1.5 bg-[#E2E8F0] rounded-full mt-1 ml-auto overflow-hidden">
                   <div
@@ -264,8 +260,8 @@ export default function ObunaPage() {
           {subStats.plan === 'FREE' && (
             <div className="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center justify-between flex-wrap gap-3">
               <div>
-                <p className="text-sm font-medium text-[#0F172A]">7 kun bepul Pro sinab ko'ring</p>
-                <p className="text-xs text-[#94A3B8]">Karta ma'lumotlari talab qilinmaydi</p>
+                <p className="text-sm font-medium text-[#0F172A]">{t('tryProTitle')}</p>
+                <p className="text-xs text-[#94A3B8]">{t('tryProDesc')}</p>
               </div>
               <Button
                 size="sm"
@@ -274,14 +270,13 @@ export default function ObunaPage() {
                 loading={demoMutation.isPending}
                 onClick={() => demoMutation.mutate()}
               >
-                Demo boshlash
+                {t('startDemo')}
               </Button>
             </div>
           )}
         </div>
       )}
 
-      {/* Davr tanlash */}
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         {(['1m', '3m', '12m'] as const).map(p => (
           <button
@@ -294,7 +289,7 @@ export default function ObunaPage() {
                 : 'border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]'
             )}
           >
-            {p === '1m' ? '1 oy' : p === '3m' ? '3 oy' : '1 yil'}
+            {p === '1m' ? t('month1') : p === '3m' ? t('month3') : t('year1')}
             {periodSavings[p] && (
               <Badge variant="success" size="sm">{periodSavings[p]}</Badge>
             )}
@@ -302,9 +297,8 @@ export default function ObunaPage() {
         ))}
       </div>
 
-      {/* Reja kartalar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {PLANS_CONFIG.map(plan => {
+        {PLANS_CONFIG_BASE.map(plan => {
           const price      = plan.price[period]
           const isCurrent  = subStats?.plan === plan.key
           const isPro      = plan.key === 'PRO'
@@ -319,10 +313,10 @@ export default function ObunaPage() {
                 isPro && 'bg-gradient-to-b from-[#EDE9FE]/20'
               )}
             >
-              {plan.badge && (
+              {plan.badgeKey && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge variant={isPro ? 'warning' : 'primary'} size="sm">
-                    {plan.badge}
+                    {t(plan.badgeKey as any)}
                   </Badge>
                 </div>
               )}
@@ -330,20 +324,20 @@ export default function ObunaPage() {
                 <div className="absolute -top-3 right-4">
                   <Badge variant="success" size="sm">
                     <Check size={10} className="mr-1" />
-                    Joriy
+                    {t('currentBadge')}
                   </Badge>
                 </div>
               )}
 
               <div className="mb-6">
-                <p className="font-bold text-[#0F172A] text-lg mb-2">{plan.name}</p>
+                <p className="font-bold text-[#0F172A] text-lg mb-2">{t(plan.nameKey as any)}</p>
                 <div className="flex items-baseline gap-1">
                   <span className="font-black text-3xl text-[#0F172A]">
-                    {price === 0 ? 'Bepul' : formatCurrency(price)}
+                    {price === 0 ? t('free') : formatCurrency(price)}
                   </span>
                   {price > 0 && (
                     <span className="text-sm text-[#94A3B8]">
-                      /{period === '1m' ? 'oy' : period === '3m' ? '3 oy' : 'yil'}
+                      /{period === '1m' ? t('perMonth') : period === '3m' ? t('per3Months') : t('perYear')}
                     </span>
                   )}
                 </div>
@@ -351,13 +345,13 @@ export default function ObunaPage() {
 
               <ul className="space-y-2.5 flex-1 mb-6">
                 {plan.features.map(f => (
-                  <li key={f.text} className="flex items-center gap-2.5 text-sm">
+                  <li key={f.textKey} className="flex items-center gap-2.5 text-sm">
                     {f.ok ? (
                       <Check size={15} className="text-[#16A34A] shrink-0" />
                     ) : (
                       <div className="w-3.5 h-3.5 rounded-full border-2 border-[#E2E8F0] shrink-0" />
                     )}
-                    <span className={f.ok ? 'text-[#374151]' : 'text-[#CBD5E1]'}>{f.text}</span>
+                    <span className={f.ok ? 'text-[#374151]' : 'text-[#CBD5E1]'}>{t(f.textKey as any)}</span>
                   </li>
                 ))}
               </ul>
@@ -365,7 +359,7 @@ export default function ObunaPage() {
               <div>
                 {plan.key === 'FREE' ? (
                   <Button variant="secondary" fullWidth disabled={isCurrent}>
-                    {isCurrent ? 'Joriy reja' : 'Bepul'}
+                    {isCurrent ? t('currentPlanBtn') : t('freeBtn')}
                   </Button>
                 ) : (
                   <Button
@@ -376,7 +370,7 @@ export default function ObunaPage() {
                     onClick={() => setPayModal({ planKey: plan.key })}
                     className={isPro ? 'bg-[#7C3AED] hover:bg-[#6D28D9] border-[#7C3AED]' : ''}
                   >
-                    {isCurrent ? 'Joriy reja' : 'Sotib olish'}
+                    {isCurrent ? t('currentPlanBtn') : t('buyBtn')}
                   </Button>
                 )}
               </div>
@@ -385,27 +379,14 @@ export default function ObunaPage() {
         })}
       </div>
 
-      {/* FAQ */}
       <div className="bg-white rounded-2xl border border-[#E2E8F0] p-6">
-        <h3 className="font-bold text-[#0F172A] mb-4">Ko'p so'raladigan savollar</h3>
+        <h3 className="font-bold text-[#0F172A] mb-4">{t('faqTitle')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            {
-              q: 'Shartnoma limiti qanday ishlaydi?',
-              a: "Har oy 1-sanada hisoblagich sifirlanadi. Masalan, Fevral oyida 3 ta shartnoma yaratsangiz, Mart oyida yana 3 ta yarata olasiz.",
-            },
-            {
-              q: "To'lov xavfsizmi?",
-              a: "Ha. Click va Payme O'zbekistonning eng ishonchli to'lov tizimlari. Karta ma'lumotlari to'g'ridan to'lov tizimiga kiritiladi.",
-            },
-            {
-              q: 'Obunani bekor qila olamanmi?',
-              a: "Obuna muddati tugaganda avtomatik uziladi. Qayta to'lov talab qilinmaydi.",
-            },
-            {
-              q: 'Demo rejada nima bor?',
-              a: '7 kun davomida Pro rejaning barcha imkoniyatlaridan bepul foydalanasiz: AI, E-imzo, Didox va boshqalar.',
-            },
+            { q: t('faqLimitQ'),  a: t('faqLimitA') },
+            { q: t('faqSafeQ'),   a: t('faqSafeA') },
+            { q: t('faqCancelQ'), a: t('faqCancelA') },
+            { q: t('faqDemoQ'),   a: t('faqDemoA') },
           ].map(item => (
             <div key={item.q} className="p-4 rounded-xl bg-[#F8FAFC]">
               <p className="font-medium text-[#0F172A] text-sm mb-1.5">{item.q}</p>

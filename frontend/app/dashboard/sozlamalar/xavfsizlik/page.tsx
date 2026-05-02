@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }           from 'react'
+import { useTranslations }    from 'next-intl'
 import { Lock, Eye, EyeOff, ShieldCheck, ShieldOff, Monitor, Smartphone, Trash2, Copy, RefreshCw, Check, Download, AlertTriangle } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card }               from '@/components/ui/Card'
@@ -12,10 +13,11 @@ import toast                  from 'react-hot-toast'
 import { cn }                 from '@/lib/cn'
 
 function PasswordStrength({ password }: { password: string }) {
+  const t = useTranslations('security')
   const checks = [
-    { label: '8+ belgi',   ok: password.length >= 8 },
-    { label: 'Raqam',      ok: /\d/.test(password) },
-    { label: 'Katta harf', ok: /[A-Z]/.test(password) },
+    { label: t('checkLength'), ok: password.length >= 8 },
+    { label: t('checkNumber'), ok: /\d/.test(password) },
+    { label: t('checkUpper'),  ok: /[A-Z]/.test(password) },
   ]
   const strength = checks.filter(c => c.ok).length
   const barColor =
@@ -45,6 +47,7 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 export default function XavfsizlikPage() {
+  const t = useTranslations('security')
   const [showOld, setShowOld] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [form, setForm] = useState({
@@ -60,10 +63,10 @@ export default function XavfsizlikPage() {
         newPassword: form.newPassword,
       }),
     onSuccess: () => {
-      toast.success("Parol o'zgartirildi ✓")
+      toast.success(t('passwordChanged'))
       setForm({ oldPassword: '', newPassword: '', confirm: '' })
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const canSubmit =
@@ -74,10 +77,10 @@ export default function XavfsizlikPage() {
   return (
     <div className="space-y-5 max-w-lg">
       <Card>
-        <h2 className="font-bold text-[#0F172A] mb-4">Parolni o'zgartirish</h2>
+        <h2 className="font-bold text-[#0F172A] mb-4">{t('changePassword')}</h2>
         <div className="space-y-4">
           <Input
-            label="Joriy parol"
+            label={t('currentPassword')}
             type={showOld ? 'text' : 'password'}
             value={form.oldPassword}
             onChange={e => setForm(f => ({ ...f, oldPassword: e.target.value }))}
@@ -94,7 +97,7 @@ export default function XavfsizlikPage() {
 
           <div className="space-y-2">
             <Input
-              label="Yangi parol"
+              label={t('newPassword')}
               type={showNew ? 'text' : 'password'}
               value={form.newPassword}
               onChange={e => setForm(f => ({ ...f, newPassword: e.target.value }))}
@@ -112,13 +115,13 @@ export default function XavfsizlikPage() {
           </div>
 
           <Input
-            label="Yangi parolni tasdiqlang"
+            label={t('confirmNewPassword')}
             type="password"
             value={form.confirm}
             onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))}
             error={
               form.confirm && form.confirm !== form.newPassword
-                ? 'Parollar mos emas'
+                ? t('passwordsDontMatch')
                 : undefined
             }
           />
@@ -129,7 +132,7 @@ export default function XavfsizlikPage() {
             disabled={!canSubmit}
             onClick={() => mutation.mutate()}
           >
-            Parolni o'zgartirish
+            {t('changePasswordBtn')}
           </Button>
         </div>
       </Card>
@@ -143,7 +146,6 @@ export default function XavfsizlikPage() {
   )
 }
 
-// ─── ACTIVE SESSIONS ─────────────────────────────────────
 interface Session {
   id:        string
   ipAddress: string | null
@@ -155,6 +157,7 @@ interface Session {
 }
 
 function ActiveSessions() {
+  const t = useTranslations('security')
   const qc = useQueryClient()
 
   const { data: sessions = [], isLoading } = useQuery<Session[]>({
@@ -166,7 +169,7 @@ function ActiveSessions() {
     mutationFn: (id: string) => api.delete(`/sessions/${id}`),
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['sessions'] })
-      toast.success('Sessiya bekor qilindi')
+      toast.success(t('sessionRevoked'))
     },
   })
 
@@ -174,7 +177,7 @@ function ActiveSessions() {
     mutationFn: () => api.delete('/sessions/all/except-current'),
     onSuccess:  (res: any) => {
       qc.invalidateQueries({ queryKey: ['sessions'] })
-      toast.success(`${res.data?.revoked || 0} ta sessiya bekor qilindi`)
+      toast.success(t('sessionsRevoked', { count: res.data?.revoked || 0 }))
     },
   })
 
@@ -183,23 +186,23 @@ function ActiveSessions() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-[#0F172A]">Faol sessiyalar</h2>
+        <h2 className="font-bold text-[#0F172A]">{t('activeSessions')}</h2>
         {otherSessions.length > 0 && (
           <Button size="xs" variant="outline" onClick={() => {
-            if (confirm("Boshqa barcha qurilmalardan chiqilsinmi?")) revokeAllMut.mutate()
+            if (confirm(t('logoutFromAllConfirm'))) revokeAllMut.mutate()
           }}>
-            Hammasidan chiqish
+            {t('logoutFromAll')}
           </Button>
         )}
       </div>
       <p className="text-xs text-[#94A3B8] mb-4">
-        Hisobingizga kirilgan barcha qurilmalar. Notanish qurilma ko'rinsa darhol bekor qiling.
+        {t('sessionsHint')}
       </p>
 
       {isLoading ? (
-        <div className="text-sm text-[#94A3B8] text-center py-4">Yuklanmoqda...</div>
+        <div className="text-sm text-[#94A3B8] text-center py-4">{t('loading')}</div>
       ) : sessions.length === 0 ? (
-        <div className="text-sm text-[#94A3B8] text-center py-4">Faol sessiya yo'q</div>
+        <div className="text-sm text-[#94A3B8] text-center py-4">{t('noActiveSessions')}</div>
       ) : (
         <div className="space-y-2">
           {sessions.map(s => {
@@ -216,18 +219,18 @@ function ActiveSessions() {
                     </p>
                     {s.isCurrent && (
                       <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#16A34A] text-white">
-                        Joriy
+                        {t('current')}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-[#94A3B8] mt-0.5">
-                    {s.ipAddress || 'IP noma\'lum'} · {formatDate(s.createdAt, 'short')}
+                    {s.ipAddress || t('ipUnknown')} · {formatDate(s.createdAt, 'short')}
                   </p>
                 </div>
                 {!s.isCurrent && (
                   <button
                     onClick={() => {
-                      if (confirm("Bu qurilmadan chiqilsinmi?")) revokeMut.mutate(s.id)
+                      if (confirm(t('logoutDeviceConfirm'))) revokeMut.mutate(s.id)
                     }}
                     className="p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition shrink-0"
                   >
@@ -243,8 +246,8 @@ function ActiveSessions() {
   )
 }
 
-// ─── 2FA (Ikki bosqichli tasdiqlash) ──────────────────────
 function TwoFactor() {
+  const t = useTranslations('security')
   const qc = useQueryClient()
   const [setupData, setSetupData] = useState<{ secret: string; qrCode: string } | null>(null)
   const [code, setCode]           = useState('')
@@ -261,36 +264,36 @@ function TwoFactor() {
   const setupMut = useMutation({
     mutationFn: () => api.post('/auth/2fa/setup').then(r => r.data),
     onSuccess:  d => setSetupData(d),
-    onError:    (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError:    (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   const enableMut = useMutation({
     mutationFn: () => api.post('/auth/2fa/enable', { code }).then(r => r.data),
     onSuccess:  d => {
-      toast.success('2FA yoqildi ✓')
+      toast.success(t('twofaEnabled2'))
       setBackupCodes(d.backupCodes)
       setSetupData(null)
       setCode('')
       qc.invalidateQueries({ queryKey: ['2fa-status'] })
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || "Kod noto'g'ri"),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('wrongCode')),
   })
 
   const disableMut = useMutation({
     mutationFn: () => api.post('/auth/2fa/disable', { code: disableCode }).then(r => r.data),
     onSuccess:  () => {
-      toast.success("2FA o'chirildi")
+      toast.success(t('twofaDisabled'))
       setShowDisable(false)
       setDisableCode('')
       qc.invalidateQueries({ queryKey: ['2fa-status'] })
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || "Kod noto'g'ri"),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('wrongCode')),
   })
 
   const regenerateMut = useMutation({
     mutationFn: () => api.post('/auth/2fa/regenerate-codes').then(r => r.data),
     onSuccess:  d => {
-      toast.success('Yangi backup kodlar yaratildi')
+      toast.success(t('newBackupCodesGen'))
       setBackupCodes(d.backupCodes)
     },
   })
@@ -299,17 +302,16 @@ function TwoFactor() {
     if (!setupData) return
     await navigator.clipboard.writeText(setupData.secret)
     setCopiedSecret(true)
-    toast.success('Sekret nusxalandi')
+    toast.success(t('secretCopied'))
     setTimeout(() => setCopiedSecret(false), 2000)
   }
 
   const copyBackupCodes = async () => {
     if (!backupCodes) return
     await navigator.clipboard.writeText(backupCodes.join('\n'))
-    toast.success('Backup kodlar nusxalandi')
+    toast.success(t('backupCopied'))
   }
 
-  // ─── Backup codes ko'rsatish (yangi yaratilgandan keyin) ───
   if (backupCodes) {
     return (
       <Card>
@@ -318,9 +320,9 @@ function TwoFactor() {
             <ShieldCheck size={18} className="text-[#D97706]" />
           </div>
           <div>
-            <h2 className="font-bold text-[#0F172A]">Backup kodlarni saqlang</h2>
+            <h2 className="font-bold text-[#0F172A]">{t('saveBackupCodes')}</h2>
             <p className="text-xs text-[#94A3B8] mt-0.5 leading-relaxed">
-              Telefoningizni yo'qotsangiz, ushbu kodlardan foydalaning. Har bir kod faqat bir marta ishlaydi.
+              {t('saveBackupCodesDesc')}
             </p>
           </div>
         </div>
@@ -333,24 +335,23 @@ function TwoFactor() {
 
         <div className="flex gap-2 mt-4">
           <Button size="sm" variant="outline" leftIcon={<Copy size={14} />} onClick={copyBackupCodes}>
-            Nusxalash
+            {t('copy')}
           </Button>
           <Button size="sm" onClick={() => setBackupCodes(null)}>
-            Saqladim, davom etish
+            {t('savedContinue')}
           </Button>
         </div>
       </Card>
     )
   }
 
-  // ─── Setup jarayoni (QR + kod kiritish) ─────────────────────
   if (setupData) {
     return (
       <Card>
         <div className="mb-4">
-          <h2 className="font-bold text-[#0F172A] mb-1">2FA sozlash</h2>
+          <h2 className="font-bold text-[#0F172A] mb-1">{t('twofaSetupTitle')}</h2>
           <p className="text-xs text-[#94A3B8] leading-relaxed">
-            Google Authenticator yoki shunga o'xshash ilovada QR-kodni skaner qiling
+            {t('twofaSetupDesc')}
           </p>
         </div>
 
@@ -362,7 +363,7 @@ function TwoFactor() {
 
           <div className="flex-1 space-y-3">
             <div>
-              <p className="text-xs text-[#475569] font-medium mb-1">Yoki qo'lda kiriting:</p>
+              <p className="text-xs text-[#475569] font-medium mb-1">{t('orManually')}</p>
               <div className="flex items-center gap-2 p-2 bg-[#F8FAFC] rounded border border-[#E2E8F0]">
                 <code className="text-xs text-[#0F172A] font-mono break-all flex-1">{setupData.secret}</code>
                 <button
@@ -376,10 +377,10 @@ function TwoFactor() {
             </div>
 
             <Input
-              label="Ilovadagi 6 raqamli kod"
+              label={t('code6digit')}
               value={code}
               onChange={e => setCode(e.target.value)}
-              placeholder="123456"
+              placeholder={t('code6place')}
               inputMode="numeric"
               autoFocus
             />
@@ -392,17 +393,16 @@ function TwoFactor() {
             loading={enableMut.isPending}
             disabled={code.replace(/\s/g, '').length < 6}
           >
-            Yoqish
+            {t('enable')}
           </Button>
           <Button variant="outline" onClick={() => { setSetupData(null); setCode('') }}>
-            Bekor qilish
+            {t('cancel')}
           </Button>
         </div>
       </Card>
     )
   }
 
-  // ─── 2FA yoqilgan holat ────────────────────────────────────
   if (status?.enabled) {
     return (
       <Card>
@@ -412,13 +412,13 @@ function TwoFactor() {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-[#0F172A] text-sm">Ikki bosqichli tasdiqlash</p>
+              <p className="font-semibold text-[#0F172A] text-sm">{t('twofa')}</p>
               <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#16A34A] text-white">
-                Yoqilgan
+                {t('twofaEnabled')}
               </span>
             </div>
             <p className="text-xs text-[#94A3B8] mt-0.5 leading-relaxed">
-              Hisobingiz qo'shimcha xavfsizlik qatlami bilan himoyalangan
+              {t('twofaProtected')}
             </p>
           </div>
         </div>
@@ -426,12 +426,12 @@ function TwoFactor() {
         {showDisable ? (
           <div className="space-y-3 p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg">
             <p className="text-xs text-[#991B1B]">
-              2FA ni o'chirish uchun authenticator yoki backup kodni kiriting:
+              {t('twofaDisableEnter')}
             </p>
             <Input
               value={disableCode}
               onChange={e => setDisableCode(e.target.value)}
-              placeholder="Kod"
+              placeholder={t('code')}
               inputMode="numeric"
               autoFocus
             />
@@ -443,10 +443,10 @@ function TwoFactor() {
                 loading={disableMut.isPending}
                 disabled={disableCode.length < 4}
               >
-                O'chirish
+                {t('disable')}
               </Button>
               <Button size="sm" variant="outline" onClick={() => { setShowDisable(false); setDisableCode('') }}>
-                Bekor qilish
+                {t('cancel')}
               </Button>
             </div>
           </div>
@@ -459,7 +459,7 @@ function TwoFactor() {
               onClick={() => regenerateMut.mutate()}
               loading={regenerateMut.isPending}
             >
-              Yangi backup kodlar
+              {t('newBackupCodes')}
             </Button>
             <Button
               size="sm"
@@ -467,7 +467,7 @@ function TwoFactor() {
               leftIcon={<ShieldOff size={13} />}
               onClick={() => setShowDisable(true)}
             >
-              O'chirish
+              {t('disable')}
             </Button>
           </div>
         )}
@@ -475,7 +475,6 @@ function TwoFactor() {
     )
   }
 
-  // ─── 2FA o'chirilgan holat ─────────────────────────────────
   return (
     <Card>
       <div className="flex items-start gap-3">
@@ -483,9 +482,9 @@ function TwoFactor() {
           <ShieldCheck size={18} className="text-[#16A34A]" />
         </div>
         <div className="flex-1">
-          <p className="font-semibold text-[#0F172A] text-sm">Ikki bosqichli tasdiqlash</p>
+          <p className="font-semibold text-[#0F172A] text-sm">{t('twofa')}</p>
           <p className="text-xs text-[#94A3B8] mt-0.5 leading-relaxed mb-3">
-            Hisobingizni himoya qilish uchun Google Authenticator orqali qo'shimcha himoya qatlamini yoqing.
+            {t('twofaProtectAccount')}
           </p>
           <Button
             size="sm"
@@ -493,7 +492,7 @@ function TwoFactor() {
             onClick={() => setupMut.mutate()}
             loading={setupMut.isPending}
           >
-            Yoqish
+            {t('enable')}
           </Button>
         </div>
       </div>
@@ -501,8 +500,8 @@ function TwoFactor() {
   )
 }
 
-// ─── Data Privacy (GDPR) ──────────────────────────────────
 function DataPrivacy() {
+  const t = useTranslations('security')
   const [exporting, setExporting] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [password, setPassword] = useState('')
@@ -520,9 +519,9 @@ function DataPrivacy() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Ma\'lumotlar yuklab olindi')
+      toast.success(t('dataDownloaded'))
     } catch (e: any) {
-      toast.error(e?.response?.data?.message || 'Xatolik')
+      toast.error(e?.response?.data?.message || t('error'))
     } finally {
       setExporting(false)
     }
@@ -531,16 +530,16 @@ function DataPrivacy() {
   const deleteAccountMut = useMutation({
     mutationFn: () => api.post('/users/delete-account', { password }),
     onSuccess:  () => {
-      toast.success("Hisob o'chirildi")
+      toast.success(t('accountDeleted'))
       localStorage.clear()
       window.location.href = '/'
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik'),
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   return (
     <Card>
-      <h2 className="font-bold text-[#0F172A] mb-4">Ma'lumot va maxfiylik</h2>
+      <h2 className="font-bold text-[#0F172A] mb-4">{t('dataPrivacy')}</h2>
 
       <div className="space-y-3">
         <div className="flex items-start gap-3 p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
@@ -548,9 +547,9 @@ function DataPrivacy() {
             <Download size={18} className="text-[#2563EB]" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-[#0F172A] text-sm">Ma'lumotlarimni yuklab olish</p>
+            <p className="font-semibold text-[#0F172A] text-sm">{t('downloadData')}</p>
             <p className="text-xs text-[#94A3B8] mt-0.5 leading-relaxed mb-2">
-              Profil, tashkilotlar, shartnomalar va barcha boshqa ma'lumotlaringizni JSON formatida olib oling.
+              {t('downloadDataDesc')}
             </p>
             <Button
               size="xs"
@@ -559,7 +558,7 @@ function DataPrivacy() {
               loading={exporting}
               onClick={exportData}
             >
-              JSON yuklab olish
+              {t('downloadJson')}
             </Button>
           </div>
         </div>
@@ -569,9 +568,9 @@ function DataPrivacy() {
             <AlertTriangle size={18} className="text-[#DC2626]" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-[#991B1B] text-sm">Hisobni o'chirish</p>
+            <p className="font-semibold text-[#991B1B] text-sm">{t('deleteAccount')}</p>
             <p className="text-xs text-[#7F1D1D] mt-0.5 leading-relaxed mb-2">
-              Bu amal qaytarib bo'lmaydi. Barcha tashkilotlar, shartnomalar va ma'lumotlar butunlay o'chiriladi.
+              {t('deleteAccountDesc')}
             </p>
 
             {!showDelete ? (
@@ -581,22 +580,22 @@ function DataPrivacy() {
                 leftIcon={<Trash2 size={13} />}
                 onClick={() => setShowDelete(true)}
               >
-                O'chirishni boshlash
+                {t('startDelete')}
               </Button>
             ) : (
               <div className="space-y-2 mt-2">
                 <Input
-                  label="Parolingiz"
+                  label={t('yourPassword')}
                   type="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="Joriy parol"
+                  placeholder={t('yourPasswordPlace')}
                 />
                 <Input
-                  label='Tasdiqlash uchun "OCHIRISH" deb yozing'
+                  label={t('typeOchirish')}
                   value={confirmText}
                   onChange={e => setConfirmText(e.target.value)}
-                  placeholder="OCHIRISH"
+                  placeholder={t('typeOchirishPlace')}
                 />
                 <div className="flex gap-2">
                   <Button
@@ -606,19 +605,19 @@ function DataPrivacy() {
                     disabled={!password || confirmText !== 'OCHIRISH'}
                     loading={deleteAccountMut.isPending}
                     onClick={() => {
-                      if (confirm("Hisobingiz va barcha ma'lumotlar butunlay o'chiriladi. Davom etamizmi?")) {
+                      if (confirm(t('deleteAccountConfirm'))) {
                         deleteAccountMut.mutate()
                       }
                     }}
                   >
-                    Hisobni o'chirish
+                    {t('deleteAccountBtn')}
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => {
                     setShowDelete(false)
                     setPassword('')
                     setConfirmText('')
                   }}>
-                    Bekor qilish
+                    {t('cancel')}
                   </Button>
                 </div>
               </div>

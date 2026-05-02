@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                  from 'react'
+import { useTranslations }                           from 'next-intl'
 import { Plus, Edit2, Trash2, Users }                from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }     from '@tanstack/react-query'
 import { Card }                                      from '@/components/ui/Card'
@@ -14,6 +15,7 @@ import toast                                         from 'react-hot-toast'
 type FounderForm = { ism: string; jshshir: string; ulush: string; manzil: string }
 
 export default function TasischchilarPage() {
+  const t = useTranslations('settings')
   const { currentOrg } = useAuth()
   const qc             = useQueryClient()
   const [modal,    setModal]    = useState(false)
@@ -44,7 +46,7 @@ export default function TasischchilarPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['founders'] })
-      toast.success(editItem ? 'Yangilandi' : "Qo'shildi ✓")
+      toast.success(editItem ? t('tasischiUpdated') : t('tasischiAdded'))
       closeModal()
     },
   })
@@ -53,7 +55,7 @@ export default function TasischchilarPage() {
     mutationFn: (id: string) => api.delete(`/founders/${id}`),
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['founders'] })
-      toast.success("O'chirildi")
+      toast.success(t('tasischiDeleted'))
     },
   })
 
@@ -62,16 +64,16 @@ export default function TasischchilarPage() {
   return (
     <div className="max-w-lg space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-display font-bold text-[#0F172A]">Ta'sischilar</h2>
+        <h2 className="font-display font-bold text-[#0F172A]">{t('tasischilar')}</h2>
         <Button size="sm" leftIcon={<Plus size={14} />} onClick={() => setModal(true)}>
-          Qo'shish
+          {t('addTasischi')}
         </Button>
       </div>
 
       {founders.length === 0 ? (
         <Card className="text-center py-8">
           <Users size={28} className="mx-auto text-[#94A3B8] opacity-40 mb-2" />
-          <p className="text-sm text-[#94A3B8]">Ta'sischilar qo'shilmagan</p>
+          <p className="text-sm text-[#94A3B8]">{t('noTasischilar')}</p>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -83,8 +85,8 @@ export default function TasischchilarPage() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[#0F172A]">{f.ism}</p>
                 <p className="text-xs text-[#94A3B8]">
-                  {f.jshshir && `JSHSHIR: ${f.jshshir}`}
-                  {f.ulush   && ` • Ulush: ${f.ulush}%`}
+                  {f.jshshir && `${t('tasischiJshshir')}: ${f.jshshir}`}
+                  {f.ulush   && ` • ${t('tasischiUlush')}: ${f.ulush}%`}
                 </p>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -110,11 +112,11 @@ export default function TasischchilarPage() {
 
           {totalUlush > 0 && (
             <p className="text-xs text-right text-[#94A3B8]">
-              Jami ulush:{' '}
+              {t('totalUlush')}{' '}
               <strong className={totalUlush === 100 ? 'text-[#16A34A]' : 'text-[#DC2626]'}>
                 {totalUlush}%
               </strong>
-              {totalUlush !== 100 && " (100% bo'lishi kerak)"}
+              {totalUlush !== 100 && ` ${t('ulushMustBe100')}`}
             </p>
           )}
         </div>
@@ -123,41 +125,41 @@ export default function TasischchilarPage() {
       <Modal
         open={modal}
         onClose={closeModal}
-        title={editItem ? 'Tahrirlash' : "Ta'sischi qo'shish"}
+        title={editItem ? t('tasischiEdit') : t('tasischiAdd')}
         size="sm"
         footer={
           <>
-            <Button variant="outline" size="sm" onClick={closeModal}>Bekor</Button>
+            <Button variant="outline" size="sm" onClick={closeModal}>{t('tasischiCancel')}</Button>
             <Button
               size="sm"
               loading={mutation.isPending}
               disabled={!form.ism}
               onClick={() => mutation.mutate(form)}
             >
-              Saqlash
+              {t('tasischiSave')}
             </Button>
           </>
         }
       >
         <div className="space-y-3 py-2">
           <Input
-            label="To'liq ism *"
+            label={t('tasischiFullName')}
             value={form.ism}
             onChange={e => setForm(f => ({ ...f, ism: e.target.value }))}
           />
           <Input
-            label="JSHSHIR"
+            label={t('tasischiJshshir')}
             value={form.jshshir}
             onChange={e => setForm(f => ({ ...f, jshshir: e.target.value }))}
           />
           <Input
-            label="Ulush (%)"
+            label={t('tasischiUlush')}
             type="number"
             value={form.ulush}
             onChange={e => setForm(f => ({ ...f, ulush: e.target.value }))}
           />
           <Input
-            label="Manzil"
+            label={t('tasischiManzil')}
             value={form.manzil}
             onChange={e => setForm(f => ({ ...f, manzil: e.target.value }))}
           />

@@ -172,6 +172,7 @@
   "memberRemoved": "Аъзо ўчирилди",
   "roleUpdated": "Рол янгиланди",
   "rolesInfo": "<b>Роллар:</b> <a>Эгаси</a> — тўлиқ назорат; <b1>Бухгалтер</b1> — фактура ва ҳисоботлар; <b2>Аъзо</b2> — кўриш ва яратиш.",
+  "rolesInfoLabel": "Роллар:",
   "azolarLoading": "Юкланмоқда...",
   "azolarEmpty": "Аъзолар йўқ",
   "azolarEmptyDesc": "Invite link орқали аъзо қўшинг",

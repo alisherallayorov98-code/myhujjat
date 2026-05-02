@@ -2,18 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Cookie, X } from 'lucide-react'
 
 const STORAGE_KEY = 'cookie_consent'
 
 export function CookieConsent() {
+  const t = useTranslations('cookieConsent')
   const [show, setShow] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     const consent = localStorage.getItem(STORAGE_KEY)
     if (!consent) {
-      // 1 sekund kutib ko'rsatamiz (boshlang'ich tajriba uchun)
       const t = setTimeout(() => setShow(true), 1000)
       return () => clearTimeout(t)
     }
@@ -48,14 +49,12 @@ export function CookieConsent() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-[#0F172A] mb-1">
-              Cookies va shaxsiy ma'lumotlar
+              {t('title')}
             </p>
             <p className="text-xs text-[#475569] leading-relaxed">
-              MyHujjat.uz faqat zarur cookies'lardan foydalanadi — sessiya saqlash, til tanlash va
-              interfeys sozlamalari uchun. Reklamalar yoki uchinchi shaxs analitika xizmatlari
-              ishlatilmaydi.{' '}
+              {t('description')}{' '}
               <Link href="/privacy" className="text-[#2563EB] hover:underline whitespace-nowrap">
-                Ko'proq bilish
+                {t('learnMore')}
               </Link>
             </p>
 
@@ -64,20 +63,20 @@ export function CookieConsent() {
                 onClick={accept}
                 className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition"
               >
-                Roziman
+                {t('accept')}
               </button>
               <button
                 onClick={decline}
                 className="bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#475569] px-4 py-1.5 rounded-lg text-xs font-semibold transition"
               >
-                Faqat zarur
+                {t('decline')}
               </button>
             </div>
           </div>
           <button
             onClick={decline}
             className="p-1 rounded text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] shrink-0"
-            aria-label="Yopish"
+            aria-label={t('close')}
           >
             <X size={14} />
           </button>
