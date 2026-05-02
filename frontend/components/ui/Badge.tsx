@@ -1,6 +1,7 @@
 'use client'
 
 import { HTMLAttributes } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/cn'
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -56,14 +57,17 @@ export function Badge({
 }
 
 export function ContractStatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-    DRAFT:     { label: 'Qoralama', variant: 'default' },
-    ACTIVE:    { label: 'Faol',     variant: 'success' },
-    COMPLETED: { label: 'Tugagan',  variant: 'primary' },
-    CANCELLED: { label: 'Bekor',    variant: 'danger'  },
+  const t = useTranslations('contracts.statusOptions')
+  const variants: Record<string, BadgeProps['variant']> = {
+    DRAFT:     'default',
+    ACTIVE:    'success',
+    COMPLETED: 'primary',
+    CANCELLED: 'danger',
   }
-  const cfg = config[status] || { label: status, variant: 'default' }
-  return <Badge variant={cfg.variant} dot>{cfg.label}</Badge>
+  const variant = variants[status] || 'default'
+  let label = status
+  try { label = t(status as any) } catch { /* fallback */ }
+  return <Badge variant={variant} dot>{label}</Badge>
 }
 
 export function PlanBadge({ plan }: { plan: string }) {

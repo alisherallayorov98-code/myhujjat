@@ -14,13 +14,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary:   'bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-sm',
-  secondary: 'bg-[#F1F5F9] text-[#475569] hover:bg-[#E2E8F0] border border-[#E2E8F0]',
-  success:   'bg-[#16A34A] text-white hover:bg-[#15803D] shadow-sm',
-  danger:    'bg-[#DC2626] text-white hover:bg-[#B91C1C] shadow-sm',
-  warning:   'bg-[#D97706] text-white hover:bg-[#B45309] shadow-sm',
+  primary:   'bg-[#2563EB] text-white hover:bg-[#1E40AF] shadow-sm hover:shadow-md',
+  secondary: 'bg-[#F1F5F9] text-[#475569] hover:bg-[#CBD5E1] hover:text-[#0F172A] border border-[#E2E8F0]',
+  success:   'bg-[#16A34A] text-white hover:bg-[#166534] shadow-sm hover:shadow-md',
+  danger:    'bg-[#DC2626] text-white hover:bg-[#991B1B] shadow-sm hover:shadow-md',
+  warning:   'bg-[#D97706] text-white hover:bg-[#92400E] shadow-sm hover:shadow-md',
   ghost:     'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0F172A]',
-  outline:   'border border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC] bg-white',
+  outline:   'border border-[#E2E8F0] text-[#475569] hover:bg-[#F1F5F9] hover:border-[#CBD5E1] hover:text-[#0F172A] bg-white',
 }
 
 const sizes = {
