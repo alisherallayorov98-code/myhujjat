@@ -45,7 +45,7 @@ export default function BayonnomPage() {
 
   const { data: docs = [], isLoading } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id, 'BAYONNOMA'],
-    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}&type=BAYONNOMA`).then(r => r.data),
+    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}&type=BAYONNOMA&limit=100`).then(r => r.data.data || []),
     enabled:  !!activeOrg,
   })
 

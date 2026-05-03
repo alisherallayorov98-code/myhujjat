@@ -164,13 +164,23 @@ export class AiService {
     })
   }
 
-  async getHistory(orgId: string, limit = 20) {
-    return this.prisma.aiDocument.findMany({
-      where:   { organizationId: orgId, isActive: true },
-      orderBy: { createdAt: 'desc' },
-      take:    limit,
-      select:  { id: true, title: true, docType: true, tokensUsed: true, createdAt: true },
-    })
+  async getHistory(orgId: string, query: { page?: number; limit?: number } = {}) {
+    const page  = query.page  || 1
+    const limit = Math.min(query.limit || 20, 100)
+    const where = { organizationId: orgId, isActive: true }
+
+    const [total, data] = await Promise.all([
+      this.prisma.aiDocument.count({ where }),
+      this.prisma.aiDocument.findMany({
+        where,
+        skip:    (page - 1) * limit,
+        take:    limit,
+        orderBy: { createdAt: 'desc' },
+        select:  { id: true, title: true, docType: true, tokensUsed: true, createdAt: true },
+      }),
+    ])
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
 
   async getDoc(orgId: string, id: string) {

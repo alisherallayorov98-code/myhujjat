@@ -15,10 +15,16 @@ export class EmployeesController {
 
   @Get()
   findAll(
-    @Query('orgId')  orgId: string,
+    @Query('orgId')  orgId:   string,
     @Query('search') search?: string,
+    @Query('page')   page?:   string,
+    @Query('limit')  limit?:  string,
   ) {
-    return this.svc.findAll(orgId, search)
+    return this.svc.findAll(orgId, {
+      search,
+      page:  page  ? Number(page)  : 1,
+      limit: limit ? Number(limit) : 20,
+    })
   }
 
   @Post()

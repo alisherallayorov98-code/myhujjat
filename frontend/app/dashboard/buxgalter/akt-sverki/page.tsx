@@ -46,13 +46,13 @@ export default function AktSverkiPage() {
 
   const { data: aktlar = [], isLoading } = useQuery<any[]>({
     queryKey: ['akt-sverki', currentOrg?.id],
-    queryFn:  () => api.get(`/documents?orgId=${currentOrg!.id}&type=AKT_SVERKI`).then(r => r.data),
+    queryFn:  () => api.get(`/documents?orgId=${currentOrg!.id}&type=AKT_SVERKI&limit=100`).then(r => r.data.data || []),
     enabled:  !!currentOrg?.id,
   })
 
   const { data: cps = [] } = useQuery<any[]>({
     queryKey: ['counterparties', currentOrg?.id],
-    queryFn:  () => api.get(`/counterparties?orgId=${currentOrg!.id}`).then(r => r.data),
+    queryFn:  () => api.get(`/counterparties?orgId=${currentOrg!.id}&limit=100`).then(r => r.data.data || []),
     enabled:  !!currentOrg?.id,
   })
 

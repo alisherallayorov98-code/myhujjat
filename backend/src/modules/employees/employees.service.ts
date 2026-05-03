@@ -19,21 +19,33 @@ export interface CreateEmployeeDto {
 export class EmployeesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(orgId: string, search?: string) {
-    return this.prisma.employee.findMany({
-      where: {
-        organizationId: orgId,
-        isActive:       true,
-        ...(search && {
-          OR: [
-            { ism:     { contains: search, mode: 'insensitive' } },
-            { lavozim: { contains: search, mode: 'insensitive' } },
-            { bolim:   { contains: search, mode: 'insensitive' } },
-          ],
-        }),
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+  async findAll(orgId: string, query: { search?: string; page?: number; limit?: number } = {}) {
+    const { search, page = 1 } = query
+    const limit = Math.min(query.limit || 20, 100)
+
+    const where = {
+      organizationId: orgId,
+      isActive:       true,
+      ...(search && {
+        OR: [
+          { ism:     { contains: search, mode: 'insensitive' as const } },
+          { lavozim: { contains: search, mode: 'insensitive' as const } },
+          { bolim:   { contains: search, mode: 'insensitive' as const } },
+        ],
+      }),
+    }
+
+    const [total, data] = await Promise.all([
+      this.prisma.employee.count({ where }),
+      this.prisma.employee.findMany({
+        where,
+        skip:    (page - 1) * limit,
+        take:    limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+    ])
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
 
   async create(dto: CreateEmployeeDto) {

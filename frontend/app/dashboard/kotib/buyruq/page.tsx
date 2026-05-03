@@ -46,7 +46,7 @@ export default function BuyruqPage() {
 
   const { data: docs = [], isLoading } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id, 'BUYRUQ'],
-    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}&type=BUYRUQ`).then(r => r.data),
+    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}&type=BUYRUQ&limit=100`).then(r => r.data.data || []),
     enabled:  !!activeOrg,
   })
 

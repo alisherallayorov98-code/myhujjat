@@ -10,6 +10,7 @@ import { Input }        from '@/components/ui/Input'
 import { Card }         from '@/components/ui/Card'
 import { Badge }        from '@/components/ui/Badge'
 import { Modal }        from '@/components/ui/Modal'
+import { Pagination }   from '@/components/ui/Pagination'
 import { EmptyState, TableRowSkeleton } from '@/components/ui/Skeleton'
 import { StirInput, type StirData } from '@/components/shared/StirInput'
 import { useAuth }      from '@/hooks/useAuth'
@@ -127,24 +128,30 @@ export default function KontragentlarPage() {
   const t = useTranslations('counterparties')
   const { currentOrg } = useAuth()
   const [search,   setSearch]   = useState('')
+  const [page,     setPage]     = useState(1)
   const [addModal, setAddModal] = useState(false)
   const [editCp,   setEditCp]   = useState<Counterparty | null>(null)
 
-  const { data: cps = [], isLoading } = useQuery({
-    queryKey: ['counterparties', currentOrg?.id],
+  const { data, isLoading } = useQuery({
+    queryKey: ['counterparties', currentOrg?.id, page, search],
     queryFn:  async () => {
-      if (!currentOrg?.id) return []
-      const { data } = await api.get(`/counterparties?orgId=${currentOrg.id}`)
-      return data as Counterparty[]
+      if (!currentOrg?.id) return { data: [] as Counterparty[], meta: { total: 0, totalPages: 1, page: 1, limit: 20 } }
+      const params = new URLSearchParams({
+        orgId: currentOrg.id,
+        page:  String(page),
+        limit: '20',
+        ...(search && { search }),
+      })
+      const { data } = await api.get(`/counterparties?${params}`)
+      return data as { data: Counterparty[]; meta: { total: number; totalPages: number; page: number; limit: number } }
     },
     enabled: !!currentOrg?.id,
   })
 
-  const filtered = cps.filter(cp =>
-    !search ||
-    cp.name?.toLowerCase().includes(search.toLowerCase()) ||
-    cp.inn?.includes(search)
-  )
+  const cps        = data?.data || []
+  const totalPages = data?.meta?.totalPages || 1
+  const total      = data?.meta?.total || 0
+  const filtered   = cps  // backend filtri allaqachon ishlatilgan
 
   if (!currentOrg) {
     return (
@@ -182,14 +189,19 @@ export default function KontragentlarPage() {
         }
       />
 
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <Input
           placeholder={t('searchPlaceholder')}
           leftIcon={<Search size={15} />}
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(1) }}
           className="max-w-sm"
         />
+        {total > 0 && (
+          <span className="text-xs text-[#94A3B8] shrink-0">
+            {total} ta
+          </span>
+        )}
       </div>
 
       {!isLoading && filtered.length === 0 && (
@@ -264,6 +276,11 @@ export default function KontragentlarPage() {
             </tbody>
           </table>
         </div>
+        {totalPages > 1 && (
+          <div className="border-t border-[#E2E8F0]">
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
+        )}
       </Card>
       )}
 

@@ -89,7 +89,7 @@ export default function HRHujjatlarPage() {
 
   const { data: employees = [] } = useQuery<any[]>({
     queryKey: ['employees', currentOrg?.id],
-    queryFn:  () => api.get(`/employees?orgId=${currentOrg!.id}`).then(r => r.data),
+    queryFn:  () => api.get(`/employees?orgId=${currentOrg!.id}&limit=100`).then(r => r.data.data || []),
     enabled:  !!currentOrg?.id,
   })
 

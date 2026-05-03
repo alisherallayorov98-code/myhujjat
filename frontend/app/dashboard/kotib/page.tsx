@@ -34,7 +34,7 @@ export default function KotibPage() {
 
   const { data: recent = [] } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id],
-    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}`).then(r => r.data),
+    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}&limit=20`).then(r => r.data.data || []),
     enabled:  !!activeOrg,
   })
 

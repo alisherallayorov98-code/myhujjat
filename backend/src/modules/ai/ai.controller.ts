@@ -56,8 +56,15 @@ export class AiController {
   }
 
   @Get('history')
-  getHistory(@Query('orgId') orgId: string) {
-    return this.aiService.getHistory(orgId)
+  getHistory(
+    @Query('orgId') orgId: string,
+    @Query('page')  page?:  string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.aiService.getHistory(orgId, {
+      page:  page  ? Number(page)  : 1,
+      limit: limit ? Number(limit) : 20,
+    })
   }
 
   @Get('docs/:id')

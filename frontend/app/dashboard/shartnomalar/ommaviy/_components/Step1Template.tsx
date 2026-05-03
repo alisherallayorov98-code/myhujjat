@@ -26,16 +26,17 @@ export function Step1Template({ draft, onChange }: Props) {
   const tc = useTranslations('contracts')
   const { currentOrg } = useAuth()
 
-  const { data: templates = [] } = useQuery<any[]>({
+  const { data: templatesData } = useQuery<{ data: any[] }>({
     queryKey: ['templates', currentOrg?.id, draft.contractType],
     queryFn:  async () => {
       const { data } = await api.get('/templates', {
-        params: { orgId: currentOrg?.id, contractType: draft.contractType },
+        params: { orgId: currentOrg?.id, contractType: draft.contractType, limit: 100 },
       })
       return data
     },
     enabled: !!currentOrg?.id,
   })
+  const templates = templatesData?.data || []
 
   const sourceMode = draft.customContent !== null ? 'custom' : 'template'
 

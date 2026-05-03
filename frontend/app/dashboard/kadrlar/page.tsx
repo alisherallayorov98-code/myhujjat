@@ -11,6 +11,7 @@ import { Card }                                           from '@/components/ui/
 import { Badge }                                          from '@/components/ui/Badge'
 import { Modal }                                          from '@/components/ui/Modal'
 import { EmptyState, TableRowSkeleton }                   from '@/components/ui/Skeleton'
+import { Pagination }                                    from '@/components/ui/Pagination'
 import { useAuth }                                        from '@/hooks/useAuth'
 import api                                                from '@/lib/api'
 import { exportEmployeesExcel }                          from '@/lib/export/listExport'
@@ -155,18 +156,27 @@ export default function KadrlarPage() {
   const qc             = useQueryClient()
 
   const [search,    setSearch]    = useState('')
+  const [page,      setPage]      = useState(1)
   const [addModal,  setAddModal]  = useState(false)
   const [editXodim, setEditXodim] = useState<Employee | null>(null)
 
-  const { data: employees = [], isLoading } = useQuery<Employee[]>({
-    queryKey: ['employees', currentOrg?.id, search],
+  const { data, isLoading } = useQuery<{ data: Employee[]; meta: { total: number; totalPages: number; page: number; limit: number } }>({
+    queryKey: ['employees', currentOrg?.id, search, page],
     queryFn:  () => {
-      const params = new URLSearchParams({ orgId: currentOrg!.id })
+      const params = new URLSearchParams({
+        orgId: currentOrg!.id,
+        page:  String(page),
+        limit: '20',
+      })
       if (search) params.set('search', search)
       return api.get(`/employees?${params}`).then(r => r.data)
     },
     enabled: !!currentOrg?.id,
   })
+
+  const employees   = data?.data || []
+  const totalPages  = data?.meta?.totalPages || 1
+  const totalCount  = data?.meta?.total || 0
 
   const { data: stats } = useQuery<{ total: number; active: number; bolimlar: any[] }>({
     queryKey: ['employees-stats', currentOrg?.id],
@@ -237,14 +247,19 @@ export default function KadrlarPage() {
       )}
 
       {/* Qidiruv */}
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <Input
           placeholder={t('searchPlace')}
           leftIcon={<Search size={15} />}
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(1) }}
           className="max-w-xs"
         />
+        {totalCount > 0 && (
+          <span className="text-xs text-[#94A3B8] shrink-0">
+            {totalCount} ta
+          </span>
+        )}
       </div>
 
       {/* Jadval */}
@@ -328,6 +343,11 @@ export default function KadrlarPage() {
             </tbody>
           </table>
         </div>
+        {totalPages > 1 && (
+          <div className="border-t border-[#E2E8F0]">
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
+        )}
       </Card>
 
       <XodimModal

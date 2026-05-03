@@ -15,10 +15,18 @@ export class TemplatesController {
 
   @Get()
   findAll(
-    @Query('orgId')        orgId: string,
+    @Query('orgId')        orgId:        string,
     @Query('contractType') contractType?: string,
+    @Query('search')       search?:      string,
+    @Query('page')         page?:        string,
+    @Query('limit')        limit?:       string,
   ) {
-    return this.svc.findAll(orgId, contractType)
+    return this.svc.findAll(orgId, {
+      contractType,
+      search,
+      page:  page  ? Number(page)  : 1,
+      limit: limit ? Number(limit) : 30,
+    })
   }
 
   @Get(':id')

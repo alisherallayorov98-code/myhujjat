@@ -42,13 +42,13 @@ export default function FakturaPage() {
 
   const { data: cps = [] } = useQuery<any[]>({
     queryKey: ['counterparties', currentOrg?.id],
-    queryFn:  () => api.get(`/counterparties?orgId=${currentOrg!.id}`).then(r => r.data),
+    queryFn:  () => api.get(`/counterparties?orgId=${currentOrg!.id}&limit=100`).then(r => r.data.data || []),
     enabled:  !!currentOrg?.id,
   })
 
   const { data: fakturalar = [], isLoading } = useQuery<any[]>({
     queryKey: ['fakturalar', currentOrg?.id],
-    queryFn:  () => api.get(`/documents?orgId=${currentOrg!.id}&type=FAKTURA`).then(r => r.data),
+    queryFn:  () => api.get(`/documents?orgId=${currentOrg!.id}&type=FAKTURA&limit=100`).then(r => r.data.data || []),
     enabled:  !!currentOrg?.id,
   })
 

@@ -30,10 +30,16 @@ export class DocumentsController {
 
   @Get()
   findAll(
-    @Query('orgId') orgId: string,
-    @Query('type')  type?: DocumentType,
+    @Query('orgId') orgId:  string,
+    @Query('type')  type?:  DocumentType,
+    @Query('page')  page?:  string,
+    @Query('limit') limit?: string,
   ) {
-    return this.svc.findAll(orgId, type)
+    return this.svc.findAll(orgId, {
+      type,
+      page:  page  ? Number(page)  : 1,
+      limit: limit ? Number(limit) : 30,
+    })
   }
 
   @Get(':id')

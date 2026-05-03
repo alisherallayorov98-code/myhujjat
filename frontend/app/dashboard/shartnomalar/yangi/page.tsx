@@ -107,8 +107,8 @@ export default function YangiShartnoma() {
     queryKey: ['counterparties', currentOrg?.id],
     queryFn:  async () => {
       if (!currentOrg?.id) return []
-      const { data } = await api.get(`/counterparties?orgId=${currentOrg.id}`)
-      return data as Counterparty[]
+      const { data } = await api.get(`/counterparties?orgId=${currentOrg.id}&limit=100`)
+      return (data.data || []) as Counterparty[]
     },
     enabled: !!currentOrg?.id,
   })

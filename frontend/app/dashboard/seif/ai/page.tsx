@@ -31,8 +31,8 @@ export default function AiGeneratorPage() {
     queryKey: ['ai-history', currentOrg?.id],
     queryFn:  async () => {
       if (!currentOrg?.id) return []
-      const { data } = await api.get(`/ai/history?orgId=${currentOrg.id}`)
-      return data
+      const { data } = await api.get(`/ai/history?orgId=${currentOrg.id}&limit=50`)
+      return data.data || []
     },
     enabled: !!currentOrg?.id,
   })

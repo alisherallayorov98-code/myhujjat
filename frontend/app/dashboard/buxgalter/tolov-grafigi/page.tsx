@@ -43,7 +43,7 @@ export default function TolovGrafigiPage() {
 
   const { data: grafiklar = [], isLoading } = useQuery<any[]>({
     queryKey: ['tolov-grafik', currentOrg?.id],
-    queryFn:  () => api.get(`/documents?orgId=${currentOrg!.id}&type=TOLOV_GRAFIGI`).then(r => r.data),
+    queryFn:  () => api.get(`/documents?orgId=${currentOrg!.id}&type=TOLOV_GRAFIGI&limit=100`).then(r => r.data.data || []),
     enabled:  !!currentOrg?.id,
   })
 

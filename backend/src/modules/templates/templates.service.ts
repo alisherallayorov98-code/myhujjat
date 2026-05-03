@@ -199,22 +199,39 @@ _______________ / {{ORG_RAHBAR}} /  _______________ / {{CP_RAHBAR}} /
 export class TemplatesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(orgId: string, contractType?: string) {
+  async findAll(orgId: string, query: {
+    contractType?: string
+    search?:       string
+    page?:         number
+    limit?:        number
+  } = {}) {
+    const { contractType, search, page = 1 } = query
+    const limit = Math.min(query.limit || 30, 100)
+
     const where: any = {
       OR: [
         { isSystem: true },
         { organizationId: orgId },
       ],
       ...(contractType ? { contractType } : {}),
+      ...(search ? { name: { contains: search, mode: 'insensitive' as const } } : {}),
     }
-    return this.prisma.template.findMany({
-      where,
-      orderBy: [{ isSystem: 'desc' }, { createdAt: 'desc' }],
-      select: {
-        id: true, contractType: true, name: true, isSystem: true,
-        isPublic: true, organizationId: true, createdAt: true,
-      },
-    })
+
+    const [total, data] = await Promise.all([
+      this.prisma.template.count({ where }),
+      this.prisma.template.findMany({
+        where,
+        skip:    (page - 1) * limit,
+        take:    limit,
+        orderBy: [{ isSystem: 'desc' }, { createdAt: 'desc' }],
+        select: {
+          id: true, contractType: true, name: true, isSystem: true,
+          isPublic: true, organizationId: true, createdAt: true,
+        },
+      }),
+    ])
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
 
   async findOne(id: string) {

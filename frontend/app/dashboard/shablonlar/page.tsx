@@ -57,11 +57,12 @@ export default function ShablonlarPage() {
 
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const { data: templates = [], isLoading } = useQuery<Template[]>({
+  const { data: templatesData, isLoading } = useQuery<{ data: Template[]; meta: any }>({
     queryKey: ['templates', currentOrg?.id],
-    queryFn:  () => api.get(`/templates?orgId=${currentOrg!.id}`).then(r => r.data),
+    queryFn:  () => api.get(`/templates?orgId=${currentOrg!.id}&limit=100`).then(r => r.data),
     enabled:  !!currentOrg?.id,
   })
+  const templates = templatesData?.data || []
 
   const deleteMut = useMutation({
     mutationFn: (id: string) =>

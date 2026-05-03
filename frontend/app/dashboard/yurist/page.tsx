@@ -82,7 +82,7 @@ export default function YuristPage() {
 
   const { data: cps = [] } = useQuery<any[]>({
     queryKey: ['counterparties', currentOrg?.id],
-    queryFn:  () => api.get(`/counterparties?orgId=${currentOrg!.id}`).then(r => r.data),
+    queryFn:  () => api.get(`/counterparties?orgId=${currentOrg!.id}&limit=100`).then(r => r.data.data || []),
     enabled:  !!currentOrg?.id,
   })
 

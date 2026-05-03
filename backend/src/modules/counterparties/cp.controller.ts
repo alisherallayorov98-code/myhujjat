@@ -10,8 +10,17 @@ export class CounterpartiesController {
   constructor(private readonly cpService: CounterpartiesService) {}
 
   @Get()
-  findAll(@Query('orgId') orgId: string) {
-    return this.cpService.findAll(orgId)
+  findAll(
+    @Query('orgId')  orgId:  string,
+    @Query('page')   page?:  string,
+    @Query('limit')  limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.cpService.findAll(orgId, {
+      page:   page  ? Number(page)  : 1,
+      limit:  limit ? Number(limit) : 20,
+      search,
+    })
   }
 
   @Get(':id')

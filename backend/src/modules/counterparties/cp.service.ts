@@ -18,11 +18,36 @@ export interface CreateCpDto {
 export class CounterpartiesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(orgId: string) {
-    return this.prisma.counterparty.findMany({
-      where:   { organizationId: orgId, isActive: true },
-      orderBy: { createdAt: 'desc' },
-    })
+  async findAll(orgId: string, query: {
+    page?:   number
+    limit?:  number
+    search?: string
+  } = {}) {
+    const { page = 1, search } = query
+    const limit = Math.min(query.limit || 20, 100)
+
+    const where: any = {
+      organizationId: orgId,
+      isActive:       true,
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' as const } },
+          { inn:  { contains: search } },
+        ],
+      }),
+    }
+
+    const [total, data] = await Promise.all([
+      this.prisma.counterparty.count({ where }),
+      this.prisma.counterparty.findMany({
+        where,
+        skip:    (page - 1) * limit,
+        take:    limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+    ])
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
 
   async findOne(id: string) {

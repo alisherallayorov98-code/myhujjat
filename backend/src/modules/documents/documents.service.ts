@@ -26,15 +26,30 @@ export class DocumentsService {
   // CRUD (kotib, buxgalter, kadrlar sahifalari)
   // ============================================
 
-  async findAll(orgId: string, type?: DocumentType) {
-    return this.prisma.document.findMany({
-      where:   { organizationId: orgId, isActive: true, ...(type ? { type } : {}) },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true, type: true, title: true, number: true,
-        docDate: true, status: true, createdAt: true,
-      },
-    })
+  async findAll(orgId: string, query: {
+    type?:  DocumentType
+    page?:  number
+    limit?: number
+  } = {}) {
+    const { type, page = 1 } = query
+    const limit = Math.min(query.limit || 30, 100)
+    const where = { organizationId: orgId, isActive: true, ...(type ? { type } : {}) }
+
+    const [total, data] = await Promise.all([
+      this.prisma.document.count({ where }),
+      this.prisma.document.findMany({
+        where,
+        skip:    (page - 1) * limit,
+        take:    limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true, type: true, title: true, number: true,
+          docDate: true, status: true, createdAt: true,
+        },
+      }),
+    ])
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
 
   async findOne(orgId: string, id: string) {
