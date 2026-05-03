@@ -67,7 +67,7 @@ export class TenantAccessService {
    */
   async requireResourceOwnership(
     userId: string,
-    resource: 'contract' | 'counterparty' | 'employee' | 'invoice' | 'specification' | 'document' | 'template',
+    resource: 'contract' | 'counterparty' | 'employee' | 'invoice' | 'specification' | 'document' | 'template' | 'tasischi' | 'bulkSendDraft' | 'aiDocument',
     resourceId: string,
   ): Promise<void> {
     const orgIds = await this.getAccessibleOrgIds(userId)
@@ -99,6 +99,15 @@ export class TenantAccessService {
         count = await this.prisma.template.count({
           where: { id: resourceId, OR: [{ organizationId: { in: orgIds } }, { isSystem: true }] },
         })
+        break
+      case 'tasischi':
+        count = await this.prisma.tasischi.count({ where: { id: resourceId, organizationId: { in: orgIds } } })
+        break
+      case 'bulkSendDraft':
+        count = await this.prisma.bulkSendDraft.count({ where: { id: resourceId, organizationId: { in: orgIds } } })
+        break
+      case 'aiDocument':
+        count = await this.prisma.aiDocument.count({ where: { id: resourceId, organizationId: { in: orgIds } } })
         break
     }
 

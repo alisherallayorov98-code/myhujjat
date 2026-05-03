@@ -3,38 +3,59 @@ import {
   Delete, Body, Param, Query, HttpCode,
 } from '@nestjs/common'
 import { SpecService } from './spec.service'
+import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { TenantAccessService } from '../../common/services/tenant-access.service'
 
 @Controller('specifications')
 export class SpecController {
-  constructor(private readonly specService: SpecService) {}
+  constructor(
+    private readonly specService: SpecService,
+    private readonly tenant:      TenantAccessService,
+  ) {}
 
   @Get()
-  findAll(@Query('orgId') orgId: string) {
+  async findAll(@CurrentUser() user: any, @Query('orgId') orgId: string) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.specService.findAll(orgId)
   }
 
   @Get(':id')
-  findOne(@Query('orgId') orgId: string, @Param('id') id: string) {
+  async findOne(
+    @CurrentUser() user: any,
+    @Query('orgId') orgId: string,
+    @Param('id') id: string,
+  ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'specification', id)
     return this.specService.findOne(orgId, id)
   }
 
   @Post()
-  create(@Body() dto: any) {
+  async create(@CurrentUser() user: any, @Body() dto: any) {
+    if (dto?.organizationId) {
+      await this.tenant.requireOrgAccess(user.sub, dto.organizationId)
+    }
     return this.specService.create(dto)
   }
 
   @Put(':id')
-  update(
+  async update(
+    @CurrentUser() user: any,
     @Query('orgId') orgId: string,
     @Param('id')    id:    string,
     @Body()         dto:   any,
   ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'specification', id)
     return this.specService.update(orgId, id, dto)
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Query('orgId') orgId: string, @Param('id') id: string) {
+  async remove(
+    @CurrentUser() user: any,
+    @Query('orgId') orgId: string,
+    @Param('id') id: string,
+  ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'specification', id)
     return this.specService.remove(orgId, id)
   }
 }

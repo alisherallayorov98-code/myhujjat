@@ -2,36 +2,61 @@ import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags }                          from '@nestjs/swagger'
 import { OrgMembersService }                               from './org-members.service'
 import { CurrentUser }                                     from '../../common/decorators/current-user.decorator'
+import { TenantAccessService }                             from '../../common/services/tenant-access.service'
 
 @ApiTags('OrgMembers')
 @ApiBearerAuth()
 @Controller('orgs')
 export class OrgMembersController {
-  constructor(private readonly service: OrgMembersService) {}
+  constructor(
+    private readonly service: OrgMembersService,
+    private readonly tenant:  TenantAccessService,
+  ) {}
 
-  // Invite orqali qo'shilish — static route first
+  // Invite orqali qo'shilish — static route first (token o'zi auth qiladi)
   @Post('join')
   joinByInvite(@CurrentUser() user: any, @Body('token') token: string) {
     return this.service.joinByInvite(user.sub, token)
   }
 
+  // Faqat tashkilot a'zolari ro'yxatni ko'ra oladi
   @Get(':orgId/members')
-  getMembers(@Param('orgId') orgId: string) {
+  async getMembers(@CurrentUser() user: any, @Param('orgId') orgId: string) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.service.getMembers(orgId)
   }
 
+  // Faqat OWNER taklif yarata oladi
   @Post(':orgId/members/invite')
-  createInvite(@Param('orgId') orgId: string, @Body('role') role: string) {
+  async createInvite(
+    @CurrentUser() user: any,
+    @Param('orgId') orgId: string,
+    @Body('role') role: string,
+  ) {
+    await this.tenant.requireOwner(user.sub, orgId)
     return this.service.createInvite(orgId, role || 'MEMBER')
   }
 
+  // Faqat OWNER rolni o'zgartira oladi
   @Put(':orgId/members/:memberId/role')
-  changeRole(@Param('memberId') id: string, @Body('role') role: string) {
+  async changeRole(
+    @CurrentUser() user: any,
+    @Param('orgId') orgId: string,
+    @Param('memberId') id: string,
+    @Body('role') role: string,
+  ) {
+    await this.tenant.requireOwner(user.sub, orgId)
     return this.service.changeRole(id, role)
   }
 
+  // Faqat OWNER a'zolarni o'chira oladi
   @Delete(':orgId/members/:memberId')
-  remove(@Param('memberId') id: string) {
+  async remove(
+    @CurrentUser() user: any,
+    @Param('orgId') orgId: string,
+    @Param('memberId') id: string,
+  ) {
+    await this.tenant.requireOwner(user.sub, orgId)
     return this.service.removeMember(id)
   }
 }

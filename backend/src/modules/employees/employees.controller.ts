@@ -3,23 +3,31 @@ import {
   Body, Param, Query, HttpCode, HttpStatus,
 } from '@nestjs/common'
 import { EmployeesService, CreateEmployeeDto } from './employees.service'
+import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { TenantAccessService } from '../../common/services/tenant-access.service'
 
 @Controller('employees')
 export class EmployeesController {
-  constructor(private readonly svc: EmployeesService) {}
+  constructor(
+    private readonly svc:    EmployeesService,
+    private readonly tenant: TenantAccessService,
+  ) {}
 
   @Get('stats')
-  getStats(@Query('orgId') orgId: string) {
+  async getStats(@CurrentUser() user: any, @Query('orgId') orgId: string) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.svc.getStats(orgId)
   }
 
   @Get()
-  findAll(
+  async findAll(
+    @CurrentUser() user: any,
     @Query('orgId')  orgId:   string,
     @Query('search') search?: string,
     @Query('page')   page?:   string,
     @Query('limit')  limit?:  string,
   ) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.svc.findAll(orgId, {
       search,
       page:  page  ? Number(page)  : 1,
@@ -28,21 +36,25 @@ export class EmployeesController {
   }
 
   @Post()
-  create(@Body() dto: CreateEmployeeDto) {
+  async create(@CurrentUser() user: any, @Body() dto: CreateEmployeeDto) {
+    await this.tenant.requireOrgAccess(user.sub, dto.organizationId)
     return this.svc.create(dto)
   }
 
   @Put(':id')
-  update(
+  async update(
+    @CurrentUser() user: any,
     @Param('id') id: string,
     @Body()      dto: Partial<CreateEmployeeDto>,
   ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'employee', id)
     return this.svc.update(id, dto)
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
+  async remove(@CurrentUser() user: any, @Param('id') id: string) {
+    await this.tenant.requireResourceOwnership(user.sub, 'employee', id)
     return this.svc.remove(id)
   }
 }

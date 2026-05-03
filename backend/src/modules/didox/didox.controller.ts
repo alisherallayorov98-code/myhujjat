@@ -4,22 +4,33 @@ import {
 import type { Request } from 'express'
 import { DidoxService } from './didox.service'
 import { Public }       from '../../common/decorators/public.decorator'
+import { CurrentUser }  from '../../common/decorators/current-user.decorator'
+import { TenantAccessService } from '../../common/services/tenant-access.service'
 
 @Controller('didox')
 export class DidoxController {
-  constructor(private readonly didoxService: DidoxService) {}
+  constructor(
+    private readonly didoxService: DidoxService,
+    private readonly tenant:       TenantAccessService,
+  ) {}
 
   @Post('send/:contractId')
-  sendInvoice(
+  async sendInvoice(
+    @CurrentUser() user: any,
     @Query('orgId')      orgId:      string,
     @Param('contractId') contractId: string,
     @Body('specId')      specId:     string,
   ) {
+    // Org va contract ownership ikkalasi ham tekshirilishi kerak
+    await this.tenant.requireOrgAccess(user.sub, orgId)
+    await this.tenant.requireResourceOwnership(user.sub, 'contract', contractId)
     return this.didoxService.sendInvoice(orgId, contractId, specId)
   }
 
   @Get('status/:didoxId')
   checkStatus(@Param('didoxId') didoxId: string) {
+    // Status tekshirish — Didox ID public/opaque, ownership tekshirish kerak emas
+    // (foydalanuvchi bilmagan didoxId ni topa olmaydi)
     return this.didoxService.checkStatus(didoxId)
   }
 

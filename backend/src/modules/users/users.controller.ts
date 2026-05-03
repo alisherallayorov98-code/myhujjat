@@ -2,10 +2,14 @@ import { Controller, Put, Get, Post, Delete, Body, Param, Res, HttpCode, HttpSta
 import type { Response } from 'express'
 import { UsersService }                 from './users.service'
 import { CurrentUser }                  from '../../common/decorators/current-user.decorator'
+import { TenantAccessService }          from '../../common/services/tenant-access.service'
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly tenant:       TenantAccessService,
+  ) {}
 
   @Put('profile')
   updateProfile(
@@ -18,7 +22,8 @@ export class UsersController {
       avatarUrl?: string
     },
   ) {
-    return this.usersService.updateProfile(user.id, dto)
+    // CRITICAL: JWT payload'da userId — `sub` (NOT `id`)
+    return this.usersService.updateProfile(user.sub, dto)
   }
 
   @Put('change-password')
@@ -26,16 +31,18 @@ export class UsersController {
     @CurrentUser() user: any,
     @Body() body: { oldPassword: string; newPassword: string },
   ) {
-    return this.usersService.changePassword(user.id, body.oldPassword, body.newPassword)
+    return this.usersService.changePassword(user.sub, body.oldPassword, body.newPassword)
   }
 
   @Put('organizations/:orgId')
-  updateOrganization(
+  async updateOrganization(
     @CurrentUser() user: any,
     @Param('orgId') orgId: string,
     @Body() dto: any,
   ) {
-    return this.usersService.updateOrganization(orgId, user.id, dto)
+    // Faqat tashkilot egasi rekvizitlarni o'zgartira oladi
+    await this.tenant.requireOwner(user.sub, orgId)
+    return this.usersService.updateOrganization(orgId, user.sub, dto)
   }
 
   // ─── GDPR ────────────────────────────────────────────────

@@ -5,14 +5,19 @@ import {
 import { Response }    from 'express'
 import { AiService }   from './ai.service'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { TenantAccessService } from '../../common/services/tenant-access.service'
 import { GenerateAiDocDto } from './dto/generate.dto'
 
 @Controller('ai')
 export class AiController {
-  constructor(private readonly aiService: AiService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly tenant:    TenantAccessService,
+  ) {}
 
   @Post('generate')
-  generate(@CurrentUser() user: any, @Body() dto: GenerateAiDocDto) {
+  async generate(@CurrentUser() user: any, @Body() dto: GenerateAiDocDto) {
+    await this.tenant.requireOrgAccess(user.sub, dto.orgId)
     return this.aiService.generateDocument({ userId: user.sub, ...dto })
   }
 
@@ -22,6 +27,8 @@ export class AiController {
     @Body() dto: GenerateAiDocDto,
     @Res() res: Response,
   ) {
+    await this.tenant.requireOrgAccess(user.sub, dto.orgId)
+
     res.setHeader('Content-Type',  'text/event-stream')
     res.setHeader('Cache-Control', 'no-cache')
     res.setHeader('Connection',    'keep-alive')
@@ -57,11 +64,13 @@ export class AiController {
   }
 
   @Get('history')
-  getHistory(
+  async getHistory(
+    @CurrentUser() user: any,
     @Query('orgId') orgId: string,
     @Query('page')  page?:  string,
     @Query('limit') limit?: string,
   ) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.aiService.getHistory(orgId, {
       page:  page  ? Number(page)  : 1,
       limit: limit ? Number(limit) : 20,
@@ -69,7 +78,12 @@ export class AiController {
   }
 
   @Get('docs/:id')
-  getDoc(@Query('orgId') orgId: string, @Param('id') id: string) {
+  async getDoc(
+    @CurrentUser() user: any,
+    @Query('orgId') orgId: string,
+    @Param('id')    id:    string,
+  ) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.aiService.getDoc(orgId, id)
   }
 }

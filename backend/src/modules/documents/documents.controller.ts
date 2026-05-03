@@ -4,20 +4,27 @@ import {
 } from '@nestjs/common'
 import { DocumentsService, CreateDocDto, UpdateDocDto } from './documents.service'
 import { DocumentType } from '@prisma/client'
+import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { TenantAccessService } from '../../common/services/tenant-access.service'
 
 @Controller('documents')
 export class DocumentsController {
-  constructor(private readonly svc: DocumentsService) {}
+  constructor(
+    private readonly svc:    DocumentsService,
+    private readonly tenant: TenantAccessService,
+  ) {}
 
   // ── SEIF routes (must be before /:id) ───────────────────────────────────
 
   @Get('seif/stats')
-  getSeifStats(@Query('orgId') orgId: string) {
+  async getSeifStats(@CurrentUser() user: any, @Query('orgId') orgId: string) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.svc.getSeifStats(orgId)
   }
 
   @Get('seif')
-  findSeif(@Query() query: any) {
+  async findSeif(@CurrentUser() user: any, @Query() query: any) {
+    await this.tenant.requireOrgAccess(user.sub, query.orgId)
     return this.svc.findSeif(query.orgId, {
       search: query.search,
       type:   query.type,
@@ -29,12 +36,14 @@ export class DocumentsController {
   // ── CRUD routes ──────────────────────────────────────────────────────────
 
   @Get()
-  findAll(
+  async findAll(
+    @CurrentUser() user: any,
     @Query('orgId') orgId:  string,
     @Query('type')  type?:  DocumentType,
     @Query('page')  page?:  string,
     @Query('limit') limit?: string,
   ) {
+    await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.svc.findAll(orgId, {
       type,
       page:  page  ? Number(page)  : 1,
@@ -43,32 +52,39 @@ export class DocumentsController {
   }
 
   @Get(':id')
-  findOne(
+  async findOne(
+    @CurrentUser() user: any,
     @Query('orgId') orgId: string,
     @Param('id')    id: string,
   ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'document', id)
     return this.svc.findOne(orgId, id)
   }
 
   @Post()
-  create(@Body() dto: CreateDocDto) {
+  async create(@CurrentUser() user: any, @Body() dto: CreateDocDto) {
+    await this.tenant.requireOrgAccess(user.sub, dto.organizationId)
     return this.svc.create(dto)
   }
 
   @Put(':id')
-  update(
+  async update(
+    @CurrentUser() user: any,
     @Query('orgId') orgId: string,
     @Param('id')    id: string,
     @Body()         dto: UpdateDocDto,
   ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'document', id)
     return this.svc.update(orgId, id, dto)
   }
 
   @Delete(':id')
-  remove(
+  async remove(
+    @CurrentUser() user: any,
     @Query('orgId') orgId: string,
     @Param('id')    id: string,
   ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'document', id)
     return this.svc.remove(orgId, id)
   }
 }

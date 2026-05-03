@@ -3,12 +3,15 @@ import {
 } from '@nestjs/common'
 import { EimzoService }  from './eimzo.service'
 import { PrismaService } from '../prisma/prisma.service'
+import { CurrentUser }   from '../../common/decorators/current-user.decorator'
+import { TenantAccessService } from '../../common/services/tenant-access.service'
 
 @Controller('eimzo')
 export class EimzoController {
   constructor(
     private readonly eimzoService: EimzoService,
     private readonly prisma:       PrismaService,
+    private readonly tenant:       TenantAccessService,
   ) {}
 
   @Get('challenge')
@@ -18,6 +21,7 @@ export class EimzoController {
 
   @Post('verify/:contractId')
   async verifyAndSign(
+    @CurrentUser() user: any,
     @Param('contractId') contractId: string,
     @Body() body: {
       challengeId: string
@@ -26,6 +30,10 @@ export class EimzoController {
       signerType:  'us' | 'cp'
     },
   ) {
+    // CRITICAL: Foydalanuvchi shu shartnomaga ruxsati borligini tekshirish.
+    // Aks holda: User A fraudly Sign User B's contract.
+    await this.tenant.requireResourceOwnership(user.sub, 'contract', contractId)
+
     const result = this.eimzoService.verifySignature({
       challengeId: body.challengeId,
       signature:   body.signature,
