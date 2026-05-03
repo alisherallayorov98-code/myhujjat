@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
 import { useTranslations }    from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Plus, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }         from '@/components/layout/PageHeader'
 import { Button }             from '@/components/ui/Button'
@@ -31,6 +31,29 @@ import { SpecTable }   from './_components/SpecTable'
 
 function today(): string {
   return new Date().toISOString().split('T')[0]
+}
+
+/**
+ * Foydalanuvchi qo'shgan sarlavha+matn bandlarni shartnoma matniga
+ * REKVIZITLAR bo'limidan oldin joylaydi. Agar REKVIZITLAR yo'q bo'lsa,
+ * matn oxiriga qo'shiladi.
+ */
+function injectCustomSections(
+  text:     string,
+  sections: { title: string; body: string }[],
+): string {
+  const valid = sections.filter(s => s.title.trim() || s.body.trim())
+  if (valid.length === 0) return text
+
+  const block = valid
+    .map(s => `\n\n${s.title.trim().toUpperCase()}\n\n${s.body.trim()}\n`)
+    .join('')
+
+  const rekvIdx = text.search(/\n\s*\d+\.\s*TOMONLARNING\s+REKVIZITLARI/i)
+  if (rekvIdx > -1) {
+    return text.slice(0, rekvIdx) + block + text.slice(rekvIdx)
+  }
+  return text + block
 }
 
 export default function YangiShartnoma() {
@@ -66,6 +89,7 @@ export default function YangiShartnoma() {
     qqsEnabled:     false,
     qqsRate:        12,
     productName:    '',
+    customSections: [] as { title: string; body: string }[],
   })
 
   const PARTY_FIELDS: [string, string][] = [
@@ -117,6 +141,7 @@ export default function YangiShartnoma() {
       qqsEnabled:   cloneSource.qqsEnabled ?? f.qqsEnabled,
       qqsRate:      cloneSource.qqsRate    ?? f.qqsRate,
       productName:  cloneSource.productName || '',
+      customSections: (cloneSource.customSections || []) as { title: string; body: string }[],
       // RESET — yangi shartnoma uchun bo'sh:
       contractNumber: '',
       contractDate:   today(),
@@ -152,7 +177,7 @@ export default function YangiShartnoma() {
     const amount = specTotal > 0 ? specTotal : parseFloat(form.amount) || 0
     const template = CONTRACT_TEMPLATES[type]
     if (!template) return ''
-    return fillTemplate(template, {
+    const filled = fillTemplate(template, {
       orgNomi:   org?.name          || '___________',
       orgInn:    org?.inn           || '___________',
       orgRahbar: org?.directorName  || '___________',
@@ -174,6 +199,7 @@ export default function YangiShartnoma() {
       summaMatn: amount > 0 ? formatAmountWords(amount) : '___________',
       extra:     form.extraData,
     })
+    return injectCustomSections(filled, form.customSections)
   }, [mergedOrg, selectedCp, form, type, specTotal, orgEdits])
 
   const buildContractObj = useCallback(() => ({
@@ -237,8 +263,29 @@ export default function YangiShartnoma() {
       specItems:      form.specItems.length > 0 ? form.specItems : undefined,
       qqsEnabled:     form.qqsEnabled,
       qqsRate:        form.qqsRate,
+      customSections: form.customSections.filter(s => s.title.trim() || s.body.trim()),
       content:        buildPreview(),
     })
+  }
+
+  // ─── Custom sections helpers ──────────────────────────────
+  function addSection() {
+    setForm(f => ({
+      ...f,
+      customSections: [...f.customSections, { title: '', body: '' }],
+    }))
+  }
+  function updateSection(i: number, key: 'title' | 'body', val: string) {
+    setForm(f => ({
+      ...f,
+      customSections: f.customSections.map((s, idx) => idx === i ? { ...s, [key]: val } : s),
+    }))
+  }
+  function removeSection(i: number) {
+    setForm(f => ({
+      ...f,
+      customSections: f.customSections.filter((_, idx) => idx !== i),
+    }))
   }
 
   const typeCfg     = CONTRACT_TYPE_CONFIG[type]
@@ -507,6 +554,55 @@ export default function YangiShartnoma() {
                   hint={form.amount && parseFloat(form.amount) > 0 ? formatAmountWords(parseFloat(form.amount)) : ''} />
               )}
             </div>
+          </Card>
+
+          {/* Qo'shimcha bandlar (Tarkibi builder) */}
+          <Card>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-bold text-[#0F172A]">{t('sections.title')}</h3>
+                <p className="text-xs text-[#94A3B8] mt-0.5">{t('sections.desc')}</p>
+              </div>
+              <Button size="sm" variant="outline" leftIcon={<Plus size={13} />} onClick={addSection}>
+                {t('sections.add')}
+              </Button>
+            </div>
+
+            {form.customSections.length === 0 ? (
+              <p className="text-sm text-[#94A3B8] text-center py-4 italic">
+                {t('sections.empty')}
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {form.customSections.map((sec, i) => (
+                  <div key={i} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-[#94A3B8]">{i + 1}.</span>
+                      <input
+                        value={sec.title}
+                        onChange={e => updateSection(i, 'title', e.target.value)}
+                        placeholder={t('sections.titlePlace')}
+                        className="flex-1 bg-white border border-[#E2E8F0] rounded-md px-2.5 py-1.5 text-sm font-semibold focus:outline-none focus:border-[#2563EB]"
+                      />
+                      <button
+                        onClick={() => removeSection(i)}
+                        className="p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition"
+                        title={t('sections.remove')}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <textarea
+                      value={sec.body}
+                      onChange={e => updateSection(i, 'body', e.target.value)}
+                      placeholder={t('sections.bodyPlace')}
+                      rows={3}
+                      className="w-full bg-white border border-[#E2E8F0] rounded-md px-2.5 py-2 text-sm leading-relaxed focus:outline-none focus:border-[#2563EB] resize-none"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
 

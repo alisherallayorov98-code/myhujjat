@@ -177,8 +177,18 @@ export function renderContractHtml(contract: any): string {
         font-weight: 700;
         margin-top: 4px;
       }
+      .contract-docid {
+        font-size: 9px;
+        color: #6B7280;
+        font-family: monospace;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+      }
     </style>
     <div class="contract-doc">
+      ${contract.id
+        ? `<div class="contract-docid">elektron hujjat identifikatori: ${esc(String(contract.id).toUpperCase().replace(/-/g, ''))}</div>`
+        : ''}
       <h1 class="contract-h1">${esc(typeName)}</h1>
       ${number ? `<div class="contract-num">№ ${esc(number)}</div>` : ''}
       <div class="contract-meta">

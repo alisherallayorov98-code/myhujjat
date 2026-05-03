@@ -156,6 +156,15 @@
     "mxikHint":  "10-15 raqam",
     "mxikInvalid": "MXIK kodi noto'g'ri"
   },
+  "sections": {
+    "title":      "Qo'shimcha bandlar",
+    "desc":       "O'z shartnoma matnigizdan tashqari qo'shimcha bandlar qo'shing — sarlavha va matn",
+    "add":        "Band qo'shish",
+    "remove":     "O'chirish",
+    "empty":      "Hech qanday qo'shimcha band qo'shilmagan",
+    "titlePlace": "Sarlavha (masalan: Boshqa shartlar)",
+    "bodyPlace":  "Band matni..."
+  },
   "preview": {
     "back": "Orqaga",
     "fullscreen": "To'liq ekran",

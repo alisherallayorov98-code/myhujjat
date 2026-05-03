@@ -94,6 +94,18 @@ export async function exportContractDocx(opts: DocxOpts): Promise<void> {
   type AnyChild = InstanceType<typeof Paragraph> | InstanceType<typeof Table>
   const children: AnyChild[] = []
 
+  // ─── 0. Hujjat identifikatori (qonuniy talab) ───────────
+  if (contract.id) {
+    const docId = String(contract.id).toUpperCase().replace(/-/g, '')
+    children.push(new Paragraph({
+      spacing: { after: 200 },
+      children: [new TextRun({
+        text: `elektron hujjat identifikatori: ${docId}`,
+        size: 16, font: 'Courier New', color: '6B7280',
+      })],
+    }))
+  }
+
   // ─── 1. Sarlavha ─────────────────────────────────────────
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER,
