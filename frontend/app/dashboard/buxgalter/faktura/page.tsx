@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                      from 'react'
+import { useRouter }                                     from 'next/navigation'
 import { useTranslations }                               from 'next-intl'
 import { Plus, Save, Download, RefreshCw }               from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
@@ -25,6 +26,7 @@ const today = () => new Date().toISOString().split('T')[0]
 
 export default function FakturaPage() {
   const t = useTranslations('accountant')
+  const router           = useRouter()
   const qc               = useQueryClient()
   const { currentOrg }   = useAuth()
   const [modal, setModal] = useState(false)
@@ -170,7 +172,11 @@ export default function FakturaPage() {
             </thead>
             <tbody>
               {fakturalar.map((doc: any) => (
-                <tr key={doc.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group">
+                <tr
+                  key={doc.id}
+                  onClick={() => router.push(`/dashboard/hujjat/${doc.id}`)}
+                  className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group cursor-pointer"
+                >
                   <td className="px-4 py-3 text-sm font-mono text-[#2563EB]">{doc.number}</td>
                   <td className="px-4 py-3 text-sm text-[#475569]">{doc.title}</td>
                   <td className="px-4 py-3 text-sm font-semibold tabular-nums">
@@ -182,11 +188,14 @@ export default function FakturaPage() {
                   <td className="px-4 py-3">
                     {doc.content?.text && (
                       <button
-                        onClick={() => exportContractPdf({
-                          title:   doc.title,
-                          content: doc.content.text,
-                          orgName: currentOrg?.name,
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          exportContractPdf({
+                            title:   doc.title,
+                            content: doc.content.text,
+                            orgName: currentOrg?.name,
+                          })
+                        }}
                         className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#2563EB] transition-all"
                       >
                         <Download size={14} />

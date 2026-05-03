@@ -1,0 +1,35 @@
+{
+  "loading": "Загрузка...",
+  "notFound": "Документ не найден",
+  "back": "Назад",
+  "pdf": "PDF",
+  "word": "Word",
+  "delete": "Удалить",
+  "deleteConfirm": "Подтверждаете удаление документа?",
+  "deleted": "Документ удалён",
+  "downloaded": "{type} загружен ✓",
+  "exportError": "Ошибка экспорта",
+  "info": {
+    "type": "Тип",
+    "number": "Номер",
+    "date": "Дата",
+    "createdAt": "Создан",
+    "amount": "Сумма",
+    "status": "Статус"
+  },
+  "type": {
+    "FAKTURA": "Счёт-фактура",
+    "AKT_SVERKI": "Акт сверки",
+    "BUYRUQ": "Приказ",
+    "BAYONNOMA": "Протокол",
+    "TOLOV_GRAFIGI": "График платежей"
+  },
+  "status": {
+    "DRAFT": "Черновик",
+    "FINAL": "Готов",
+    "SENT": "Отправлен"
+  },
+  "noContent": "Содержимое документа отсутствует",
+  "specRows": "Товары/услуги",
+  "rowsSummary": "{count} строк · Всего: {total}"
+}

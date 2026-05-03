@@ -1,0 +1,35 @@
+{
+  "loading": "Yuklanmoqda...",
+  "notFound": "Hujjat topilmadi",
+  "back": "Orqaga",
+  "pdf": "PDF",
+  "word": "Word",
+  "delete": "O'chirish",
+  "deleteConfirm": "Hujjatni o'chirishni tasdiqlaysizmi?",
+  "deleted": "Hujjat o'chirildi",
+  "downloaded": "{type} yuklandi ✓",
+  "exportError": "Eksport xatosi",
+  "info": {
+    "type": "Turi",
+    "number": "Raqam",
+    "date": "Sana",
+    "createdAt": "Yaratilgan",
+    "amount": "Summa",
+    "status": "Holat"
+  },
+  "type": {
+    "FAKTURA": "Faktura",
+    "AKT_SVERKI": "Akt-sverka",
+    "BUYRUQ": "Buyruq",
+    "BAYONNOMA": "Bayonnoma",
+    "TOLOV_GRAFIGI": "To'lov grafigi"
+  },
+  "status": {
+    "DRAFT": "Qoralama",
+    "FINAL": "Tayyor",
+    "SENT": "Yuborildi"
+  },
+  "noContent": "Hujjat matni mavjud emas",
+  "specRows": "Tovarlar/xizmatlar",
+  "rowsSummary": "{count} qator · Jami: {total}"
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState }                                      from 'react'
+import { useRouter }                                     from 'next/navigation'
 import { useTranslations }                               from 'next-intl'
 import { Plus, Download, Check }                         from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
@@ -24,6 +25,7 @@ const today = () => new Date().toISOString().split('T')[0]
 
 export default function TolovGrafigiPage() {
   const t = useTranslations('accountant')
+  const router           = useRouter()
   const qc               = useQueryClient()
   const { currentOrg }   = useAuth()
   const [modal, setModal] = useState(false)
@@ -143,7 +145,11 @@ export default function TolovGrafigiPage() {
               const jamiSum  = docRows.reduce((s: number, r: any) => s + r.jami, 0)
               const tolangan = docRows.filter((r: any) => r.tolangan).length
               return (
-                <div key={doc.id} className="flex items-center gap-3 px-4 py-3.5 hover:bg-[#F8FAFC]">
+                <div
+                  key={doc.id}
+                  onClick={() => router.push(`/dashboard/hujjat/${doc.id}`)}
+                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-[#F8FAFC] cursor-pointer"
+                >
                   <div className="w-9 h-9 rounded-lg bg-[#EDE9FE] flex items-center justify-center text-base">📅</div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#0F172A]">{doc.title}</p>

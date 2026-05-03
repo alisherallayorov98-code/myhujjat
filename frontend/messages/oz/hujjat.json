@@ -1,0 +1,35 @@
+{
+  "loading": "Юкланмоқда...",
+  "notFound": "Ҳужжат топилмади",
+  "back": "Орқага",
+  "pdf": "PDF",
+  "word": "Word",
+  "delete": "Ўчириш",
+  "deleteConfirm": "Ҳужжатни ўчиришни тасдиқлайсизми?",
+  "deleted": "Ҳужжат ўчирилди",
+  "downloaded": "{type} юкланди ✓",
+  "exportError": "Экспорт хатоси",
+  "info": {
+    "type": "Тури",
+    "number": "Рақам",
+    "date": "Сана",
+    "createdAt": "Яратилган",
+    "amount": "Сумма",
+    "status": "Ҳолат"
+  },
+  "type": {
+    "FAKTURA": "Фактура",
+    "AKT_SVERKI": "Акт-сверка",
+    "BUYRUQ": "Буйруқ",
+    "BAYONNOMA": "Баённома",
+    "TOLOV_GRAFIGI": "Тўлов графиги"
+  },
+  "status": {
+    "DRAFT": "Қоралама",
+    "FINAL": "Тайёр",
+    "SENT": "Юборилди"
+  },
+  "noContent": "Ҳужжат матни мавжуд эмас",
+  "specRows": "Товарлар/хизматлар",
+  "rowsSummary": "{count} қатор · Жами: {total}"
+}

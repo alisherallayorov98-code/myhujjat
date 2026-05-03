@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tee /tmp/tscDoc.log)"
+    ]
+  }
+}

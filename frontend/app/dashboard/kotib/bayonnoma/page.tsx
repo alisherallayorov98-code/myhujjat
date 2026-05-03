@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo }                     from 'react'
+import { useRouter }                             from 'next/navigation'
 import { useTranslations }                       from 'next-intl'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth }                           from '@/hooks/useAuth'
@@ -31,6 +32,7 @@ const EMPTY: BayonnomData = {
 
 export default function BayonnomPage() {
   const t = useTranslations('secretary')
+  const router          = useRouter()
   const { currentOrg: activeOrg } = useAuth()
   const qc              = useQueryClient()
   const [step, setStep] = useState<Step>('list')
@@ -151,7 +153,11 @@ export default function BayonnomPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {docs.map(d => (
-                <tr key={d.id} className="hover:bg-gray-50">
+                <tr
+                  key={d.id}
+                  onClick={() => router.push(`/dashboard/hujjat/${d.id}`)}
+                  className="hover:bg-gray-50 cursor-pointer"
+                >
                   <td className="px-5 py-3 text-gray-500">{d.number}</td>
                   <td className="px-5 py-3 font-medium text-gray-900">{d.title}</td>
                   <td className="px-5 py-3 text-gray-500">{d.docDate || format(new Date(d.createdAt), 'dd.MM.yyyy')}</td>
@@ -162,7 +168,10 @@ export default function BayonnomPage() {
                   </td>
                   <td className="px-5 py-3 text-right">
                     <button
-                      onClick={() => deleteMut.mutate(d.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteMut.mutate(d.id)
+                      }}
                       className="text-gray-300 hover:text-red-500 transition-colors p-1"
                     >
                       <Trash2 className="w-4 h-4" />
