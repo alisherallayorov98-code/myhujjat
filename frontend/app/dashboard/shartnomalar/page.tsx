@@ -5,7 +5,7 @@ import Link                        from 'next/link'
 import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
-  Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy,
+  Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -27,8 +27,9 @@ type SortOrder = 'asc' | 'desc'
 type DateRange = 'all' | 'thisMonth' | 'lastMonth' | 'thisYear'
 
 export default function ShartnomalarPage() {
-  const t = useTranslations('contracts')
-  const { currentOrg, canCreate } = useAuth()
+  const t     = useTranslations('contracts')
+  const tBulk = useTranslations('bulkSend')
+  const { currentOrg, canCreate, isPro } = useAuth()
   const qc = useQueryClient()
 
   const [search,       setSearch]       = useState('')
@@ -163,6 +164,13 @@ export default function ShartnomalarPage() {
             <Button variant="outline" size="sm" leftIcon={<Download size={14} />} onClick={handleExportExcel}>
               Excel
             </Button>
+            {isPro && (
+              <Link href="/dashboard/shartnomalar/ommaviy">
+                <Button variant="outline" size="sm" leftIcon={<Send size={14} />}>
+                  {tBulk('navItem')}
+                </Button>
+              </Link>
+            )}
             <Link href="/dashboard/shartnomalar/yangi">
               <Button leftIcon={<Plus size={14} />} size="sm" disabled={!canCreate}
                 title={!canCreate ? t('limit.limitReached') : ''}>

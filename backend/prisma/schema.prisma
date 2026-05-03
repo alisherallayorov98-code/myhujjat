@@ -52,6 +52,7 @@ model User {
   payments      Payment[]
   auditLogs     AuditLog[]
   miraSettings  MiraSettings?
+  bulkSendDrafts BulkSendDraft[]
 }
 
 enum UserRole {
@@ -153,6 +154,7 @@ model Organization {
   invoices       Invoice[]
   aiDocuments    AiDocument[]
   miraSettings   MiraSettings[]
+  bulkSendDrafts BulkSendDraft[]
 }
 
 model OrgMember {
@@ -579,6 +581,54 @@ model MiraSettings {
   lastUsedAt DateTime?
 
   @@index([organizationId])
+}
+
+// ============================================
+// OMMAVIY SHARTNOMA YUBORISH (Pro tarif)
+// Yil boshida hamma kontragentlarga shartnoma yuborish uchun
+// ============================================
+model BulkSendDraft {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Wizard joriy bosqichi: 1=shablon, 2=kontragentlar, 3=raqamlash, 4=imzolash
+  currentStep Int @default(1)
+
+  // 1-bosqich: shablon
+  templateId      String?  // mavjud shablon (Template) ID
+  customContent   String?  @db.Text  // foydalanuvchi yozgan matn (placeholder bilan)
+  contractType    String   @default("OLDI_SOTDI")
+  defaultAmount   Decimal  @default(0) @db.Decimal(20, 2)
+  defaultProductName String? @db.VarChar(500)
+  city            String   @default("Toshkent")
+
+  // 3-bosqich: raqamlash
+  // 'manual'   — Excel'dagi raqamlarni hurmat qilish (yo'qsa skip)
+  // 'sequential' — boshlang'ich raqamdan ketma-ket
+  numberingMode  String  @default("sequential")
+  startNumber    String? @db.VarChar(50)  // "001" yoki "2026/01"
+
+  // 2+3-bosqich: kontragentlar va shartnomalar (JSON)
+  // [{ stir, name, directorName, address, contractNumber, amount, productName, status }]
+  // status: 'pending' | 'fetching' | 'ready' | 'error' | 'created' | 'signed' | 'sent'
+  items Json @default("[]")
+
+  // 4-bosqich: bajarilish hisoboti
+  status         String    @default("draft")  // draft | executing | completed | cancelled
+  totalCount     Int       @default(0)
+  successCount   Int       @default(0)
+  errorCount     Int       @default(0)
+  startedAt      DateTime?
+  completedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, status])
+  @@index([userId, status])
 }
 
 // ============================================

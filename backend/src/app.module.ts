@@ -28,6 +28,7 @@ import { FoundersModule }          from './modules/founders/founders.module'
 import { NotificationsModule }     from './modules/notifications/notifications.module'
 import { VoiceModule }             from './modules/voice/voice.module'
 import { MiraModule }              from './modules/mira/mira.module'
+import { BulkSendModule }          from './modules/bulk-send/bulk-send.module'
 import { ShareLinksModule }        from './modules/share-links/share-links.module'
 import { TelegramModule }          from './modules/telegram/telegram.module'
 import { InvoicesModule }          from './modules/invoices/invoices.module'
@@ -74,6 +75,7 @@ import { JwtAuthGuard }            from './common/guards/jwt-auth.guard'
     NotificationsModule,
     VoiceModule,
     MiraModule,
+    BulkSendModule,
     ShareLinksModule,
     TelegramModule,
     InvoicesModule,
