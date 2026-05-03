@@ -49,9 +49,10 @@ export class VoiceService {
 
   // ─── Buyruqni qabul qilish (matn yoki audio) ───────────────────────────
   async processCommand(opts: {
-    text?:     string
-    audio?:    { data: string; mimeType: string } // base64 + mime
-    context:   VoiceContext
+    text?:       string
+    audio?:      { data: string; mimeType: string } // base64 + mime
+    targetLang?: 'uz' | 'oz' | 'ru'
+    context:     VoiceContext
   }): Promise<VoiceResult> {
     if (!process.env.GEMINI_API_KEY) {
       throw new BadRequestException('Gemini API key sozlanmagan')
@@ -66,6 +67,15 @@ export class VoiceService {
       throw new BadRequestException("Bo'sh buyruq")
     }
 
+    // Til ko'rsatmasi qo'shilgan system prompt
+    const lang = opts.targetLang || 'uz'
+    const langInstruction = lang === 'ru'
+      ? '\n\nЯЗЫК ОТВЕТА: Отвечай только на русском языке. Все твои ответы — на грамотном русском.'
+      : lang === 'oz'
+      ? `\n\nЖАВОБ ТИЛИ: Фойдаланувчига фақат ўзбек тилида (КИРИЛЛ ёзувида) жавоб бер. Барча матн кирилл алифбосида бўлсин.`
+      : `\n\nJAVOB TILI: Foydalanuvchiga faqat o'zbek tilida (lotin yozuvida) javob ber.`
+    const systemPrompt = SYSTEM_INSTRUCTION + langInstruction
+
     // 2. Gemini bilan tool calling
     const toolsCalled: ToolResult[] = []
     let response = ''
@@ -75,7 +85,7 @@ export class VoiceService {
         model: this.model,
         contents: [{ role: 'user', parts: [{ text: userText }] }],
         config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
+          systemInstruction: systemPrompt,
           tools: TOOLS,
           temperature: 0.3,
         },
@@ -106,7 +116,7 @@ export class VoiceService {
             { role: 'user',  parts: toolResponses },
           ],
           config: {
-            systemInstruction: SYSTEM_INSTRUCTION,
+            systemInstruction: systemPrompt,
             tools: TOOLS,
             temperature: 0.3,
           },

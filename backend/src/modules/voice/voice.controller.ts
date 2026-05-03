@@ -20,9 +20,10 @@ export class VoiceController {
   async command(
     @CurrentUser() user: any,
     @Body() body: {
-      text?:    string
-      audio?:   { data: string; mimeType: string }
-      orgId?:   string
+      text?:       string
+      audio?:      { data: string; mimeType: string }
+      orgId?:      string
+      targetLang?: 'uz' | 'oz' | 'ru'
     },
   ) {
     if (!body.text && !body.audio?.data) {
@@ -45,9 +46,10 @@ export class VoiceController {
     }
 
     return this.voiceService.processCommand({
-      text:    body.text,
-      audio:   body.audio,
-      context: { userId: user.sub, organizationId: orgId },
+      text:       body.text,
+      audio:      body.audio,
+      targetLang: body.targetLang,
+      context:    { userId: user.sub, organizationId: orgId },
     })
   }
 }

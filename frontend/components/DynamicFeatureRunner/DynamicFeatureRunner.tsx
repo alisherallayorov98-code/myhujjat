@@ -12,6 +12,7 @@ import api                                         from '@/lib/api'
 import { exportContractPdf  }                      from '@/lib/export/contractPdf'
 import { exportContractDocx }                      from '@/lib/export/contractDocx'
 import { fillPrompt, type FeatureConfig }          from '@/lib/dynamicFeatures'
+import { currentLocale }                           from '@/lib/formatters'
 import { cn }                                      from '@/lib/cn'
 import toast                                       from 'react-hot-toast'
 
@@ -75,10 +76,11 @@ export function DynamicFeatureRunner({ features }: Props) {
         Telefon: (currentOrg as any).phone        || '',
       }
       const { data } = await api.post('/ai/generate', {
-        orgId:   currentOrg.id,
-        docType: selected.docType,
+        orgId:      currentOrg.id,
+        docType:    selected.docType,
         prompt,
         orgData,
+        targetLang: currentLocale(),
       })
       setResult(data.content)
       toast.success(t('docCreated'))

@@ -6,6 +6,7 @@ import { useQuery }   from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth }    from '@/hooks/useAuth'
 import api            from '@/lib/api'
+import { currentLocale } from '@/lib/formatters'
 import toast          from 'react-hot-toast'
 
 import { ProLockScreen } from './_components/ProLockScreen'
@@ -59,6 +60,7 @@ export default function AiGeneratorPage() {
 
       const { data } = await api.post('/ai/generate', {
         orgId: currentOrg.id, docType, prompt, orgData,
+        targetLang: currentLocale(),
       })
 
       setResult(data.content)

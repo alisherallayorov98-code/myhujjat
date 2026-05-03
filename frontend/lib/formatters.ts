@@ -1,9 +1,9 @@
 // ============================================
 // LOCALE — joriy tilni cookie'dan o'qish
 // ============================================
-type AppLocale = 'uz' | 'oz' | 'ru'
+export type AppLocale = 'uz' | 'oz' | 'ru'
 
-function currentLocale(): AppLocale {
+export function currentLocale(): AppLocale {
   if (typeof document === 'undefined') return 'uz'
   const m = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/)
   const v = m?.[1] as AppLocale | undefined

@@ -8,6 +8,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import api from '@/lib/api'
+import { currentLocale } from '@/lib/formatters'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/cn'
 import toast from 'react-hot-toast'
@@ -162,7 +163,8 @@ export function VoiceAssistant() {
     try {
       const { data } = await api.post('/voice/command', {
         ...payload,
-        orgId: currentOrg?.id,
+        orgId:      currentOrg?.id,
+        targetLang: currentLocale(),
       })
 
       // Foydalanuvchi xabari (transcript)
