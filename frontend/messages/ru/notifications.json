@@ -1,4 +1,50 @@
 {
+  "types": {
+    "CONTRACT_CREATED": {
+      "title":   "Новый договор создан",
+      "message": "Договор № {contractNumber} успешно создан"
+    },
+    "CONTRACT_EXPIRING": {
+      "title":   "Срок договора истекает",
+      "message": "Договор № {contractNumber} истекает через {days} дней"
+    },
+    "CONTRACT_SIGNED": {
+      "title":   "Договор подписан",
+      "message": "Договор № {contractNumber} подписан"
+    },
+    "CONTRACT_OVERAGE": {
+      "title":   "Превышение суммы договора",
+      "message": "По договору {contractNumber} выставлено {percent}% от суммы"
+    },
+    "SUBSCRIPTION_EXPIRING": {
+      "title":   "Срок подписки истекает",
+      "message": "Подписка {plan} истекает через {days} дней"
+    },
+    "SUBSCRIPTION_ACTIVATED": {
+      "title":   "Подписка активирована",
+      "message": "Подписка {plan} успешно активирована"
+    },
+    "CONTRACT_LIMIT": {
+      "title":   "Лимит договоров",
+      "message": "На тарифе {plan} создано {used}/{limit} договоров"
+    },
+    "INVOICE_RECEIVED": {
+      "title":   "Новая фактура",
+      "message": "Фактура № {invoiceNumber} от {senderName}"
+    },
+    "INVOICE_SIGNED": {
+      "title":   "Фактура подписана",
+      "message": "Фактура № {invoiceNumber} подписана"
+    },
+    "SYSTEM": {
+      "title":   "Системное сообщение",
+      "message": "{message}"
+    },
+    "WELCOME": {
+      "title":   "Добро пожаловать, {firstName}!",
+      "message": "Спасибо за регистрацию на MyHujjat.uz. Для начала добавьте организацию."
+    }
+  },
   "title": "Уведомления",
   "unreadCount": "{count} непрочитанных",
   "markAllRead": "Прочитать все",

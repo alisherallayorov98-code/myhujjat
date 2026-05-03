@@ -1,4 +1,50 @@
 {
+  "types": {
+    "CONTRACT_CREATED": {
+      "title":   "Янги шартнома яратилди",
+      "message": "{contractNumber} рақамли шартнома муваффақиятли яратилди"
+    },
+    "CONTRACT_EXPIRING": {
+      "title":   "Шартнома муддати тугаяпти",
+      "message": "{contractNumber} рақамли шартнома {days} кундан кейин тугайди"
+    },
+    "CONTRACT_SIGNED": {
+      "title":   "Шартнома имзоланди",
+      "message": "{contractNumber} рақамли шартнома имзоланди"
+    },
+    "CONTRACT_OVERAGE": {
+      "title":   "Шартнома суммасидан ошиб кетди",
+      "message": "{contractNumber} бўйича {percent}% сумма фактуралаштирилди"
+    },
+    "SUBSCRIPTION_EXPIRING": {
+      "title":   "Обуна муддати тугаяпти",
+      "message": "{plan} обунангиз {days} кундан кейин тугайди"
+    },
+    "SUBSCRIPTION_ACTIVATED": {
+      "title":   "Обуна фаоллашди",
+      "message": "{plan} обунангиз муваффақиятли фаоллашди"
+    },
+    "CONTRACT_LIMIT": {
+      "title":   "Шартнома лимити",
+      "message": "{plan} тарифда {used}/{limit} та шартнома яратдингиз"
+    },
+    "INVOICE_RECEIVED": {
+      "title":   "Янги фактура келди",
+      "message": "{invoiceNumber} рақамли фактура {senderName}'дан келди"
+    },
+    "INVOICE_SIGNED": {
+      "title":   "Фактура имзоланди",
+      "message": "{invoiceNumber} рақамли фактура имзоланди"
+    },
+    "SYSTEM": {
+      "title":   "Тизим хабари",
+      "message": "{message}"
+    },
+    "WELCOME": {
+      "title":   "Хуш келибсиз, {firstName}!",
+      "message": "MyHujjat.uz га рўйхатдан ўтганингиз учун раҳмат. Бошлаш учун аввал ташкилотингизни қўшинг."
+    }
+  },
   "title": "Билдиришномалар",
   "unreadCount": "{count} та ўқилмаган",
   "markAllRead": "Ҳаммасини ўқилди",

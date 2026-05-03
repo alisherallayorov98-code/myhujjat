@@ -54,9 +54,10 @@ export class NotificationsCron {
           link:    '/dashboard/sozlamalar/obuna',
         }).catch(() => {})
 
-        // Email
+        // Email — user tilida
         if (sub.user.email) {
-          this.mail.sendSubscriptionExpiring(sub.user.email, sub.user.firstName || '', days)
+          const lang = (sub.user as any).language?.toLowerCase() as 'uz' | 'oz' | 'ru' || 'uz'
+          this.mail.sendSubscriptionExpiring(sub.user.email, sub.user.firstName || '', days, lang)
             .catch(err => this.logger.warn(`Email xato: ${err?.message}`))
         }
       }
@@ -107,7 +108,8 @@ export class NotificationsCron {
       }).catch(() => {})
 
       if (used >= 2 && sub.user.email) {
-        this.mail.sendContractLimitWarning(sub.user.email, sub.user.firstName || '', used, 3)
+        const lang = (sub.user as any).language?.toLowerCase() as 'uz' | 'oz' | 'ru' || 'uz'
+        this.mail.sendContractLimitWarning(sub.user.email, sub.user.firstName || '', used, 3, lang)
           .catch(err => this.logger.warn(`Email xato: ${err?.message}`))
       }
     }

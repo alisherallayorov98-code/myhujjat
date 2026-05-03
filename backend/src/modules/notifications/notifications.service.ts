@@ -19,9 +19,10 @@ export interface CreateNotification {
   userId:          string
   organizationId?: string
   type:            NotificationType
-  title:           string
-  message:         string
+  title:           string                  // UZ default — backward compat
+  message:         string                  // UZ default
   link?:           string
+  data?:           Record<string, any>     // Frontend tarjima parametrlari (yangi yondashuv)
 }
 
 @Injectable()
@@ -32,14 +33,24 @@ export class NotificationsService {
     private push?: PushService,
   ) {}
 
-  async create(data: CreateNotification) {
-    const notification = await this.prisma.notification.create({ data: data as any })
+  async create(payload: CreateNotification) {
+    const notification = await this.prisma.notification.create({
+      data: {
+        userId:         payload.userId,
+        organizationId: payload.organizationId,
+        type:           payload.type,
+        title:          payload.title,
+        message:        payload.message,
+        link:           payload.link,
+        data:           payload.data as any,  // Frontend t(`notifications.${type}.title`, data)
+      },
+    })
 
     // Push bildirishnoma — fonda, async, xato bildirishnomani to'xtatmasin
-    this.push?.sendToUser(data.userId, {
-      title: data.title,
-      body:  data.message,
-      url:   data.link || '/dashboard',
+    this.push?.sendToUser(payload.userId, {
+      title: payload.title,
+      body:  payload.message,
+      url:   payload.link || '/dashboard',
     }).catch(() => {})
 
     return notification

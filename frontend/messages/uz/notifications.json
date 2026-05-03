@@ -1,4 +1,50 @@
 {
+  "types": {
+    "CONTRACT_CREATED": {
+      "title":   "Yangi shartnoma yaratildi",
+      "message": "{contractNumber} raqamli shartnoma muvaffaqiyatli yaratildi"
+    },
+    "CONTRACT_EXPIRING": {
+      "title":   "Shartnoma muddati tugayapti",
+      "message": "{contractNumber} raqamli shartnoma {days} kundan keyin tugaydi"
+    },
+    "CONTRACT_SIGNED": {
+      "title":   "Shartnoma imzolandi",
+      "message": "{contractNumber} raqamli shartnoma imzolandi"
+    },
+    "CONTRACT_OVERAGE": {
+      "title":   "Shartnoma summasidan oshib ketdi",
+      "message": "{contractNumber} bo'yicha {percent}% summa fakturalashtirildi"
+    },
+    "SUBSCRIPTION_EXPIRING": {
+      "title":   "Obuna muddati tugayapti",
+      "message": "{plan} obunangiz {days} kundan keyin tugaydi"
+    },
+    "SUBSCRIPTION_ACTIVATED": {
+      "title":   "Obuna faollashdi",
+      "message": "{plan} obunangiz muvaffaqiyatli faollashdi"
+    },
+    "CONTRACT_LIMIT": {
+      "title":   "Shartnoma limiti",
+      "message": "{plan} tarifda {used}/{limit} ta shartnoma yaratdingiz"
+    },
+    "INVOICE_RECEIVED": {
+      "title":   "Yangi faktura keldi",
+      "message": "{invoiceNumber} raqamli faktura {senderName}'dan keldi"
+    },
+    "INVOICE_SIGNED": {
+      "title":   "Faktura imzolandi",
+      "message": "{invoiceNumber} raqamli faktura imzolandi"
+    },
+    "SYSTEM": {
+      "title":   "Tizim xabari",
+      "message": "{message}"
+    },
+    "WELCOME": {
+      "title":   "Xush kelibsiz, {firstName}!",
+      "message": "MyHujjat.uz ga ro'yxatdan o'tganingiz uchun rahmat. Boshlash uchun avval tashkilotingizni qo'shing."
+    }
+  },
   "title": "Bildirishnomalar",
   "unreadCount": "{count} ta o'qilmagan",
   "markAllRead": "Hammasini o'qildi",

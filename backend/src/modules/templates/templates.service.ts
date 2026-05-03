@@ -15,10 +15,22 @@ export interface UpdateTemplateDto {
   isPublic?: boolean
 }
 
-const SYSTEM_TEMPLATES: { contractType: string; name: string; content: string }[] = [
+// Tizim shablonlari — 3 tilda nomlar (content asosan UZ qoladi, yuridik
+// tarjimon ko'rib chiqgandan keyin to'liq lokalizatsiya qo'shiladi)
+const SYSTEM_TEMPLATES: {
+  contractType: string
+  name:    string         // UZ — default
+  nameUz?: string
+  nameOz?: string
+  nameRu?: string
+  content: string
+}[] = [
   {
     contractType: 'OLDI_SOTDI',
-    name: "Oldi-sotdi shartnomasi (standart)",
+    name:   "Oldi-sotdi shartnomasi (standart)",
+    nameUz: "Oldi-sotdi shartnomasi (standart)",
+    nameOz: "Олди-сотди шартномаси (стандарт)",
+    nameRu: "Договор купли-продажи (стандартный)",
     content: `OLDI-SOTDI SHARTNOMASI
 
 № {{RAQAM}}
@@ -87,7 +99,10 @@ _______________ / {{ORG_RAHBAR}} /  _______________ / {{CP_RAHBAR}} /
   },
   {
     contractType: 'XIZMAT',
-    name: "Xizmat ko'rsatish shartnomasi (standart)",
+    name:   "Xizmat ko'rsatish shartnomasi (standart)",
+    nameUz: "Xizmat ko'rsatish shartnomasi (standart)",
+    nameOz: "Хизмат кўрсатиш шартномаси (стандарт)",
+    nameRu: "Договор оказания услуг (стандартный)",
     content: `XIZMAT KO'RSATISH SHARTNOMASI
 
 № {{RAQAM}}
@@ -144,7 +159,10 @@ _______________ / {{ORG_RAHBAR}} /  _______________ / {{CP_RAHBAR}} /
   },
   {
     contractType: 'IJARA',
-    name: "Ijara shartnomasi (standart)",
+    name:   "Ijara shartnomasi (standart)",
+    nameUz: "Ijara shartnomasi (standart)",
+    nameOz: "Ижара шартномаси (стандарт)",
+    nameRu: "Договор аренды (стандартный)",
     content: `IJARA SHARTNOMASI
 
 № {{RAQAM}}

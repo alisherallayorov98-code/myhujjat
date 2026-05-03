@@ -54,11 +54,12 @@ export class SubscriptionService {
       create: { userId, plan: config.plan as any, status: 'ACTIVE', startedAt: now, expiresAt },
     })
 
-    // Email bildirishnoma (async, xatolik to'xtatmasin)
+    // Email bildirishnoma (async, xatolik to'xtatmasin) — user tilida
     this.prisma.user.findUnique({ where: { id: userId } }).then(user => {
       if (user) {
+        const lang = user.language?.toLowerCase() as 'uz' | 'oz' | 'ru' || 'uz'
         this.mailService.sendSubscriptionActivated(
-          user.email, user.firstName || '', config.plan, expiresAt
+          user.email, user.firstName || '', config.plan, expiresAt, lang
         ).catch(() => {})
       }
     })
@@ -131,10 +132,12 @@ export class SubscriptionService {
       const daysLeft = Math.ceil(
         (sub.expiresAt!.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
       )
+      const lang = (sub as any).user.language?.toLowerCase() as 'uz' | 'oz' | 'ru' || 'uz'
       this.mailService.sendSubscriptionExpiring(
         (sub as any).user.email,
         (sub as any).user.firstName || '',
         daysLeft,
+        lang,
       ).catch(() => {})
     }
   }

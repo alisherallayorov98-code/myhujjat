@@ -643,10 +643,14 @@ model Template {
   id             String        @id @default(cuid())
   organizationId String?
   contractType   ContractType?
-  name           String
+  name           String                       // UZ default
   nameUz         String?
+  nameOz         String?                      // Yangi: kiril nomi
   nameRu         String?
-  content        String        @db.Text
+  content        String        @db.Text       // UZ default
+  contentUz      String?       @db.Text       // Yangi: kelajakda lokalizatsiya
+  contentOz      String?       @db.Text
+  contentRu      String?       @db.Text
   isSystem       Boolean       @default(false)
   isPublic       Boolean       @default(false)
   language       Lang          @default(UZ)
@@ -729,8 +733,11 @@ model Notification {
   userId         String
   organizationId String?
   type           NotificationType
+  // title/message — eski yozuvlar bilan moslik (deprecated yangi yozuvlarda)
+  // Yangi yondashuv: faqat type + data, frontend tarjima qiladi
   title          String
   message        String           @db.Text
+  data           Json? // Frontend tarjima uchun parametrlar (e.g. {contractNumber, orgName})
   link           String?
   read           Boolean          @default(false)
   readAt         DateTime?

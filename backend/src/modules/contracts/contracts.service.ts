@@ -187,6 +187,7 @@ export class ContractsService {
       title:          'Yangi shartnoma yaratildi',
       message:        `${contractNumber} raqamli shartnoma muvaffaqiyatli yaratildi`,
       link:           `/dashboard/shartnomalar/${contract.id}`,
+      data:           { contractNumber },  // Frontend tarjima params
     }).catch((err: any) => this.logger.error(`Notification yaratishda xato: ${err?.message}`))
 
     return contract

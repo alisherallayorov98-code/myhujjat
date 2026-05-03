@@ -83,16 +83,18 @@ export class AuthService {
 
     // Email tasdiqlash xatini yuborish (async — registratsiyani to'xtatmasin,
     // lekin xatolarni log qilamiz, support uchun)
-    this.mailService.sendVerification(user.email, user.firstName || '', verifyToken)
+    const lang = user.language?.toLowerCase() as 'uz' | 'oz' | 'ru' || 'uz'
+    this.mailService.sendVerification(user.email, user.firstName || '', verifyToken, lang)
       .catch((err: any) => this.logger.error(`Verify mail xato: ${err?.message}`, err?.stack))
 
-    // Welcome notification
+    // Welcome notification — type+data, frontend tarjima qiladi
     this.notificationsService.create({
       userId:  user.id,
       type:    'WELCOME',
       title:   `Xush kelibsiz, ${user.firstName || 'Foydalanuvchi'}!`,
       message: "MyHujjat.uz ga ro'yxatdan o'tganingiz uchun rahmat. Boshlash uchun avval tashkilotingizni qo'shing.",
       link:    '/dashboard/tashkilotlar',
+      data:    { firstName: user.firstName || '' },
     }).catch((err: any) => this.logger.error(`Welcome notification xato: ${err?.message}`))
 
     return {
@@ -274,8 +276,9 @@ export class AuthService {
       data:  { resetToken, resetTokenExp: resetExp }
     })
 
-    this.mailService.sendPasswordReset(user.email, user.firstName || '', resetToken)
-      .catch(() => {})
+    const langReset = user.language?.toLowerCase() as 'uz' | 'oz' | 'ru' || 'uz'
+    this.mailService.sendPasswordReset(user.email, user.firstName || '', resetToken, langReset)
+      .catch((err: any) => this.logger.error(`Reset mail xato: ${err?.message}`))
 
     return { message: 'Parol tiklash havolasi emailingizga yuborildi' }
   }

@@ -5,27 +5,57 @@
 
 import type { ContractType } from './contractTemplates'
 
+export type Lang = 'uz' | 'oz' | 'ru'
+
 export interface IndustryTemplate {
   id:           string
   industry:     string         // soha
   industryIcon: string
-  name:         string
-  description:  string
+  name:         string         // UZ default
+  nameOz?:      string
+  nameRu?:      string
+  description:  string         // UZ default
+  descriptionOz?: string
+  descriptionRu?: string
   contractType: ContractType
-  content:      string
+  content:      string         // UZ qoladi (yuridik matn — pro translator kerak)
   tags:         string[]
 }
 
+// Soha labellari 3 tilda
 export const INDUSTRIES = [
-  { key: 'qurilish',  label: 'Qurilish',     icon: '🏗️', color: 'bg-[#FFEDD5] text-[#EA580C]' },
-  { key: 'savdo',     label: 'Savdo',        icon: '🛒', color: 'bg-[#DBEAFE] text-[#2563EB]' },
-  { key: 'it',        label: 'IT/Texnologiya', icon: '💻', color: 'bg-[#EDE9FE] text-[#7C3AED]' },
-  { key: 'talim',     label: "Ta'lim",       icon: '🎓', color: 'bg-[#DCFCE7] text-[#16A34A]' },
-  { key: 'restoran',  label: 'Restoran/Yetkazib berish', icon: '🍽️', color: 'bg-[#FEF3C7] text-[#D97706]' },
-  { key: 'transport', label: 'Transport',    icon: '🚛', color: 'bg-[#CFFAFE] text-[#0891B2]' },
-  { key: 'tibbiyot',  label: 'Tibbiyot',     icon: '⚕️', color: 'bg-[#FEE2E2] text-[#DC2626]' },
-  { key: 'kreativ',   label: 'Kreativ/Dizayn', icon: '🎨', color: 'bg-[#FDF4FF] text-[#A855F7]' },
+  { key: 'qurilish',  label: 'Qurilish',                labelOz: 'Қурилиш',                 labelRu: 'Строительство',     icon: '🏗️', color: 'bg-[#FFEDD5] text-[#EA580C]' },
+  { key: 'savdo',     label: 'Savdo',                   labelOz: 'Савдо',                   labelRu: 'Торговля',          icon: '🛒', color: 'bg-[#DBEAFE] text-[#2563EB]' },
+  { key: 'it',        label: 'IT/Texnologiya',          labelOz: 'ИТ/Технология',           labelRu: 'IT/Технологии',     icon: '💻', color: 'bg-[#EDE9FE] text-[#7C3AED]' },
+  { key: 'talim',     label: "Ta'lim",                  labelOz: 'Таълим',                  labelRu: 'Образование',       icon: '🎓', color: 'bg-[#DCFCE7] text-[#16A34A]' },
+  { key: 'restoran',  label: 'Restoran/Yetkazib berish', labelOz: 'Ресторан/Етказиб бериш', labelRu: 'Ресторан/Доставка', icon: '🍽️', color: 'bg-[#FEF3C7] text-[#D97706]' },
+  { key: 'transport', label: 'Transport',               labelOz: 'Транспорт',               labelRu: 'Транспорт',         icon: '🚛', color: 'bg-[#CFFAFE] text-[#0891B2]' },
+  { key: 'tibbiyot',  label: 'Tibbiyot',                labelOz: 'Тиббиёт',                 labelRu: 'Медицина',          icon: '⚕️', color: 'bg-[#FEE2E2] text-[#DC2626]' },
+  { key: 'kreativ',   label: 'Kreativ/Dizayn',          labelOz: 'Креатив/Дизайн',          labelRu: 'Креатив/Дизайн',    icon: '🎨', color: 'bg-[#FDF4FF] text-[#A855F7]' },
 ] as const
+
+// Helper — joriy tilda label qaytaradi
+export function getIndustryLabel(key: string, lang: Lang): string {
+  const ind = INDUSTRIES.find(i => i.key === key)
+  if (!ind) return key
+  if (lang === 'oz') return ind.labelOz
+  if (lang === 'ru') return ind.labelRu
+  return ind.label
+}
+
+// Helper — template nomini tilda qaytaradi
+export function getTemplateName(t: IndustryTemplate, lang: Lang): string {
+  if (lang === 'oz' && t.nameOz) return t.nameOz
+  if (lang === 'ru' && t.nameRu) return t.nameRu
+  return t.name
+}
+
+// Helper — template tavsifini tilda qaytaradi
+export function getTemplateDescription(t: IndustryTemplate, lang: Lang): string {
+  if (lang === 'oz' && t.descriptionOz) return t.descriptionOz
+  if (lang === 'ru' && t.descriptionRu) return t.descriptionRu
+  return t.description
+}
 
 export const INDUSTRY_TEMPLATES: IndustryTemplate[] = [
   // ─── QURILISH ──────────────────────────────────────────────
@@ -33,8 +63,12 @@ export const INDUSTRY_TEMPLATES: IndustryTemplate[] = [
     id: 'qurilish-pudrat',
     industry: 'qurilish',
     industryIcon: '🏗️',
-    name: 'Qurilish pudrat shartnomasi',
-    description: 'Asosiy qurilish ishlari uchun (ta\'mirlash, qurilish, montaj)',
+    name:   'Qurilish pudrat shartnomasi',
+    nameOz: 'Қурилиш пудрат шартномаси',
+    nameRu: 'Договор строительного подряда',
+    description:   "Asosiy qurilish ishlari uchun (ta'mirlash, qurilish, montaj)",
+    descriptionOz: "Асосий қурилиш ишлари учун (таъмирлаш, қурилиш, монтаж)",
+    descriptionRu: 'Для основных строительных работ (ремонт, строительство, монтаж)',
     contractType: 'PUDRAT',
     tags: ['qurilish', "ta'mirlash", 'montaj', 'subpodryad'],
     content: `QURILISH PUDRAT SHARTNOMASI
@@ -99,8 +133,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'qurilish-material',
     industry: 'qurilish',
     industryIcon: '🏗️',
-    name: 'Qurilish materiallari yetkazib berish',
-    description: 'Sement, g\'isht, armatura va boshqa materiallarni yetkazib berish',
+    name:   'Qurilish materiallari yetkazib berish',
+    nameOz: 'Қурилиш материалларини етказиб бериш',
+    nameRu: 'Поставка строительных материалов',
+    description:   "Sement, g'isht, armatura va boshqa materiallarni yetkazib berish",
+    descriptionOz: "Цемент, ғишт, арматура ва бошқа материалларни етказиб бериш",
+    descriptionRu: 'Поставка цемента, кирпича, арматуры и других материалов',
     contractType: 'OLDI_SOTDI',
     tags: ['materiallar', 'yetkazib berish', 'sement', "g'isht"],
     content: `QURILISH MATERIALLARI YETKAZIB BERISH SHARTNOMASI
@@ -150,8 +188,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'it-saas',
     industry: 'it',
     industryIcon: '💻',
-    name: 'SaaS / dasturiy ta\'minot xizmati',
-    description: 'Bulutli xizmat ko\'rsatish (oylik yoki yillik obuna)',
+    name:   "SaaS / dasturiy ta'minot xizmati",
+    nameOz: 'SaaS / дастурий таъминот хизмати',
+    nameRu: 'SaaS / Программное обеспечение как услуга',
+    description:   "Bulutli xizmat ko'rsatish (oylik yoki yillik obuna)",
+    descriptionOz: "Булутли хизмат кўрсатиш (ойлик ёки йиллик обуна)",
+    descriptionRu: 'Облачные услуги (ежемесячная или годовая подписка)',
     contractType: 'XIZMAT',
     tags: ['saas', "dasturiy ta'minot", 'bulut', 'obuna'],
     content: `DASTURIY TA'MINOT XIZMATI SHARTNOMASI (SaaS)
@@ -205,8 +247,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'it-development',
     industry: 'it',
     industryIcon: '💻',
-    name: 'Dasturiy ta\'minot ishlab chiqish',
-    description: 'Web sayt, mobil ilova yoki maxsus dastur yaratish',
+    name:   "Dasturiy ta'minot ishlab chiqish",
+    nameOz: 'Дастурий таъминот ишлаб чиқиш',
+    nameRu: 'Разработка программного обеспечения',
+    description:   'Web sayt, mobil ilova yoki maxsus dastur yaratish',
+    descriptionOz: 'Веб сайт, мобиль илова ёки махсус дастур яратиш',
+    descriptionRu: 'Создание сайта, мобильного приложения или специального ПО',
     contractType: 'PUDRAT',
     tags: ['development', 'web', 'mobile', 'ilova', 'sayt'],
     content: `DASTURIY TA'MINOT ISHLAB CHIQISH SHARTNOMASI
@@ -263,8 +309,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'it-nda',
     industry: 'it',
     industryIcon: '💻',
-    name: 'NDA (Maxfiylik shartnomasi)',
-    description: "Tijorat sirini saqlash bo'yicha o'zaro shartnoma",
+    name:   'NDA (Maxfiylik shartnomasi)',
+    nameOz: 'НДА (Махфийлик шартномаси)',
+    nameRu: 'NDA (Соглашение о неразглашении)',
+    description:   "Tijorat sirini saqlash bo'yicha o'zaro shartnoma",
+    descriptionOz: "Тижорат сирини сақлаш бўйича ўзаро шартнома",
+    descriptionRu: 'Взаимное соглашение о сохранении коммерческой тайны',
     contractType: 'BOSHQA',
     tags: ['nda', 'maxfiylik', 'tijorat siri', 'confidentiality'],
     content: `MAXFIYLIK SHARTNOMASI (NDA)
@@ -327,8 +377,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'savdo-dilership',
     industry: 'savdo',
     industryIcon: '🛒',
-    name: "Dilerlik (mahsulot tarqatish) shartnomasi",
-    description: "Mahsulotni hududda eksklyuziv yoki noeksklyuziv sotish",
+    name:   "Dilerlik (mahsulot tarqatish) shartnomasi",
+    nameOz: 'Дилерлик (маҳсулот тарқатиш) шартномаси',
+    nameRu: 'Дилерский договор (распространение продукции)',
+    description:   "Mahsulotni hududda eksklyuziv yoki noeksklyuziv sotish",
+    descriptionOz: "Маҳсулотни ҳудудда эксклюзив ёки ноэксклюзив сотиш",
+    descriptionRu: 'Эксклюзивная или неэксклюзивная продажа продукции в регионе',
     contractType: 'AGENTLIK',
     tags: ['dilership', 'tarqatish', 'distribution'],
     content: `DILERLIK SHARTNOMASI
@@ -382,8 +436,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'talim-kurs',
     industry: 'talim',
     industryIcon: '🎓',
-    name: "O'quv kurs xizmati",
-    description: "Til kurslari, IT kurslari, qo'shimcha ta'lim",
+    name:   "O'quv kurs xizmati",
+    nameOz: 'Ўқув курс хизмати',
+    nameRu: 'Услуги обучающих курсов',
+    description:   "Til kurslari, IT kurslari, qo'shimcha ta'lim",
+    descriptionOz: "Тил курслари, ИТ курслари, қўшимча таълим",
+    descriptionRu: 'Языковые курсы, IT-курсы, дополнительное образование',
     contractType: 'XIZMAT',
     tags: ["o'quv", 'kurs', "ta'lim", 'trening'],
     content: `O'QUV KURS XIZMATI SHARTNOMASI
@@ -438,8 +496,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'restoran-yetkazish',
     industry: 'restoran',
     industryIcon: '🍽️',
-    name: 'Yetkazib berish xizmati',
-    description: 'Restoran/oshxona ovqatlarini yetkazib berish hamkorligi',
+    name:   'Yetkazib berish xizmati',
+    nameOz: 'Етказиб бериш хизмати',
+    nameRu: 'Услуги доставки',
+    description:   'Restoran/oshxona ovqatlarini yetkazib berish hamkorligi',
+    descriptionOz: 'Ресторан/ошхона овқатларини етказиб бериш ҳамкорлиги',
+    descriptionRu: 'Партнёрство по доставке еды из ресторанов и кафе',
     contractType: 'XIZMAT',
     tags: ['yetkazib berish', 'delivery', 'restoran', 'oshxona'],
     content: `OVQAT YETKAZIB BERISH XIZMATI SHARTNOMASI
@@ -494,8 +556,12 @@ _________________ /{{ORG_RAHBAR}}/     _________________ /{{CP_RAHBAR}}/
     id: 'kreativ-dizayn',
     industry: 'kreativ',
     industryIcon: '🎨',
-    name: 'Dizayn xizmati shartnomasi',
-    description: 'Logo, brendbuk, web dizayn, marketing materiallari',
+    name:   'Dizayn xizmati shartnomasi',
+    nameOz: 'Дизайн хизмати шартномаси',
+    nameRu: 'Договор дизайнерских услуг',
+    description:   'Logo, brendbuk, web dizayn, marketing materiallari',
+    descriptionOz: 'Логотип, брендбук, веб дизайн, маркетинг материаллари',
+    descriptionRu: 'Логотип, брендбук, веб-дизайн, маркетинговые материалы',
     contractType: 'PUDRAT',
     tags: ['dizayn', 'logo', 'brendbuk', 'kreativ'],
     content: `DIZAYN XIZMATI SHARTNOMASI
