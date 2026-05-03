@@ -9,13 +9,13 @@ import { Button }                                         from '@/components/ui/
 import { Input }                                          from '@/components/ui/Input'
 import { Card }                                           from '@/components/ui/Card'
 import { Badge }                                          from '@/components/ui/Badge'
-import { Modal }                                          from '@/components/ui/Modal'
+import { Modal, ConfirmDialog }                           from '@/components/ui/Modal'
 import { EmptyState, TableRowSkeleton }                   from '@/components/ui/Skeleton'
 import { Pagination }                                    from '@/components/ui/Pagination'
 import { useAuth }                                        from '@/hooks/useAuth'
 import api                                                from '@/lib/api'
 import { exportEmployeesExcel }                          from '@/lib/export/listExport'
-import { formatDate }                                    from '@/lib/formatters'
+import { formatDate, formatNumber }                      from '@/lib/formatters'
 import toast                                              from 'react-hot-toast'
 import Link                                               from 'next/link'
 
@@ -159,6 +159,7 @@ export default function KadrlarPage() {
   const [page,      setPage]      = useState(1)
   const [addModal,  setAddModal]  = useState(false)
   const [editXodim, setEditXodim] = useState<Employee | null>(null)
+  const [deleteEmp, setDeleteEmp] = useState<Employee | null>(null)
 
   const { data, isLoading } = useQuery<{ data: Employee[]; meta: { total: number; totalPages: number; page: number; limit: number } }>({
     queryKey: ['employees', currentOrg?.id, search, page],
@@ -311,7 +312,7 @@ export default function KadrlarPage() {
                       }
                     </td>
                     <td className="px-4 py-3 text-sm tabular-nums text-[#0F172A]">
-                      {emp.maosh ? Number(emp.maosh).toLocaleString('uz-UZ') + ` ${t('som')}` : '—'}
+                      {emp.maosh ? `${formatNumber(Number(emp.maosh))} ${t('som')}` : '—'}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#94A3B8]">
                       {emp.ishBoshi ? formatDate(emp.ishBoshi, 'short') : '—'}
@@ -326,11 +327,7 @@ export default function KadrlarPage() {
                           <Edit2 size={14} />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(t('deleteConfirm', { name: emp.ism }))) {
-                              deleteMutation.mutate(emp.id)
-                            }
-                          }}
+                          onClick={() => setDeleteEmp(emp)}
                           className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-colors"
                         >
                           <Trash2 size={14} />
@@ -356,6 +353,21 @@ export default function KadrlarPage() {
         xodim={editXodim}
         orgId={currentOrg?.id ?? ''}
         onClose={() => { setAddModal(false); setEditXodim(null) }}
+      />
+
+      <ConfirmDialog
+        open={!!deleteEmp}
+        onClose={() => setDeleteEmp(null)}
+        onConfirm={() => {
+          if (deleteEmp) {
+            deleteMutation.mutate(deleteEmp.id)
+            setDeleteEmp(null)
+          }
+        }}
+        title={t('deleteConfirmTitle')}
+        description={deleteEmp ? t('deleteConfirm', { name: deleteEmp.ism }) : ''}
+        variant="danger"
+        loading={deleteMutation.isPending}
       />
     </div>
   )

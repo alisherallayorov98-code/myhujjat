@@ -1,9 +1,9 @@
 'use client'
 
-import { useState }           from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations }    from 'next-intl'
-import { useSearchParams }    from 'next/navigation'
-import { Check, Zap, CreditCard, CheckCircle } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { Check, Zap, CreditCard, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { PageHeader }         from '@/components/layout/PageHeader'
 import { Card }               from '@/components/ui/Card'
@@ -164,9 +164,11 @@ function PaymentModal({
 export default function ObunaPage() {
   const t = useTranslations('settings')
   const searchParams = useSearchParams()
+  const router       = useRouter()
   const { user }     = useAuth()
   const [period,   setPeriod]   = useState<'1m' | '3m' | '12m'>('1m')
   const [payModal, setPayModal] = useState<{ planKey: string } | null>(null)
+  const [polling,  setPolling]  = useState(false)
 
   const paymentStatus = searchParams.get('status')
 
@@ -178,13 +180,37 @@ export default function ObunaPage() {
     },
   })
 
-  const { data: payHistory } = useQuery<{ data: any[]; meta: any }>({
+  const { data: payHistory, refetch: refetchHistory } = useQuery<{ data: any[]; meta: any }>({
     queryKey: ['payment-history'],
     queryFn:  async () => {
       const { data } = await api.get('/payments/history?limit=10')
       return data
     },
   })
+
+  // To'lov gateway'idan qaytganda — status'ni tekshirish va sub'ni yangilash
+  useEffect(() => {
+    if (paymentStatus === 'success' || paymentStatus === 'processing') {
+      setPolling(true)
+      let attempts = 0
+      const interval = setInterval(async () => {
+        attempts++
+        await refetch()
+        await refetchHistory()
+        // 6 marta urinish (~30 sekund)
+        if (attempts >= 6) {
+          clearInterval(interval)
+          setPolling(false)
+          // URL'dan status param'ni olib tashlash
+          router.replace('/dashboard/sozlamalar/obuna')
+        }
+      }, 5_000)
+      // Birinchi urinish darhol
+      void refetch().then(() => refetchHistory())
+      return () => clearInterval(interval)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentStatus])
 
   const demoMutation = useMutation({
     mutationFn: () => api.post('/payments/demo'),
@@ -211,12 +237,42 @@ export default function ObunaPage() {
         ]}
       />
 
-      {paymentStatus === 'success' && (
+      {paymentStatus === 'success' && polling && (
+        <div className="mb-6 p-4 bg-[#F0F9FF] border border-[#BFDBFE] rounded-xl flex items-center gap-3">
+          <Loader2 size={20} className="text-[#2563EB] animate-spin" />
+          <div>
+            <p className="font-semibold text-[#1E40AF]">{t('paymentChecking')}</p>
+            <p className="text-sm text-[#2563EB]">{t('paymentCheckingDesc')}</p>
+          </div>
+        </div>
+      )}
+
+      {paymentStatus === 'success' && !polling && subStats?.plan && subStats.plan !== 'FREE' && (
         <div className="mb-6 p-4 bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl flex items-center gap-3">
           <CheckCircle size={20} className="text-[#16A34A]" />
           <div>
             <p className="font-semibold text-[#15803D]">{t('paymentSuccess')}</p>
             <p className="text-sm text-[#16A34A]">{t('paymentSuccessDesc')}</p>
+          </div>
+        </div>
+      )}
+
+      {paymentStatus === 'success' && !polling && (subStats?.plan === 'FREE' || !subStats?.plan) && (
+        <div className="mb-6 p-4 bg-[#FEF3C7] border border-[#FDE68A] rounded-xl flex items-center gap-3">
+          <AlertCircle size={20} className="text-[#A16207]" />
+          <div>
+            <p className="font-semibold text-[#854D0E]">{t('paymentPending')}</p>
+            <p className="text-sm text-[#A16207]">{t('paymentPendingDesc')}</p>
+          </div>
+        </div>
+      )}
+
+      {paymentStatus === 'failed' && (
+        <div className="mb-6 p-4 bg-[#FEF2F2] border border-[#FECACA] rounded-xl flex items-center gap-3">
+          <AlertCircle size={20} className="text-[#DC2626]" />
+          <div>
+            <p className="font-semibold text-[#991B1B]">{t('paymentFailed')}</p>
+            <p className="text-sm text-[#DC2626]">{t('paymentFailedDesc')}</p>
           </div>
         </div>
       )}

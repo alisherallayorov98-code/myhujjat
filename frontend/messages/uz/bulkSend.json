@@ -8,6 +8,7 @@
 
   "loading": "Yuklanmoqda...",
   "saved": "Saqlandi",
+  "savingNow": "Saqlanmoqda...",
   "error": "Xato yuz berdi",
   "newDraft": "Yangi yuborish",
   "discard": "Bekor qilish",
@@ -47,6 +48,8 @@
   "step2Add": "Qo'shish",
   "step2Count": "{count}/50 kontragent",
   "step2OverLimit": "50 dan ko'p qo'shish mumkin emas",
+  "step2ExcelOverLimit": "Faylda {fileRows} qator topildi, ulardan {unique} ta yangi. Lekin maks {max} ga sig'adi — birinchi {willTake} ta qo'shiladi. Davom etilsinmi?",
+  "step2ExcelAdded": "{count} ta yangi qo'shildi (faylda {totalRows} qator bor edi)",
   "step2DuplicateStir": "Bu STIR ro'yxatda bor",
   "step2InvalidStir": "STIR 9 ta raqam bo'lishi kerak",
   "step2Remove": "O'chirish",
@@ -94,6 +97,9 @@
   "step4Done": "Tugadi",
   "step4DoneSuccess": "{success} ta muvaffaqiyatli, {errors} ta xato",
   "step4ViewContracts": "Shartnomalarni ko'rish",
+  "step4ErrorsTitle": "Xato yuz bergan {count} ta shartnoma",
+  "step4ErrorsHint": "Quyidagilar imzolanmadi yoki yuborilmadi. Har birini alohida qayta urinib ko'rishingiz mumkin.",
+  "step4Retry": "Qayta urinish",
 
   "executeError": "Bajarishda xato",
   "selectKey": "E-IMZO kalitni tanlang",

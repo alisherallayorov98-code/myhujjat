@@ -17,7 +17,7 @@ import {
   calcTolovGrafigi, type TolovGrafigiData, type TolovQatori,
 } from '@/lib/buxgalterTemplates'
 import { exportSpecExcel }                                from '@/lib/export/specExport'
-import { formatCurrency, formatAmountWords }              from '@/lib/formatters'
+import { formatCurrency, formatAmountWords, formatNumber } from '@/lib/formatters'
 import toast                                              from 'react-hot-toast'
 import { cn }                                             from '@/lib/cn'
 
@@ -242,12 +242,12 @@ export default function TolovGrafigiPage() {
                     <tr key={i} className={cn('border-b border-[#F1F5F9]', row.tolangan && 'bg-[#F0FDF4]')}>
                       <td className="px-3 py-2.5 text-sm text-[#94A3B8]">{row.oy}</td>
                       <td className="px-3 py-2.5 text-sm text-[#475569]">{row.sana}</td>
-                      <td className="px-3 py-2.5 text-sm tabular-nums text-right">{row.asosiy.toLocaleString('uz-UZ')}</td>
+                      <td className="px-3 py-2.5 text-sm tabular-nums text-right">{formatNumber(row.asosiy)}</td>
                       <td className="px-3 py-2.5 text-sm tabular-nums text-right text-[#D97706]">
-                        {row.foiz > 0 ? row.foiz.toLocaleString('uz-UZ') : '—'}
+                        {row.foiz > 0 ? formatNumber(row.foiz) : '—'}
                       </td>
-                      <td className="px-3 py-2.5 text-sm font-semibold tabular-nums text-right">{row.jami.toLocaleString('uz-UZ')}</td>
-                      <td className="px-3 py-2.5 text-sm tabular-nums text-right text-[#475569]">{row.qoldiq.toLocaleString('uz-UZ')}</td>
+                      <td className="px-3 py-2.5 text-sm font-semibold tabular-nums text-right">{formatNumber(row.jami)}</td>
+                      <td className="px-3 py-2.5 text-sm tabular-nums text-right text-[#475569]">{formatNumber(row.qoldiq)}</td>
                       <td className="px-3 py-2.5">
                         <button
                           onClick={() => togglePaid(i)}

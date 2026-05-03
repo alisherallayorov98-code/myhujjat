@@ -19,7 +19,7 @@ import {
   generateIshdanBoshtirish,
   type XodimData,
 } from '@/lib/kadrlarTemplates'
-import { formatAmountWords } from '@/lib/formatters'
+import { formatAmountWords, formatNumber } from '@/lib/formatters'
 import { DynamicFeatureRunner } from '@/components/DynamicFeatureRunner/DynamicFeatureRunner'
 import { KADRLAR_FEATURES }     from '@/lib/dynamicFeatures'
 import toast                 from 'react-hot-toast'
@@ -108,7 +108,7 @@ export default function HRHujjatlarPage() {
       xodimPassport:   selectedEmployee?.passport,
       xodimLavozim:    form.lavozim || selectedEmployee?.lavozim || '_______________',
       xodimBolim:      form.bolim   || selectedEmployee?.bolim,
-      xodimMaosh:      maoshNum > 0 ? maoshNum.toLocaleString('uz-UZ') + " so'm" : '_______________',
+      xodimMaosh:      maoshNum > 0 ? formatNumber(maoshNum) + " so'm" : '_______________',
       xodimMaoshMatn:  maoshNum > 0 ? formatAmountWords(maoshNum) : undefined,
       xodimIshBoshi:   form.ishBoshi ? new Date(form.ishBoshi).toLocaleDateString('uz-UZ') : '___',
       xodimTel:        selectedEmployee?.tel,

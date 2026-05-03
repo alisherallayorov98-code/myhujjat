@@ -18,7 +18,7 @@ import {
   fillTemplate,
   type ContractType,
 } from '@/lib/contractTemplates'
-import { formatAmountWords }  from '@/lib/formatters'
+import { formatAmountWords, formatCurrency, formatNumber } from '@/lib/formatters'
 import { renderContractHtml } from '@/lib/export/contractHtml'
 import { type SpecItem }      from '@/lib/qqs'
 import { cn }                 from '@/lib/cn'
@@ -195,7 +195,7 @@ export default function YangiShartnoma() {
       raqam:     form.contractNumber || `${new Date().getFullYear()}/001`,
       sana:      form.contractDate ? form.contractDate.split('-').reverse().join('.') : today().split('-').reverse().join('.'),
       shahar:    form.city || 'Toshkent',
-      summa:     amount > 0 ? amount.toLocaleString('uz-UZ') : '0',
+      summa:     amount > 0 ? formatNumber(amount) : '0',
       summaMatn: amount > 0 ? formatAmountWords(amount) : '___________',
       extra:     form.extraData,
     })
@@ -242,7 +242,8 @@ export default function YangiShartnoma() {
 
   function handleCreate() {
     if (!currentOrg?.id) return
-    if (!form.contractDate) { toast.error(t('toast.dateRequired')); return }
+    if (!form.counterpartyId) { toast.error(t('toast.cpRequired')); return }
+    if (!form.contractDate)   { toast.error(t('toast.dateRequired')); return }
     const amount = specTotal > 0 ? specTotal : parseFloat(form.amount) || 0
     mutation.mutate({
       organizationId: currentOrg.id,
@@ -494,8 +495,15 @@ export default function YangiShartnoma() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-[#0F172A]">{t('new_.specTitle')}</h3>
               <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 text-sm text-[#475569] cursor-pointer select-none">
+                <label
+                  className={cn(
+                    'flex items-center gap-1.5 text-sm select-none',
+                    currentOrg?.qqsReg ? 'text-[#475569] cursor-pointer' : 'text-[#94A3B8] cursor-not-allowed'
+                  )}
+                  title={!currentOrg?.qqsReg ? t('new_.qqsNotRegistered') : undefined}
+                >
                   <input type="checkbox" checked={form.qqsEnabled}
+                    disabled={!currentOrg?.qqsReg}
                     onChange={e => setForm(f => ({ ...f, qqsEnabled: e.target.checked }))}
                     className="rounded" />
                   QQS
@@ -528,15 +536,15 @@ export default function YangiShartnoma() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-[#475569]">
                     <span>{t('new_.totalNoQqs')}</span>
-                    <span className="font-medium">{form.specItems.reduce((s, i) => s + i.miqdori * i.narxi, 0).toLocaleString('uz-UZ')} so'm</span>
+                    <span className="font-medium">{formatCurrency(form.specItems.reduce((s, i) => s + i.miqdori * i.narxi, 0))}</span>
                   </div>
                   <div className="flex justify-between text-[#475569]">
                     <span>{t('new_.qqs')}</span>
-                    <span className="font-medium">{form.specItems.reduce((s, i) => s + i.qqsSumma, 0).toLocaleString('uz-UZ')} so'm</span>
+                    <span className="font-medium">{formatCurrency(form.specItems.reduce((s, i) => s + i.qqsSumma, 0))}</span>
                   </div>
                   <div className="flex justify-between text-[#0F172A] font-bold text-base border-t border-[#E2E8F0] pt-2 mt-2">
                     <span>{t('new_.total')}</span>
-                    <span>{specTotal.toLocaleString('uz-UZ')} so'm</span>
+                    <span>{formatCurrency(specTotal)}</span>
                   </div>
                   {specTotal > 0 && (
                     <p className="text-xs text-[#94A3B8] italic">{formatAmountWords(specTotal)}</p>

@@ -24,6 +24,7 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
   const [open,      setOpen]      = useState(false)
   const [loading,   setLoading]   = useState(false)
   const [quickAdd,  setQuickAdd]  = useState(false)
+  const [notFoundStir, setNotFoundStir] = useState<string | null>(null)
   const [newCp,     setNewCp]     = useState({ name: '', inn: '', directorName: '', address: '', phone: '', bankName: '', bankAccount: '', mfo: '' })
   const [savingCp,  setSavingCp]  = useState(false)
   const dropRef     = useRef<HTMLDivElement>(null)
@@ -88,13 +89,26 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
       setOpen(false)
       toast.success(t('found', { name: cp.name }))
     } catch {
-      toast.error(t('stirNotFound'))
-      setQuickAdd(true)
-      setNewCp(p => ({ ...p, inn: digs }))
-      setOpen(false)
+      // Inline tasdiqlash — toast emas, balki dropdown ichida aniq xabar
+      setNotFoundStir(digs)
+      setOpen(true)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleNotFoundYes = () => {
+    if (!notFoundStir) return
+    setNewCp(p => ({ ...p, inn: notFoundStir }))
+    setQuickAdd(true)
+    setNotFoundStir(null)
+    setOpen(false)
+  }
+
+  const handleNotFoundNo = () => {
+    setNotFoundStir(null)
+    prevStir.current = ''  // qayta urinish uchun
+    setSearch('')
   }
 
   const filtered = (() => {
@@ -216,7 +230,35 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
           </button>
         )}
       </div>
-      {open && !value && (
+      {open && notFoundStir && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-[#FECACA] rounded-xl shadow-xl p-4">
+          <p className="text-sm font-semibold text-[#0F172A] mb-1">
+            {t('notFoundTitle', { stir: notFoundStir })}
+          </p>
+          <p className="text-xs text-[#94A3B8] mb-3">
+            {t('notFoundDesc')}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onMouseDown={e => e.preventDefault()}
+              onClick={handleNotFoundYes}
+              className="flex-1 h-9 rounded-lg bg-[#2563EB] text-white text-sm font-medium hover:bg-[#1D4ED8] transition"
+            >
+              {t('notFoundYes')}
+            </button>
+            <button
+              type="button"
+              onMouseDown={e => e.preventDefault()}
+              onClick={handleNotFoundNo}
+              className="flex-1 h-9 rounded-lg border border-[#E2E8F0] text-[#475569] text-sm font-medium hover:bg-[#F8FAFC] transition"
+            >
+              {t('notFoundNo')}
+            </button>
+          </div>
+        </div>
+      )}
+      {open && !value && !notFoundStir && (
         <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-xl shadow-xl max-h-56 overflow-y-auto">
           {filtered.map(cp => (
             <button key={cp.id} type="button"

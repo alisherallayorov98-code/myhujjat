@@ -16,7 +16,7 @@ import {
   newSpecItem, BIRLIKLAR, QQS_OPTIONS,
   type SpecItem, type QqsFoiz,
 } from '@/lib/qqs'
-import { formatAmountWords } from '@/lib/formatters'
+import { formatAmountWords, formatNumber } from '@/lib/formatters'
 import { exportSpecExcel }   from '@/lib/export/specExport'
 import toast            from 'react-hot-toast'
 
@@ -208,10 +208,10 @@ export default function YangiSpesifikatsiya() {
                     </select>
                   </td>
                   <td className="px-3 py-2 text-right text-sm tabular-nums text-[#D97706]">
-                    {item.qqsSumma > 0 ? item.qqsSumma.toLocaleString('uz-UZ') : '—'}
+                    {item.qqsSumma > 0 ? formatNumber(item.qqsSumma) : '—'}
                   </td>
                   <td className="px-3 py-2 text-right text-sm font-semibold tabular-nums text-[#0F172A]">
-                    {item.summa.toLocaleString('uz-UZ')}
+                    {formatNumber(item.summa)}
                   </td>
                   <td className="px-3 py-2">
                     <button
@@ -245,15 +245,15 @@ export default function YangiSpesifikatsiya() {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-[#475569]">{t('withoutQqs')}</span>
-            <span className="tabular-nums font-medium">{totals.jami.toLocaleString('uz-UZ')} so'm</span>
+            <span className="tabular-nums font-medium">{formatNumber(totals.jami)} so'm</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-[#475569]">{t('totalQqs')}</span>
-            <span className="tabular-nums text-[#D97706] font-medium">{totals.jamiQqs.toLocaleString('uz-UZ')} so'm</span>
+            <span className="tabular-nums text-[#D97706] font-medium">{formatNumber(totals.jamiQqs)} so'm</span>
           </div>
           <div className="border-t border-[#E2E8F0] pt-2 flex justify-between">
             <span className="font-bold text-[#0F172A]">{t('grandTotal')}</span>
-            <span className="tabular-nums font-black text-[#0F172A] text-base">{totals.umumiy.toLocaleString('uz-UZ')} so'm</span>
+            <span className="tabular-nums font-black text-[#0F172A] text-base">{formatNumber(totals.umumiy)} so'm</span>
           </div>
           <p className="text-xs text-[#94A3B8] italic leading-relaxed">
             {formatAmountWords(totals.umumiy)}

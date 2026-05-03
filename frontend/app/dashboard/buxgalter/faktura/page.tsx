@@ -19,7 +19,7 @@ import {
   QQS_OPTIONS, type SpecItem, type QqsFoiz,
 } from '@/lib/qqs'
 import { exportContractPdf }                              from '@/lib/export/contractPdf'
-import { formatCurrency, formatDate }                     from '@/lib/formatters'
+import { formatCurrency, formatDate, formatNumber }       from '@/lib/formatters'
 import toast                                              from 'react-hot-toast'
 
 const today = () => new Date().toISOString().split('T')[0]
@@ -316,15 +316,15 @@ export default function FakturaPage() {
               <div className="mt-3 pt-3 border-t border-[#E2E8F0] space-y-1">
                 <div className="flex justify-between text-xs text-[#475569]">
                   <span>{t('jami')}</span>
-                  <span className="tabular-nums">{totals.jami.toLocaleString('uz-UZ')} {t('som')}</span>
+                  <span className="tabular-nums">{formatNumber(totals.jami)} {t('som')}</span>
                 </div>
                 <div className="flex justify-between text-xs text-[#D97706]">
                   <span>{t('qqs')}</span>
-                  <span className="tabular-nums">{totals.jamiQqs.toLocaleString('uz-UZ')} {t('som')}</span>
+                  <span className="tabular-nums">{formatNumber(totals.jamiQqs)} {t('som')}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold text-[#0F172A]">
                   <span>{t('umumiy')}</span>
-                  <span className="tabular-nums">{totals.umumiy.toLocaleString('uz-UZ')} {t('som')}</span>
+                  <span className="tabular-nums">{formatNumber(totals.umumiy)} {t('som')}</span>
                 </div>
               </div>
             </div>

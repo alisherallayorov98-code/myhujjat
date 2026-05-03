@@ -25,5 +25,9 @@
   "stirLabel": "STIR:",
   "notFound": "Topilmadi.",
   "addNew": "Yangi qo'shish →",
-  "addNewCp": "+ Yangi kontragent qo'shish"
+  "addNewCp": "+ Yangi kontragent qo'shish",
+  "notFoundTitle": "STIR {stir} soliq bazasida topilmadi",
+  "notFoundDesc": "Bu raqam noto'g'ri kiritilgan bo'lishi yoki kontragent yangi tashkil etilgan bo'lishi mumkin. Qo'lda kiritmoqchimisiz?",
+  "notFoundYes": "Ha, qo'lda kiritaman",
+  "notFoundNo": "Yo'q, qaytadan tekshiraman"
 }

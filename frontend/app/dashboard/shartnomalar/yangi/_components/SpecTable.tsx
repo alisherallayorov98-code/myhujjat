@@ -1,7 +1,9 @@
 'use client'
 
 import { Plus, Trash2 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { calcSpecItem, newSpecItem, BIRLIKLAR, QQS_OPTIONS, type SpecItem } from '@/lib/qqs'
+import { formatNumber } from '@/lib/formatters'
 
 interface Props {
   items:    SpecItem[]
@@ -25,13 +27,34 @@ export function SpecTable({ items, onChange }: Props) {
   }
 
   function add() { onChange([...items, newSpecItem()]) }
-  function remove(i: number) { onChange(items.filter((_, idx) => idx !== i)) }
+  function remove(i: number) {
+    const removed = items[i]
+    const next    = items.filter((_, idx) => idx !== i)
+    onChange(next)
+    // Undo toast — 5 sekund ichida bekor qilish mumkin
+    toast((t) => (
+      <span className="flex items-center gap-2">
+        <span className="text-sm">Qator o&apos;chirildi</span>
+        <button
+          onClick={() => {
+            // Aniq joyga qaytarish
+            const restored = [...next.slice(0, i), removed, ...next.slice(i)]
+            onChange(restored)
+            toast.dismiss(t.id)
+          }}
+          className="text-[#2563EB] font-medium text-sm hover:underline"
+        >
+          Bekor qilish
+        </button>
+      </span>
+    ), { duration: 5000 })
+  }
 
   const jami    = items.reduce((s, i) => s + i.miqdori * i.narxi, 0)
   const jamiQqs = items.reduce((s, i) => s + i.qqsSumma, 0)
   const umumiy  = items.reduce((s, i) => s + i.summa, 0)
 
-  const fmt = (n: number) => n > 0 ? n.toLocaleString('uz-UZ') : '—'
+  const fmt = (n: number) => n > 0 ? formatNumber(n) : '—'
 
   return (
     <div className="space-y-3">
@@ -108,9 +131,12 @@ export function SpecTable({ items, onChange }: Props) {
                   {fmt(item.summa)}
                 </td>
                 <td className="px-2 py-2">
-                  <button onClick={() => remove(i)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all">
-                    <Trash2 size={12} />
+                  <button
+                    onClick={() => remove(i)}
+                    aria-label="Qatorni o'chirish"
+                    className="md:opacity-0 md:group-hover:opacity-100 p-2 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 </td>
               </tr>

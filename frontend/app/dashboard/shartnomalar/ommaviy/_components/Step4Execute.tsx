@@ -3,7 +3,7 @@
 import { useState }              from 'react'
 import { useTranslations }       from 'next-intl'
 import {
-  Shield, Play, Loader2, CheckCircle2, AlertCircle, Key,
+  Shield, Play, Loader2, CheckCircle2, AlertCircle, Key, RefreshCw,
 } from 'lucide-react'
 import { Card }                          from '@/components/ui/Card'
 import { Button }                        from '@/components/ui/Button'
@@ -234,17 +234,99 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
           </div>
 
           {finished && (
-            <div className="mt-4 p-3 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg flex items-start gap-2">
-              <CheckCircle2 size={14} className="text-[#16A34A] shrink-0 mt-0.5" />
-              <p className="text-sm text-[#15803D]">
+            <div className={cn(
+              'mt-4 p-3 rounded-lg flex items-start gap-2',
+              errorCount === 0
+                ? 'bg-[#F0FDF4] border border-[#BBF7D0]'
+                : 'bg-[#FEF3C7] border border-[#FDE68A]'
+            )}>
+              {errorCount === 0
+                ? <CheckCircle2 size={14} className="text-[#16A34A] shrink-0 mt-0.5" />
+                : <AlertCircle size={14} className="text-[#A16207] shrink-0 mt-0.5" />
+              }
+              <p className={cn('text-sm', errorCount === 0 ? 'text-[#15803D]' : 'text-[#854D0E]')}>
                 {t('step4DoneSuccess', { success: successCount, errors: errorCount })}
               </p>
             </div>
           )}
         </Card>
       )}
+
+      {/* Xatolar hisoboti — alohida kartochka, retry tugmasi bilan */}
+      {finished && errorCount > 0 && (
+        <Card>
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle size={16} className="text-[#DC2626]" />
+            <h3 className="font-bold text-[#0F172A] text-sm">
+              {t('step4ErrorsTitle', { count: errorCount })}
+            </h3>
+          </div>
+          <p className="text-xs text-[#94A3B8] mb-4">{t('step4ErrorsHint')}</p>
+
+          <div className="space-y-2 mb-4">
+            {items.map((item, idx) => {
+              if (item.status !== 'error') return null
+              return (
+                <div key={idx} className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#0F172A] truncate">
+                        <span className="font-mono text-xs text-[#94A3B8] mr-2">{item.stir}</span>
+                        {item.name || '—'}
+                      </p>
+                      {item.errorMessage && (
+                        <p className="text-xs text-[#991B1B] mt-1">{item.errorMessage}</p>
+                      )}
+                    </div>
+                    {item.contractId && (
+                      <button
+                        onClick={() => retryItem(idx)}
+                        disabled={!selectedKey}
+                        title={!selectedKey ? t('selectKey') : t('step4Retry')}
+                        className="shrink-0 p-1.5 rounded-lg text-[#2563EB] hover:bg-[#DBEAFE] disabled:opacity-40 transition"
+                      >
+                        <RefreshCw size={13} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+      )}
     </div>
   )
+
+  function retryItem(idx: number) {
+    const item = items[idx]
+    if (!selectedKey || !item.contractId) return
+    void signSingle(selectedKey, item, idx)
+  }
+
+  async function signSingle(key: EimzoKey, item: BulkItem, idx: number) {
+    onItemUpdate(idx, { status: 'created', errorMessage: undefined })
+    try {
+      const { data: ch } = await api.get('/eimzo/challenge')
+      const { signature, certificate } = await eimzoClient.sign(key.alias, ch.challenge)
+      const { data: verifyResp } = await api.post(`/eimzo/verify/${item.contractId}`, {
+        challengeId: ch.id, signature, certificate, signerType: 'us',
+      })
+      if (!verifyResp.success) throw new Error('Imzo tasdiqlanmadi')
+      onItemUpdate(idx, { status: 'signed' })
+      await api.post(`/bulk-send/draft/${draft.id}/mark-signed`, { contractId: item.contractId })
+
+      try {
+        await api.post(`/didox/send/${item.contractId}?orgId=${orgId}`, {})
+        onItemUpdate(idx, { status: 'sent' })
+        await api.post(`/bulk-send/draft/${draft.id}/mark-sent`, { contractId: item.contractId })
+      } catch (e: any) {
+        onItemUpdate(idx, { status: 'error', errorMessage: e?.response?.data?.message || 'Didox xato' })
+      }
+    } catch (e: any) {
+      onItemUpdate(idx, { status: 'error', errorMessage: e?.message?.slice(0, 100) || 'Imzo xato' })
+    }
+  }
 }
 
 function ItemStatusIcon({ item, active }: { item: BulkItem; active: boolean }) {

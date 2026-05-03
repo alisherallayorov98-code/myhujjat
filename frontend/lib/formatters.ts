@@ -17,13 +17,30 @@ function intlLocale(l: AppLocale): string {
 // ============================================
 // VALYUTA FORMATLASH
 // ============================================
-export function formatCurrency(amount: number, currency = 'UZS'): string {
+// Butun son: "1 200 500 so'm"
+// Kasrli: "1 200 500.50 so'm" (decimals=2)
+export function formatCurrency(amount: number, currency = 'UZS', opts?: { decimals?: number }): string {
   const lc = intlLocale(currentLocale())
   const sumWord = currentLocale() === 'ru' ? 'сум' : currentLocale() === 'oz' ? "сўм" : "so'm"
   if (currency === 'UZS') {
-    return new Intl.NumberFormat(lc).format(Math.round(amount)) + ' ' + sumWord
+    const decimals = opts?.decimals ?? (Number.isInteger(amount) ? 0 : 2)
+    const formatted = new Intl.NumberFormat(lc, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(amount)
+    return formatted + ' ' + sumWord
   }
   return new Intl.NumberFormat(lc, { style: 'currency', currency }).format(amount)
+}
+
+// Faqat son (so'mholiq emas) — jadval ichida
+export function formatNumber(n: number, opts?: { decimals?: number }): string {
+  const lc = intlLocale(currentLocale())
+  const decimals = opts?.decimals ?? (Number.isInteger(n) ? 0 : 2)
+  return new Intl.NumberFormat(lc, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(n)
 }
 
 // ============================================

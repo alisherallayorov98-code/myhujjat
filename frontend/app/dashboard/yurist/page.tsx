@@ -10,6 +10,7 @@ import { Card }       from '@/components/ui/Card'
 import { Button }     from '@/components/ui/Button'
 import { useAuth }    from '@/hooks/useAuth'
 import api            from '@/lib/api'
+import { formatNumber } from '@/lib/formatters'
 import { exportContractPdf  } from '@/lib/export/contractPdf'
 import { exportContractDocx } from '@/lib/export/contractDocx'
 import {
@@ -87,7 +88,7 @@ export default function YuristPage() {
   })
 
   function buildData(): YuristData {
-    const fmt = (v: string) => v ? Number(v).toLocaleString('uz-UZ') + " so'm" : ''
+    const fmt = (v: string) => v ? formatNumber(Number(v)) + " so'm" : ''
     return {
       orgNomi:   currentOrg?.name         || '',
       orgInn:    currentOrg?.inn           || '',

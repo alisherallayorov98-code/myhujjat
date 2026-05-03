@@ -10,7 +10,7 @@ import { Button }     from '@/components/ui/Button'
 import { Card }       from '@/components/ui/Card'
 import { useAuth }    from '@/hooks/useAuth'
 import api            from '@/lib/api'
-import { formatAmountWords, formatDate } from '@/lib/formatters'
+import { formatAmountWords, formatDate, formatNumber } from '@/lib/formatters'
 import { calcSpecTotals } from '@/lib/qqs'
 import { exportSpecExcel } from '@/lib/export/specExport'
 import toast          from 'react-hot-toast'
@@ -106,7 +106,7 @@ export default function SpecDetailPage() {
                   <td className="px-4 py-3 text-sm text-[#475569]">{item.birlik}</td>
                   <td className="px-4 py-3 text-sm tabular-nums text-right text-[#475569]">{item.miqdori}</td>
                   <td className="px-4 py-3 text-sm tabular-nums text-right text-[#475569]">
-                    {item.narxi.toLocaleString('uz-UZ')}
+                    {formatNumber(item.narxi)}
                   </td>
                   <td className="px-4 py-3 text-sm text-center">
                     {item.qqsFoiz === 'siz'
@@ -115,10 +115,10 @@ export default function SpecDetailPage() {
                     }
                   </td>
                   <td className="px-4 py-3 text-sm tabular-nums text-right text-[#D97706]">
-                    {item.qqsSumma > 0 ? item.qqsSumma.toLocaleString('uz-UZ') : '—'}
+                    {item.qqsSumma > 0 ? formatNumber(item.qqsSumma) : '—'}
                   </td>
                   <td className="px-4 py-3 text-sm tabular-nums text-right font-semibold text-[#0F172A]">
-                    {item.summa.toLocaleString('uz-UZ')}
+                    {formatNumber(item.summa)}
                   </td>
                 </tr>
               ))}
@@ -132,15 +132,15 @@ export default function SpecDetailPage() {
           <div className="space-y-2.5">
             <div className="flex justify-between text-sm">
               <span className="text-[#475569]">{t('withoutQqs')}</span>
-              <span className="tabular-nums font-medium">{totals.jami.toLocaleString('uz-UZ')} so'm</span>
+              <span className="tabular-nums font-medium">{formatNumber(totals.jami)} so'm</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#475569]">{t('totalQqs')}</span>
-              <span className="tabular-nums text-[#D97706] font-medium">{totals.jamiQqs.toLocaleString('uz-UZ')} so'm</span>
+              <span className="tabular-nums text-[#D97706] font-medium">{formatNumber(totals.jamiQqs)} so'm</span>
             </div>
             <div className="border-t border-[#E2E8F0] pt-2.5 flex justify-between">
               <span className="font-bold text-[#0F172A]">{t('grandTotal')}</span>
-              <span className="tabular-nums font-black text-[#0F172A] text-lg">{totals.umumiy.toLocaleString('uz-UZ')} so'm</span>
+              <span className="tabular-nums font-black text-[#0F172A] text-lg">{formatNumber(totals.umumiy)} so'm</span>
             </div>
             <p className="text-xs text-[#94A3B8] italic">{formatAmountWords(totals.umumiy)}</p>
           </div>

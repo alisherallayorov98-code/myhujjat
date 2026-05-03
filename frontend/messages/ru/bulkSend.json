@@ -8,6 +8,7 @@
 
   "loading": "Загрузка...",
   "saved": "Сохранено",
+  "savingNow": "Сохранение...",
   "error": "Произошла ошибка",
   "newDraft": "Новая отправка",
   "discard": "Отменить",
@@ -47,6 +48,8 @@
   "step2Add": "Добавить",
   "step2Count": "{count}/50 контрагентов",
   "step2OverLimit": "Нельзя добавить больше 50",
+  "step2ExcelOverLimit": "В файле {fileRows} строк, из них {unique} новых. Но максимум {max} — будут добавлены первые {willTake}. Продолжить?",
+  "step2ExcelAdded": "Добавлено {count} новых (в файле было {totalRows} строк)",
   "step2DuplicateStir": "Этот ИНН уже в списке",
   "step2InvalidStir": "ИНН должен быть из 9 цифр",
   "step2Remove": "Удалить",
@@ -94,6 +97,9 @@
   "step4Done": "Готово",
   "step4DoneSuccess": "{success} успешно, {errors} с ошибкой",
   "step4ViewContracts": "Посмотреть договоры",
+  "step4ErrorsTitle": "Ошибки в {count} договорах",
+  "step4ErrorsHint": "Не подписаны или не отправлены. Можно повторить каждый отдельно.",
+  "step4Retry": "Повторить",
 
   "executeError": "Ошибка выполнения",
   "selectKey": "Выберите ключ E-IMZO",

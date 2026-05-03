@@ -6,7 +6,7 @@ import { useRouter }                     from 'next/navigation'
 import { useTranslations }               from 'next-intl'
 import { useQuery }                      from '@tanstack/react-query'
 import {
-  ChevronLeft, ChevronRight, Loader2, Trash2, Send, FileText,
+  ChevronLeft, ChevronRight, Loader2, Trash2, Send, FileText, CheckCircle2,
 } from 'lucide-react'
 import { PageHeader }    from '@/components/layout/PageHeader'
 import { Card }          from '@/components/ui/Card'
@@ -30,7 +30,8 @@ export default function OmmaviyShartnomaPage() {
   const { currentOrg, isPro } = useAuth()
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [draft, setDraft] = useState<BulkDraft | null>(null)
-  const [saving, setSaving] = useState(false)
+  const [saving,    setSaving]    = useState(false)
+  const [savedFlash, setSavedFlash] = useState(false)
 
   // Pro lock
   if (!isPro) return <ProLockBulk />
@@ -65,12 +66,25 @@ export default function OmmaviyShartnomaPage() {
     setSaving(true)
     try {
       await api.patch(`/bulk-send/draft/${draft.id}`, patch)
+      setSavedFlash(true)
+      setTimeout(() => setSavedFlash(false), 2000)
     } catch (e: any) {
       toast.error(e?.response?.data?.message || t('error'))
     } finally {
       setSaving(false)
     }
   }
+
+  // Browser back / yopish ogohlantirish (P5.19)
+  useEffect(() => {
+    if (!draft || draft.items.length === 0 || draft.status !== 'draft') return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [draft?.items.length, draft?.status])
 
   const updateItem = (idx: number, patch: Partial<BulkItem>) => {
     if (!draft) return
@@ -178,8 +192,10 @@ export default function OmmaviyShartnomaPage() {
                   {n}
                 </div>
                 <p className={cn(
-                  'text-xs hidden md:block',
+                  'text-[10px] md:text-xs leading-tight',
                   active ? 'text-[#0F172A] font-semibold' : 'text-[#94A3B8]',
+                  // Mobile'da faqat aktiv label ko'rsatiladi (joy tejash uchun)
+                  !active && 'hidden md:block',
                 )}>
                   {labels[idx]}
                 </p>
@@ -219,8 +235,16 @@ export default function OmmaviyShartnomaPage() {
           {t('back')}
         </Button>
 
-        <div className="text-xs text-[#94A3B8]">
-          {saving && <span className="flex items-center gap-1"><Loader2 size={11} className="animate-spin" /> {t('saved')}</span>}
+        <div className="text-xs">
+          {saving ? (
+            <span className="flex items-center gap-1 text-[#94A3B8]">
+              <Loader2 size={11} className="animate-spin" /> {t('savingNow')}
+            </span>
+          ) : savedFlash ? (
+            <span className="flex items-center gap-1 text-[#16A34A]">
+              <CheckCircle2 size={11} /> {t('saved')}
+            </span>
+          ) : null}
         </div>
 
         {step < 4 ? (

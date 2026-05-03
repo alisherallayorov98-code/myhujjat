@@ -53,23 +53,33 @@ export function Step2Recipients({ draft, onChange }: Props) {
     try {
       const rows = await parseBulkExcel(file)
       const existing = new Set(items.map(it => it.stir))
-      const newItems: BulkItem[] = rows
-        .filter(r => !existing.has(r.stir))
-        .map(r => ({
-          stir:           r.stir,
-          contractNumber: r.contractNumber,
-          amount:         r.amount,
-          productName:    r.productName,
-          status:         'pending' as const,
+      const uniqueRows = rows.filter(r => !existing.has(r.stir))
+
+      // Pre-flight tasdiqlash — agar 50 dan oshib ketadigan bo'lsa
+      const totalAfter = items.length + uniqueRows.length
+      if (totalAfter > MAX) {
+        const willTake = MAX - items.length
+        const ok = confirm(t('step2ExcelOverLimit', {
+          fileRows: rows.length,
+          unique:   uniqueRows.length,
+          willTake,
+          max:      MAX,
         }))
+        if (!ok) return
+      }
+
+      const newItems: BulkItem[] = uniqueRows.map(r => ({
+        stir:           r.stir,
+        contractNumber: r.contractNumber,
+        amount:         r.amount,
+        productName:    r.productName,
+        status:         'pending' as const,
+      }))
 
       const combined = [...items, ...newItems].slice(0, MAX)
       setItems(combined)
-      if (combined.length === MAX && items.length + newItems.length > MAX) {
-        toast.error(t('step2OverLimit'))
-      } else {
-        toast.success(`${newItems.length} ta yangi qo'shildi`)
-      }
+      const added = combined.length - items.length
+      toast.success(t('step2ExcelAdded', { count: added, totalRows: rows.length }))
     } catch (err: any) {
       toast.error(err?.message || t('error'))
     }

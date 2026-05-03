@@ -8,6 +8,7 @@
 
   "loading": "Юкланмоқда...",
   "saved": "Сақланди",
+  "savingNow": "Сақланмоқда...",
   "error": "Хато юз берди",
   "newDraft": "Янги юбориш",
   "discard": "Бекор қилиш",
@@ -47,6 +48,8 @@
   "step2Add": "Қўшиш",
   "step2Count": "{count}/50 контрагент",
   "step2OverLimit": "50 дан кўп қўшиш мумкин эмас",
+  "step2ExcelOverLimit": "Файлда {fileRows} қатор топилди, улардан {unique} та янги. Лекин макс {max} га сиғади — биринчи {willTake} та қўшилади. Давом этилсинми?",
+  "step2ExcelAdded": "{count} та янги қўшилди (файлда {totalRows} қатор бор эди)",
   "step2DuplicateStir": "Бу СТИР рўйхатда бор",
   "step2InvalidStir": "СТИР 9 та рақам бўлиши керак",
   "step2Remove": "Ўчириш",
@@ -94,6 +97,9 @@
   "step4Done": "Тугади",
   "step4DoneSuccess": "{success} та муваффақиятли, {errors} та хато",
   "step4ViewContracts": "Шартномаларни кўриш",
+  "step4ErrorsTitle": "Хато юз берган {count} та шартнома",
+  "step4ErrorsHint": "Қуйидагилар имзоланмади ёки юборилмади. Ҳар бирини алоҳида қайта уриниб кўришингиз мумкин.",
+  "step4Retry": "Қайта уриниш",
 
   "executeError": "Бажаришда хато",
   "selectKey": "Е-ИМЗО калитни танланг",
