@@ -38,13 +38,17 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
-      - name: Tests (backend only)
+      - name: Backend tests (jest)
         if: matrix.project == 'backend'
         run: npm test -- --ci --passWithNoTests
         env:
           DATABASE_URL:   "postgresql://test:test@localhost:5432/test"
           JWT_SECRET:     "test_secret_key_at_least_32_characters_long"
           ENCRYPTION_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+      - name: Frontend tests (vitest)
+        if: matrix.project == 'frontend'
+        run: npm test
 
       - name: Build
         run: npm run build
