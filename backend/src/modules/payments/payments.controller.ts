@@ -1,11 +1,12 @@
 import {
   Controller, Get, Post, Body,
-  Param, Req, HttpCode,
+  Param, Query, Req, HttpCode,
 } from '@nestjs/common'
 import { Request }             from 'express'
 import { ClickService }        from './click.service'
 import { PaymeService }        from './payme.service'
 import { SubscriptionService, PLANS, PlanKey } from '../subscriptions/subscription.service'
+import { PrismaService }       from '../prisma/prisma.service'
 import { CurrentUser }         from '../../common/decorators/current-user.decorator'
 import { Public }              from '../../common/decorators/public.decorator'
 
@@ -15,6 +16,7 @@ export class PaymentsController {
     private clickService: ClickService,
     private paymeService: PaymeService,
     private subService:   SubscriptionService,
+    private prisma:       PrismaService,
   ) {}
 
   @Get('subscription')
@@ -68,7 +70,36 @@ export class PaymentsController {
   }
 
   @Get('history')
-  async getHistory(@CurrentUser() user: any) {
-    return []
+  async getHistory(
+    @CurrentUser() user: any,
+    @Query('page')  page?:  string,
+    @Query('limit') limit?: string,
+  ) {
+    const p = page  ? Math.max(1, Number(page))           : 1
+    const l = limit ? Math.min(100, Math.max(1, Number(limit))) : 20
+
+    const where = { userId: user.sub }
+
+    const [total, data] = await Promise.all([
+      this.prisma.payment.count({ where }),
+      this.prisma.payment.findMany({
+        where,
+        skip:    (p - 1) * l,
+        take:    l,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id:        true,
+          provider:  true,
+          amount:    true,
+          currency:  true,
+          plan:      true,
+          months:    true,
+          status:    true,
+          createdAt: true,
+        },
+      }),
+    ])
+
+    return { data, meta: { total, page: p, limit: l, totalPages: Math.ceil(total / l) } }
   }
 }

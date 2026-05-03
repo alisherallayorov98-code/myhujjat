@@ -39,10 +39,10 @@ export class DidoxService {
     if (!dto.apiKey || !dto.userKey) {
       throw new BadRequestException('Ikkala kalit ham kerak: api-key va user-key')
     }
-    // Token to'g'riligini tekshirish
-    const valid = await this.verifyTokens(dto.apiKey, dto.userKey)
-    if (!valid) {
-      throw new BadRequestException("Kalitlar noto'g'ri yoki Didox API javob bermadi")
+    // Token to'g'riligini Didox API orqali tekshirish (majburiy)
+    const result = await this.verifyTokens(dto.apiKey, dto.userKey)
+    if (!result.ok) {
+      throw new BadRequestException(result.reason || "Kalitlar tekshirib bo'lmadi")
     }
     return this.prisma.user.update({
       where: { id: userId },
@@ -83,21 +83,40 @@ export class DidoxService {
     }
   }
 
-  // ─── Token tekshirish (stub) ──────────────────────────────
-  private async verifyTokens(apiKey: string, userKey: string): Promise<boolean> {
-    // Real implementatsiya — kalit kelganda
-    if (!process.env.DIDOX_API_URL) {
-      this.logger.warn('Didox API URL sozlanmagan — stub rejimi')
-      return apiKey.length > 0 && userKey.length > 0 // stub: kalit bor bo'lsa OK
+  // ─── Token tekshirish ─────────────────────────────────────
+  // Didox API'ga real chaqiruv qiladi — yaroqsiz kalit qabul qilinmaydi
+  private async verifyTokens(apiKey: string, userKey: string): Promise<{ ok: boolean; reason?: string }> {
+    // Asosiy formatlar tekshiruvi (oddiy xatolardan oldindan ogohlantirish)
+    if (apiKey.length < 10 || userKey.length < 10) {
+      return { ok: false, reason: "Kalit juda qisqa — Didox kalitlari kamida 10 ta belgidan iborat" }
     }
+
+    // Real Didox API'ga so'rov
+    const controller = new AbortController()
+    const timeout    = setTimeout(() => controller.abort(), 10_000)
+
     try {
       const res = await fetch(`${DIDOX_API_BASE}/v1/me`, {
         headers: this.headers(apiKey, userKey),
+        signal:  controller.signal,
       })
-      return res.ok
+      clearTimeout(timeout)
+
+      if (res.ok) return { ok: true }
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, reason: "Kalitlar noto'g'ri (Didox tomonidan rad etildi)" }
+      }
+      if (res.status === 404) {
+        return { ok: false, reason: "Didox API endpointi topilmadi — administratorga murojaat qiling" }
+      }
+      return { ok: false, reason: `Didox javobi: ${res.status}` }
     } catch (err: any) {
+      clearTimeout(timeout)
+      if (err?.name === 'AbortError') {
+        return { ok: false, reason: "Didox javob bermadi (10 soniya kutdik) — keyinroq urinib ko'ring" }
+      }
       this.logger.warn(`Token tekshirishda xato: ${err?.message}`)
-      return false
+      return { ok: false, reason: `Tarmoq xatosi: ${err?.message || 'noma\'lum'}` }
     }
   }
 

@@ -178,6 +178,14 @@ export default function ObunaPage() {
     },
   })
 
+  const { data: payHistory } = useQuery<{ data: any[]; meta: any }>({
+    queryKey: ['payment-history'],
+    queryFn:  async () => {
+      const { data } = await api.get('/payments/history?limit=10')
+      return data
+    },
+  })
+
   const demoMutation = useMutation({
     mutationFn: () => api.post('/payments/demo'),
     onSuccess: () => {
@@ -378,6 +386,50 @@ export default function ObunaPage() {
           )
         })}
       </div>
+
+      {/* To'lov tarixi */}
+      {payHistory && payHistory.data.length > 0 && (
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-6 mb-6">
+          <h3 className="font-bold text-[#0F172A] mb-4">{t('payHistoryTitle')}</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#E2E8F0] text-xs text-[#94A3B8] uppercase">
+                  <th className="text-left py-2 font-semibold">{t('payHistDate')}</th>
+                  <th className="text-left py-2 font-semibold">{t('payHistPlan')}</th>
+                  <th className="text-left py-2 font-semibold">{t('payHistProvider')}</th>
+                  <th className="text-right py-2 font-semibold">{t('payHistAmount')}</th>
+                  <th className="text-right py-2 font-semibold">{t('payHistStatus')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payHistory.data.map((p: any) => (
+                  <tr key={p.id} className="border-b border-[#F1F5F9] last:border-0">
+                    <td className="py-2.5 text-[#475569]">{formatDate(p.createdAt, 'short')}</td>
+                    <td className="py-2.5 text-[#0F172A] font-medium">{p.plan} ({p.months} oy)</td>
+                    <td className="py-2.5 text-[#94A3B8]">{p.provider}</td>
+                    <td className="py-2.5 text-right font-mono text-[#0F172A]">
+                      {formatCurrency(Number(p.amount))} {p.currency}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <Badge
+                        variant={
+                          p.status === 'COMPLETED' ? 'success' :
+                          p.status === 'PENDING'   ? 'warning' :
+                          p.status === 'FAILED'    ? 'danger'  : 'default'
+                        }
+                        size="sm"
+                      >
+                        {p.status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-[#E2E8F0] p-6">
         <h3 className="font-bold text-[#0F172A] mb-4">{t('faqTitle')}</h3>

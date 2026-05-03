@@ -47,14 +47,6 @@ export class EimzoService {
 
     challengeStore.delete(params.challengeId)
 
-    // Development bypass
-    if (process.env.NODE_ENV === 'development' && params.signature === 'TEST_SIGNATURE') {
-      return {
-        valid:   true,
-        subject: { CN: 'Test User', SERIALNUMBER: '12345' },
-      }
-    }
-
     try {
       const signedDer = forge.util.decode64(params.signature)
       const p7        = (forge.pkcs7 as any).messageFromDer(signedDer)
