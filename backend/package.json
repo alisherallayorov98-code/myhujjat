@@ -6,9 +6,12 @@
     "build": "nest build",
     "start": "node dist/main",
     "seed": "ts-node prisma/seed.ts",
-    "test":          "jest",
-    "test:watch":    "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test":             "jest",
+    "test:watch":       "jest --watch",
+    "test:coverage":    "jest --coverage",
+    "test:integration": "jest test/integration --testTimeout=30000",
+    "test:db:up":       "docker compose -f docker-compose.test.yml up -d",
+    "test:db:down":     "docker compose -f docker-compose.test.yml down -v"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
@@ -66,13 +69,14 @@
   },
   "jest": {
     "moduleFileExtensions": ["js", "json", "ts"],
-    "rootDir": "src",
+    "rootDir": ".",
+    "roots": ["<rootDir>/src", "<rootDir>/test"],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": ["**/*.(t|j)s"],
-    "coverageDirectory": "../coverage",
+    "collectCoverageFrom": ["src/**/*.(t|j)s"],
+    "coverageDirectory": "coverage",
     "testEnvironment": "node"
   }
 }

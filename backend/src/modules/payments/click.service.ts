@@ -3,10 +3,8 @@ import { PrismaService }       from '../prisma/prisma.service'
 import { SubscriptionService, PLANS, PlanKey } from '../subscriptions/subscription.service'
 import { createHash }          from 'crypto'
 
-const CLICK_SERVICE_ID  = process.env.CLICK_SERVICE_ID  || ''
-const CLICK_MERCHANT_ID = process.env.CLICK_MERCHANT_ID || ''
-const CLICK_SECRET      = process.env.CLICK_SECRET_KEY  || ''
-const FRONTEND_URL      = process.env.FRONTEND_URL      || 'https://myhujjat.uz'
+// Lazy env reading — har chaqiruvda yangi qiymat o'qiladi (test va prod uchun ham mos)
+const env = (key: string, fallback = '') => process.env[key] || fallback
 
 @Injectable()
 export class ClickService {
@@ -20,7 +18,7 @@ export class ClickService {
   private verifySign(params: Record<string, any>, action: number): boolean {
     const hash = createHash('md5')
       .update(
-        `${params.click_trans_id}${CLICK_SERVICE_ID}${CLICK_SECRET}` +
+        `${params.click_trans_id}${env('CLICK_SERVICE_ID')}${env('CLICK_SECRET_KEY')}` +
         `${params.merchant_trans_id}` +
         `${action === 1 ? (params.merchant_prepare_id || '') : ''}` +
         `${params.amount}${action}${params.sign_time}`
@@ -137,7 +135,7 @@ export class ClickService {
   generatePaymentUrl(userId: string, planKey: PlanKey): string {
     const plan    = PLANS[planKey]
     const transId = `${userId}:${planKey}`
-    const returnUrl = encodeURIComponent(`${FRONTEND_URL}/dashboard/sozlamalar/obuna?status=success`)
-    return `https://my.click.uz/services/pay?service_id=${CLICK_SERVICE_ID}&merchant_id=${CLICK_MERCHANT_ID}&amount=${plan.price}&transaction_param=${encodeURIComponent(transId)}&return_url=${returnUrl}`
+    const returnUrl = encodeURIComponent(`${env('FRONTEND_URL', 'https://myhujjat.uz')}/dashboard/sozlamalar/obuna?status=success`)
+    return `https://my.click.uz/services/pay?service_id=${env('CLICK_SERVICE_ID')}&merchant_id=${env('CLICK_MERCHANT_ID')}&amount=${plan.price}&transaction_param=${encodeURIComponent(transId)}&return_url=${returnUrl}`
   }
 }

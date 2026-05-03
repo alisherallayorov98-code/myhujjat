@@ -69,10 +69,11 @@ describe('formatPhone', () => {
 })
 
 describe('formatDate', () => {
-  it('short format: DD.MM.YYYY', () => {
+  it('short format: DD/MM/YYYY yoki DD.MM.YYYY (locale)', () => {
     const d = new Date('2026-03-15')
     const r = formatDate(d, 'short')
-    expect(r).toMatch(/^\d{2}\.\d{2}\.\d{4}$/)
+    // Locale uz-UZ — slash separator; oz/ru — dot. Ikkalasi ham OK.
+    expect(r).toMatch(/^\d{2}[./]\d{2}[./]\d{4}$/)
   })
 
   it('long format: o\'zbekcha oy nomi', () => {

@@ -60,3 +60,25 @@ class IntersectionObserverMock {
 }
 ;(globalThis as any).IntersectionObserver = IntersectionObserverMock
 ;(globalThis as any).ResizeObserver       = IntersectionObserverMock
+
+// jsdom'da File.arrayBuffer mavjud emas — polyfill (Excel parser test'lari uchun)
+if (typeof File !== 'undefined' && !File.prototype.arrayBuffer) {
+  File.prototype.arrayBuffer = async function () {
+    return new Promise<ArrayBuffer>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload  = () => resolve(reader.result as ArrayBuffer)
+      reader.onerror = () => reject(reader.error)
+      reader.readAsArrayBuffer(this)
+    })
+  }
+}
+if (typeof Blob !== 'undefined' && !Blob.prototype.arrayBuffer) {
+  Blob.prototype.arrayBuffer = async function () {
+    return new Promise<ArrayBuffer>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload  = () => resolve(reader.result as ArrayBuffer)
+      reader.onerror = () => reject(reader.error)
+      reader.readAsArrayBuffer(this)
+    })
+  }
+}

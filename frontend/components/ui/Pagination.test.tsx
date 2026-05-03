@@ -25,7 +25,7 @@ describe('Pagination', () => {
     expect(screen.getAllByText('...').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('current page'ni ajratib ko\'rsatadi (font-medium klassi bilan)', () => {
+  it("current page ajratib ko'rsatiladi (font-medium klassi bilan)", () => {
     render(<Pagination page={3} totalPages={5} onPageChange={() => {}} />)
     const currentBtn = screen.getByText('3')
     expect(currentBtn.className).toContain('bg-[#2563EB]')  // primary color
