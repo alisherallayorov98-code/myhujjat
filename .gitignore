@@ -52,3 +52,4 @@ coverage/
 backend/prisma/migrations/dev/
 *.db
 *.db-journal
+.claude/
