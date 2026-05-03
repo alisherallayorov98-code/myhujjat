@@ -1,4 +1,4 @@
-import { Module }                  from '@nestjs/common'
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common'
 import { ConfigModule }            from '@nestjs/config'
 import { APP_GUARD }               from '@nestjs/core'
 import { JwtModule }               from '@nestjs/jwt'
@@ -36,6 +36,7 @@ import { HealthModule }            from './modules/health/health.module'
 import { PushModule }              from './modules/push/push.module'
 import { CommonModule }            from './common/common.module'
 import { JwtAuthGuard }            from './common/guards/jwt-auth.guard'
+import { RequestLoggerMiddleware } from './common/request-logger.middleware'
 
 @Module({
   imports: [
@@ -87,4 +88,9 @@ import { JwtAuthGuard }            from './common/guards/jwt-auth.guard'
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Structured JSON request logging — Docker stdout → log aggregator
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*')
+  }
+}

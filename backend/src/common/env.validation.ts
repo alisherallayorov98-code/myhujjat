@@ -22,6 +22,8 @@ const RECOMMENDED_ENV_VARS = [
   'PAYME_MERCHANT_ID',
   'PAYME_SECRET_KEY',
   'FRONTEND_URL',
+  'SENTRY_DSN',           // Backend error tracking
+  'METRICS_TOKEN',        // /health/metrics endpoint himoyasi
 ] as const
 
 /**

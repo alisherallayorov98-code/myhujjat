@@ -2,6 +2,7 @@ import { NestFactory }    from '@nestjs/core'
 import { ValidationPipe, Logger } from '@nestjs/common'
 import { AppModule }      from './app.module'
 import { validateEnv }    from './common/env.validation'
+import { initSentry }     from './common/sentry'
 import { randomUUID }     from 'crypto'
 import * as cookieParser  from 'cookie-parser'
 import * as bodyParser    from 'body-parser'
@@ -11,6 +12,11 @@ import * as compression   from 'compression'
 async function bootstrap() {
   // Application boshlanishidan oldin majburiy env'larni tekshirish
   validateEnv()
+
+  // Sentry error tracking init (SENTRY_DSN env bor bo'lsa)
+  // Sentry app yaratilishidan OLDIN init qilinishi kerak — Express
+  // middleware'lar to'g'ri qo'shilishi uchun
+  await initSentry()
 
   const app = await NestFactory.create(AppModule, { bodyParser: false })
 
