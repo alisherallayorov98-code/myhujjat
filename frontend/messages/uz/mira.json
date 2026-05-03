@@ -1,0 +1,55 @@
+{
+  "title": "Mira autopilot sozlamalari",
+  "description": "Mira shartnomalarni avtomatik yaratishi uchun standart qiymatlarni sozlang. Bir marta sozlang — Mira keyin o'zi qiladi.",
+
+  "loading": "Yuklanmoqda...",
+  "saved": "Saqlandi ✓",
+  "saveError": "Saqlashda xato",
+  "save": "Saqlash",
+
+  "defaultsTitle": "Standart qiymatlar",
+  "defaultsDesc": "STIR yozsangiz Mira shu qiymatlar bilan shartnoma yaratadi",
+
+  "contractType": "Shartnoma turi",
+  "amount": "Standart summa (so'm)",
+  "amountHint": "Mira yangi shartnomalarda shu summani qo'yadi",
+  "city": "Shahar",
+  "productName": "Mahsulot/xizmat nomi",
+  "productNameHint": "Bo'sh qoldirsangiz har safar so'raydi",
+  "paymentDays": "To'lov muddati (kun)",
+
+  "numberingTitle": "Shartnoma raqamlari",
+  "numberingDesc": "Mira shartnoma raqamini qanday qo'yishini tanlang",
+
+  "schemeDate": "Sana bo'yicha (03/05)",
+  "schemeDateDesc": "Bugungi sana raqam sifatida",
+  "schemeDateSeq": "Sana + tartib (03/05, 03/05-1, 03/05-2)",
+  "schemeDateSeqDesc": "Eng ko'p ishlatiladigan",
+  "schemeCounter": "Tartib raqami (001, 002, ...)",
+  "schemeCounterDesc": "Yiliga davom etadi",
+  "schemeAskEach": "Har safar so'rasin",
+  "schemeAskEachDesc": "Mira raqamni o'zingizdan so'raydi",
+
+  "customPrefix": "Prefiks (ixtiyoriy)",
+  "customPrefixHint": "Masalan: DV — \"DV-001\" bo'ladi",
+
+  "trustTitle": "Avtomatik yuborish",
+  "trustLockMsg": "Bu funksiya {needed} muvaffaqiyatli shartnoma yaratganingizdan keyin ochiladi. Hozir: {current}/{needed}",
+  "trustReady": "Mira siz uchun yetarli ishladi — endi avtomatik yuborishni yoqishingiz mumkin",
+
+  "autoSendLabel": "Ruxsatsiz yuborishni yoqish",
+  "autoSendDesc": "Mira shartnomani tasdiqlamasdan to'g'ridan-to'g'ri Didox'ga yuboradi",
+
+  "autoSignLabel": "Avtomatik imzolash",
+  "autoSignDesc": "Imzolash modal-oynani avtomatik ochib beradi (kalit hali ham brauzeringizda turadi)",
+
+  "thresholdLabel": "Tasdiqlash chegarasi",
+  "thresholdHint": "Bundan katta summa shartnomalarini har doim tasdiqlatadi (xavfsizlik uchun)",
+
+  "securityNotice": "🔒 Sizning E-IMZO kalitingiz hech qachon serverga yuklanmaydi — barcha imzolash brauzeringizda amalga oshiriladi. Kalit faqat sizning kompyuteringizda turadi.",
+
+  "successCountTitle": "Mira ishlari",
+  "successCountText": "{count} ta shartnoma muvaffaqiyatli yuborildi",
+  "lastUsed": "Oxirgi marta: {date}",
+  "neverUsed": "Hali ishlatilmagan"
+}

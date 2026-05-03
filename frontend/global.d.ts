@@ -54,6 +54,7 @@ import type shablonlar        from './messages/uz/shablonlar.json'
 import type stirInput         from './messages/uz/stirInput.json'
 import type didoxSend         from './messages/uz/didoxSend.json'
 import type hujjat            from './messages/uz/hujjat.json'
+import type mira              from './messages/uz/mira.json'
 
 type AllMessages = {
   common:            typeof common
@@ -109,6 +110,7 @@ type AllMessages = {
   stirInput:         typeof stirInput
   didoxSend:         typeof didoxSend
   hujjat:            typeof hujjat
+  mira:              typeof mira
 }
 
 declare module 'next-intl' {

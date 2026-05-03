@@ -3,7 +3,7 @@
 import Link            from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { User, Lock, Building2, CreditCard, Bell, Activity, Users, UserCheck, Link2 } from 'lucide-react'
+import { User, Lock, Building2, CreditCard, Bell, Activity, Users, UserCheck, Link2, Bot } from 'lucide-react'
 import { cn }          from '@/lib/cn'
 
 export default function SozlamalarLayout({ children }: { children: React.ReactNode }) {
@@ -17,6 +17,7 @@ export default function SozlamalarLayout({ children }: { children: React.ReactNo
     { id: 'tasischilar', label: t('navTasischilar'), icon: UserCheck,   path: '/dashboard/sozlamalar/tashkilot/tasischilar'   },
     { id: 'azolar',      label: t('navAzolar'),      icon: Users,       path: '/dashboard/sozlamalar/tashkilot/azolar'        },
     { id: 'didox',       label: t('navDidox'),       icon: Link2,       path: '/dashboard/sozlamalar/didox'                   },
+    { id: 'mira',        label: t('navMira'),        icon: Bot,         path: '/dashboard/sozlamalar/mira'                    },
     { id: 'obuna',       label: t('navObuna'),       icon: CreditCard,  path: '/dashboard/sozlamalar/obuna'                   },
     { id: 'xabarnoma',   label: t('navXabarnoma'),   icon: Bell,        path: '/dashboard/sozlamalar/xabarnoma'               },
     { id: 'audit',       label: t('navAudit'),       icon: Activity,    path: '/dashboard/sozlamalar/audit'                   },

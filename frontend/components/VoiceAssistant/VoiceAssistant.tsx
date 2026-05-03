@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   Mic, MicOff, Loader2, X, Sparkles,
-  Check, AlertCircle, Volume2,
+  Check, AlertCircle, Volume2, Shield,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
@@ -15,6 +15,7 @@ import toast from 'react-hot-toast'
 import {
   blobToBase64, playGeminiAudio, speakBrowser, detectAudioMimeType,
 } from './audio'
+import { MiraSignButton } from './MiraSignButton'
 
 type Status = 'idle' | 'recording' | 'processing' | 'done' | 'error'
 
@@ -29,8 +30,11 @@ interface VoiceMessage {
   role:        'user' | 'assistant'
   text:        string
   toolsCalled?: ToolCall[]
+  pendingSign?: { contractId: string; contractNumber: string }
   timestamp:   number
 }
+
+type ConvState = any  // ConversationState — server tomondan keladi, mazmuni shaffof
 
 const TOOL_KEYS = [
   'createCounterparty',
@@ -56,6 +60,7 @@ export function VoiceAssistant() {
   const [status,      setStatus]      = useState<Status>('idle')
   const [messages,    setMessages]    = useState<VoiceMessage[]>([])
   const [textInput,   setTextInput]   = useState('')
+  const [convState,   setConvState]   = useState<ConvState | null>(null)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef   = useRef<Blob[]>([])
@@ -165,7 +170,11 @@ export function VoiceAssistant() {
         ...payload,
         orgId:      currentOrg?.id,
         targetLang: currentLocale(),
+        state:      convState,
       })
+
+      // Suhbat davomini saqlash (yoki tozalash)
+      setConvState(data.state || null)
 
       // Foydalanuvchi xabari (transcript)
       if (data.transcript) {
@@ -181,6 +190,7 @@ export function VoiceAssistant() {
         role:        'assistant',
         text:        data.response || t('doneFallback'),
         toolsCalled: data.toolsCalled,
+        pendingSign: data.pendingSign,
         timestamp:   Date.now(),
       }])
 
@@ -241,7 +251,7 @@ export function VoiceAssistant() {
               </div>
             </div>
             <button
-              onClick={() => { setOpen(false); window.speechSynthesis?.cancel() }}
+              onClick={() => { setOpen(false); window.speechSynthesis?.cancel(); setConvState(null) }}
               className="p-1.5 rounded-lg hover:bg-white/15 transition"
             >
               <X size={16} />
@@ -299,6 +309,19 @@ export function VoiceAssistant() {
                           </span>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {m.pendingSign && (
+                    <div className="mt-3 pt-3 border-t border-[#F1F5F9]">
+                      <MiraSignButton
+                        contractId={m.pendingSign.contractId}
+                        contractNumber={m.pendingSign.contractNumber}
+                        onSigned={() => {
+                          qc.invalidateQueries({ queryKey: ['contracts'] })
+                          qc.invalidateQueries({ queryKey: ['contracts-stats'] })
+                        }}
+                      />
                     </div>
                   )}
                 </div>
