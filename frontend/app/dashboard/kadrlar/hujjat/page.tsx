@@ -2,7 +2,7 @@
 
 import { useState }                                      from 'react'
 import { useTranslations }                               from 'next-intl'
-import { FileText, UserCheck, UserX, ArrowRight }        from 'lucide-react'
+import { FileText, UserCheck, UserX, ArrowRight, Sparkles } from 'lucide-react'
 import { useQuery }                                       from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Card }                                           from '@/components/ui/Card'
@@ -20,6 +20,8 @@ import {
   type XodimData,
 } from '@/lib/kadrlarTemplates'
 import { formatAmountWords } from '@/lib/formatters'
+import { DynamicFeatureRunner } from '@/components/DynamicFeatureRunner/DynamicFeatureRunner'
+import { KADRLAR_FEATURES }     from '@/lib/dynamicFeatures'
 import toast                 from 'react-hot-toast'
 import { cn }                from '@/lib/cn'
 
@@ -195,24 +197,42 @@ export default function HRHujjatlarPage() {
       />
 
       {!selectedDoc ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {HR_DOCS.map(doc => (
-            <button
-              key={doc.id}
-              onClick={() => { setSelectedDoc(doc.id); setPreview('') }}
-              className="p-5 rounded-xl bg-white border-2 border-[#E2E8F0] hover:border-[#2563EB]/40 hover:shadow-md transition-all text-left group"
-            >
-              <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-3', doc.bg)}>
-                <doc.icon size={22} className={doc.color} />
-              </div>
-              <p className="font-semibold text-[#0F172A] mb-1">{doc.name}</p>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">{doc.desc}</p>
-              <div className="flex items-center gap-1 mt-3 text-xs text-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity">
-                <span>{t('create')}</span>
-                <ArrowRight size={12} />
-              </div>
-            </button>
-          ))}
+        <div className="space-y-8">
+          {/* Asosiy 4 ta — to'liq form bilan */}
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Asosiy hujjatlar</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {HR_DOCS.map(doc => (
+                <button
+                  key={doc.id}
+                  onClick={() => { setSelectedDoc(doc.id); setPreview('') }}
+                  className="p-5 rounded-xl bg-white border-2 border-[#E2E8F0] hover:border-[#2563EB]/40 hover:shadow-md transition-all text-left group"
+                >
+                  <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center mb-3', doc.bg)}>
+                    <doc.icon size={22} className={doc.color} />
+                  </div>
+                  <p className="font-semibold text-[#0F172A] mb-1">{doc.name}</p>
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">{doc.desc}</p>
+                  <div className="flex items-center gap-1 mt-3 text-xs text-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>{t('create')}</span>
+                    <ArrowRight size={12} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* AI orqali — qo'shimcha 7 ta */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-[#7C3AED]" />
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                AI yordamida shablon yaratish
+              </h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#EDE9FE] text-[#7C3AED]">Pro</span>
+            </div>
+            <DynamicFeatureRunner features={KADRLAR_FEATURES} />
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
