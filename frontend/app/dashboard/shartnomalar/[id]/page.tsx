@@ -7,7 +7,7 @@ import { useRouter }                                             from 'next/navi
 import {
   ChevronLeft, FileText, Download, Edit2, Trash2,
   CheckCircle, Circle, Building2, Calendar, Hash,
-  DollarSign, MapPin, ClipboardList, Share2,
+  DollarSign, MapPin, ClipboardList, Share2, Copy,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }                 from '@tanstack/react-query'
 import { PageHeader }                                            from '@/components/layout/PageHeader'
@@ -117,6 +117,13 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
         ]}
         actions={
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="success" size="sm"
+              leftIcon={<Copy size={13} />}
+              onClick={() => router.push(`/dashboard/shartnomalar/yangi?cloneFrom=${id}`)}
+            >
+              {t('clone.button')}
+            </Button>
             <Button
               variant="outline" size="sm"
               leftIcon={<Download size={13} />}

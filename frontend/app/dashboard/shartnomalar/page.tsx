@@ -5,7 +5,7 @@ import Link                        from 'next/link'
 import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
-  Download, ChevronLeft, ChevronRight, Calendar, Trash2,
+  Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -314,9 +314,14 @@ export default function ShartnomalarPage() {
                         onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
                         <ContractStatusBadge status={c.status} />
                       </td>
-                      <td className="px-3 py-3 cursor-pointer"
-                        onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
-                        <span className="text-[#94A3B8] opacity-0 group-hover:opacity-100 text-xs">→</span>
+                      <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
+                        <button
+                          onClick={() => window.location.href = `/dashboard/shartnomalar/yangi?cloneFrom=${c.id}`}
+                          title={t('clone.button')}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-all"
+                        >
+                          <Copy size={14} />
+                        </button>
                       </td>
                     </tr>
                   )

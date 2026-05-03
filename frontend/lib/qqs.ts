@@ -3,6 +3,7 @@ export type QqsFoiz = 'siz' | '0' | '12' | '15'
 export interface SpecItem {
   nomi:        string
   izoh?:       string
+  mxikKodi?:   string  // MXIK — Mahsulot va xizmatlarning yagona milliy katalogi (soliq talabi)
   shtrixKodi?: string
   birlik:      string
   miqdori:     number
@@ -10,6 +11,21 @@ export interface SpecItem {
   qqsFoiz:     QqsFoiz
   qqsSumma:    number
   summa:       number
+}
+
+/** MXIK kodi to'g'ri formatdami? (10-15 raqam) */
+export function isValidMxik(code: string | undefined | null): boolean {
+  if (!code) return false
+  const clean = code.replace(/\D/g, '')
+  return clean.length >= 10 && clean.length <= 15
+}
+
+/** Spec item to'liq to'g'ri to'ldirilganmi? */
+export function isSpecItemComplete(item: SpecItem): boolean {
+  return !!item.nomi.trim() &&
+         isValidMxik(item.mxikKodi) &&
+         item.miqdori > 0 &&
+         item.narxi > 0
 }
 
 export function calcSpecItem(

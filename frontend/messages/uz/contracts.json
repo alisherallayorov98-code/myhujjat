@@ -64,6 +64,7 @@
     "created": "Shartnoma yaratildi!",
     "dateRequired": "Sana kiriting",
     "orgRequired": "Avval tashkilot qo'shing",
+    "mxikRequired": "Har bir tovar/xizmat uchun MXIK kodi kiritilishi shart (10-15 raqam)",
     "error": "Xatolik"
   },
   "new_": {
@@ -145,6 +146,15 @@
       "amount": "Summa",
       "product": "Mahsulot/xizmat"
     }
+  },
+  "clone": {
+    "button": "Nusxa olish",
+    "banner": "📋 «{number}» shartnomadan nusxa olinmoqda. Kontragent, raqam va sana yangilash kerak."
+  },
+  "spec": {
+    "mxikLabel": "MXIK kodi",
+    "mxikHint":  "10-15 raqam",
+    "mxikInvalid": "MXIK kodi noto'g'ri"
   },
   "preview": {
     "back": "Orqaga",

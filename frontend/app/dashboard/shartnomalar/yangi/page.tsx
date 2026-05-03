@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
 import { useTranslations }    from 'next-intl'
-import { useRouter }          from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }         from '@/components/layout/PageHeader'
@@ -20,7 +20,7 @@ import {
 } from '@/lib/contractTemplates'
 import { formatAmountWords }  from '@/lib/formatters'
 import { renderContractHtml } from '@/lib/export/contractHtml'
-import { type SpecItem }      from '@/lib/qqs'
+import { type SpecItem, isValidMxik }      from '@/lib/qqs'
 import { cn }                 from '@/lib/cn'
 import toast                  from 'react-hot-toast'
 import type { Organization, Counterparty } from '@/lib/types'
@@ -36,6 +36,8 @@ function today(): string {
 export default function YangiShartnoma() {
   const t = useTranslations('contracts')
   const router         = useRouter()
+  const searchParams   = useSearchParams()
+  const cloneFromId    = searchParams.get('cloneFrom')
   const qc             = useQueryClient()
   const { currentOrg } = useAuth()
 
@@ -94,6 +96,36 @@ export default function YangiShartnoma() {
     setForm(f => ({ ...f, qqsEnabled: isQqs, qqsRate: isNaN(rate) ? 12 : rate }))
     setOrgEdits({})
   }, [currentOrg?.id])
+
+  // ─── Nusxa olish — manba shartnomadan ma'lumotlarni o'tkazib olish
+  const [cloneSourceNumber, setCloneSourceNumber] = useState<string | null>(null)
+  const { data: cloneSource } = useQuery<any>({
+    queryKey: ['contract-clone-source', cloneFromId],
+    queryFn:  () => api.get(`/contracts/${cloneFromId}?orgId=${currentOrg!.id}`).then(r => r.data),
+    enabled:  !!cloneFromId && !!currentOrg?.id,
+  })
+
+  useEffect(() => {
+    if (!cloneSource) return
+    setType(cloneSource.contractType)
+    setForm(f => ({
+      ...f,
+      // KEEP — shu narsalar nusxalandi:
+      city:         cloneSource.city || f.city,
+      extraData:    cloneSource.extraData || {},
+      specItems:    (cloneSource.specifications?.[0]?.items || []) as SpecItem[],
+      qqsEnabled:   cloneSource.qqsEnabled ?? f.qqsEnabled,
+      qqsRate:      cloneSource.qqsRate    ?? f.qqsRate,
+      productName:  cloneSource.productName || '',
+      // RESET — yangi shartnoma uchun bo'sh:
+      contractNumber: '',
+      contractDate:   today(),
+      counterpartyId: '',
+      amount:         '',
+    }))
+    setCloneSourceNumber(cloneSource.contractNumber || cloneSource.id?.slice(0, 8))
+    setStep(2) // 1-bosqichni o'tkazib yuboramiz
+  }, [cloneSource])
 
   const mutation = useMutation({
     mutationFn: (data: any) => api.post('/contracts', data),
@@ -185,6 +217,12 @@ export default function YangiShartnoma() {
   function handleCreate() {
     if (!currentOrg?.id) return
     if (!form.contractDate) { toast.error(t('toast.dateRequired')); return }
+    // MXIK validatsiya — agar tovar nomi yozilgan bo'lsa, MXIK majburiy
+    const invalidItem = form.specItems.find(it => it.nomi.trim() && !isValidMxik(it.mxikKodi))
+    if (invalidItem) {
+      toast.error(t('toast.mxikRequired'))
+      return
+    }
     const amount = specTotal > 0 ? specTotal : parseFloat(form.amount) || 0
     mutation.mutate({
       organizationId: currentOrg.id,
@@ -273,6 +311,15 @@ export default function YangiShartnoma() {
           }
         />
         <StepBar step={2} />
+
+        {cloneSourceNumber && (
+          <div className="mb-4 p-3 bg-[#DBEAFE] border border-[#BFDBFE] rounded-lg flex items-start gap-2">
+            <span className="text-[#2563EB] text-base">📋</span>
+            <p className="text-sm text-[#1E40AF]">
+              {t('clone.banner', { number: cloneSourceNumber })}
+            </p>
+          </div>
+        )}
 
         <Card className="mb-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
