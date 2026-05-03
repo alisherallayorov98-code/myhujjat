@@ -20,7 +20,7 @@ import {
 } from '@/lib/contractTemplates'
 import { formatAmountWords }  from '@/lib/formatters'
 import { renderContractHtml } from '@/lib/export/contractHtml'
-import { type SpecItem, isValidMxik }      from '@/lib/qqs'
+import { type SpecItem }      from '@/lib/qqs'
 import { cn }                 from '@/lib/cn'
 import toast                  from 'react-hot-toast'
 import type { Organization, Counterparty } from '@/lib/types'
@@ -243,12 +243,6 @@ export default function YangiShartnoma() {
   function handleCreate() {
     if (!currentOrg?.id) return
     if (!form.contractDate) { toast.error(t('toast.dateRequired')); return }
-    // MXIK validatsiya — agar tovar nomi yozilgan bo'lsa, MXIK majburiy
-    const invalidItem = form.specItems.find(it => it.nomi.trim() && !isValidMxik(it.mxikKodi))
-    if (invalidItem) {
-      toast.error(t('toast.mxikRequired'))
-      return
-    }
     const amount = specTotal > 0 ? specTotal : parseFloat(form.amount) || 0
     mutation.mutate({
       organizationId: currentOrg.id,

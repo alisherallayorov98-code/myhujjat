@@ -13,19 +13,11 @@ export interface SpecItem {
   summa:       number
 }
 
-/** MXIK kodi to'g'ri formatdami? (10-15 raqam) */
+/** MXIK kodi to'g'ri formatdami? (10-15 raqam) — ixtiyoriy validatsiya uchun */
 export function isValidMxik(code: string | undefined | null): boolean {
   if (!code) return false
   const clean = code.replace(/\D/g, '')
   return clean.length >= 10 && clean.length <= 15
-}
-
-/** Spec item to'liq to'g'ri to'ldirilganmi? */
-export function isSpecItemComplete(item: SpecItem): boolean {
-  return !!item.nomi.trim() &&
-         isValidMxik(item.mxikKodi) &&
-         item.miqdori > 0 &&
-         item.narxi > 0
 }
 
 export function calcSpecItem(

@@ -1,9 +1,7 @@
 'use client'
 
-import { Plus, Trash2, AlertCircle } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { calcSpecItem, newSpecItem, BIRLIKLAR, QQS_OPTIONS, isValidMxik, type SpecItem } from '@/lib/qqs'
-import { cn } from '@/lib/cn'
+import { Plus, Trash2 } from 'lucide-react'
+import { calcSpecItem, newSpecItem, BIRLIKLAR, QQS_OPTIONS, type SpecItem } from '@/lib/qqs'
 
 interface Props {
   items:    SpecItem[]
@@ -11,7 +9,6 @@ interface Props {
 }
 
 export function SpecTable({ items, onChange }: Props) {
-  const t = useTranslations('contracts.spec')
 
   function update(i: number, key: keyof SpecItem, val: string | number) {
     const updated = items.map((item, idx) => {
@@ -35,30 +32,16 @@ export function SpecTable({ items, onChange }: Props) {
   const umumiy  = items.reduce((s, i) => s + i.summa, 0)
 
   const fmt = (n: number) => n > 0 ? n.toLocaleString('uz-UZ') : '—'
-  const missingMxik = items.some(item =>
-    item.nomi.trim() && !isValidMxik(item.mxikKodi)
-  )
 
   return (
     <div className="space-y-3">
-      {missingMxik && (
-        <div className="flex items-start gap-2 p-3 bg-[#FEF3C7] border border-[#FDE68A] rounded-lg text-xs">
-          <AlertCircle size={14} className="text-[#D97706] shrink-0 mt-0.5" />
-          <p className="text-[#92400E]">
-            <strong>MXIK kodi majburiy.</strong> Soliq tizimi talabiga ko'ra har bir tovar/xizmat uchun
-            Mahsulot va xizmatlar yagona milliy katalogi (MXIK) kodi kiritilishi kerak.
-            Kod 10-15 raqamdan iborat bo'ladi.
-          </p>
-        </div>
-      )}
-
       <div className="overflow-x-auto rounded-xl border border-[#E2E8F0]">
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
               <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-8">#</th>
               <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold min-w-[180px]">Nomi *</th>
-              <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-32">MXIK *</th>
+              <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-32">MXIK</th>
               <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-20">Birlik</th>
               <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-20">Miqdor</th>
               <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-28">Narx</th>
@@ -68,9 +51,7 @@ export function SpecTable({ items, onChange }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F1F5F9]">
-            {items.map((item, i) => {
-              const mxikInvalid = item.nomi.trim() && !isValidMxik(item.mxikKodi)
-              return (
+            {items.map((item, i) => (
               <tr key={i} className="hover:bg-[#F8FAFC] group">
                 <td className="px-3 py-2 text-[#94A3B8]">{i + 1}</td>
                 <td className="px-3 py-2">
@@ -85,13 +66,8 @@ export function SpecTable({ items, onChange }: Props) {
                   <input
                     value={item.mxikKodi || ''}
                     onChange={e => update(i, 'mxikKodi', e.target.value.replace(/\D/g, '').slice(0, 15))}
-                    placeholder="0252300200123"
-                    className={cn(
-                      'w-full bg-transparent border-b font-mono tabular-nums focus:outline-none px-0.5 transition',
-                      mxikInvalid
-                        ? 'border-[#DC2626] text-[#DC2626] placeholder:text-[#DC2626]/50'
-                        : 'border-transparent hover:border-[#E2E8F0] focus:border-[#2563EB] text-[#0F172A]',
-                    )}
+                    placeholder="ixtiyoriy"
+                    className="w-full bg-transparent border-b border-transparent hover:border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none px-0.5 text-[#0F172A] font-mono tabular-nums placeholder:text-[#CBD5E1] placeholder:italic transition"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -138,8 +114,7 @@ export function SpecTable({ items, onChange }: Props) {
                   </button>
                 </td>
               </tr>
-              )
-            })}
+            ))}
           </tbody>
           {items.length > 0 && (
             <tfoot className="bg-[#F8FAFC] border-t border-[#E2E8F0]">
