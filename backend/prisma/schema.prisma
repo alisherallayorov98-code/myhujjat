@@ -222,6 +222,7 @@ model Counterparty {
   contracts Contract[]
 
   @@index([organizationId, isActive])
+  @@index([organizationId, inn])
   @@index([inn])
   @@index([name])
 }
@@ -241,6 +242,9 @@ model Subscription {
   autoRenew     Boolean          @default(false)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+
+  @@index([expiresAt, status])
+  @@index([plan, status])
 }
 
 enum SubscriptionPlan {
@@ -265,7 +269,7 @@ model Payment {
   user       User        @relation(fields: [userId], references: [id])
   provider   PayProvider
   externalId String?
-  amount     Decimal
+  amount     Decimal     @db.Decimal(20, 2)
   currency   String      @default("UZS")
   plan       String
   months     Int
@@ -301,7 +305,7 @@ model Contract {
   contractDate   String
   contractType   ContractType
   city           String?        @default("Toshkent")
-  amount         Decimal        @default(0)
+  amount         Decimal        @default(0) @db.Decimal(20, 2)
   status         ContractStatus @default(DRAFT)
 
   content   String? @db.Text
@@ -310,7 +314,7 @@ model Contract {
   productName String?
   specItems   Json?
   qqsEnabled  Boolean @default(false)
-  qqsRate     Decimal @default(12)
+  qqsRate     Decimal @default(12) @db.Decimal(5, 2)
 
   signedUs   Boolean   @default(false)
   signedCp   Boolean   @default(false)
@@ -321,7 +325,7 @@ model Contract {
   didoxId   String?
 
   // ─── Faktura monitoringi (Didox/Roaming integratsiyasi) ───
-  totalInvoiced Decimal     @default(0) // jami fakturalar yig'indisi
+  totalInvoiced Decimal     @default(0) @db.Decimal(20, 2) // jami fakturalar yig'indisi
   invoiceCount  Int         @default(0) // fakturalar soni
   lastInvoiceAt DateTime? // oxirgi faktura keldi
   alertLevel    AlertLevel? // joriy ogohlantirish darajasi
@@ -338,6 +342,7 @@ model Contract {
 
   @@index([organizationId, isActive, createdAt])
   @@index([organizationId, status])
+  @@index([organizationId, contractType, status])
   @@index([counterpartyId])
   @@index([contractNumber])
   @@index([contractDate])
@@ -461,8 +466,8 @@ model Tasischi {
 
   ism      String
   jshshir  String?
-  ulush    Decimal?
-  summa    Decimal?
+  ulush    Decimal? @db.Decimal(5, 2)   // foiz: 0-100
+  summa    Decimal? @db.Decimal(20, 2)
   passport String?
   manzil   String?
 
@@ -671,6 +676,10 @@ model AuditLog {
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([entity, entityId])
 }
 
 model SystemSetting {
@@ -773,9 +782,9 @@ model Invoice {
   direction  InvoiceDirection // bizga keladimi yoki bizdan ketadimi
 
   // Summa
-  amount      Decimal @default(0) // QQSsiz
-  vatAmount   Decimal @default(0)
-  totalAmount Decimal @default(0) // QQS bilan
+  amount      Decimal @default(0) @db.Decimal(20, 2) // QQSsiz
+  vatAmount   Decimal @default(0) @db.Decimal(20, 2)
+  totalAmount Decimal @default(0) @db.Decimal(20, 2) // QQS bilan
 
   // Holat
   status InvoiceStatus @default(DRAFT)

@@ -1,7 +1,7 @@
 import {
   Injectable, UnauthorizedException,
   BadRequestException, ConflictException,
-  NotFoundException
+  NotFoundException, Logger,
 } from '@nestjs/common'
 import { JwtService }    from '@nestjs/jwt'
 import { PrismaService } from '../prisma/prisma.service'
@@ -14,6 +14,7 @@ import { randomBytes }   from 'crypto'
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name)
   private loginAttempts = new Map<string, { count: number; blockedUntil: number }>()
   private cleanupInterval: NodeJS.Timeout | null = null
 
@@ -80,9 +81,10 @@ export class AuthService {
       }
     })
 
-    // Email tasdiqlash xatini yuborish
+    // Email tasdiqlash xatini yuborish (async — registratsiyani to'xtatmasin,
+    // lekin xatolarni log qilamiz, support uchun)
     this.mailService.sendVerification(user.email, user.firstName || '', verifyToken)
-      .catch(() => {}) // Emaillar async — xatolik registrationni to'xtatmasin
+      .catch((err: any) => this.logger.error(`Verify mail xato: ${err?.message}`, err?.stack))
 
     // Welcome notification
     this.notificationsService.create({
@@ -91,7 +93,7 @@ export class AuthService {
       title:   `Xush kelibsiz, ${user.firstName || 'Foydalanuvchi'}!`,
       message: "MyHujjat.uz ga ro'yxatdan o'tganingiz uchun rahmat. Boshlash uchun avval tashkilotingizni qo'shing.",
       link:    '/dashboard/tashkilotlar',
-    }).catch(() => {})
+    }).catch((err: any) => this.logger.error(`Welcome notification xato: ${err?.message}`))
 
     return {
       message: "Ro'yxatdan o'tish muvaffaqiyatli. Email tasdiqlang.",

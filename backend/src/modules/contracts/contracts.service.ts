@@ -1,6 +1,6 @@
 import {
   Injectable, NotFoundException,
-  ForbiddenException, BadRequestException,
+  ForbiddenException, BadRequestException, Logger,
 } from '@nestjs/common'
 import { PrismaService }        from '../prisma/prisma.service'
 import { SubscriptionService }  from '../subscriptions/subscription.service'
@@ -26,6 +26,8 @@ export interface CreateContractDto {
 
 @Injectable()
 export class ContractsService {
+  private readonly logger = new Logger(ContractsService.name)
+
   constructor(
     private prisma:               PrismaService,
     private subService:           SubscriptionService,
@@ -176,7 +178,7 @@ export class ContractsService {
       entityType:      'contract',
       entityId:        contract.id,
       details:         { contractNumber },
-    })
+    }).catch((err: any) => this.logger.error(`Audit log xato: ${err?.message}`))
 
     this.notificationsService.create({
       userId,
@@ -185,7 +187,7 @@ export class ContractsService {
       title:          'Yangi shartnoma yaratildi',
       message:        `${contractNumber} raqamli shartnoma muvaffaqiyatli yaratildi`,
       link:           `/dashboard/shartnomalar/${contract.id}`,
-    }).catch(() => {})
+    }).catch((err: any) => this.logger.error(`Notification yaratishda xato: ${err?.message}`))
 
     return contract
   }

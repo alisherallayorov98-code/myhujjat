@@ -30,6 +30,12 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
   const dropRef     = useRef<HTMLDivElement>(null)
   const prevStir    = useRef('')
   const prevQuickStir = useRef('')
+  const isMounted   = useRef(true)
+
+  // Component unmount bo'lganda — async setState'larni to'xtatish
+  useEffect(() => {
+    return () => { isMounted.current = false }
+  }, [])
 
   const selectedCp = cps.find(c => c.id === value)
 
@@ -67,6 +73,7 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
   async function lookupAndCreate(digs: string) {
     const existing = cps.find(c => (c.inn || '').replace(/\D/g, '') === digs)
     if (existing) {
+      if (!isMounted.current) return
       onChange(existing.id, existing.name)
       setSearch(existing.name)
       setOpen(false)
@@ -75,6 +82,7 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
     setLoading(true)
     try {
       const { data } = await api.get(`/stir/${digs}`)
+      if (!isMounted.current) return
       const saved = await api.post('/counterparties', {
         organizationId: orgId,
         name: data.name, inn: digs,
@@ -82,6 +90,7 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
         address: data.address || '',
         phone: data.phone || '',
       })
+      if (!isMounted.current) return
       const cp = saved.data as Counterparty
       onCpCreated?.(cp)
       onChange(cp.id, cp.name)
@@ -89,11 +98,12 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
       setOpen(false)
       toast.success(t('found', { name: cp.name }))
     } catch {
+      if (!isMounted.current) return
       // Inline tasdiqlash — toast emas, balki dropdown ichida aniq xabar
       setNotFoundStir(digs)
       setOpen(true)
     } finally {
-      setLoading(false)
+      if (isMounted.current) setLoading(false)
     }
   }
 

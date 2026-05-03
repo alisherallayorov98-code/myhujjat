@@ -5,20 +5,21 @@ import {
 import { Response }    from 'express'
 import { AiService }   from './ai.service'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
+import { GenerateAiDocDto } from './dto/generate.dto'
 
 @Controller('ai')
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Post('generate')
-  generate(@CurrentUser() user: any, @Body() dto: any) {
+  generate(@CurrentUser() user: any, @Body() dto: GenerateAiDocDto) {
     return this.aiService.generateDocument({ userId: user.sub, ...dto })
   }
 
   @Post('generate/stream')
   async generateStream(
     @CurrentUser() user: any,
-    @Body() dto: any,
+    @Body() dto: GenerateAiDocDto,
     @Res() res: Response,
   ) {
     res.setHeader('Content-Type',  'text/event-stream')

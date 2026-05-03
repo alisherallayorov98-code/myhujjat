@@ -27,5 +27,7 @@ COPY --from=builder /app/package.json   ./
 
 EXPOSE 4000
 
-# Migratsiyani avtomatik qo'llash, keyin ishga tushirish
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/main"]
+# Versionlangan migratsiyalar (xavfsiz — DROP TABLE qilmaydi)
+# Lokal/dev'da `prisma migrate dev` bilan migration yaratiladi,
+# prod'da faqat `migrate deploy` qo'llanadi.
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]

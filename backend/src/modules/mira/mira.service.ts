@@ -73,70 +73,87 @@ export class MiraService {
 
   /**
    * Sozlamalar bo'yicha keyingi shartnoma raqamini yaratadi.
-   * Atomic: race-condition'siz (transaction).
+   * Race-condition'siz: 'counter' uchun atomic increment, 'date-seq' uchun
+   * Serializable isolation + retry. Parallel chaqiruvlar dublikat raqam
+   * bermaydi.
    */
   async generateContractNumber(userId: string): Promise<string> {
-    return this.prisma.$transaction(async (tx) => {
-      const settings = await tx.miraSettings.findUnique({ where: { userId } })
-      if (!settings) {
-        // Sozlama yo'q bo'lsa — oddiy sana
-        const d = new Date()
-        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`
+    const settings = await this.prisma.miraSettings.findUnique({ where: { userId } })
+    if (!settings) {
+      const d = new Date()
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`
+    }
+
+    const today = new Date()
+    const dd    = pad(today.getDate())
+    const mm    = pad(today.getMonth() + 1)
+    const dateStr = `${dd}/${mm}`
+
+    switch (settings.numberingScheme) {
+      case 'date': {
+        // Faqat sana — har kun yangi (race muhim emas)
+        return dateStr
       }
 
-      const today = new Date()
-      const dd    = pad(today.getDate())
-      const mm    = pad(today.getMonth() + 1)
-      const dateStr = `${dd}/${mm}`
+      case 'counter': {
+        // Atomic increment — Prisma'ning $inc operatori SQL UPDATE bilan
+        // bir transaction'da ishlaydi, race-condition yo'q.
+        const updated = await this.prisma.miraSettings.update({
+          where: { userId },
+          data:  { lastCounter: { increment: 1 } },
+          select: { lastCounter: true, customPrefix: true },
+        })
+        const padded = String(updated.lastCounter).padStart(3, '0')
+        return updated.customPrefix ? `${updated.customPrefix}-${padded}` : padded
+      }
 
-      let result = ''
+      case 'date-seq': {
+        // Serializable transaction + retry — read+compute+write atomik
+        // bo'lishi kerak (oldingi qiymatga bog'liq).
+        return this.dateSeqWithRetry(userId, dateStr)
+      }
 
-      switch (settings.numberingScheme) {
-        case 'date': {
-          // Faqat sana — har kun yangi
-          result = dateStr
-          break
-        }
+      case 'ask-each':
+      default:
+        throw new Error('NUMBERING_ASK_REQUIRED')
+    }
+  }
 
-        case 'date-seq': {
-          // 03/05, 03/05-1, 03/05-2 ...
-          const last = settings.lastDateNumber || ''
+  // 'date-seq' rejimida: 03/05 → 03/05-1 → 03/05-2 (oldingi qiymatga bog'liq)
+  // Serializable + retry agar konflikt bo'lsa
+  private async dateSeqWithRetry(userId: string, dateStr: string, attempts = 3): Promise<string> {
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await this.prisma.$transaction(async (tx) => {
+          const s = await tx.miraSettings.findUnique({
+            where:  { userId },
+            select: { lastDateNumber: true },
+          })
+          const last     = s?.lastDateNumber || ''
           const lastDate = last.split('-')[0]
+          let result: string
           if (lastDate === dateStr) {
             const seq = parseInt(last.split('-')[1] || '0', 10) || 0
             result = `${dateStr}-${seq + 1}`
           } else {
             result = dateStr
           }
-          break
+          await tx.miraSettings.update({
+            where: { userId },
+            data:  { lastDateNumber: result },
+          })
+          return result
+        }, { isolationLevel: 'Serializable' })
+      } catch (err: any) {
+        // P2034 = serialization failure (parallel transaction)
+        if (err?.code === 'P2034' && i < attempts - 1) {
+          await new Promise(r => setTimeout(r, 50 * (i + 1)))  // exponential backoff
+          continue
         }
-
-        case 'counter': {
-          // Hisoblagich (DV-001, DV-002 ...)
-          const next = settings.lastCounter + 1
-          const padded = String(next).padStart(3, '0')
-          result = settings.customPrefix
-            ? `${settings.customPrefix}-${padded}`
-            : padded
-          break
-        }
-
-        case 'ask-each':
-        default:
-          throw new Error('NUMBERING_ASK_REQUIRED')
+        throw err
       }
-
-      // Hisoblagichlarni yangilash
-      await tx.miraSettings.update({
-        where: { userId },
-        data: {
-          lastDateNumber: settings.numberingScheme === 'date-seq' ? result : settings.lastDateNumber,
-          lastCounter:    settings.numberingScheme === 'counter'  ? settings.lastCounter + 1 : settings.lastCounter,
-        },
-      })
-
-      return result
-    })
+    }
+    throw new Error('Raqam generatsiya qilib bo\'lmadi (parallel konflikt)')
   }
 
   /**

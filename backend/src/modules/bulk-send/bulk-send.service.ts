@@ -122,34 +122,30 @@ export class BulkSendService {
     const now      = new Date()
     const lastYear = now.getFullYear() - 1
 
-    const contracts = await this.prisma.contract.findMany({
+    // SQL distinct: o'tgan yili shartnoma bo'lgan unique kontragentlar.
+    // Avvalgi N+1 yondashuv (barcha shartnomalarni tortib app'da unique
+    // qilish) o'rniga to'g'ridan-to'g'ri kontragentlarni filtr orqali olamiz.
+    const cps = await this.prisma.counterparty.findMany({
       where: {
         organizationId: orgId,
         isActive:       true,
-        contractDate:   { startsWith: String(lastYear) },  // "YYYY-MM-DD" formatida saqlanadi
-        counterpartyId: { not: null },
-      },
-      include: {
-        counterparty: {
-          select: {
-            id: true, name: true, inn: true, directorName: true,
-            address: true, bankName: true, bankAccount: true, mfo: true,
+        inn:            { not: null },
+        contracts: {
+          some: {
+            organizationId: orgId,
+            isActive:       true,
+            contractDate:   { startsWith: String(lastYear) },
           },
         },
       },
+      select: {
+        id: true, name: true, inn: true, directorName: true,
+        address: true, bankName: true, bankAccount: true, mfo: true,
+      },
+      orderBy: { name: 'asc' },
     })
 
-    // Kontragentlarni unique qilish (STIR bo'yicha)
-    const seen = new Set<string>()
-    const unique: any[] = []
-    for (const c of contracts) {
-      const cp = c.counterparty
-      if (!cp || !cp.inn) continue
-      if (seen.has(cp.inn)) continue
-      seen.add(cp.inn)
-      unique.push(cp)
-    }
-    return unique
+    return cps
   }
 
   // ─── Bulk shartnoma yaratish (atomic, ketma-ket) ─────────────
@@ -158,9 +154,6 @@ export class BulkSendService {
   async execute(userId: string, draftId: string) {
     await this.assertPro(userId)
     const draft = await this.getDraft(userId, draftId)
-    if (draft.status !== 'draft') {
-      throw new BadRequestException('Bu draft allaqachon ishga tushirilgan')
-    }
 
     const items = (draft.items as any as BulkItem[]) || []
     if (!items.length) throw new BadRequestException('Kontragentlar yo\'q')
@@ -168,15 +161,19 @@ export class BulkSendService {
       throw new BadRequestException(`Maksimum ${MAX_BULK} ta shartnoma`)
     }
 
-    // Boshlanish belgisi
-    await this.prisma.bulkSendDraft.update({
-      where: { id: draftId },
+    // Atomic guard: faqat status='draft' bo'lsa 'executing'ga o'tkaz.
+    // Parallel ikki chaqiruv kelsa, ikkinchisi 0 row update qiladi va xato.
+    const claimed = await this.prisma.bulkSendDraft.updateMany({
+      where: { id: draftId, status: 'draft' },
       data:  {
         status:     'executing',
         startedAt:  new Date(),
         totalCount: items.length,
       },
     })
+    if (claimed.count === 0) {
+      throw new BadRequestException('Bu draft allaqachon ishga tushirilgan yoki tugatilgan')
+    }
 
     const today = new Date().toISOString().split('T')[0]
     const updatedItems: BulkItem[] = [...items]

@@ -1,5 +1,6 @@
 import {
   Injectable, BadRequestException, Logger,
+  OnModuleInit, OnModuleDestroy,
 } from '@nestjs/common'
 import { randomBytes } from 'crypto'
 import * as forge      from 'node-forge'
@@ -7,8 +8,29 @@ import * as forge      from 'node-forge'
 const challengeStore = new Map<string, { challenge: string; expiredAt: number }>()
 
 @Injectable()
-export class EimzoService {
+export class EimzoService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(EimzoService.name)
+  private cleanupTimer?: NodeJS.Timeout
+
+  onModuleInit() {
+    // Har 60 soniyada eskirgan challenge'larni tozalash
+    this.cleanupTimer = setInterval(() => {
+      const now = Date.now()
+      let removed = 0
+      for (const [key, val] of challengeStore.entries()) {
+        if (now > val.expiredAt) {
+          challengeStore.delete(key)
+          removed++
+        }
+      }
+      if (removed > 0) this.logger.debug(`E-IMZO challenge cleanup: ${removed} ta o'chirildi`)
+    }, 60_000)
+    if (this.cleanupTimer.unref) this.cleanupTimer.unref()
+  }
+
+  onModuleDestroy() {
+    if (this.cleanupTimer) clearInterval(this.cleanupTimer)
+  }
 
   createChallenge(): { id: string; challenge: string } {
     const id        = randomBytes(16).toString('hex')
@@ -18,13 +40,6 @@ export class EimzoService {
       challenge,
       expiredAt: Date.now() + 5 * 60 * 1000,
     })
-
-    if (challengeStore.size > 1000) {
-      const now = Date.now()
-      for (const [key, val] of challengeStore.entries()) {
-        if (now > val.expiredAt) challengeStore.delete(key)
-      }
-    }
 
     return { id, challenge }
   }

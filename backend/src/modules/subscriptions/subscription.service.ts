@@ -67,16 +67,26 @@ export class SubscriptionService {
   }
 
   async incrementContractCount(userId: string): Promise<boolean> {
-    const sub = await this.getCurrent(userId)
+    // Avval expirationni tekshirish (cron'siz ham)
+    await this.getCurrent(userId)
 
-    if (sub.plan === 'FREE'     && sub.contractCount >= 3)  return false
-    if (sub.plan === 'STANDARD' && sub.contractCount >= 50) return false
-
-    await this.prisma.subscription.update({
-      where: { userId },
-      data:  { contractCount: { increment: 1 } },
+    // Atomic conditional update — bir vaqtda check + increment.
+    // updateMany ishlatamiz, chunki update where'ida limit shartlari kerak.
+    // Agar 0 row updated bo'lsa → limit oshirilgan yoki rejada cheklov bor.
+    const res = await this.prisma.subscription.updateMany({
+      where: {
+        userId,
+        status: 'ACTIVE',
+        OR: [
+          { plan: 'PRO' },
+          { plan: 'DEMO' },
+          { plan: 'STANDARD', contractCount: { lt: 50 } },
+          { plan: 'FREE',     contractCount: { lt: 3 } },
+        ],
+      },
+      data: { contractCount: { increment: 1 } },
     })
-    return true
+    return res.count > 0
   }
 
   async activateDemo(userId: string) {

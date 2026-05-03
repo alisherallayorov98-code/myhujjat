@@ -273,14 +273,27 @@ export class VoiceService {
         }
 
         case 'listContracts': {
+          // N+1 fix: contractsService.findAll'dan voz kechib, faqat
+          // kerakli field'larni tortamiz (voice javobi uchun)
           const limit = Math.min(Number(args.limit) || 5, 20)
-          const result = await this.contractsService.findAll(ctx.organizationId, {
-            limit,
-            status: args.status,
+          const where: any = { organizationId: ctx.organizationId, isActive: true }
+          if (args.status) where.status = args.status
+          const data = await this.prisma.contract.findMany({
+            where,
+            take:    limit,
+            orderBy: { createdAt: 'desc' },
+            select: {
+              contractNumber: true,
+              contractType:   true,
+              amount:         true,
+              status:         true,
+              contractDate:   true,
+              counterparty: { select: { name: true } },
+            },
           })
           return {
             success: true,
-            data: result.data.map((c: any) => ({
+            data: data.map(c => ({
               number: c.contractNumber,
               type:   c.contractType,
               amount: c.amount,

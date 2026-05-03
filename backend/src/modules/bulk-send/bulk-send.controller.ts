@@ -2,7 +2,8 @@ import {
   Controller, Get, Post, Patch, Delete, Body, Param,
   BadRequestException,
 } from '@nestjs/common'
-import { BulkSendService, type UpdateDraftDto } from './bulk-send.service'
+import { BulkSendService } from './bulk-send.service'
+import { UpdateBulkDraftDto } from './dto/bulk-send.dto'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -29,9 +30,9 @@ export class BulkSendController {
   async update(
     @CurrentUser() user: any,
     @Param('id') id: string,
-    @Body() dto: UpdateDraftDto,
+    @Body() dto: UpdateBulkDraftDto,
   ) {
-    return this.service.updateDraft(user.sub, id, dto)
+    return this.service.updateDraft(user.sub, id, dto as any)
   }
 
   @Delete('draft/:id')

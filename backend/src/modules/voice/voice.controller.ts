@@ -4,6 +4,7 @@ import {
 import { VoiceService }     from './voice.service'
 import { CurrentUser }      from '../../common/decorators/current-user.decorator'
 import { PrismaService }    from '../prisma/prisma.service'
+import { VoiceCommandDto }  from './dto/voice-command.dto'
 
 @Controller('voice')
 export class VoiceController {
@@ -14,18 +15,11 @@ export class VoiceController {
 
   /**
    * POST /voice/command
-   * Body: { text?: string; audio?: { data: string (base64); mimeType: string }; orgId?: string }
    */
   @Post('command')
   async command(
     @CurrentUser() user: any,
-    @Body() body: {
-      text?:       string
-      audio?:      { data: string; mimeType: string }
-      orgId?:      string
-      targetLang?: 'uz' | 'oz' | 'ru'
-      state?:      any   // ConversationState — fastPath suhbatini davom ettirish
-    },
+    @Body() body: VoiceCommandDto,
   ) {
     if (!body.text && !body.audio?.data) {
       throw new BadRequestException("Buyruq matni yoki audio kerak")
@@ -50,7 +44,7 @@ export class VoiceController {
       text:       body.text,
       audio:      body.audio,
       targetLang: body.targetLang,
-      state:      body.state || null,
+      state:      (body.state as any) || null,
       context:    { userId: user.sub, organizationId: orgId },
     })
   }
