@@ -12,45 +12,46 @@ datasource db {
 // FOYDALANUVCHILAR
 // ============================================
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  firstName     String?
-  lastName      String?
-  phone         String?
-  avatarUrl     String?
-  isActive      Boolean  @default(true)
-  isVerified    Boolean  @default(false)
-  verifyToken   String?
-  resetToken    String?
-  resetTokenExp DateTime?
-  language      Lang     @default(UZ)
-  role          UserRole @default(USER)
-  telegramId    String?  @unique
-  telegramLinkCode String?  // /link AB12CD orqali ulash uchun
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  firstName        String?
+  lastName         String?
+  phone            String?
+  avatarUrl        String?
+  isActive         Boolean   @default(true)
+  isVerified       Boolean   @default(false)
+  verifyToken      String?
+  resetToken       String?
+  resetTokenExp    DateTime?
+  language         Lang      @default(UZ)
+  role             UserRole  @default(USER)
+  telegramId       String?   @unique
+  telegramLinkCode String? // /link AB12CD orqali ulash uchun
 
   // ─── Didox integratsiyasi (faktura monitoringi uchun) ───
-  didoxApiKey      String?  // partner-token (yashirin)
-  didoxUserKey     String?  // user-key (yuridik shaxs identifikatori)
-  didoxConnected   Boolean  @default(false)
-  didoxLastSync    DateTime?
-  didoxSyncError   String?  // oxirgi sync xato xabari
+  didoxApiKey    String? // partner-token (yashirin)
+  didoxUserKey   String? // user-key (yuridik shaxs identifikatori)
+  didoxConnected Boolean   @default(false)
+  didoxLastSync  DateTime?
+  didoxSyncError String? // oxirgi sync xato xabari
 
   // ─── 2FA (TOTP - Google Authenticator) ───
-  twoFactorSecret  String?  // shifrlangan TOTP secret
-  twoFactorEnabled Boolean  @default(false)
-  twoFactorBackup  String?  // shifrlangan backup kodlar (JSON array)
+  twoFactorSecret  String? // shifrlangan TOTP secret
+  twoFactorEnabled Boolean @default(false)
+  twoFactorBackup  String? // shifrlangan backup kodlar (JSON array)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  refreshTokens  RefreshToken[]
-  pushSubs       PushSubscription[]
-  organizations  Organization[]
-  orgMembers     OrgMember[]
-  subscription   Subscription?
-  payments       Payment[]
-  auditLogs      AuditLog[]
+  refreshTokens RefreshToken[]
+  pushSubs      PushSubscription[]
+  organizations Organization[]
+  orgMembers    OrgMember[]
+  subscription  Subscription?
+  payments      Payment[]
+  auditLogs     AuditLog[]
+  miraSettings  MiraSettings?
 }
 
 enum UserRole {
@@ -94,23 +95,23 @@ model PushSubscription {
 // TASHKILOTLAR
 // ============================================
 model Organization {
-  id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name            String
-  fullName        String?
-  inn             String?
-  directorName    String?
-  directorPinfl   String?
+  name          String
+  fullName      String?
+  inn           String?
+  directorName  String?
+  directorPinfl String?
 
-  bankName        String?
-  bankAccount     String?
-  mfo             String?
+  bankName    String?
+  bankAccount String?
+  mfo         String?
 
-  address         String?
-  viloyat         String?
-  tuman           String?
+  address String?
+  viloyat String?
+  tuman   String?
 
   phone           String?
   oked            String?
@@ -128,29 +129,30 @@ model Organization {
   opfName         String?
   soato           String?
 
-  soliqSyncedAt   DateTime?
-  status          String?
-  statusText      String?
+  soliqSyncedAt DateTime?
+  status        String?
+  statusText    String?
 
-  stampUrl        String?
-  signatureUrl    String?
-  inviteToken     String?
+  stampUrl     String?
+  signatureUrl String?
+  inviteToken  String?
 
-  isDefault       Boolean  @default(false)
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  members         OrgMember[]
-  bankAccounts    BankAccount[]
-  counterparties  Counterparty[]
-  contracts       Contract[]
-  specifications  Specification[]
-  employees       Employee[]
-  tasischilar     Tasischi[]
-  documents       Document[]
-  invoices        Invoice[]
-  aiDocuments     AiDocument[]
+  members        OrgMember[]
+  bankAccounts   BankAccount[]
+  counterparties Counterparty[]
+  contracts      Contract[]
+  specifications Specification[]
+  employees      Employee[]
+  tasischilar    Tasischi[]
+  documents      Document[]
+  invoices       Invoice[]
+  aiDocuments    AiDocument[]
+  miraSettings   MiraSettings[]
 }
 
 model OrgMember {
@@ -197,25 +199,25 @@ model Counterparty {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  name           String
-  inn            String?
-  directorName   String?
-  bankName       String?
-  bankAccount    String?
-  mfo            String?
-  address        String?
-  phone          String?
-  qqsReg         String?
-  oked           String?
+  name         String
+  inn          String?
+  directorName String?
+  bankName     String?
+  bankAccount  String?
+  mfo          String?
+  address      String?
+  phone        String?
+  qqsReg       String?
+  oked         String?
 
-  stirStatus     String?
-  stirCheckedAt  DateTime?
+  stirStatus    String?
+  stirCheckedAt DateTime?
 
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  contracts      Contract[]
+  contracts Contract[]
 
   @@index([organizationId, isActive])
   @@index([inn])
@@ -256,19 +258,19 @@ enum SubStatus {
 // TO'LOVLAR
 // ============================================
 model Payment {
-  id          String        @id @default(cuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id])
-  provider    PayProvider
-  externalId  String?
-  amount      Decimal
-  currency    String        @default("UZS")
-  plan        String
-  months      Int
-  status      PayStatus     @default(PENDING)
-  metadata    Json?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  provider   PayProvider
+  externalId String?
+  amount     Decimal
+  currency   String      @default("UZS")
+  plan       String
+  months     Int
+  status     PayStatus   @default(PENDING)
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 enum PayProvider {
@@ -287,45 +289,45 @@ enum PayStatus {
 // SHARTNOMALAR
 // ============================================
 model Contract {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   counterpartyId String?
   counterparty   Counterparty? @relation(fields: [counterpartyId], references: [id])
 
   contractNumber String
   contractDate   String
   contractType   ContractType
-  city           String?      @default("Toshkent")
-  amount         Decimal      @default(0)
+  city           String?        @default("Toshkent")
+  amount         Decimal        @default(0)
   status         ContractStatus @default(DRAFT)
 
-  content        String?      @db.Text
-  extraData      Json?
+  content   String? @db.Text
+  extraData Json?
 
-  productName    String?
-  specItems      Json?
-  qqsEnabled     Boolean      @default(false)
-  qqsRate        Decimal      @default(12)
+  productName String?
+  specItems   Json?
+  qqsEnabled  Boolean @default(false)
+  qqsRate     Decimal @default(12)
 
-  signedUs       Boolean      @default(false)
-  signedCp       Boolean      @default(false)
-  signedUsAt     DateTime?
-  signedCpAt     DateTime?
+  signedUs   Boolean   @default(false)
+  signedCp   Boolean   @default(false)
+  signedUsAt DateTime?
+  signedCpAt DateTime?
 
-  didoxSent      Boolean      @default(false)
-  didoxId        String?
+  didoxSent Boolean @default(false)
+  didoxId   String?
 
   // ─── Faktura monitoringi (Didox/Roaming integratsiyasi) ───
-  totalInvoiced  Decimal      @default(0)  // jami fakturalar yig'indisi
-  invoiceCount   Int          @default(0)  // fakturalar soni
-  lastInvoiceAt  DateTime?                  // oxirgi faktura keldi
-  alertLevel     AlertLevel?                // joriy ogohlantirish darajasi
-  alertedAt      DateTime?                  // oxirgi alert vaqti
+  totalInvoiced Decimal     @default(0) // jami fakturalar yig'indisi
+  invoiceCount  Int         @default(0) // fakturalar soni
+  lastInvoiceAt DateTime? // oxirgi faktura keldi
+  alertLevel    AlertLevel? // joriy ogohlantirish darajasi
+  alertedAt     DateTime? // oxirgi alert vaqti
 
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   versions       ContractVersion[]
   specifications Specification[]
@@ -340,35 +342,35 @@ model Contract {
 }
 
 enum AlertLevel {
-  WARNING           // 80% — ogohlantirish
-  CRITICAL          // 95% — kritik darajaga yaqin
-  EXCEEDED          // 100%+ — oshib ketdi
-  CRITICAL_OVERAGE  // 120%+ — sezilarli oshib ketdi
+  WARNING // 80% — ogohlantirish
+  CRITICAL // 95% — kritik darajaga yaqin
+  EXCEEDED // 100%+ — oshib ketdi
+  CRITICAL_OVERAGE // 120%+ — sezilarli oshib ketdi
 }
 
 // ============================================
 // SHARTNOMA OMMAVIY ULASHISH HAVOLALARI
 // ============================================
 model ContractShareLink {
-  id              String    @id @default(cuid())
-  token           String    @unique
-  contractId      String
-  contract        Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  token      String   @unique
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 
-  recipientEmail  String?
-  recipientName   String?
-  recipientPhone  String?
+  recipientEmail String?
+  recipientName  String?
+  recipientPhone String?
 
-  viewedAt        DateTime?
-  viewCount       Int       @default(0)
-  signedAt        DateTime?
-  signerName      String?
-  signerEmail     String?
-  signerIp        String?
+  viewedAt    DateTime?
+  viewCount   Int       @default(0)
+  signedAt    DateTime?
+  signerName  String?
+  signerEmail String?
+  signerIp    String?
 
-  expiresAt       DateTime
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
+  expiresAt DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
   @@index([token])
   @@index([contractId])
@@ -430,21 +432,21 @@ model Employee {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  ism            String
-  jshshir        String?
-  passport       String?
-  lavozim        String?
-  bolim          String?
-  maosh          String?
-  ishBoshi       String?
-  status         String?      @default("active")
-  tel            String?
-  tugilganSana   String?
-  manzil         String?
+  ism          String
+  jshshir      String?
+  passport     String?
+  lavozim      String?
+  bolim        String?
+  maosh        String?
+  ishBoshi     String?
+  status       String? @default("active")
+  tel          String?
+  tugilganSana String?
+  manzil       String?
 
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ============================================
@@ -455,14 +457,14 @@ model Tasischi {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  ism            String
-  jshshir        String?
-  ulush          Decimal?
-  summa          Decimal?
-  passport       String?
-  manzil         String?
+  ism      String
+  jshshir  String?
+  ulush    Decimal?
+  summa    Decimal?
+  passport String?
+  manzil   String?
 
-  createdAt      DateTime     @default(now())
+  createdAt DateTime @default(now())
 }
 
 // ============================================
@@ -473,16 +475,16 @@ model Document {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  type           DocumentType
-  title          String
-  number         String?
-  docDate        String?
-  content        Json
-  status         DocStatus    @default(DRAFT)
+  type    DocumentType
+  title   String
+  number  String?
+  docDate String?
+  content Json
+  status  DocStatus    @default(DRAFT)
 
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum DocumentType {
@@ -519,15 +521,64 @@ model AiDocument {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String?
 
-  title          String
-  prompt         String       @db.Text
-  content        String       @db.Text
-  docType        String?
-  tokensUsed     Int          @default(0)
-  model          String?
+  title      String
+  prompt     String  @db.Text
+  content    String  @db.Text
+  docType    String?
+  tokensUsed Int     @default(0)
+  model      String?
 
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// ============================================
+// MIRA AVTOMATIK SOZLAMALARI
+// ============================================
+// Foydalanuvchi bir marta sozlaydi → Mira shu defaults bilan ishlaydi.
+// Faqat STIR yozish kifoya — qolganini Mira algoritm asosida bajaradi.
+model MiraSettings {
+  id             String       @id @default(cuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Default shartnoma
+  defaultContractType String  @default("OLDI_SOTDI")
+  defaultAmount       Decimal @default(0) @db.Decimal(20, 2)
+  defaultCity         String  @default("Toshkent")
+  defaultProductName  String? @db.VarChar(500)
+  defaultPaymentDays  Int     @default(10)
+
+  // Raqamlash sxemasi
+  // 'date'        — 03/05
+  // 'date-seq'    — 03/05, 03/05-1, 03/05-2
+  // 'counter'     — 001, 002, 003 (prefix bilan: DV-001)
+  // 'ask-each'    — har safar so'ralsin
+  numberingScheme String  @default("date-seq")
+  customPrefix    String? @db.VarChar(20)
+  lastCounter     Int     @default(0)
+  lastDateNumber  String? // bugungi sana uchun oxirgi raqam ("03/05-2")
+
+  // Avtomatik amallar
+  autoSendEnabled Boolean @default(false) // sozlamalar yoqilgandagina
+  autoSignEnabled Boolean @default(false) // browser kalit bilan avto-imzo
+
+  // Xavfsizlik chegarasi
+  // Bu summadan oshsa — avtomatik bo'lsa ham qo'lda tasdiq so'raydi
+  confirmationThreshold Decimal? @db.Decimal(20, 2)
+
+  // Ishonch hisoblagichi
+  // Mira nechta hujjat to'g'ri yaratganligi
+  successCount Int @default(0)
+
+  // Audit
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedAt DateTime?
+
+  @@index([organizationId])
 }
 
 // ============================================
@@ -552,24 +603,24 @@ model Template {
 // ADMIN TIZIMI
 // ============================================
 model Admin {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  permissions  Json     @default("[]")
-  createdAt    DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  permissions Json     @default("[]")
+  createdAt   DateTime @default(now())
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String?
-  user       User?    @relation(fields: [userId], references: [id])
-  action     String
-  entity     String?
-  entityId   String?
-  oldData    Json?
-  newData    Json?
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String?
+  entityId  String?
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
 }
 
 model SystemSetting {
@@ -615,16 +666,16 @@ model Announcement {
 // BILDIRISHNOMALAR
 // ============================================
 model Notification {
-  id              String           @id @default(cuid())
-  userId          String
-  organizationId  String?
-  type            NotificationType
-  title           String
-  message         String           @db.Text
-  link            String?
-  read            Boolean          @default(false)
-  readAt          DateTime?
-  createdAt       DateTime         @default(now())
+  id             String           @id @default(cuid())
+  userId         String
+  organizationId String?
+  type           NotificationType
+  title          String
+  message        String           @db.Text
+  link           String?
+  read           Boolean          @default(false)
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
 
   @@index([userId, read, createdAt])
 }
@@ -633,7 +684,7 @@ enum NotificationType {
   CONTRACT_CREATED
   CONTRACT_EXPIRING
   CONTRACT_SIGNED
-  CONTRACT_OVERAGE          // shartnoma summasidan oshib ketish
+  CONTRACT_OVERAGE // shartnoma summasidan oshib ketish
   SUBSCRIPTION_EXPIRING
   SUBSCRIPTION_ACTIVATED
   CONTRACT_LIMIT
@@ -647,44 +698,44 @@ enum NotificationType {
 // FAKTURALAR (Didox/Roaming dan import)
 // ============================================
 model Invoice {
-  id              String           @id @default(cuid())
-  userId          String
-  organizationId  String
-  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   // Manba va identifikatorlari
-  source          InvoiceSource    @default(MANUAL)
-  didoxId         String?          @unique  // Didox dagi unique ID
-  documentNumber  String?          // EHF/faktura raqami
-  documentDate    String?          // YYYY-MM-DD
+  source         InvoiceSource @default(MANUAL)
+  didoxId        String?       @unique // Didox dagi unique ID
+  documentNumber String? // EHF/faktura raqami
+  documentDate   String? // YYYY-MM-DD
 
   // Bog'liq shartnoma
-  contractId      String?
-  contract        Contract?        @relation(fields: [contractId], references: [id], onDelete: SetNull)
-  contractNumber  String?          // Didox/manual'dan kelgan shartnoma raqami
-  contractDate    String?
+  contractId     String?
+  contract       Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  contractNumber String? // Didox/manual'dan kelgan shartnoma raqami
+  contractDate   String?
 
   // Tomonlar
-  sellerInn       String?          // sotuvchi STIR
-  sellerName      String?
-  buyerInn        String?          // xaridor STIR
-  buyerName       String?
-  direction       InvoiceDirection // bizga keladimi yoki bizdan ketadimi
+  sellerInn  String? // sotuvchi STIR
+  sellerName String?
+  buyerInn   String? // xaridor STIR
+  buyerName  String?
+  direction  InvoiceDirection // bizga keladimi yoki bizdan ketadimi
 
   // Summa
-  amount          Decimal          @default(0) // QQSsiz
-  vatAmount       Decimal          @default(0)
-  totalAmount     Decimal          @default(0) // QQS bilan
+  amount      Decimal @default(0) // QQSsiz
+  vatAmount   Decimal @default(0)
+  totalAmount Decimal @default(0) // QQS bilan
 
   // Holat
-  status          InvoiceStatus    @default(DRAFT)
+  status InvoiceStatus @default(DRAFT)
 
   // Raw ma'lumotlar (Didox response)
-  rawData         Json?
+  rawData Json?
 
-  syncedAt        DateTime         @default(now())
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  syncedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([organizationId])
@@ -694,15 +745,15 @@ model Invoice {
 }
 
 enum InvoiceSource {
-  MANUAL    // qo'lda kiritilgan
-  EXCEL     // Excel orqali import
-  DIDOX     // Didox API'dan
-  ROAMING   // boshqa operator (kelajakda)
+  MANUAL // qo'lda kiritilgan
+  EXCEL // Excel orqali import
+  DIDOX // Didox API'dan
+  ROAMING // boshqa operator (kelajakda)
 }
 
 enum InvoiceDirection {
-  INCOMING  // bizga keladi (xaridor)
-  OUTGOING  // bizdan ketadi (sotuvchi)
+  INCOMING // bizga keladi (xaridor)
+  OUTGOING // bizdan ketadi (sotuvchi)
 }
 
 enum InvoiceStatus {

@@ -24,6 +24,7 @@ export class VoiceController {
       audio?:      { data: string; mimeType: string }
       orgId?:      string
       targetLang?: 'uz' | 'oz' | 'ru'
+      state?:      any   // ConversationState — fastPath suhbatini davom ettirish
     },
   ) {
     if (!body.text && !body.audio?.data) {
@@ -49,6 +50,7 @@ export class VoiceController {
       text:       body.text,
       audio:      body.audio,
       targetLang: body.targetLang,
+      state:      body.state || null,
       context:    { userId: user.sub, organizationId: orgId },
     })
   }

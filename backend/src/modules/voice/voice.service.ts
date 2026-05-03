@@ -4,8 +4,10 @@ import { PrismaService }         from '../prisma/prisma.service'
 import { CounterpartiesService } from '../counterparties/cp.service'
 import { ContractsService }      from '../contracts/contracts.service'
 import { StirService }           from '../stir/stir.service'
+import { MiraService }           from '../mira/mira.service'
 import { SYSTEM_INSTRUCTION }    from './voice.prompts'
 import { TOOLS }                 from './voice.tools'
+import { VoiceFastPath, type ConversationState } from './voice.fastpath'
 
 
 interface VoiceContext {
@@ -25,6 +27,10 @@ export interface VoiceResult {
   response:     string  // agent javobi (matn)
   audio?:       { data: string; mimeType: string }  // agent javobi (ovoz, base64 PCM)
   toolsCalled:  ToolResult[]
+  /** Suhbat davom etmoqdami (fastPath state) — frontend keyingi xabarda yuboradi */
+  state?:       ConversationState | null
+  /** Frontend imzolab Didox'ga yuborishi kerakmi? */
+  pendingSign?: { contractId: string; contractNumber: string }
 }
 
 @Injectable()
@@ -34,17 +40,22 @@ export class VoiceService {
   private readonly model    = 'gemini-2.5-pro'           // matn + tool calling uchun
   private readonly ttsModel = 'gemini-2.5-flash-preview-tts'  // ovoz uchun
 
+  private readonly fastPath: VoiceFastPath
+
   constructor(
     private prisma:    PrismaService,
     private cpService: CounterpartiesService,
     private contractsService: ContractsService,
     private stirService: StirService,
+    private miraService: MiraService,
   ) {
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       this.logger.warn('GEMINI_API_KEY mavjud emas — VoiceService ishlamaydi')
     }
     this.client = new GoogleGenAI({ apiKey: apiKey || '' })
+
+    this.fastPath = new VoiceFastPath(prisma, cpService, contractsService, stirService, miraService)
   }
 
   // ─── Buyruqni qabul qilish (matn yoki audio) ───────────────────────────
@@ -52,6 +63,7 @@ export class VoiceService {
     text?:       string
     audio?:      { data: string; mimeType: string } // base64 + mime
     targetLang?: 'uz' | 'oz' | 'ru'
+    state?:      ConversationState | null
     context:     VoiceContext
   }): Promise<VoiceResult> {
     if (!process.env.GEMINI_API_KEY) {
@@ -65,6 +77,33 @@ export class VoiceService {
     }
     if (!userText.trim()) {
       throw new BadRequestException("Bo'sh buyruq")
+    }
+
+    // 1.5. Tezkor algoritm (LLM'siz, token tejaydi)
+    const fastResult = await this.fastPath.tryHandle({
+      text:       userText,
+      userId:     opts.context.userId,
+      orgId:      opts.context.organizationId,
+      state:      opts.state,
+      targetLang: opts.targetLang,
+    })
+    if (fastResult) {
+      const audio = fastResult.response
+        ? await this.generateSpeech(fastResult.response).catch(() => undefined)
+        : undefined
+      return {
+        transcript:  userText,
+        response:    fastResult.response,
+        audio,
+        toolsCalled: fastResult.toolsCalled.map(t => ({
+          name:    t.name,
+          result:  t.data,
+          success: t.success,
+          error:   t.error,
+        })),
+        state:       fastResult.state,
+        pendingSign: fastResult.pendingSign,
+      }
     }
 
     // Til ko'rsatmasi qo'shilgan system prompt
