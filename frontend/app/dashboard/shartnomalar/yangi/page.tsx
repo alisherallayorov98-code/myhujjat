@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
 import { useTranslations }    from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Eye, EyeOff, Plus, Trash2, Printer } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Plus, Trash2, Printer, RefreshCw, X } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }         from '@/components/layout/PageHeader'
 import { Button }             from '@/components/ui/Button'
 import { Input }              from '@/components/ui/Input'
 import { Card }               from '@/components/ui/Card'
 import { useAuth }            from '@/hooks/useAuth'
+import { useFormDraft }       from '@/hooks/useFormDraft'
 import api                    from '@/lib/api'
 import {
   CONTRACT_TYPE_CONFIG,
@@ -92,6 +93,22 @@ export default function YangiShartnoma() {
     customSections: [] as { title: string; body: string }[],
   })
 
+  // Auto-save: form to'ldirib turganda har 1 soniyada localStorage'ga saqlash.
+  // Sahifa yopilsa yoki F5 bosilsa — keyin qaytib kelganda tiklash mumkin.
+  // Clone holatida (?cloneFrom=...) qoralamani ishlatmaymiz, chunki manba shartnomadan keladi.
+  const draftKey = currentOrg?.id ? `contract-new-${currentOrg.id}` : 'contract-new'
+  const draft = useFormDraft(draftKey, { form, type, orgEdits, step })
+
+  function restoreDraft() {
+    const saved = draft.restore()
+    if (!saved) return
+    setForm(saved.form)
+    setType(saved.type)
+    setOrgEdits(saved.orgEdits)
+    setStep(saved.step)
+    toast.success(t('new_.draftRestored'))
+  }
+
   const PARTY_FIELDS: [string, string][] = [
     [t('partyFields.stir'),         'inn'],
     [t('partyFields.name'),         'name'],
@@ -150,17 +167,45 @@ export default function YangiShartnoma() {
     }))
     setCloneSourceNumber(cloneSource.contractNumber || cloneSource.id?.slice(0, 8))
     setStep(2) // 1-bosqichni o'tkazib yuboramiz
+    // Clone — eski qoralama bilan aralashmaslik uchun banner'ni yashiramiz
+    draft.dismiss()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cloneSource])
 
   const mutation = useMutation({
     mutationFn: (data: any) => api.post('/contracts', data),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['contracts'] })
+      draft.clear() // Saqlangan qoralama tozalanadi
       toast.success(t('toast.created'))
       router.push(`/dashboard/shartnomalar/${res.data.id}`)
     },
     onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
   })
+
+  // ─── Step navigation validatsiyasi ──────────────────────────────────
+  function canGoToStep3(): { ok: boolean; message?: string } {
+    if (!form.counterpartyId)              return { ok: false, message: t('new_.validation.cpRequired') }
+    if (!form.contractDate)                return { ok: false, message: t('new_.validation.dateRequired') }
+    return { ok: true }
+  }
+  function canCreate(): { ok: boolean; message?: string } {
+    if (!form.counterpartyId)              return { ok: false, message: t('new_.validation.cpRequired') }
+    if (!form.contractDate)                return { ok: false, message: t('new_.validation.dateRequired') }
+    const totalAmount = form.specItems.reduce((s, i) => s + i.summa, 0) || parseFloat(form.amount) || 0
+    if (totalAmount <= 0)                  return { ok: false, message: t('new_.validation.amountRequired') }
+    if (!currentOrg)                       return { ok: false, message: t('toast.orgRequired') }
+    return { ok: true }
+  }
+
+  function tryGoToStep3() {
+    const v = canGoToStep3()
+    if (!v.ok) {
+      toast.error(v.message!)
+      return
+    }
+    setStep(3)
+  }
 
   const upd = (key: string, val: string) => setForm(f => ({ ...f, [key]: val }))
   const updExtra = (key: string, val: string) => setForm(f => ({ ...f, extraData: { ...f.extraData, [key]: val } }))
@@ -241,12 +286,11 @@ export default function YangiShartnoma() {
   }, [preview, deferredForm, deferredOrgEdits, deferredType, currentOrg?.id, selectedCp?.id])
 
   function handleCreate() {
-    if (!currentOrg?.id) return
-    if (!form.counterpartyId) { toast.error(t('toast.cpRequired')); return }
-    if (!form.contractDate)   { toast.error(t('toast.dateRequired')); return }
+    const v = canCreate()
+    if (!v.ok) { toast.error(v.message!); return }
     const amount = specTotal > 0 ? specTotal : parseFloat(form.amount) || 0
     mutation.mutate({
-      organizationId: currentOrg.id,
+      organizationId: currentOrg!.id,
       counterpartyId: form.counterpartyId || undefined,
       contractType:   type,
       contractNumber: form.contractNumber || undefined,
@@ -304,6 +348,17 @@ export default function YangiShartnoma() {
           }
         />
         <StepBar step={1} />
+
+        {draft.hasDraft && (
+          <DraftBanner
+            savedAt={draft.draftSavedAt}
+            onRestore={restoreDraft}
+            onDismiss={() => draft.dismiss()}
+            onDelete={() => draft.clear()}
+            t={t}
+          />
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Object.entries(CONTRACT_TYPE_CONFIG).map(([key, cfg]) => (
             <button
@@ -346,7 +401,7 @@ export default function YangiShartnoma() {
               <Button variant="outline" size="sm" leftIcon={<ArrowLeft size={14} />} onClick={() => setStep(1)}>
                 {t('new_.back')}
               </Button>
-              <Button size="sm" onClick={() => setStep(3)}>
+              <Button size="sm" onClick={tryGoToStep3}>
                 {t('new_.next')}
               </Button>
             </div>
@@ -650,4 +705,61 @@ export default function YangiShartnoma() {
       )}
     </div>
   )
+}
+
+// ─── Saqlangan qoralama banner'i ────────────────────────────────────────
+function DraftBanner({
+  savedAt, onRestore, onDismiss, onDelete, t,
+}: {
+  savedAt:   string | null
+  onRestore: () => void
+  onDismiss: () => void
+  onDelete:  () => void
+  t:         (key: string, params?: any) => string
+}) {
+  const timeAgo = savedAt ? formatRelativeTime(savedAt) : ''
+  return (
+    <div className="mb-4 p-4 bg-gradient-to-r from-[#FEF3C7] to-[#FDE68A] border border-[#FCD34D] rounded-xl flex items-start gap-3">
+      <div className="w-10 h-10 rounded-xl bg-white/60 flex items-center justify-center shrink-0">
+        <RefreshCw size={18} className="text-[#B45309]" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-[#78350F]">{t('new_.draftTitle')}</p>
+        <p className="text-xs text-[#92400E] mt-0.5">{t('new_.draftHint', { time: timeAgo })}</p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={onRestore}
+          className="px-3 py-1.5 rounded-lg bg-[#B45309] text-white text-xs font-medium hover:bg-[#92400E] transition"
+        >
+          {t('new_.draftRestore')}
+        </button>
+        <button
+          onClick={onDelete}
+          className="px-3 py-1.5 rounded-lg bg-white text-[#92400E] text-xs font-medium border border-[#FCD34D] hover:bg-[#FEF3C7] transition"
+        >
+          {t('new_.draftDelete')}
+        </button>
+        <button
+          onClick={onDismiss}
+          className="p-1.5 rounded-lg text-[#92400E] hover:bg-white/40 transition"
+          title={t('new_.draftDismiss')}
+        >
+          <X size={14} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ISO timestamp -> "5 daqiqa avval", "2 soat avval", "kecha"
+function formatRelativeTime(iso: string): string {
+  const now    = Date.now()
+  const then   = new Date(iso).getTime()
+  const secAgo = Math.floor((now - then) / 1000)
+  if (secAgo < 60)        return `${secAgo} soniya avval`
+  if (secAgo < 3600)      return `${Math.floor(secAgo / 60)} daqiqa avval`
+  if (secAgo < 86400)     return `${Math.floor(secAgo / 3600)} soat avval`
+  if (secAgo < 86400 * 7) return `${Math.floor(secAgo / 86400)} kun avval`
+  return new Date(iso).toLocaleDateString()
 }

@@ -41,6 +41,7 @@
     "makeCancelled": "Бекор қилиш",
     "clear": "Тозалаш",
     "confirmStatus": "{count} та шартнома ҳолати \"{status}\" га ўзгартирилсинми?",
+    "confirmTitle": "Ҳолатни ўзгартириш",
     "updated": "{count} та шартнома янгиланди"
   },
   "table": {
@@ -92,6 +93,17 @@
     "previewTitle": "Шартнома кўриниши",
     "previewDesc": "Маълумотлар киритилган ҳолда автоматик янгиланади",
     "print": "Печат",
+    "draftTitle": "Сақланган қоралама мавжуд",
+    "draftHint": "Аввал тўлдирган маълумотларингиз бор — {time} сақланган. Тиклаш хоҳлайсизми?",
+    "draftRestore": "Тиклаш",
+    "draftDelete": "Ўчириш",
+    "draftDismiss": "Ёпиш",
+    "draftRestored": "Қоралама тикланди",
+    "validation": {
+      "cpRequired": "Контрагентни танланг",
+      "dateRequired": "Сана тўлдирилиши шарт",
+      "amountRequired": "Сумма ёки спесификация киритилиши шарт"
+    },
     "form": {
       "contractNumberLabel": "Шартнома рақами",
       "autoHint": "Бўш → автоматик",

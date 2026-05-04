@@ -14,6 +14,7 @@ import { Button }    from '@/components/ui/Button'
 import { Input }     from '@/components/ui/Input'
 import { Card }      from '@/components/ui/Card'
 import { ContractStatusBadge } from '@/components/ui/Badge'
+import { ConfirmDialog }     from '@/components/ui/Modal'
 import { EmptyState, TableRowSkeleton } from '@/components/ui/Skeleton'
 import { useAuth }   from '@/hooks/useAuth'
 import api           from '@/lib/api'
@@ -42,6 +43,7 @@ export default function ShartnomalarPage() {
   const [sortOrder,    setSortOrder]    = useState<SortOrder>('desc')
   const [page,         setPage]         = useState(1)
   const [selected,     setSelected]     = useState<Set<string>>(new Set())
+  const [bulkConfirm,  setBulkConfirm]  = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['contracts', currentOrg?.id, search, typeFilter, statusFilter, page],
@@ -147,9 +149,12 @@ export default function ShartnomalarPage() {
 
   function handleBulkStatus(status: string) {
     if (selected.size === 0) return
-    const statusLabel = (t.raw as any)('statusOptions')[status] || status
-    if (!confirm(t('bulk.confirmStatus', { count: selected.size, status: statusLabel }))) return
-    bulkStatusMut.mutate({ ids: Array.from(selected), status })
+    setBulkConfirm(status)
+  }
+  function executeBulkStatus() {
+    if (!bulkConfirm) return
+    bulkStatusMut.mutate({ ids: Array.from(selected), status: bulkConfirm })
+    setBulkConfirm(null)
   }
 
   return (
@@ -354,6 +359,19 @@ export default function ShartnomalarPage() {
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         )}
       </Card>
+
+      <ConfirmDialog
+        open={!!bulkConfirm}
+        onClose={() => setBulkConfirm(null)}
+        onConfirm={executeBulkStatus}
+        title={t('bulk.confirmTitle')}
+        description={bulkConfirm ? t('bulk.confirmStatus', {
+          count: selected.size,
+          status: (t.raw as any)('statusOptions')[bulkConfirm] || bulkConfirm,
+        }) : ''}
+        variant={bulkConfirm === 'CANCELLED' ? 'danger' : 'primary'}
+        loading={bulkStatusMut.isPending}
+      />
     </div>
   )
 }

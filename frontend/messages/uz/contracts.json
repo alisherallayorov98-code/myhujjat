@@ -41,6 +41,7 @@
     "makeCancelled": "Bekor qilish",
     "clear": "Tozalash",
     "confirmStatus": "{count} ta shartnoma holati \"{status}\" ga o'zgartirilsinmi?",
+    "confirmTitle": "Holatni o'zgartirish",
     "updated": "{count} ta shartnoma yangilandi"
   },
   "table": {
@@ -92,6 +93,17 @@
     "previewTitle": "Shartnoma ko'rinishi",
     "previewDesc": "Ma'lumotlar kiritilgan holda avtomatik yangilanadi",
     "print": "Pechat",
+    "draftTitle": "Saqlangan qoralama mavjud",
+    "draftHint": "Avval to'ldirgan ma'lumotlaringiz bor — {time} saqlangan. Tiklash xohlaysizmi?",
+    "draftRestore": "Tiklash",
+    "draftDelete": "O'chirish",
+    "draftDismiss": "Yopish",
+    "draftRestored": "Qoralama tiklandi",
+    "validation": {
+      "cpRequired": "Kontragentni tanlang",
+      "dateRequired": "Sana to'ldirilishi shart",
+      "amountRequired": "Summa yoki spesifikatsiya kiritilishi shart"
+    },
     "form": {
       "contractNumberLabel": "Shartnoma raqami",
       "autoHint": "Bo'sh → avtomatik",

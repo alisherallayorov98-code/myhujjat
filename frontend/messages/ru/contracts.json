@@ -41,6 +41,7 @@
     "makeCancelled": "Отменить",
     "clear": "Очистить",
     "confirmStatus": "Изменить статус {count} договоров на \"{status}\"?",
+    "confirmTitle": "Изменение статуса",
     "updated": "Обновлено договоров: {count}"
   },
   "table": {
@@ -92,6 +93,17 @@
     "previewTitle": "Вид договора",
     "previewDesc": "Обновляется автоматически при вводе данных",
     "print": "Печать",
+    "draftTitle": "Есть сохранённый черновик",
+    "draftHint": "Ранее введённые данные сохранены {time}. Восстановить?",
+    "draftRestore": "Восстановить",
+    "draftDelete": "Удалить",
+    "draftDismiss": "Закрыть",
+    "draftRestored": "Черновик восстановлен",
+    "validation": {
+      "cpRequired": "Выберите контрагента",
+      "dateRequired": "Заполните дату",
+      "amountRequired": "Укажите сумму или спецификацию"
+    },
     "form": {
       "contractNumberLabel": "Номер договора",
       "autoHint": "Пусто → автоматически",
