@@ -48,9 +48,17 @@ export function renderContractHtml(contract: any): string {
   const sellerLabel = (cfg.parties?.seller || 'SOTUVCHI').toUpperCase()
   const buyerLabel  = (cfg.parties?.buyer  || 'XARIDOR').toUpperCase()
 
-  // REKVIZITLAR oldidan body matnini ajratamiz
+  // REKVIZITLAR oldidan body matnini ajratamiz.
+  // Quyidagi naqshlardan birini topadi:
+  //   "16. TOMONLARNING REKVIZITLARI VA IMZOLARI"
+  //   "10. TOMONLARNING REKVIZITLARI"
+  //   "TOMONLAR:"
+  //   "PARTIES:"
+  //   "REKVIZITLAR:"
+  // Shu yerdan keyingi qism (imzo joylari, MFO, INN) avtomatik render qilinadigan
+  // chiroyli rekvizit card bilan almashtiriladi.
   const fullContent = contract.content || ''
-  const splitRegex  = /\n\s*\d+\.\s*TOMONLARNING\s+REKVIZITLARI[^\n]*\n/i
+  const splitRegex  = /\n\s*(?:\d+\.\s*)?(?:TOMONLARNING\s+REKVIZITLARI[^\n]*|TOMONLAR\s*:|PARTIES\s*:|REKVIZITLAR\s*:)\s*\n/i
   const parts       = fullContent.split(splitRegex)
   let bodyText      = parts[0] || fullContent
 
