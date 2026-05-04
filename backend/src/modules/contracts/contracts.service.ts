@@ -245,12 +245,44 @@ export class ContractsService {
   }
 
   async getStats(orgId: string) {
-    const [total, active, draft, completed] = await Promise.all([
+    const monthStart = new Date()
+    monthStart.setDate(1)
+    monthStart.setHours(0, 0, 0, 0)
+
+    const [total, active, draft, completed, cancelled, thisMonth, totalAmountAgg] = await Promise.all([
       this.prisma.contract.count({ where: { organizationId: orgId, isActive: true } }),
-      this.prisma.contract.count({ where: { organizationId: orgId, status: 'ACTIVE' } }),
-      this.prisma.contract.count({ where: { organizationId: orgId, status: 'DRAFT' } }),
-      this.prisma.contract.count({ where: { organizationId: orgId, status: 'COMPLETED' } }),
+      this.prisma.contract.count({ where: { organizationId: orgId, status: 'ACTIVE',     isActive: true } }),
+      this.prisma.contract.count({ where: { organizationId: orgId, status: 'DRAFT',      isActive: true } }),
+      this.prisma.contract.count({ where: { organizationId: orgId, status: 'COMPLETED',  isActive: true } }),
+      this.prisma.contract.count({ where: { organizationId: orgId, status: 'CANCELLED',  isActive: true } }),
+      this.prisma.contract.count({
+        where: { organizationId: orgId, isActive: true, createdAt: { gte: monthStart } },
+      }),
+      // Faol shartnomalarning umumiy summasi
+      this.prisma.contract.aggregate({
+        where: { organizationId: orgId, isActive: true, status: { in: ['ACTIVE', 'COMPLETED'] } },
+        _sum:  { amount: true },
+      }),
     ])
-    return { total, active, draft, completed }
+
+    return {
+      total,
+      active,
+      draft,
+      completed,
+      cancelled,
+      thisMonth,
+      totalAmount: Number(totalAmountAgg._sum.amount || 0),
+    }
+  }
+
+  async bulkDelete(orgId: string, ids: string[]) {
+    if (!Array.isArray(ids) || ids.length === 0) return { deleted: 0 }
+    // Soft delete + multi-tenant guard (faqat ushbu tashkilot shartnomalari)
+    const res = await this.prisma.contract.updateMany({
+      where: { id: { in: ids }, organizationId: orgId, isActive: true },
+      data:  { isActive: false },
+    })
+    return { deleted: res.count }
   }
 }

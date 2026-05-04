@@ -42,7 +42,18 @@
     "clear": "Тозалаш",
     "confirmStatus": "{count} та шартнома ҳолати \"{status}\" га ўзгартирилсинми?",
     "confirmTitle": "Ҳолатни ўзгартириш",
-    "updated": "{count} та шартнома янгиланди"
+    "updated": "{count} та шартнома янгиланди",
+    "delete": "Ўчириш",
+    "deleteTitle": "Шартномаларни ўчириш",
+    "deleteConfirm": "Танланган {count} та шартномани ўчириш? Бу амални қайтариб бўлмайди.",
+    "deleted": "{count} та шартнома ўчирилди"
+  },
+  "stats": {
+    "total":       "Жами",
+    "active":      "Фаол",
+    "draft":       "Қоралама",
+    "thisMonth":   "Бу ойда",
+    "totalAmount": "Умумий сумма"
   },
   "table": {
     "number": "Рақам",

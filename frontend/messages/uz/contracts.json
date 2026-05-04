@@ -42,7 +42,18 @@
     "clear": "Tozalash",
     "confirmStatus": "{count} ta shartnoma holati \"{status}\" ga o'zgartirilsinmi?",
     "confirmTitle": "Holatni o'zgartirish",
-    "updated": "{count} ta shartnoma yangilandi"
+    "updated": "{count} ta shartnoma yangilandi",
+    "delete": "O'chirish",
+    "deleteTitle": "Shartnomalarni o'chirish",
+    "deleteConfirm": "Tanlangan {count} ta shartnomani o'chirish? Bu amalni qaytarib bo'lmaydi.",
+    "deleted": "{count} ta shartnoma o'chirildi"
+  },
+  "stats": {
+    "total":       "Jami",
+    "active":      "Faol",
+    "draft":       "Qoralama",
+    "thisMonth":   "Bu oyda",
+    "totalAmount": "Umumiy summa"
   },
   "table": {
     "number": "Raqam",

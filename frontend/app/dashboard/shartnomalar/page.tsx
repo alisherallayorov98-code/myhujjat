@@ -7,6 +7,7 @@ import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send, Eye,
+  TrendingUp, CheckCircle, FileEdit, DollarSign,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -41,9 +42,25 @@ export default function ShartnomalarPage() {
   const [dateRange,    setDateRange]    = useState<DateRange>('all')
   const [sortKey,      setSortKey]      = useState<SortKey>('createdAt')
   const [sortOrder,    setSortOrder]    = useState<SortOrder>('desc')
-  const [page,         setPage]         = useState(1)
-  const [selected,     setSelected]     = useState<Set<string>>(new Set())
-  const [bulkConfirm,  setBulkConfirm]  = useState<string | null>(null)
+  const [page,             setPage]             = useState(1)
+  const [selected,         setSelected]         = useState<Set<string>>(new Set())
+  const [bulkConfirm,      setBulkConfirm]      = useState<string | null>(null)
+  const [bulkDeleteOpen,   setBulkDeleteOpen]   = useState(false)
+
+  // Statistika kartochkalari uchun
+  const { data: stats } = useQuery<{
+    total:       number
+    active:      number
+    draft:       number
+    completed:   number
+    cancelled:   number
+    thisMonth:   number
+    totalAmount: number
+  }>({
+    queryKey: ['contract-stats', currentOrg?.id],
+    queryFn:  () => api.get(`/contracts/stats/${currentOrg!.id}`).then(r => r.data),
+    enabled:  !!currentOrg?.id,
+  })
 
   const { data, isLoading } = useQuery({
     queryKey: ['contracts', currentOrg?.id, search, typeFilter, statusFilter, page],
@@ -71,10 +88,27 @@ export default function ShartnomalarPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['contracts'] })
+      qc.invalidateQueries({ queryKey: ['contract-stats'] })
       const count = selected.size
       setSelected(new Set())
       toast.success(t('bulk.updated', { count }))
     },
+  })
+
+  const bulkDeleteMut = useMutation({
+    mutationFn: () => api.post('/contracts/bulk-delete', {
+      orgId: currentOrg!.id,
+      ids:   Array.from(selected),
+    }),
+    onSuccess: (res: any) => {
+      qc.invalidateQueries({ queryKey: ['contracts'] })
+      qc.invalidateQueries({ queryKey: ['contract-stats'] })
+      const count = res.data?.deleted ?? 0
+      setSelected(new Set())
+      setBulkDeleteOpen(false)
+      toast.success(t('bulk.deleted', { count }))
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
   })
 
   const rawContracts = data?.data || []
@@ -188,6 +222,43 @@ export default function ShartnomalarPage() {
         }
       />
 
+      {/* Statistika kartochkalari */}
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
+          <StatCard
+            label={t('stats.total')}
+            value={stats.total.toLocaleString()}
+            icon={<FileText size={16} />}
+            color="bg-[#F1F5F9] text-[#475569]"
+          />
+          <StatCard
+            label={t('stats.active')}
+            value={stats.active.toLocaleString()}
+            icon={<CheckCircle size={16} />}
+            color="bg-[#DCFCE7] text-[#15803D]"
+          />
+          <StatCard
+            label={t('stats.draft')}
+            value={stats.draft.toLocaleString()}
+            icon={<FileEdit size={16} />}
+            color="bg-[#FEF3C7] text-[#B45309]"
+          />
+          <StatCard
+            label={t('stats.thisMonth')}
+            value={stats.thisMonth.toLocaleString()}
+            icon={<TrendingUp size={16} />}
+            color="bg-[#DBEAFE] text-[#1D4ED8]"
+          />
+          <StatCard
+            label={t('stats.totalAmount')}
+            value={formatCurrency(stats.totalAmount)}
+            icon={<DollarSign size={16} />}
+            color="bg-[#EDE9FE] text-[#7C3AED]"
+            full
+          />
+        </div>
+      )}
+
       {/* Filtrlar */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">
         <Input
@@ -236,6 +307,14 @@ export default function ShartnomalarPage() {
           </Button>
           <Button size="xs" variant="outline" onClick={() => handleBulkStatus('CANCELLED')}>
             {t('bulk.makeCancelled')}
+          </Button>
+          <Button
+            size="xs" variant="outline"
+            className="text-red-500 hover:bg-red-50 hover:border-red-200"
+            leftIcon={<Trash2 size={11} />}
+            onClick={() => setBulkDeleteOpen(true)}
+          >
+            {t('bulk.delete')}
           </Button>
           <Button size="xs" variant="outline" onClick={() => setSelected(new Set())}>
             {t('bulk.clear')}
@@ -334,14 +413,14 @@ export default function ShartnomalarPage() {
                           <button
                             onClick={() => router.push(`/dashboard/shartnomalar/${c.id}/preview`)}
                             title={t('viewBtn')}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all"
+                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all"
                           >
                             <Eye size={14} />
                           </button>
                           <button
                             onClick={() => router.push(`/dashboard/shartnomalar/yangi?cloneFrom=${c.id}`)}
                             title={t('clone.button')}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-all"
+                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-all"
                           >
                             <Copy size={14} />
                           </button>
@@ -372,6 +451,40 @@ export default function ShartnomalarPage() {
         variant={bulkConfirm === 'CANCELLED' ? 'danger' : 'primary'}
         loading={bulkStatusMut.isPending}
       />
+
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onClose={() => setBulkDeleteOpen(false)}
+        onConfirm={() => bulkDeleteMut.mutate()}
+        title={t('bulk.deleteTitle')}
+        description={t('bulk.deleteConfirm', { count: selected.size })}
+        variant="danger"
+        loading={bulkDeleteMut.isPending}
+      />
+    </div>
+  )
+}
+
+// ─── Statistika kartochkasi ─────────────────────────────────────────
+function StatCard({ label, value, icon, color, full }: {
+  label: string
+  value: string
+  icon:  React.ReactNode
+  color: string
+  full?: boolean
+}) {
+  return (
+    <div className={cn(
+      'bg-white border border-[#E2E8F0] rounded-xl p-3.5 flex items-center gap-3',
+      full && 'col-span-2 sm:col-span-1 lg:col-span-1',
+    )}>
+      <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', color)}>
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] uppercase tracking-wider text-[#94A3B8] truncate">{label}</p>
+        <p className="text-base font-bold text-[#0F172A] truncate tabular-nums">{value}</p>
+      </div>
     </div>
   )
 }

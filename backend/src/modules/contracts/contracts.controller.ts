@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete,
-  Body, Param, Query, HttpCode, HttpStatus, UseGuards,
+  Body, Param, Query, HttpCode, HttpStatus, UseGuards, BadRequestException,
 } from '@nestjs/common'
 import { ContractsService, CreateContractDto } from './contracts.service'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
@@ -77,5 +77,18 @@ export class ContractsController {
   ) {
     await this.tenant.requireResourceOwnership(user.sub, 'contract', id)
     return this.contractsService.remove(orgId, id)
+  }
+
+  // Bulk delete — multi-tenant guard ichkarida
+  @Post('bulk-delete')
+  async bulkDelete(
+    @CurrentUser() user: any,
+    @Body() body: { orgId: string; ids: string[] },
+  ) {
+    if (!body?.orgId || !Array.isArray(body?.ids)) {
+      throw new BadRequestException('orgId va ids kerak')
+    }
+    await this.tenant.requireOrgAccess(user.sub, body.orgId)
+    return this.contractsService.bulkDelete(body.orgId, body.ids)
   }
 }
