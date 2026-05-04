@@ -63,14 +63,34 @@ jobs:
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
+        env:
+          PROJECT_PATH: ${{ secrets.PROJECT_PATH || '/home/alisher/myhujjat.uz' }}
         with:
           host:     ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key:      ${{ secrets.SERVER_SSH_KEY }}
+          envs:     PROJECT_PATH
           script: |
-            cd /opt/myhujjat
+            set -e
+            cd "$PROJECT_PATH"
+
             git pull origin main
-            docker compose -f docker-compose.prod.yml build backend
-            docker compose -f docker-compose.prod.yml up -d
-            docker compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
+
+            # Frontend + backend rebuild (yangi kod, i18n messages, migration'lar)
+            # docker-compose.override.yml — port mappings (3100, 4100) Caddy o'rniga
+            COMPOSE="docker compose -f docker-compose.prod.yml"
+            [ -f docker-compose.override.yml ] && COMPOSE="$COMPOSE -f docker-compose.override.yml"
+
+            $COMPOSE build frontend backend
+
+            # Atomic switch — eski tushadi, yangi ko'tariladi
+            $COMPOSE up -d frontend backend
+
+            # Backend startup + DB ready uchun kutish
+            sleep 10
+
+            # Migration deploy (yangi migration'lar bo'lsa)
+            $COMPOSE exec -T backend npx prisma migrate deploy || true
+
+            # Eski image'larni tozalash
             docker system prune -f

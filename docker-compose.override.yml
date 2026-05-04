@@ -1,0 +1,20 @@
+# Production override — Caddy o'rniga to'g'ridan-to'g'ri port mapping
+# Frontend: 3100 (host) → 3000 (container)
+# Backend:  4100 (host) → 4000 (container)
+#
+# Caddy ishlatilganda (DNS + 80/443 mavjud) — bu fayl o'chiriladi
+# yoki Caddy services'i `profiles: [disabled]` bilan o'chiriladi.
+
+services:
+  frontend:
+    ports:
+      - "3100:3000"
+
+  backend:
+    ports:
+      - "4100:4000"
+
+  # Caddy — port 80 ishg'ol etilgan VPS'da ishlamaydi, hozircha o'chiq
+  caddy:
+    profiles:
+      - disabled
