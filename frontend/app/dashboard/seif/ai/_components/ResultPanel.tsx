@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Sparkles, Copy, Check, Download, FileText } from 'lucide-react'
+import { Sparkles, Copy, Check, Download, FileText, Maximize2, ChevronLeft } from 'lucide-react'
 import { Card }  from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { exportContractPdf  } from '@/lib/export/contractPdf'
@@ -19,6 +19,7 @@ interface Props {
 export function ResultPanel({ loading, result, docType, orgName }: Props) {
   const t = useTranslations('seifAi')
   const [copied, setCopied] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
 
   async function handleCopy() {
     await navigator.clipboard.writeText(result)
@@ -40,6 +41,13 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
 
         {result && (
           <div className="flex gap-2">
+            <button
+              onClick={() => setFullscreen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F1F5F9] transition-colors"
+              title="To'liq ekranda ko'rish"
+            >
+              <Maximize2 size={12} />
+            </button>
             <button
               onClick={handleCopy}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F1F5F9] transition-colors"
@@ -65,11 +73,51 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
         )}
       </div>
 
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto bg-[#F1F5F9] p-4">
         {loading ? <LoadingState /> :
          result  ? <ResultView content={result} /> :
                    <EmptyState />}
       </div>
+
+      {fullscreen && result && (
+        <div className="fixed inset-0 z-50 bg-[#1E293B] flex flex-col">
+          <div className="bg-[#0F172A] text-white border-b border-[#1E293B] flex items-center px-3 sm:px-4 h-14 gap-2 shrink-0">
+            <button
+              onClick={() => setFullscreen(false)}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <ChevronLeft size={16} />
+              <span className="hidden sm:inline">Orqaga</span>
+            </button>
+            <div className="h-6 w-px bg-white/10 mx-1" />
+            <Sparkles size={14} className="text-[#A78BFA]" />
+            <p className="text-sm font-semibold">{docType}</p>
+            <div className="flex-1" />
+            <button onClick={() => exportContractPdf({ title: docType, content: result, orgName })} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+              <Download size={14} /><span className="hidden sm:inline">PDF</span>
+            </button>
+            <button onClick={() => exportContractDocx({ title: docType, content: result, orgName })} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+              <FileText size={14} /><span className="hidden sm:inline">Word</span>
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
+              <div
+                className="bg-white shadow-2xl p-12 whitespace-pre-wrap"
+                style={{
+                  width: '794px',
+                  minHeight: '1123px',
+                  fontFamily: '"Times New Roman", serif',
+                  fontSize: 14,
+                  lineHeight: 1.8,
+                }}
+              >
+                {result}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }
@@ -103,12 +151,18 @@ function LoadingState() {
 
 function ResultView({ content }: { content: string }) {
   return (
-    <pre
-      className="whitespace-pre-wrap leading-relaxed text-[#0F172A] select-text"
-      style={{ fontFamily: '"Times New Roman", serif', fontSize: '13px', lineHeight: '1.8' }}
+    <div
+      className="bg-white shadow-md mx-auto p-8 sm:p-12 leading-relaxed text-[#0F172A] rounded-sm whitespace-pre-wrap select-text"
+      style={{
+        fontFamily: '"Times New Roman", serif',
+        fontSize: 13,
+        lineHeight: 1.8,
+        maxWidth: 794,
+        minHeight: 600,
+      }}
     >
       {content}
-    </pre>
+    </div>
   )
 }
 

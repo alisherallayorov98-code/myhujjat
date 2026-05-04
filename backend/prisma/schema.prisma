@@ -53,6 +53,8 @@ model User {
   auditLogs      AuditLog[]
   miraSettings   MiraSettings?
   bulkSendDrafts BulkSendDraft[]
+  templateAcks   TemplateAcknowledgement[]
+  userTemplates  UserTemplate[]
 }
 
 enum UserRole {
@@ -155,6 +157,7 @@ model Organization {
   aiDocuments    AiDocument[]
   miraSettings   MiraSettings[]
   bulkSendDrafts BulkSendDraft[]
+  userTemplates  UserTemplate[]
 }
 
 model OrgMember {
@@ -828,4 +831,73 @@ enum InvoiceStatus {
   ACCEPTED
   REJECTED
   CANCELLED
+}
+
+// ============================================
+// SHABLON JAVOBGARLIK TIZIMI (Liability disclaimer)
+// Foydalanuvchi shablonni yuklab olishdan/foydalanishdan oldin
+// shartnomadagi javobgarlik chegaralarini qabul qilishi kerak.
+// Bu — kompaniyani sud va da'volardan himoya qiladi.
+// ============================================
+model TemplateAcknowledgement {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Qaysi shablon (templateId yoki industryTemplateId yoki "system_OLDI_SOTDI")
+  templateRef    String   // namuna: "system_OLDI_SOTDI", "industry_qurilish-pudrat"
+
+  // Qabul qilingan disclaimer versiyasi (kelajakda yangilansa, qayta tasdiqlatish)
+  disclaimerVersion String  // namuna: "v1.0"
+
+  // Audit ma'lumotlari (sud uchun isbot)
+  ipAddress      String?
+  userAgent      String?   @db.Text
+
+  // Qabul vaqti
+  acceptedAt     DateTime  @default(now())
+
+  @@index([userId, templateRef])
+  @@index([acceptedAt])
+}
+
+// Foydalanuvchining shaxsiy shablonlari (Word/paste'dan yuklanadi yoki
+// system shabloni tahrir qilingan versiyasi)
+model UserTemplate {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name           String
+  contractType   ContractType?
+
+  // Asl shablonni qayerdan kelgan
+  source         UserTemplateSource @default(CUSTOM)
+  baseTemplateId String?  // agar tizim shablonidan tahrir qilingan bo'lsa
+
+  // Kontent — bandlarga bo'lingan (block editor uchun)
+  // [{ type: 'heading', text: '...', n: 1 }, { type: 'clause', n: '1.1', text: '...' }]
+  blocks         Json     @default("[]")
+
+  // Eski plain text (Word import qilinganda yoki backward compat)
+  rawContent     String?  @db.Text
+
+  // Tahrirlash tarixi (oxirgi 10 versiya)
+  versionHistory Json     @default("[]")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+enum UserTemplateSource {
+  CUSTOM       // Bo'sh joydan yaratilgan
+  WORD_UPLOAD  // .docx fayldan import
+  PASTE        // Plain text paste
+  CLONED       // Tizim shablonidan klonlangan
+  EDITED       // Tizim shablonining tahrir qilingan versiyasi
 }

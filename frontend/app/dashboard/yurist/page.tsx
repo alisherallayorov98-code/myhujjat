@@ -13,6 +13,7 @@ import api            from '@/lib/api'
 import { formatNumber } from '@/lib/formatters'
 import { exportContractPdf  } from '@/lib/export/contractPdf'
 import { exportContractDocx } from '@/lib/export/contractDocx'
+import { cn }            from '@/lib/cn'
 import {
   generatePretenziya,
   generateDavoAriza,
@@ -194,7 +195,7 @@ export default function YuristPage() {
       {!selectedDoc ? (
         <DocCardGrid onSelect={(id) => { setSelectedDoc(id); setPreview('') }} />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={cn('grid gap-6', preview ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2')}>
           <Card>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[#0F172A]">

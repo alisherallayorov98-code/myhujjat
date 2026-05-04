@@ -129,8 +129,9 @@
     "ourSignature": "Bizning imzo",
     "cpSignature": "Kontragent imzosi",
     "signedAtFormat": "{date}",
-    "contractView": "Shartnoma ko'rinishi",
-    "fullScreen": "🔍 To'liq ekranda ochish",
+    "contractView": "Shartnoma matnini ko'rish",
+    "fullScreenHint": "Alohida sahifada to'liq, kattalashtirilgan holatda — zoom, chop etish va eksport bilan",
+    "fullScreen": "Ochish",
     "specsCount": "Spesifikatsiyalar ({count})",
     "viewSpec": "Ko'rish →",
     "specName": "Spesifikatsiya",
@@ -152,6 +153,7 @@
     "button": "Nusxa olish",
     "banner": "📋 «{number}» shartnomadan nusxa olinmoqda. Kontragent, raqam va sana yangilash kerak."
   },
+  "viewBtn": "To'liq ekranda ko'rish",
   "spec": {
     "mxikLabel": "MXIK kodi",
     "mxikHint":  "10-15 raqam",

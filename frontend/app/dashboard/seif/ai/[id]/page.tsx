@@ -119,45 +119,44 @@ export default function AiDocDetailPage({ params }: { params: Promise<{ id: stri
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        {/* Asosiy: matn — kengroq panel */}
-        <div className="lg:col-span-3">
-          <Card padding="none" className="overflow-hidden">
-            <div className="px-5 py-3 border-b border-[#E2E8F0] bg-gradient-to-r from-[#F3E8FF] to-[#DBEAFE] flex items-center gap-2">
-              <Sparkles size={15} className="text-[#7C3AED]" />
-              <span className="text-sm font-semibold text-[#0F172A]">{doc.docType}</span>
-              <Badge variant="success" size="sm">{t('ready')}</Badge>
-            </div>
-            <div className="p-3 bg-[#F1F5F9] max-h-[80vh] overflow-y-auto">
-              {doc.content ? (
-                <div
-                  className="bg-white shadow-sm mx-auto p-8 sm:p-12 text-[#0F172A]"
-                  style={{
-                    fontFamily: '"Times New Roman", serif',
-                    fontSize: 14,
-                    lineHeight: 1.8,
-                    whiteSpace: 'pre-wrap',
-                    maxWidth: 794,  // A4 width
-                  }}
-                >
-                  {doc.content}
-                </div>
-              ) : (
-                <div className="bg-white p-12 text-center text-[#94A3B8]">
-                  {t('noContent')}
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
+      <div className="space-y-5">
+        {/* Asosiy: hujjat matni — to'liq kenglikda */}
+        <Card padding="none" className="overflow-hidden">
+          <div className="px-5 py-3 border-b border-[#E2E8F0] bg-gradient-to-r from-[#F3E8FF] to-[#DBEAFE] flex items-center gap-2">
+            <Sparkles size={15} className="text-[#7C3AED]" />
+            <span className="text-sm font-semibold text-[#0F172A]">{doc.docType}</span>
+            <Badge variant="success" size="sm">{t('ready')}</Badge>
+          </div>
+          <div className="bg-[#F1F5F9] py-8 px-4 sm:px-8">
+            {doc.content ? (
+              <div
+                className="bg-white shadow-md mx-auto p-10 sm:p-14 text-[#0F172A] rounded-sm"
+                style={{
+                  fontFamily: '"Times New Roman", serif',
+                  fontSize: 14,
+                  lineHeight: 1.8,
+                  whiteSpace: 'pre-wrap',
+                  maxWidth: 794,
+                  minHeight: 1100,
+                }}
+              >
+                {doc.content}
+              </div>
+            ) : (
+              <div className="bg-white p-12 text-center text-[#94A3B8] mx-auto" style={{ maxWidth: 794 }}>
+                {t('noContent')}
+              </div>
+            )}
+          </div>
+        </Card>
 
-        {/* O'ng panel: ma'lumotlar */}
-        <div className="space-y-5">
+        {/* Pastki panel: hujjat haqida ma'lumotlar */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
               {t('docInfo')}
             </p>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="flex items-start gap-2.5">
                 <Hash size={13} className="text-[#94A3B8] shrink-0 mt-1" />
                 <div className="min-w-0 flex-1">
@@ -185,7 +184,7 @@ export default function AiDocDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
 
           {doc.prompt && (
-            <Card>
+            <Card className="md:col-span-2">
               <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
                 {t('originalPrompt')}
               </p>
@@ -194,9 +193,11 @@ export default function AiDocDetailPage({ params }: { params: Promise<{ id: stri
               </p>
             </Card>
           )}
+        </div>
 
+        <div className="flex justify-center">
           <Link href="/dashboard/seif/ai">
-            <Button variant="outline" size="sm" fullWidth leftIcon={<Sparkles size={13} />}>
+            <Button variant="outline" size="sm" leftIcon={<Sparkles size={13} />}>
               {t('createAnother')}
             </Button>
           </Link>

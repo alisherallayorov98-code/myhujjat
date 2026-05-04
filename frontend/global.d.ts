@@ -56,6 +56,8 @@ import type didoxSend         from './messages/uz/didoxSend.json'
 import type hujjat            from './messages/uz/hujjat.json'
 import type mira              from './messages/uz/mira.json'
 import type bulkSend          from './messages/uz/bulkSend.json'
+import type disclaimerModal   from './messages/uz/disclaimerModal.json'
+import type userTemplates    from './messages/uz/userTemplates.json'
 
 type AllMessages = {
   common:            typeof common
@@ -113,6 +115,8 @@ type AllMessages = {
   hujjat:            typeof hujjat
   mira:              typeof mira
   bulkSend:          typeof bulkSend
+  disclaimerModal:   typeof disclaimerModal
+  userTemplates:     typeof userTemplates
 }
 
 declare module 'next-intl' {

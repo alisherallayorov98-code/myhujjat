@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
   FileText, AlertTriangle, AlertCircle, CheckCircle2,
@@ -10,7 +11,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card }    from '@/components/ui/Card'
 import { Button }  from '@/components/ui/Button'
 import { Input }   from '@/components/ui/Input'
-import { Modal }   from '@/components/ui/Modal'
+import { Modal, ConfirmDialog }   from '@/components/ui/Modal'
 import api         from '@/lib/api'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { cn }      from '@/lib/cn'
@@ -47,8 +48,10 @@ interface Props {
 
 export function InvoicesPanel({ contract, orgId }: Props) {
   const t = useTranslations('invoicesPanel')
+  const router = useRouter()
   const qc = useQueryClient()
   const [addOpen, setAddOpen] = useState(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const ALERT_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; icon: any }> = {
     WARNING:          { color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]', border: 'border-[#FDE68A]', label: t('alertWarning'),     icon: AlertCircle },
@@ -80,6 +83,7 @@ export function InvoicesPanel({ contract, orgId }: Props) {
   const alert = contract.alertLevel ? ALERT_CONFIG[contract.alertLevel] : null
 
   return (
+    <>
     <Card padding="none" className="overflow-hidden">
       <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -160,7 +164,7 @@ export function InvoicesPanel({ contract, orgId }: Props) {
               variant={contract.alertLevel === 'CRITICAL_OVERAGE' ? 'secondary' : 'primary'}
               leftIcon={<Sparkles size={11} />}
               onClick={() => {
-                window.location.href = `/dashboard/shartnomalar/yangi?type=QOSHIMCHA&parentId=${contract.id}&extraAmount=${overage}`
+                router.push(`/dashboard/shartnomalar/yangi?type=QOSHIMCHA&parentId=${contract.id}&extraAmount=${overage}`)
               }}
             >
               {t('createAdditional')}
@@ -213,9 +217,7 @@ export function InvoicesPanel({ contract, orgId }: Props) {
                 )}
               </div>
               <button
-                onClick={() => {
-                  if (confirm(t('deleteConfirm'))) removeMut.mutate(inv.id)
-                }}
+                onClick={() => setDeleteId(inv.id)}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition shrink-0"
               >
                 <Trash2 size={12} />
@@ -233,6 +235,17 @@ export function InvoicesPanel({ contract, orgId }: Props) {
         onClose={() => setAddOpen(false)}
       />
     </Card>
+
+    <ConfirmDialog
+      open={!!deleteId}
+      onClose={() => setDeleteId(null)}
+      onConfirm={() => { if (deleteId) { removeMut.mutate(deleteId); setDeleteId(null) } }}
+      title={t('deleteTitle')}
+      description={t('deleteConfirm')}
+      variant="danger"
+      loading={removeMut.isPending}
+    />
+    </>
   )
 }
 

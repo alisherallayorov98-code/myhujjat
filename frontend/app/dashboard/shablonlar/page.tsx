@@ -4,13 +4,14 @@ import { useState }                                        from 'react'
 import { useTranslations }                                 from 'next-intl'
 import Link                                                from 'next/link'
 import { useRouter }                                       from 'next/navigation'
-import { FileText, Lock, Plus, Edit2, Trash2, Copy, Eye } from 'lucide-react'
+import { FileText, Lock, Plus, Edit2, Trash2, Copy, Eye, FileUp } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }           from '@tanstack/react-query'
 import { PageHeader }                                      from '@/components/layout/PageHeader'
 import { Card }                                            from '@/components/ui/Card'
 import { Button }                                          from '@/components/ui/Button'
 import { Badge }                                           from '@/components/ui/Badge'
 import { EmptyState }                                      from '@/components/ui/Skeleton'
+import { DisclaimerModal }                                 from '@/components/DisclaimerModal/DisclaimerModal'
 import { useAuth }                                         from '@/hooks/useAuth'
 import api                                                 from '@/lib/api'
 import { CONTRACT_TYPE_CONFIG }                            from '@/lib/contractTemplates'
@@ -57,12 +58,34 @@ export default function ShablonlarPage() {
 
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
+  // Disclaimer (yuridik javobgarlik) — shablonni ishlatishdan oldin tasdiqlash kerak
+  const [pendingAction, setPendingAction] = useState<{ templateRef: string; targetHref: string } | null>(null)
+
+  async function startTemplateUse(templateRef: string, targetHref: string) {
+    try {
+      const res = await api.get('/acknowledgements/check', { params: { templateRef } })
+      if (res.data?.accepted) {
+        router.push(targetHref)
+        return
+      }
+    } catch { /* check muvaffaqiyatsiz bo'lsa, xavfsiz tomondan modal ko'rsatamiz */ }
+    setPendingAction({ templateRef, targetHref })
+  }
+
   const { data: templatesData, isLoading } = useQuery<{ data: Template[]; meta: any }>({
     queryKey: ['templates', currentOrg?.id],
     queryFn:  () => api.get(`/templates?orgId=${currentOrg!.id}&limit=100`).then(r => r.data),
     enabled:  !!currentOrg?.id,
   })
   const templates = templatesData?.data || []
+
+  // Foydalanuvchining shaxsiy shablonlari (Word import yoki paste'dan)
+  const { data: userTplData } = useQuery<{ data: any[] }>({
+    queryKey: ['user-templates', currentOrg?.id],
+    queryFn:  () => api.get(`/user-templates?orgId=${currentOrg!.id}&limit=100`).then(r => r.data),
+    enabled:  !!currentOrg?.id,
+  })
+  const userTemplates = userTplData?.data || []
 
   const deleteMut = useMutation({
     mutationFn: (id: string) =>
@@ -116,9 +139,14 @@ export default function ShablonlarPage() {
           { label: t('breadcrumb') },
         ]}
         actions={
-          <Link href="/dashboard/shablonlar/yangi">
-            <Button leftIcon={<Plus size={15} />}>{t('newTpl')}</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/shablonlar/import">
+              <Button variant="outline" leftIcon={<FileUp size={15} />}>{t('importBtn')}</Button>
+            </Link>
+            <Link href="/dashboard/shablonlar/yangi">
+              <Button leftIcon={<Plus size={15} />}>{t('newTpl')}</Button>
+            </Link>
+          </div>
         }
       />
 
@@ -149,14 +177,16 @@ export default function ShablonlarPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-[#F1F5F9]">
-                  <Link
-                    href={`/dashboard/shartnomalar/yangi?industryTpl=${tpl.id}`}
-                    className="flex-1"
+                  <Button
+                    variant="outline" size="sm" className="w-full flex-1"
+                    leftIcon={<Copy size={13} />}
+                    onClick={() => startTemplateUse(
+                      `industry_${tpl.id}`,
+                      `/dashboard/shartnomalar/yangi?industryTpl=${tpl.id}`,
+                    )}
                   >
-                    <Button variant="outline" size="sm" className="w-full" leftIcon={<Copy size={13} />}>
-                      {t('use')}
-                    </Button>
-                  </Link>
+                    {t('use')}
+                  </Button>
                 </div>
               </Card>
             )
@@ -203,11 +233,16 @@ export default function ShablonlarPage() {
                         {t('view')}
                       </Button>
                     </Link>
-                    <Link href={`/dashboard/shablonlar/yangi?from=${tpl.id}`} className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full" leftIcon={<Copy size={13} />}>
-                        {t('copy')}
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="outline" size="sm" className="w-full flex-1"
+                      leftIcon={<Copy size={13} />}
+                      onClick={() => startTemplateUse(
+                        `system_${tpl.contractType}`,
+                        `/dashboard/shablonlar/yangi?from=${tpl.id}`,
+                      )}
+                    >
+                      {t('copy')}
+                    </Button>
                   </div>
                 </Card>
               )
@@ -268,11 +303,58 @@ export default function ShablonlarPage() {
         )}
       </div>
 
+      {userTemplates.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-sm font-semibold text-[#0F172A]">{t('myImportedTpls')}</h2>
+            <Badge variant="warning" size="sm">{userTemplates.length}</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userTemplates.map((tpl: any) => {
+              const c = cfg(tpl.contractType)
+              return (
+                <Card key={tpl.id} className="group">
+                  <div className="flex items-start gap-3">
+                    <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0', c?.bg ?? 'bg-[#FEF3C7]')}>
+                      {c?.icon ?? '📥'}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-[#0F172A] truncate">{tpl.name}</p>
+                      <p className="text-xs text-[#94A3B8] mt-0.5">{tpl.source}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Link href={`/dashboard/shablonlar/mine/${tpl.id}`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full" leftIcon={<Edit2 size={13} />}>
+                        {t('edit')}
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <ConfirmDialog
         open={!!deleteId}
         onConfirm={() => deleteId && deleteMut.mutate(deleteId)}
         onCancel={() => setDeleteId(null)}
         loading={deleteMut.isPending}
+      />
+
+      <DisclaimerModal
+        open={!!pendingAction}
+        templateRef={pendingAction?.templateRef ?? ''}
+        onClose={() => setPendingAction(null)}
+        onAccepted={() => {
+          if (pendingAction) {
+            const href = pendingAction.targetHref
+            setPendingAction(null)
+            router.push(href)
+          }
+        }}
       />
     </div>
   )

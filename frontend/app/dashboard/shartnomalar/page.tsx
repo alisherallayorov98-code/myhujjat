@@ -2,10 +2,11 @@
 
 import { useState, useMemo }       from 'react'
 import Link                        from 'next/link'
+import { useRouter }               from 'next/navigation'
 import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
-  Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send,
+  Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send, Eye,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -30,6 +31,7 @@ export default function ShartnomalarPage() {
   const t     = useTranslations('contracts')
   const tBulk = useTranslations('bulkSend')
   const { currentOrg, canCreate, isPro } = useAuth()
+  const router = useRouter()
   const qc = useQueryClient()
 
   const [search,       setSearch]       = useState('')
@@ -272,7 +274,7 @@ export default function ShartnomalarPage() {
                       description={t('empty.description')}
                       action={{
                         label: t('new'),
-                        onClick: () => window.location.href = '/dashboard/shartnomalar/yangi',
+                        onClick: () => router.push('/dashboard/shartnomalar/yangi'),
                       }}
                     />
                   </td>
@@ -296,40 +298,49 @@ export default function ShartnomalarPage() {
                         />
                       </td>
                       <td className="px-4 py-3 cursor-pointer"
-                        onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
+                        onClick={() => router.push(`/dashboard/shartnomalar/${c.id}`)}>
                         <span className="text-xs font-mono text-[#2563EB]">{c.contractNumber}</span>
                       </td>
                       <td className="px-4 py-3 cursor-pointer"
-                        onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
+                        onClick={() => router.push(`/dashboard/shartnomalar/${c.id}`)}>
                         <div className="flex items-center gap-1.5">
                           <span>{typeCfg?.icon}</span>
                           <span className="text-sm text-[#475569]">{typeCfg?.name || c.contractType}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-[#0F172A] cursor-pointer"
-                        onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
+                        onClick={() => router.push(`/dashboard/shartnomalar/${c.id}`)}>
                         {c.counterparty?.name || '—'}
                       </td>
                       <td className="px-4 py-3 text-sm text-[#94A3B8] cursor-pointer"
-                        onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
+                        onClick={() => router.push(`/dashboard/shartnomalar/${c.id}`)}>
                         {formatDate(c.contractDate, 'short')}
                       </td>
                       <td className="px-4 py-3 text-sm font-medium text-[#0F172A] tabular-nums text-right cursor-pointer"
-                        onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
+                        onClick={() => router.push(`/dashboard/shartnomalar/${c.id}`)}>
                         {c.amount > 0 ? formatCurrency(c.amount) : '—'}
                       </td>
                       <td className="px-4 py-3 cursor-pointer"
-                        onClick={() => window.location.href = `/dashboard/shartnomalar/${c.id}`}>
+                        onClick={() => router.push(`/dashboard/shartnomalar/${c.id}`)}>
                         <ContractStatusBadge status={c.status} />
                       </td>
                       <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
-                        <button
-                          onClick={() => window.location.href = `/dashboard/shartnomalar/yangi?cloneFrom=${c.id}`}
-                          title={t('clone.button')}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-all"
-                        >
-                          <Copy size={14} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => router.push(`/dashboard/shartnomalar/${c.id}/preview`)}
+                            title={t('viewBtn')}
+                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            onClick={() => router.push(`/dashboard/shartnomalar/yangi?cloneFrom=${c.id}`)}
+                            title={t('clone.button')}
+                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-all"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )

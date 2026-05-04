@@ -1,6 +1,7 @@
 'use client'
 
 import Link           from 'next/link'
+import { useRouter }   from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Plus, ClipboardList, Download } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -19,6 +20,7 @@ import toast           from 'react-hot-toast'
 export default function SpesifikatsiyalarPage() {
   const t = useTranslations('specifications')
   const { currentOrg } = useAuth()
+  const router         = useRouter()
   const qc             = useQueryClient()
 
   const { data: specs = [], isLoading } = useQuery({
@@ -80,7 +82,7 @@ export default function SpesifikatsiyalarPage() {
           description={t('noSpecsDescription')}
           action={{
             label:   t('newSpec'),
-            onClick: () => window.location.href = '/dashboard/spesifikatsiyalar/yangi',
+            onClick: () => router.push('/dashboard/spesifikatsiyalar/yangi'),
           }}
         />
       ) : (

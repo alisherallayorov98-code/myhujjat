@@ -489,7 +489,7 @@ export default function YangiShartnoma() {
       />
       <StepBar step={3} />
 
-      <div className={cn('grid gap-6', preview ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1')}>
+      <div className="grid gap-6 grid-cols-1">
         <div className="space-y-5">
           <Card>
             <div className="flex items-center justify-between mb-4">
@@ -608,27 +608,39 @@ export default function YangiShartnoma() {
           </Card>
         </div>
 
-        {preview && (
-          <Card padding="none" className="overflow-hidden">
-            <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-              <p className="text-sm font-semibold text-[#0F172A]">{t('new_.previewTitle')}</p>
-              <p className="text-xs text-[#94A3B8] mt-0.5">{t('new_.previewDesc')}</p>
+      </div>
+
+      {preview && (
+        <div className="fixed inset-0 z-50 bg-[#1E293B] flex flex-col">
+          <div className="bg-[#0F172A] text-white border-b border-[#1E293B] flex items-center px-3 sm:px-4 h-14 gap-2 shrink-0">
+            <button
+              onClick={() => setPreview(false)}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <ArrowLeft size={16} />
+              <span className="hidden sm:inline">{t('new_.back')}</span>
+            </button>
+            <div className="h-6 w-px bg-white/10 mx-1" />
+            <div>
+              <p className="text-sm font-semibold">{t('new_.previewTitle')}</p>
+              <p className="text-[11px] text-white/50 leading-none mt-0.5 hidden sm:block">{t('new_.previewDesc')}</p>
             </div>
-            <div className="max-h-[700px] overflow-y-auto bg-[#F1F5F9] p-4 flex justify-center">
+            <div className="flex-1" />
+            <Button size="sm" loading={mutation.isPending} onClick={handleCreate}>
+              {t('new_.create')}
+            </Button>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
               <div
-                className="bg-white shadow-md shrink-0"
-                style={{
-                  width: 794,
-                  transform: 'scale(0.85)',
-                  transformOrigin: 'top left',
-                  marginRight: -120, // 794 * 0.15 — kompensatsiya, joylashuv sakramaydi
-                }}
+                className="bg-white shadow-2xl"
+                style={{ width: '794px', minHeight: '1123px' }}
                 dangerouslySetInnerHTML={{ __html: previewHtml }}
               />
             </div>
-          </Card>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

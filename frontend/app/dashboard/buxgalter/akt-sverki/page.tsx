@@ -175,7 +175,7 @@ export default function AktSverkiPage() {
         open={modal}
         onClose={() => setModal(false)}
         title={t('newAktSverka')}
-        size="xl"
+        size="full"
         footer={
           <div className="flex gap-2 w-full">
             <Button variant="outline" size="sm" onClick={() => setModal(false)}>{t('close')}</Button>
@@ -272,16 +272,22 @@ export default function AktSverkiPage() {
 
           <div>
             <p className="text-sm font-semibold text-[#0F172A] mb-2">{t('preview')}</p>
-            <div className="h-[480px] overflow-auto rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] p-3">
+            <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] p-3 sm:p-6">
               {preview ? (
                 <div
-                  className="bg-white shadow-sm mx-auto p-6 leading-relaxed text-[#0F172A]"
-                  style={{ fontFamily: '"Times New Roman", serif', fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}
+                  className="bg-white shadow-md mx-auto p-8 sm:p-12 leading-relaxed text-[#0F172A] rounded-sm"
+                  style={{
+                    fontFamily: '"Times New Roman", serif',
+                    fontSize: 13,
+                    lineHeight: 1.7,
+                    whiteSpace: 'pre-wrap',
+                    minHeight: 800,
+                  }}
                 >
                   {preview}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full text-[#94A3B8] text-sm">
+                <div className="flex items-center justify-center min-h-[400px] text-[#94A3B8] text-sm">
                   {t('previewHint')}
                 </div>
               )}

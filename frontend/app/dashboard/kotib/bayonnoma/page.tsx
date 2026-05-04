@@ -14,7 +14,7 @@ import { exportContractDocx } from '@/lib/export/contractDocx'
 import { format }             from 'date-fns'
 import {
   Plus, Users, Trash2, Download, Copy, Check,
-  ChevronLeft, Eye, Save,
+  ChevronLeft, Eye, Save, Maximize2,
 } from 'lucide-react'
 
 interface DocRow {
@@ -36,6 +36,7 @@ export default function BayonnomPage() {
   const { currentOrg: activeOrg } = useAuth()
   const qc              = useQueryClient()
   const [step, setStep] = useState<Step>('list')
+  const [fullscreen, setFullscreen] = useState(false)
   const [kind, setKind] = useState(BAYONNOMA_TYPES[0].value)
   const [form, setForm] = useState<BayonnomData>({ ...EMPTY })
   const [copied, setCopied]  = useState(false)
@@ -284,6 +285,10 @@ export default function BayonnomPage() {
               <Eye className="w-4 h-4" /> {t('korinish')}
             </p>
             <div className="flex gap-2">
+              <button onClick={() => setFullscreen(true)}
+                className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-300 px-2.5 py-1.5 rounded-lg transition-colors">
+                <Maximize2 className="w-3.5 h-3.5" /> {t('fullScreen')}
+              </button>
               <button onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-2.5 py-1.5 rounded-lg transition-colors">
                 {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -299,11 +304,61 @@ export default function BayonnomPage() {
               </button>
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[500px]">
-            <pre className="text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed">{preview || t('malumotlarToldiring')}</pre>
+          <div className="bg-[#F1F5F9] rounded-2xl py-6 px-3 min-h-[700px]">
+            <div
+              className="bg-white shadow-md mx-auto p-8 rounded-sm whitespace-pre-wrap"
+              style={{
+                fontFamily: '"Times New Roman", serif',
+                fontSize: 13,
+                lineHeight: 1.7,
+                minHeight: 700,
+                maxWidth: '100%',
+              }}
+            >
+              {preview || t('malumotlarToldiring')}
+            </div>
           </div>
         </div>
       </div>
+
+      {fullscreen && (
+        <div className="fixed inset-0 z-50 bg-[#1E293B] flex flex-col">
+          <div className="bg-[#0F172A] text-white border-b border-[#1E293B] flex items-center px-3 sm:px-4 h-14 gap-2 shrink-0">
+            <button
+              onClick={() => setFullscreen(false)}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('back')}</span>
+            </button>
+            <div className="h-6 w-px bg-white/10 mx-1" />
+            <p className="text-sm font-semibold">{t('korinish')}</p>
+            <div className="flex-1" />
+            <button onClick={handleDocx} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+              <Download className="w-4 h-4" /><span className="hidden sm:inline">{t('word')}</span>
+            </button>
+            <button onClick={handlePdf} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+              <Download className="w-4 h-4" /><span className="hidden sm:inline">{t('pdf')}</span>
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
+              <div
+                className="bg-white shadow-2xl p-12 whitespace-pre-wrap"
+                style={{
+                  width: '794px',
+                  minHeight: '1123px',
+                  fontFamily: '"Times New Roman", serif',
+                  fontSize: 14,
+                  lineHeight: 1.8,
+                }}
+              >
+                {preview || t('malumotlarToldiring')}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

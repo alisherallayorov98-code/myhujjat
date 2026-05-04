@@ -18,6 +18,8 @@ import { AiModule }                from './modules/ai/ai.module'
 import { DocumentsModule }         from './modules/documents/documents.module'
 import { EmployeesModule }         from './modules/employees/employees.module'
 import { TemplatesModule }         from './modules/templates/templates.module'
+import { AcknowledgementsModule }  from './modules/acknowledgements/acknowledgements.module'
+import { UserTemplatesModule }     from './modules/user-templates/user-templates.module'
 import { EimzoModule }             from './modules/eimzo/eimzo.module'
 import { DidoxModule }             from './modules/didox/didox.module'
 import { AdminModule }             from './modules/admin/admin.module'
@@ -66,6 +68,8 @@ import { RequestLoggerMiddleware } from './common/request-logger.middleware'
     DocumentsModule,
     EmployeesModule,
     TemplatesModule,
+    AcknowledgementsModule,
+    UserTemplatesModule,
     EimzoModule,
     DidoxModule,
     AdminModule,

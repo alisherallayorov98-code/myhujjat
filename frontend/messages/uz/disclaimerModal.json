@@ -1,0 +1,12 @@
+{
+  "title": "Shablondan foydalanish shartlari",
+  "subtitle": "Davom etish uchun yuridik shartlarni o'qib, qabul qiling",
+  "warningHeader": "Bu shablon umumiy yo'l-yo'riq sifatida xizmat qiladi va yuridik maslahat o'rnini bosmaydi. Yuqori summali yoki murakkab shartnomalar uchun yurist bilan maslahatlashing.",
+  "versionLabel": "Versiya {version} · {date} dan",
+  "agreeCheckbox": "Yuqoridagi shartlarni o'qib chiqdim, tushundim va qabul qilaman. MyHujjat.uz platformasiga shu asosda da'vo bildirmaslikka roziman.",
+  "acceptBtn": "Tasdiqlash va davom etish",
+  "cancel": "Bekor qilish",
+  "accepted": "Tasdiqlangan",
+  "error": "Xatolik yuz berdi",
+  "loadFailed": "Disclaimer matnini yuklab bo'lmadi"
+}

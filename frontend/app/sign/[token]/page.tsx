@@ -133,18 +133,18 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
                   </span>
                 </div>
               </div>
-              <div className="max-h-[600px] overflow-y-auto bg-[#F1F5F9] p-4">
+              <div className="bg-[#F1F5F9] py-6 px-4">
                 <div
                   className="bg-white shadow-md mx-auto"
-                  style={{ maxWidth: 794 }}
+                  style={{ maxWidth: 794, minHeight: 1100 }}
                   dangerouslySetInnerHTML={{ __html: renderContractHtml(contract) }}
                 />
               </div>
             </Card>
           </div>
 
-          {/* Sign panel */}
-          <div className="space-y-5">
+          {/* Sign panel — sticky uzun shartnomalarda ham doim ko'rinadi */}
+          <div className="space-y-5 lg:sticky lg:top-4 lg:self-start">
             {isSigned ? (
               <Card className="bg-gradient-to-br from-[#DCFCE7] to-[#F0FDF4] border-[#BBF7D0]">
                 <div className="text-center py-4">

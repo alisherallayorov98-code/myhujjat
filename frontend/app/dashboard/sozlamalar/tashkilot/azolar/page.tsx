@@ -8,6 +8,7 @@ import { Card }                                  from '@/components/ui/Card'
 import { Button }                                from '@/components/ui/Button'
 import { Badge }                                 from '@/components/ui/Badge'
 import { Select }                                from '@/components/ui/Select'
+import { ConfirmDialog }                         from '@/components/ui/Modal'
 import { useAuth }                               from '@/hooks/useAuth'
 import api                                       from '@/lib/api'
 import toast                                     from 'react-hot-toast'
@@ -19,6 +20,7 @@ export default function AzolarPage() {
   const [copied,     setCopied]     = useState(false)
   const [inviteUrl,  setInviteUrl]  = useState('')
   const [inviteRole, setInviteRole] = useState('MEMBER')
+  const [removeId,   setRemoveId]   = useState<string | null>(null)
 
   const ROLE_LABELS: Record<string, { label: string; variant: any; desc: string }> = {
     OWNER:      { label: t('roleOwner'),      variant: 'primary', desc: t('roleOwnerDesc') },
@@ -215,9 +217,7 @@ export default function AzolarPage() {
 
                 {isOwner && member.role !== 'OWNER' && !isMe && (
                   <button
-                    onClick={() => {
-                      if (confirm(t('removeMember'))) removeMutation.mutate(member.id)
-                    }}
+                    onClick={() => setRemoveId(member.id)}
                     className="p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
                     title={t('deleteRm')}
                   >
@@ -229,6 +229,16 @@ export default function AzolarPage() {
           })}
         </div>
       </Card>
+
+      <ConfirmDialog
+        open={!!removeId}
+        onClose={() => setRemoveId(null)}
+        onConfirm={() => { if (removeId) { removeMutation.mutate(removeId); setRemoveId(null) } }}
+        title={t('deleteRm')}
+        description={t('removeMember')}
+        variant="danger"
+        loading={removeMutation.isPending}
+      />
     </div>
   )
 }

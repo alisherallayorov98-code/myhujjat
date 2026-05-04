@@ -155,40 +155,39 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Asosiy: matn */}
-        <div className="lg:col-span-2">
-          <Card padding="none" className="overflow-hidden">
-            <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
-                {typeName}
-              </p>
-            </div>
-            <div className="p-3 bg-[#F1F5F9] max-h-[80vh] overflow-y-auto">
-              {text ? (
-                <div
-                  className="bg-white shadow-sm mx-auto p-8 text-[#0F172A]"
-                  style={{
-                    fontFamily: '"Times New Roman", serif',
-                    fontSize: 14,
-                    lineHeight: 1.7,
-                    whiteSpace: 'pre-wrap',
-                    maxWidth: 794,
-                  }}
-                >
-                  {text}
-                </div>
-              ) : (
-                <div className="bg-white p-12 text-center text-[#94A3B8]">
-                  {t('noContent')}
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
+      <div className="space-y-5">
+        {/* Asosiy: hujjat matni — to'liq kenglikda */}
+        <Card padding="none" className="overflow-hidden">
+          <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
+              {typeName}
+            </p>
+          </div>
+          <div className="bg-[#F1F5F9] py-8 px-4 sm:px-8">
+            {text ? (
+              <div
+                className="bg-white shadow-md mx-auto p-10 sm:p-14 text-[#0F172A] rounded-sm"
+                style={{
+                  fontFamily: '"Times New Roman", serif',
+                  fontSize: 14,
+                  lineHeight: 1.7,
+                  whiteSpace: 'pre-wrap',
+                  maxWidth: 794,
+                  minHeight: 1100,
+                }}
+              >
+                {text}
+              </div>
+            ) : (
+              <div className="bg-white p-12 text-center text-[#94A3B8] mx-auto" style={{ maxWidth: 794 }}>
+                {t('noContent')}
+              </div>
+            )}
+          </div>
+        </Card>
 
-        {/* O'ng panel: ma'lumotlar */}
-        <div className="space-y-5">
+        {/* Pastki panel: ma'lumotlar — yon emas, 2-3 ustun */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">
               {t('info.type')}

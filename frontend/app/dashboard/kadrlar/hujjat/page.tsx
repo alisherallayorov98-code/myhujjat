@@ -235,7 +235,7 @@ export default function HRHujjatlarPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={cn('grid gap-6', preview ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2')}>
           <Card>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[#0F172A]">
@@ -346,23 +346,29 @@ export default function HRHujjatlarPage() {
                 </div>
               )}
             </div>
-            <div className="p-6 min-h-96 overflow-auto max-h-[600px]">
-              {preview ? (
-                <pre
-                  className="whitespace-pre-wrap text-xs leading-relaxed text-[#0F172A]"
-                  style={{ fontFamily: '"Times New Roman", serif', fontSize: '12px', lineHeight: '1.8' }}
+            {preview ? (
+              <div className="bg-[#F1F5F9] py-8 px-4 sm:px-8">
+                <div
+                  className="bg-white shadow-md mx-auto p-10 sm:p-14 text-[#0F172A] rounded-sm whitespace-pre-wrap"
+                  style={{
+                    fontFamily: '"Times New Roman", serif',
+                    fontSize: 14,
+                    lineHeight: 1.8,
+                    maxWidth: 794,
+                    minHeight: 1100,
+                  }}
                 >
                   {preview}
-                </pre>
-              ) : (
-                <div className="flex items-center justify-center h-64 text-[#94A3B8]">
-                  <div className="text-center">
-                    <FileText size={32} className="mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">{t('previewPlaceholder')}</p>
-                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="p-6 min-h-96 flex items-center justify-center text-[#94A3B8]">
+                <div className="text-center">
+                  <FileText size={32} className="mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">{t('previewPlaceholder')}</p>
+                </div>
+              </div>
+            )}
           </Card>
         </div>
       )}

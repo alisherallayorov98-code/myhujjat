@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card }               from '@/components/ui/Card'
 import { Button }             from '@/components/ui/Button'
 import { Input }              from '@/components/ui/Input'
+import { ConfirmDialog }      from '@/components/ui/Modal'
 import api                    from '@/lib/api'
 import { formatDate }         from '@/lib/formatters'
 import toast                  from 'react-hot-toast'
@@ -182,15 +183,15 @@ function ActiveSessions() {
   })
 
   const otherSessions = sessions.filter(s => !s.isCurrent)
+  const [revokeAllOpen, setRevokeAllOpen] = useState(false)
+  const [revokeOneId, setRevokeOneId]     = useState<string | null>(null)
 
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-bold text-[#0F172A]">{t('activeSessions')}</h2>
         {otherSessions.length > 0 && (
-          <Button size="xs" variant="outline" onClick={() => {
-            if (confirm(t('logoutFromAllConfirm'))) revokeAllMut.mutate()
-          }}>
+          <Button size="xs" variant="outline" onClick={() => setRevokeAllOpen(true)}>
             {t('logoutFromAll')}
           </Button>
         )}
@@ -229,9 +230,7 @@ function ActiveSessions() {
                 </div>
                 {!s.isCurrent && (
                   <button
-                    onClick={() => {
-                      if (confirm(t('logoutDeviceConfirm'))) revokeMut.mutate(s.id)
-                    }}
+                    onClick={() => setRevokeOneId(s.id)}
                     className="p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition shrink-0"
                   >
                     <Trash2 size={13} />
@@ -242,6 +241,26 @@ function ActiveSessions() {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={revokeAllOpen}
+        onClose={() => setRevokeAllOpen(false)}
+        onConfirm={() => { revokeAllMut.mutate(); setRevokeAllOpen(false) }}
+        title={t('logoutFromAll')}
+        description={t('logoutFromAllConfirm')}
+        variant="warning"
+        loading={revokeAllMut.isPending}
+      />
+
+      <ConfirmDialog
+        open={!!revokeOneId}
+        onClose={() => setRevokeOneId(null)}
+        onConfirm={() => { if (revokeOneId) { revokeMut.mutate(revokeOneId); setRevokeOneId(null) } }}
+        title={t('logoutFromAll')}
+        description={t('logoutDeviceConfirm')}
+        variant="warning"
+        loading={revokeMut.isPending}
+      />
     </Card>
   )
 }
@@ -506,6 +525,7 @@ function DataPrivacy() {
   const [showDelete, setShowDelete] = useState(false)
   const [password, setPassword] = useState('')
   const [confirmText, setConfirmText] = useState('')
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
 
   const exportData = async () => {
     setExporting(true)
@@ -604,11 +624,7 @@ function DataPrivacy() {
                     leftIcon={<Trash2 size={13} />}
                     disabled={!password || confirmText !== 'OCHIRISH'}
                     loading={deleteAccountMut.isPending}
-                    onClick={() => {
-                      if (confirm(t('deleteAccountConfirm'))) {
-                        deleteAccountMut.mutate()
-                      }
-                    }}
+                    onClick={() => setDeleteConfirmOpen(true)}
                   >
                     {t('deleteAccountBtn')}
                   </Button>
@@ -625,6 +641,16 @@ function DataPrivacy() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={() => { deleteAccountMut.mutate(); setDeleteConfirmOpen(false) }}
+        title={t('deleteAccountBtn')}
+        description={t('deleteAccountConfirm')}
+        variant="danger"
+        loading={deleteAccountMut.isPending}
+      />
     </Card>
   )
 }

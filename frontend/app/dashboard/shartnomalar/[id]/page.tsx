@@ -5,7 +5,7 @@ import { useTranslations }                                       from 'next-intl
 import Link                                                      from 'next/link'
 import { useRouter }                                             from 'next/navigation'
 import {
-  ChevronLeft, FileText, Download, Edit2, Trash2,
+  ChevronLeft, ChevronRight, FileText, Download, Edit2, Trash2,
   CheckCircle, Circle, Building2, Calendar, Hash,
   DollarSign, MapPin, ClipboardList, Share2, Copy,
 } from 'lucide-react'
@@ -234,27 +234,23 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
           </Card>
 
           {contract.content && (
-            <Card padding="none" className="overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-                <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">
-                  {t('detail.contractView')}
-                </p>
-                <Link href={`/dashboard/shartnomalar/${id}/preview`}>
-                  <button className="flex items-center gap-1.5 text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium transition">
-                    {t('detail.fullScreen')}
-                  </button>
-                </Link>
-              </div>
-              <div
-                className="contract-render-host max-h-[700px] overflow-y-auto bg-[#F1F5F9] p-6"
-              >
-                <div
-                  className="bg-white shadow-md mx-auto"
-                  style={{ maxWidth: 794 }}
-                  dangerouslySetInnerHTML={{ __html: renderContractHtml(contract) }}
-                />
-              </div>
-            </Card>
+            <Link href={`/dashboard/shartnomalar/${id}/preview`} className="block">
+              <Card padding="none" className="overflow-hidden hover:border-[#2563EB] hover:shadow-md transition cursor-pointer group">
+                <div className="flex items-center gap-4 p-5">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#DBEAFE] to-[#BFDBFE] flex items-center justify-center shrink-0 group-hover:from-[#2563EB] group-hover:to-[#1D4ED8] transition-all">
+                    <FileText size={24} className="text-[#2563EB] group-hover:text-white transition-colors" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#0F172A] mb-0.5">{t('detail.contractView')}</p>
+                    <p className="text-xs text-[#94A3B8]">{t('detail.fullScreenHint')}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-sm font-medium opacity-90 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0">
+                    <span>{t('detail.fullScreen')}</span>
+                    <ChevronRight size={14} />
+                  </div>
+                </div>
+              </Card>
+            </Link>
           )}
 
           {contract.specifications?.length > 0 && (
