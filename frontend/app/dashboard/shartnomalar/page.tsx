@@ -7,7 +7,7 @@ import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send, Eye,
-  TrendingUp, CheckCircle, FileEdit, DollarSign,
+  TrendingUp, CheckCircle, FileEdit, DollarSign, X, Filter,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -17,6 +17,7 @@ import { Card }      from '@/components/ui/Card'
 import { ContractStatusBadge } from '@/components/ui/Badge'
 import { ConfirmDialog }     from '@/components/ui/Modal'
 import { EmptyState, TableRowSkeleton } from '@/components/ui/Skeleton'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useAuth }   from '@/hooks/useAuth'
 import api           from '@/lib/api'
 import { formatCurrency, formatDate } from '@/lib/formatters'
@@ -27,7 +28,7 @@ import toast         from 'react-hot-toast'
 
 type SortKey   = 'createdAt' | 'amount' | 'contractNumber' | 'contractDate'
 type SortOrder = 'asc' | 'desc'
-type DateRange = 'all' | 'thisMonth' | 'lastMonth' | 'thisYear'
+type DateRange = 'all' | 'last7days' | 'last30days' | 'thisMonth' | 'lastMonth' | 'thisYear'
 
 export default function ShartnomalarPage() {
   const t     = useTranslations('contracts')
@@ -39,7 +40,11 @@ export default function ShartnomalarPage() {
   const [search,       setSearch]       = useState('')
   const [typeFilter,   setTypeFilter]   = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [cpFilter,     setCpFilter]     = useState('')
   const [dateRange,    setDateRange]    = useState<DateRange>('all')
+
+  // Search debounce — har harf yozganda emas, 300ms keyin API chaqiriladi
+  const debouncedSearch = useDebouncedValue(search, 300)
   const [sortKey,      setSortKey]      = useState<SortKey>('createdAt')
   const [sortOrder,    setSortOrder]    = useState<SortOrder>('desc')
   const [page,             setPage]             = useState(1)
@@ -63,21 +68,29 @@ export default function ShartnomalarPage() {
   })
 
   const { data, isLoading } = useQuery({
-    queryKey: ['contracts', currentOrg?.id, search, typeFilter, statusFilter, page],
+    queryKey: ['contracts', currentOrg?.id, debouncedSearch, typeFilter, statusFilter, cpFilter, page],
     queryFn:  async () => {
       if (!currentOrg?.id) return { data: [], meta: { total: 0, totalPages: 1 } }
       const params = new URLSearchParams({
         orgId: currentOrg.id,
         page:  String(page),
         limit: '20',
-        ...(search       && { search }),
-        ...(typeFilter   && { type: typeFilter }),
-        ...(statusFilter && { status: statusFilter }),
+        ...(debouncedSearch && { search: debouncedSearch }),
+        ...(typeFilter      && { type: typeFilter }),
+        ...(statusFilter    && { status: statusFilter }),
+        ...(cpFilter        && { counterpartyId: cpFilter }),
       })
       const { data } = await api.get(`/contracts?${params}`)
       return data
     },
     enabled: !!currentOrg?.id,
+  })
+
+  // Kontragentlar ro'yxati — filter dropdown uchun
+  const { data: cps = [] } = useQuery<any[]>({
+    queryKey: ['counterparties-list', currentOrg?.id],
+    queryFn:  () => api.get(`/counterparties?orgId=${currentOrg!.id}&limit=200`).then(r => r.data?.data || []),
+    enabled:  !!currentOrg?.id,
   })
 
   const bulkStatusMut = useMutation({
@@ -119,7 +132,12 @@ export default function ShartnomalarPage() {
     const now = new Date()
     return rawContracts.filter((c: any) => {
       const d = new Date(c.contractDate || c.createdAt)
+      const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24))
       switch (dateRange) {
+        case 'last7days':
+          return diffDays >= 0 && diffDays <= 7
+        case 'last30days':
+          return diffDays >= 0 && diffDays <= 30
         case 'thisMonth':
           return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
         case 'lastMonth': {
@@ -133,6 +151,26 @@ export default function ShartnomalarPage() {
       }
     })
   }, [rawContracts, dateRange])
+
+  // Faol filterlar soni — "Tozalash" tugmasini ko'rsatish va badge uchun
+  const activeFiltersCount = useMemo(() => {
+    let n = 0
+    if (search.trim())  n++
+    if (typeFilter)     n++
+    if (statusFilter)   n++
+    if (cpFilter)       n++
+    if (dateRange !== 'all') n++
+    return n
+  }, [search, typeFilter, statusFilter, cpFilter, dateRange])
+
+  function clearAllFilters() {
+    setSearch('')
+    setTypeFilter('')
+    setStatusFilter('')
+    setCpFilter('')
+    setDateRange('all')
+    setPage(1)
+  }
 
   // Sortlash (frontend)
   const contracts = useMemo(() => {
@@ -261,13 +299,23 @@ export default function ShartnomalarPage() {
 
       {/* Filtrlar */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">
-        <Input
-          placeholder={t('filter.search')}
-          leftIcon={<Search size={15} />}
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
-          className="max-w-xs"
-        />
+        <div className="relative max-w-xs flex-1 sm:flex-initial">
+          <Input
+            placeholder={t('filter.search')}
+            leftIcon={<Search size={15} />}
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(''); setPage(1) }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9]"
+              title={t('filter.clearSearch')}
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
         <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1) }}
           className="h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
           <option value="">{t('filter.allTypes')}</option>
@@ -283,13 +331,31 @@ export default function ShartnomalarPage() {
           <option value="COMPLETED">{t('statusOptions.COMPLETED')}</option>
           <option value="CANCELLED">{t('statusOptions.CANCELLED')}</option>
         </select>
+        <select value={cpFilter} onChange={e => { setCpFilter(e.target.value); setPage(1) }}
+          className="h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB] max-w-[200px]">
+          <option value="">{t('filter.allCps')}</option>
+          {cps.map((cp: any) => (
+            <option key={cp.id} value={cp.id}>{cp.name}</option>
+          ))}
+        </select>
         <select value={dateRange} onChange={e => setDateRange(e.target.value as DateRange)}
           className="h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
           <option value="all">{t('filter.allDates')}</option>
+          <option value="last7days">{t('filter.last7days')}</option>
+          <option value="last30days">{t('filter.last30days')}</option>
           <option value="thisMonth">{t('filter.thisMonth')}</option>
           <option value="lastMonth">{t('filter.lastMonth')}</option>
           <option value="thisYear">{t('filter.thisYear')}</option>
         </select>
+        {activeFiltersCount > 0 && (
+          <button
+            onClick={clearAllFilters}
+            className="h-10 px-3 rounded-lg text-sm bg-[#FEE2E2] text-[#B91C1C] hover:bg-[#FECACA] flex items-center gap-1.5 transition border border-[#FECACA]"
+          >
+            <X size={13} />
+            {t('filter.clearAll')} ({activeFiltersCount})
+          </button>
+        )}
       </div>
 
       {/* Bulk action bar */}

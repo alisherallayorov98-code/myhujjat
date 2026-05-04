@@ -359,24 +359,31 @@ export default function YangiShartnoma() {
           />
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(CONTRACT_TYPE_CONFIG).map(([key, cfg]) => (
             <button
               key={key}
               onClick={() => { setType(key as ContractType); setStep(2) }}
               className={cn(
-                'p-4 rounded-xl bg-white border-2 text-left transition-all duration-200',
+                'p-4 rounded-xl bg-white border-2 text-left transition-all duration-200 group',
                 type === key
                   ? 'border-[#2563EB] shadow-md shadow-[#2563EB]/10'
                   : 'border-[#E2E8F0] hover:border-[#2563EB]/40 hover:shadow-md'
               )}
             >
-              <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3', cfg.bg)}>
-                {cfg.icon}
+              <div className="flex items-start gap-3 mb-2">
+                <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0', cfg.bg)}>
+                  {cfg.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-[#0F172A] text-sm">{t(`types.${key}` as any)}</p>
+                  <p className="text-[11px] text-[#94A3B8] mt-0.5">
+                    {cfg.parties.buyer} → {cfg.parties.seller}
+                  </p>
+                </div>
               </div>
-              <p className="font-bold text-[#0F172A] text-sm">{t(`types.${key}` as any)}</p>
-              <p className="text-xs text-[#94A3B8] mt-1">
-                {cfg.parties.buyer} → {cfg.parties.seller}
+              <p className="text-xs text-[#475569] leading-relaxed line-clamp-2">
+                {t(`new_.typeDescriptions.${key}` as any)}
               </p>
             </button>
           ))}

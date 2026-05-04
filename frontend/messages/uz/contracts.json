@@ -23,10 +23,15 @@
     "search": "Qidirish...",
     "allTypes": "Barcha turlar",
     "allStatuses": "Barcha holatlar",
+    "allCps": "Barcha kontragentlar",
     "allDates": "Barcha sanalar",
+    "last7days": "Oxirgi 7 kun",
+    "last30days": "Oxirgi 30 kun",
     "thisMonth": "Bu oy",
     "lastMonth": "O'tgan oy",
-    "thisYear": "Bu yil"
+    "thisYear": "Bu yil",
+    "clearSearch": "Qidiruvni tozalash",
+    "clearAll": "Tozalash"
   },
   "statusOptions": {
     "DRAFT": "Qoralama",
@@ -110,6 +115,20 @@
     "draftDelete": "O'chirish",
     "draftDismiss": "Yopish",
     "draftRestored": "Qoralama tiklandi",
+    "typeDescriptions": {
+      "OLDI_SOTDI": "Tovarlarni sotish-sotib olish. Mahsulot, miqdor, narx va yetkazib berish shartlari belgilanadi.",
+      "XIZMAT":     "Xizmat ko'rsatish (konsultatsiya, ta'mir, marketing va b.q.). Hajm, muddat va narx asosida.",
+      "IJARA":      "Ko'chmas yoki ko'char mulkni vaqtinchalik foydalanishga berish. Manzil, oylik haq va muddat.",
+      "PUDRAT":     "Qurilish, ta'mirlash yoki ishlab chiqarish ishlarini bajarish. LSH, bosqichlar va kafolat.",
+      "QOSHIMCHA":  "Mavjud shartnomaga qo'shimcha kelishuv (summa, muddat yoki shart o'zgarishi).",
+      "MOLIYAVIY":  "Foizsiz qarz yoki moliyaviy yordam. Qaytarish muddati va shartlari.",
+      "DAVAL":      "Xomashyodan tayyor mahsulot ishlab chiqarish. Davalchi xomashyoni, qayta ishlovchi tayyor mahsulotni beradi.",
+      "XALQARO":    "Xalqaro shartnoma (ingliz tilida). Incoterms, valyuta va xalqaro yetkazib berish.",
+      "AGENTLIK":   "Agentlik xizmati. Agent buyurtmachi nomidan harakat qilib mukofot oladi.",
+      "TRANSPORT":  "Yuk tashish xizmati. Jo'natish, manzil, og'irlik va narx asosida.",
+      "LIZING":     "Moliyaviy lizing — uskuna yoki transport vositalarini muddatli to'lov bilan olish.",
+      "BOSHQA":     "Yuqoridagilarga to'g'ri kelmaydigan boshqa shartnoma turlari uchun erkin shablon."
+    },
     "validation": {
       "cpRequired": "Kontragentni tanlang",
       "dateRequired": "Sana to'ldirilishi shart",
