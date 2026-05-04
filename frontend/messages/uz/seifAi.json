@@ -33,5 +33,16 @@
   "loadingTitle": "AI hujjat yaratmoqda...",
   "loadingHint": "Bu biroz vaqt olishi mumkin",
   "emptyTitle": "AI yordamchi tayyor",
-  "emptyHint": "Chap tomonda hujjat turini tanlab, talablarni kiriting va \"Hujjat yaratish\" tugmasini bosing"
+  "emptyHint": "Chap tomonda hujjat turini tanlab, talablarni kiriting va \"Hujjat yaratish\" tugmasini bosing",
+  "back": "Orqaga",
+  "notFound": "Hujjat topilmadi",
+  "noContent": "Hujjat matni yo'q",
+  "downloaded": "{type} yuklandi",
+  "exportError": "Yuklab bo'lmadi",
+  "aiGenerated": "AI yordamida yaratilgan",
+  "docInfo": "Hujjat ma'lumotlari",
+  "createdAt": "Yaratilgan",
+  "tokensLabel": "Sarflangan tokenlar",
+  "originalPrompt": "Asl so'rov",
+  "createAnother": "Yangi yaratish"
 }

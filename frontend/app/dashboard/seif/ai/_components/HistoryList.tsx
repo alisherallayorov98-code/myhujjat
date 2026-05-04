@@ -1,17 +1,16 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { Clock, FileText } from 'lucide-react'
-import { Card } from '@/components/ui/Card'
-import api      from '@/lib/api'
+import Link                      from 'next/link'
+import { useTranslations }       from 'next-intl'
+import { Clock, FileText, ChevronRight } from 'lucide-react'
+import { Card }                  from '@/components/ui/Card'
 
 interface Props {
-  history:    any[]
-  orgId?:     string
-  onSelect:   (content: string, id: string) => void
+  history: any[]
+  orgId?:  string
 }
 
-export function HistoryList({ history, orgId, onSelect }: Props) {
+export function HistoryList({ history }: Props) {
   const t = useTranslations('seifAi')
   if (history.length === 0) return null
 
@@ -22,21 +21,23 @@ export function HistoryList({ history, orgId, onSelect }: Props) {
         {t('historyTitle')}
       </p>
       <div className="space-y-1">
-        {history.slice(0, 5).map((h: any) => (
-          <button
+        {history.slice(0, 10).map((h: any) => (
+          <Link
             key={h.id}
-            onClick={async () => {
-              const { data } = await api.get(`/ai/docs/${h.id}?orgId=${orgId}`)
-              onSelect(data.content, data.id)
-            }}
-            className="w-full flex items-start gap-2 px-3 py-2 rounded-lg hover:bg-[#F8FAFC] text-left transition-colors"
+            href={`/dashboard/seif/ai/${h.id}`}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#F8FAFC] transition-colors group"
           >
             <FileText size={13} className="text-[#94A3B8] mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-[#475569] truncate">{h.title}</p>
-              <p className="text-[10px] text-[#94A3B8]">{t('tokenUsed', { count: h.tokensUsed })}</p>
+              <p className="text-xs font-medium text-[#475569] truncate group-hover:text-[#2563EB]">
+                {h.title}
+              </p>
+              <p className="text-[10px] text-[#94A3B8]">
+                {t('tokenUsed', { count: h.tokensUsed })}
+              </p>
             </div>
-          </button>
+            <ChevronRight size={13} className="text-[#CBD5E1] group-hover:text-[#2563EB] transition-colors" />
+          </Link>
         ))}
       </div>
     </Card>

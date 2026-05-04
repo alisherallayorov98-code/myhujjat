@@ -2,6 +2,7 @@
 
 import { useState }   from 'react'
 import { useTranslations } from 'next-intl'
+import { useRouter }  from 'next/navigation'
 import { useQuery }   from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useAuth }    from '@/hooks/useAuth'
@@ -13,19 +14,17 @@ import { ProLockScreen } from './_components/ProLockScreen'
 import { DocTypePicker } from './_components/DocTypePicker'
 import { PromptForm }    from './_components/PromptForm'
 import { HistoryList }   from './_components/HistoryList'
-import { ResultPanel }   from './_components/ResultPanel'
 import { DOC_TYPES }     from './_components/constants'
 
 export default function AiGeneratorPage() {
-  const t = useTranslations('seifAi')
+  const t      = useTranslations('seifAi')
+  const router = useRouter()
   const { currentOrg, isPro } = useAuth()
 
   const [docType,  setDocType]  = useState<string>(DOC_TYPES[0].value)
   const [category, setCategory] = useState('all')
   const [prompt,   setPrompt]   = useState('')
-  const [result,   setResult]   = useState('')
   const [loading,  setLoading]  = useState(false)
-  const [, setSavedId]          = useState<string | null>(null)
 
   const { data: history = [] } = useQuery<any[]>({
     queryKey: ['ai-history', currentOrg?.id],
@@ -44,8 +43,6 @@ export default function AiGeneratorPage() {
     if (!currentOrg?.id)  { toast.error(t('noOrg'));              return }
 
     setLoading(true)
-    setResult('')
-    setSavedId(null)
 
     try {
       const orgData: Record<string, string> = {
@@ -63,12 +60,11 @@ export default function AiGeneratorPage() {
         targetLang: currentLocale(),
       })
 
-      setResult(data.content)
-      setSavedId(data.id)
       toast.success(t('docCreated'))
+      // Yaratilgan hujjatga avtomatik o'tish — to'liq sahifa
+      router.push(`/dashboard/seif/ai/${data.id}`)
     } catch (err: any) {
       toast.error(err?.response?.data?.message || t('error'))
-    } finally {
       setLoading(false)
     }
   }
@@ -85,36 +81,25 @@ export default function AiGeneratorPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <DocTypePicker
-            category={category}
-            setCategory={setCategory}
-            docType={docType}
-            setDocType={setDocType}
-          />
-          <PromptForm
-            docType={docType}
-            prompt={prompt}
-            setPrompt={setPrompt}
-            loading={loading}
-            onGenerate={handleGenerate}
-          />
-          <HistoryList
-            history={history}
-            orgId={currentOrg?.id}
-            onSelect={(content, id) => { setResult(content); setSavedId(id) }}
-          />
-        </div>
-
-        <div className="lg:col-span-2">
-          <ResultPanel
-            loading={loading}
-            result={result}
-            docType={docType}
-            orgName={currentOrg?.name}
-          />
-        </div>
+      {/* Yagona kolonkali kompakt forma — natija alohida sahifada ochiladi */}
+      <div className="max-w-2xl mx-auto space-y-4">
+        <DocTypePicker
+          category={category}
+          setCategory={setCategory}
+          docType={docType}
+          setDocType={setDocType}
+        />
+        <PromptForm
+          docType={docType}
+          prompt={prompt}
+          setPrompt={setPrompt}
+          loading={loading}
+          onGenerate={handleGenerate}
+        />
+        <HistoryList
+          history={history}
+          orgId={currentOrg?.id}
+        />
       </div>
     </div>
   )
