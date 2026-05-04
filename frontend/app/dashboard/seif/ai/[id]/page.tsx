@@ -5,7 +5,7 @@ import { useTranslations }                          from 'next-intl'
 import { useRouter }                                from 'next/navigation'
 import Link                                         from 'next/link'
 import {
-  ArrowLeft, Download, Copy, Check, FileText, Sparkles, Calendar, Hash,
+  ArrowLeft, Download, Copy, Check, FileText, Sparkles, Calendar, Hash, Printer,
 } from 'lucide-react'
 import { useQuery }                                 from '@tanstack/react-query'
 import { PageHeader }                               from '@/components/layout/PageHeader'
@@ -100,6 +100,13 @@ export default function AiDocDetailPage({ params }: { params: Promise<{ id: stri
               onClick={handleCopy}
             >
               {copied ? t('copied') : t('copy')}
+            </Button>
+            <Button
+              variant="outline" size="sm"
+              leftIcon={<Printer size={13} />}
+              onClick={() => window.print()}
+            >
+              Pechat
             </Button>
             <Button
               size="sm"

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Sparkles, Copy, Check, Download, FileText, Maximize2, ChevronLeft } from 'lucide-react'
+import { Sparkles, Copy, Check, Download, FileText, Maximize2, ChevronLeft, Printer } from 'lucide-react'
 import { Card }  from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { exportContractPdf  } from '@/lib/export/contractPdf'
@@ -93,6 +93,9 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
             <Sparkles size={14} className="text-[#A78BFA]" />
             <p className="text-sm font-semibold">{docType}</p>
             <div className="flex-1" />
+            <button onClick={() => window.print()} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+              <Printer size={14} /><span className="hidden sm:inline">Pechat</span>
+            </button>
             <button onClick={() => exportContractPdf({ title: docType, content: result, orgName })} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <Download size={14} /><span className="hidden sm:inline">PDF</span>
             </button>

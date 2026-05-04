@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useTranslations }       from 'next-intl'
 import {
   CheckCircle2, FileText, Building2, Calendar, AlertCircle,
-  Sparkles, ArrowRight, Loader2, Shield,
+  Sparkles, ArrowRight, Loader2, Shield, Printer,
 } from 'lucide-react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import api                       from '@/lib/api'
@@ -122,7 +122,7 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
           {/* Contract preview */}
           <div className="lg:col-span-2">
             <Card padding="none" className="overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between">
+              <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between no-print">
                 <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">
                   {t('previewLabel')}
                 </p>
@@ -131,6 +131,13 @@ export default function PublicSignPage({ params }: { params: Promise<{ token: st
                     <Calendar size={12} />
                     {formatDate(contract.contractDate, 'long')}
                   </span>
+                  <button
+                    onClick={() => window.print()}
+                    className="flex items-center gap-1 px-2 py-1 rounded border border-[#E2E8F0] hover:border-[#2563EB] hover:text-[#2563EB] transition"
+                    title={t('printBtn')}
+                  >
+                    <Printer size={12} /> {t('printBtn')}
+                  </button>
                 </div>
               </div>
               <div className="bg-[#F1F5F9] py-6 px-4">

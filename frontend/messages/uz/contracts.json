@@ -91,6 +91,7 @@
     "total": "Jami:",
     "previewTitle": "Shartnoma ko'rinishi",
     "previewDesc": "Ma'lumotlar kiritilgan holda avtomatik yangilanadi",
+    "print": "Pechat",
     "form": {
       "contractNumberLabel": "Shartnoma raqami",
       "autoHint": "Bo'sh → avtomatik",

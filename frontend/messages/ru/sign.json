@@ -7,6 +7,7 @@
   "fallbackContractTitle": "Договор",
   "sentBy": "Отправитель: <strong>{name}</strong>",
   "previewLabel": "Предпросмотр договора",
+  "printBtn": "Печать",
   "signedTitle": "Подписано! ✓",
   "signedBy": "{name}",
   "signedByYou": "Вами",

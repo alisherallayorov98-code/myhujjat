@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Scale, Maximize2, ChevronLeft, Download } from 'lucide-react'
+import { Scale, Maximize2, ChevronLeft, Download, Printer } from 'lucide-react'
 import { Card }   from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
@@ -78,6 +78,9 @@ export function PreviewPanel({ preview, loading, onExport }: Props) {
           <div className="h-6 w-px bg-white/10 mx-1" />
           <p className="text-sm font-semibold">Hujjat ko'rinishi</p>
           <div className="flex-1" />
+          <button onClick={() => window.print()} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+            <Printer size={14} /><span className="hidden sm:inline">Pechat</span>
+          </button>
           <button onClick={() => onExport('pdf')} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
             <Download size={14} /><span className="hidden sm:inline">PDF</span>
           </button>

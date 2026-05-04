@@ -3,7 +3,7 @@
 import { useState }                                      from 'react'
 import { useRouter }                                     from 'next/navigation'
 import { useTranslations }                               from 'next-intl'
-import { Plus, Save, Download, RefreshCw }               from 'lucide-react'
+import { Plus, Save, Download, RefreshCw, Printer }      from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Button }                                         from '@/components/ui/Button'
@@ -221,6 +221,12 @@ export default function FakturaPage() {
             <Button variant="secondary" size="sm" leftIcon={<RefreshCw size={13} />} onClick={() => buildPreview()}>
               {t('view')}
             </Button>
+            {preview && (
+              <Button variant="secondary" size="sm" leftIcon={<Printer size={13} />}
+                onClick={() => window.print()}>
+                {t('print')}
+              </Button>
+            )}
             <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
               onClick={() => {
                 const { text, raqam } = buildPreview()

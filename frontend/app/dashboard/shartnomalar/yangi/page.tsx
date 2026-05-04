@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
 import { useTranslations }    from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Eye, EyeOff, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Plus, Trash2, Printer } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }         from '@/components/layout/PageHeader'
 import { Button }             from '@/components/ui/Button'
@@ -611,8 +611,8 @@ export default function YangiShartnoma() {
       </div>
 
       {preview && (
-        <div className="fixed inset-0 z-50 bg-[#1E293B] flex flex-col">
-          <div className="bg-[#0F172A] text-white border-b border-[#1E293B] flex items-center px-3 sm:px-4 h-14 gap-2 shrink-0">
+        <div className="fixed inset-0 z-50 bg-[#1E293B] flex flex-col print-fullscreen">
+          <div className="bg-[#0F172A] text-white border-b border-[#1E293B] flex items-center px-3 sm:px-4 h-14 gap-2 shrink-0 preview-toolbar no-print">
             <button
               onClick={() => setPreview(false)}
               className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
@@ -626,6 +626,13 @@ export default function YangiShartnoma() {
               <p className="text-[11px] text-white/50 leading-none mt-0.5 hidden sm:block">{t('new_.previewDesc')}</p>
             </div>
             <div className="flex-1" />
+            <button
+              onClick={() => window.print()}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <Printer size={14} />
+              <span className="hidden sm:inline">{t('new_.print')}</span>
+            </button>
             <Button size="sm" loading={mutation.isPending} onClick={handleCreate}>
               {t('new_.create')}
             </Button>
@@ -633,7 +640,7 @@ export default function YangiShartnoma() {
           <div className="flex-1 overflow-auto">
             <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
               <div
-                className="bg-white shadow-2xl"
+                className="bg-white shadow-2xl print-document"
                 style={{ width: '794px', minHeight: '1123px' }}
                 dangerouslySetInnerHTML={{ __html: previewHtml }}
               />

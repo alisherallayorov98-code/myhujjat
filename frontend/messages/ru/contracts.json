@@ -91,6 +91,7 @@
     "total": "Итого:",
     "previewTitle": "Вид договора",
     "previewDesc": "Обновляется автоматически при вводе данных",
+    "print": "Печать",
     "form": {
       "contractNumberLabel": "Номер договора",
       "autoHint": "Пусто → автоматически",

@@ -2,7 +2,7 @@
 
 import { useState }                                      from 'react'
 import { useTranslations }                               from 'next-intl'
-import { FileText, UserCheck, UserX, ArrowRight, Sparkles } from 'lucide-react'
+import { FileText, UserCheck, UserX, ArrowRight, Sparkles, Printer } from 'lucide-react'
 import { useQuery }                                       from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Card }                                           from '@/components/ui/Card'
@@ -337,6 +337,9 @@ export default function HRHujjatlarPage() {
               <p className="text-sm font-semibold text-[#0F172A]">{t('preview')}</p>
               {preview && (
                 <div className="flex gap-2">
+                  <Button size="xs" variant="outline" leftIcon={<Printer size={11} />} onClick={() => window.print()}>
+                    {t('print')}
+                  </Button>
                   <Button size="xs" variant="outline" loading={loading} onClick={handlePdf}>
                     {t('pdf')}
                   </Button>

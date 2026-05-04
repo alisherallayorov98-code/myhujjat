@@ -5,7 +5,7 @@ import { useTranslations }                         from 'next-intl'
 import { useRouter }                               from 'next/navigation'
 import Link                                        from 'next/link'
 import {
-  ArrowLeft, Download, Trash2, FileText,
+  ArrowLeft, Download, Trash2, FileText, Printer,
   Calendar, Hash, DollarSign, Tag,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }   from '@tanstack/react-query'
@@ -127,6 +127,13 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
             </Link>
             {text && (
               <>
+                <Button
+                  variant="outline" size="sm"
+                  leftIcon={<Printer size={13} />}
+                  onClick={() => window.print()}
+                >
+                  {t('print')}
+                </Button>
                 <Button
                   variant="outline" size="sm"
                   leftIcon={<Download size={13} />}

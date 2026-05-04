@@ -7,6 +7,7 @@
   "fallbackContractTitle": "Шартнома",
   "sentBy": "<strong>{name}</strong> томонидан юборилган",
   "previewLabel": "Шартнома кўриниши",
+  "printBtn": "Печат",
   "signedTitle": "Имзоланди! ✓",
   "signedBy": "{name} томонидан",
   "signedByYou": "Сиз томонидан",
