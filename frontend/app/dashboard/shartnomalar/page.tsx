@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useMemo }       from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import Link                        from 'next/link'
 import { useRouter }               from 'next/navigation'
 import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send, Eye,
-  TrendingUp, CheckCircle, FileEdit, DollarSign, X, Filter,
+  TrendingUp, CheckCircle, FileEdit, DollarSign, X, Filter, Star,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -17,7 +17,9 @@ import { Card }      from '@/components/ui/Card'
 import { ContractStatusBadge } from '@/components/ui/Badge'
 import { ConfirmDialog }     from '@/components/ui/Modal'
 import { EmptyState, TableRowSkeleton } from '@/components/ui/Skeleton'
-import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { useDebouncedValue }   from '@/hooks/useDebouncedValue'
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
+import { useRef }              from 'react'
 import { useAuth }   from '@/hooks/useAuth'
 import api           from '@/lib/api'
 import { formatCurrency, formatDate } from '@/lib/formatters'
@@ -45,12 +47,25 @@ export default function ShartnomalarPage() {
 
   // Search debounce — har harf yozganda emas, 300ms keyin API chaqiriladi
   const debouncedSearch = useDebouncedValue(search, 300)
+
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [sortKey,      setSortKey]      = useState<SortKey>('createdAt')
   const [sortOrder,    setSortOrder]    = useState<SortOrder>('desc')
   const [page,             setPage]             = useState(1)
   const [selected,         setSelected]         = useState<Set<string>>(new Set())
   const [bulkConfirm,      setBulkConfirm]      = useState<string | null>(null)
   const [bulkDeleteOpen,   setBulkDeleteOpen]   = useState(false)
+
+  // Keyboard shortcuts (power users uchun)
+  useKeyboardShortcut('mod+n', useCallback(() => {
+    if (canCreate) router.push('/dashboard/shartnomalar/yangi')
+  }, [canCreate, router]))
+  useKeyboardShortcut('mod+k', useCallback(() => {
+    searchInputRef.current?.focus()
+  }, []))
+  useKeyboardShortcut('escape', useCallback(() => {
+    if (selected.size > 0) setSelected(new Set())
+  }, [selected.size]))
 
   // Statistika kartochkalari uchun
   const { data: stats } = useQuery<{
@@ -106,6 +121,14 @@ export default function ShartnomalarPage() {
       setSelected(new Set())
       toast.success(t('bulk.updated', { count }))
     },
+  })
+
+  const togglePinMut = useMutation({
+    mutationFn: (id: string) => api.patch(`/contracts/${id}/pin?orgId=${currentOrg!.id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['contracts'] })
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
   })
 
   const bulkDeleteMut = useMutation({
@@ -301,7 +324,8 @@ export default function ShartnomalarPage() {
       <div className="flex flex-wrap gap-3 mb-4 items-center">
         <div className="relative max-w-xs flex-1 sm:flex-initial">
           <Input
-            placeholder={t('filter.search')}
+            ref={searchInputRef}
+            placeholder={t('filter.search') + ' (Ctrl+K)'}
             leftIcon={<Search size={15} />}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1) }}
@@ -401,6 +425,7 @@ export default function ShartnomalarPage() {
                     className="rounded"
                   />
                 </th>
+                <th className="w-8 px-2 py-3" />
                 <ThSort label={t('table.number')}     col="contractNumber" sortKey={sortKey} sortOrder={sortOrder} onClick={toggleSort} />
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('table.type')}</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('table.counterparty')}</th>
@@ -413,11 +438,11 @@ export default function ShartnomalarPage() {
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRowSkeleton key={i} cols={8} />
+                  <TableRowSkeleton key={i} cols={9} />
                 ))
               ) : contracts.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <EmptyState
                       icon={<FileText size={28} />}
                       title={t('empty.title')}
@@ -446,6 +471,21 @@ export default function ShartnomalarPage() {
                           onChange={() => toggleSelected(c.id)}
                           className="rounded"
                         />
+                      </td>
+                      <td className="px-2 py-3" onClick={e => e.stopPropagation()}>
+                        <button
+                          onClick={() => togglePinMut.mutate(c.id)}
+                          className={cn(
+                            'p-1 rounded transition-all',
+                            c.isPinned
+                              ? 'text-[#F59E0B] hover:text-[#D97706] hover:bg-[#FEF3C7]'
+                              : 'text-[#CBD5E1] hover:text-[#F59E0B] hover:bg-[#FEF3C7] opacity-100 lg:opacity-0 lg:group-hover:opacity-100',
+                            c.isPinned && 'opacity-100',
+                          )}
+                          title={c.isPinned ? t('unpin') : t('pin')}
+                        >
+                          <Star size={14} className={c.isPinned ? 'fill-current' : ''} />
+                        </button>
                       </td>
                       <td className="px-4 py-3 cursor-pointer"
                         onClick={() => router.push(`/dashboard/shartnomalar/${c.id}`)}>

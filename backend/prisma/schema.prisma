@@ -335,6 +335,7 @@ model Contract {
   alertedAt     DateTime? // oxirgi alert vaqti
 
   isActive  Boolean  @default(true)
+  isPinned  Boolean  @default(false)  // yulduzcha — eng muhim shartnomalar yuqorida ko'rinadi
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -344,6 +345,7 @@ model Contract {
   invoices       Invoice[]
 
   @@index([organizationId, isActive, createdAt])
+  @@index([organizationId, isPinned, isActive])
   @@index([organizationId, status])
   @@index([organizationId, contractType, status])
   @@index([counterpartyId])

@@ -197,6 +197,8 @@
     "banner": "📋 «{number}» shartnomadan nusxa olinmoqda. Kontragent, raqam va sana yangilash kerak."
   },
   "viewBtn": "To'liq ekranda ko'rish",
+  "pin": "Yuqoriga mahkamlash",
+  "unpin": "Mahkamlashni olib tashlash",
   "spec": {
     "mxikLabel": "MXIK kodi",
     "mxikHint":  "10-15 raqam",
