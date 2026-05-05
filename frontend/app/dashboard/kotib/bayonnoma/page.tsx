@@ -7,7 +7,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth }                           from '@/hooks/useAuth'
 import api from '@/lib/api'
 import {
-  BAYONNOMA_TYPES, BAYONNOMA_TEMPLATES, BayonnomData,
+  BAYONNOMA_TYPES, BAYONNOMA_TEMPLATES,
+  newAgendaItem,
+  type BayonnomData, type AgendaItem,
 } from '@/lib/kotibTemplates'
 import { exportContractPdf }  from '@/lib/export/contractPdf'
 import { exportContractDocx } from '@/lib/export/contractDocx'
@@ -26,8 +28,13 @@ type Step = 'list' | 'form'
 
 const EMPTY: BayonnomData = {
   raqam: '', sana: format(new Date(), 'dd.MM.yyyy'),
+  vaqtBoshlanish: '', vaqtTugash: '', joy: '',
   orgNomi: '', rahbar: '', kotib: '',
-  ishtirokchilar: '', mavzu: '', muhokama: '', qaror: '',
+  ishtirokchilar: '', taklifEtilganlar: '',
+  kvorumJami: '', kvorumKelgan: '',
+  kunTartibi: [newAgendaItem()],
+  ilovalar: '',
+  mavzu: '', muhokama: '', qaror: '',
 }
 
 export default function BayonnomPage() {
@@ -43,6 +50,7 @@ export default function BayonnomPage() {
   const [saving, setSaving]  = useState(false)
 
   const bayonnomaLabel = (val: string) => t(`bayonnomaType_${val}` as any)
+  const isQabulTopshirish = kind === 'QABUL_TOPSHIRISH'
 
   const { data: docs = [], isLoading } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id, 'BAYONNOMA'],
@@ -63,11 +71,29 @@ export default function BayonnomPage() {
     setForm(p => ({ ...p, [k]: v }))
   }
 
+  function updateAgenda(i: number, key: keyof AgendaItem, v: string) {
+    setForm(p => ({
+      ...p,
+      kunTartibi: p.kunTartibi.map((it, idx) => idx === i ? { ...it, [key]: v } : it),
+    }))
+  }
+  function addAgenda() {
+    setForm(p => ({ ...p, kunTartibi: [...p.kunTartibi, newAgendaItem()] }))
+  }
+  function removeAgenda(i: number) {
+    setForm(p => ({
+      ...p,
+      kunTartibi: p.kunTartibi.length <= 1 ? p.kunTartibi : p.kunTartibi.filter((_, idx) => idx !== i),
+    }))
+  }
+
   function initNew() {
     setForm({
       ...EMPTY,
+      kunTartibi: [newAgendaItem()],
       orgNomi: activeOrg?.name ?? '',
       rahbar:  activeOrg?.directorName ?? '',
+      joy:     activeOrg?.address ?? '',
     })
     setKind(BAYONNOMA_TYPES[0].value)
     setStep('form')
@@ -78,12 +104,15 @@ export default function BayonnomPage() {
     setSaving(true)
     try {
       const typeLabel = bayonnomaLabel(kind)
+      const titleHint = isQabulTopshirish ? form.mavzu : (form.kunTartibi[0]?.masala || form.mavzu)
       await api.post('/documents', {
         organizationId: activeOrg.id,
         type:           'BAYONNOMA',
-        title:          `${typeLabel} — ${form.mavzu || form.raqam}`,
+        title:          `${typeLabel} — ${titleHint || form.raqam}`,
+        number:         form.raqam,
         docDate:        form.sana,
-        content:        { kind, ...form },
+        // text — saved rendered preview; data — structured form for re-editing later
+        content:        { kind, text: preview, data: form },
         status,
       })
       qc.invalidateQueries({ queryKey: ['documents', activeOrg.id] })
@@ -188,7 +217,7 @@ export default function BayonnomPage() {
   )
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <button onClick={() => setStep('list')} className="text-gray-400 hover:text-gray-700 transition-colors">
           <ChevronLeft className="w-5 h-5" />
@@ -198,25 +227,28 @@ export default function BayonnomPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-5">
+          {/* Bayonnoma turi */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
             <p className="text-sm font-medium text-gray-700 mb-3">{t('bayonnomaTuri')}</p>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {BAYONNOMA_TYPES.map(b => (
                 <button
                   key={b.value}
                   onClick={() => setKind(b.value)}
-                  className={`flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all text-left ${
                     kind === b.value
                       ? 'border-purple-500 bg-purple-50 text-purple-700'
                       : 'border-gray-200 hover:border-gray-300 text-gray-600'
                   }`}
                 >
-                  <span>{b.icon}</span> {bayonnomaLabel(b.value)}
+                  <span className="shrink-0">{b.icon}</span>
+                  <span className="truncate">{bayonnomaLabel(b.value)}</span>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Asosiy ma'lumotlar */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
             <p className="text-sm font-medium text-gray-700">{t('malumotlar')}</p>
 
@@ -227,10 +259,22 @@ export default function BayonnomPage() {
                 onChange={v => update('sana', v)} placeholder="dd.mm.yyyy" />
             </div>
 
+            {!isQabulTopshirish && (
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={t('vaqtBoshlanish')} value={form.vaqtBoshlanish || ''}
+                  onChange={v => update('vaqtBoshlanish', v)} placeholder="10:00" />
+                <Field label={t('vaqtTugash')} value={form.vaqtTugash || ''}
+                  onChange={v => update('vaqtTugash', v)} placeholder="12:30" />
+              </div>
+            )}
+
+            <Field label={t('joyi')} value={form.joy || ''}
+              onChange={v => update('joy', v)} placeholder={t('joyiPlace')} />
+
             <Field label={t('tashkilotNomi')} value={form.orgNomi}
               onChange={v => update('orgNomi', v)} placeholder={t('tashkilotNomi')} />
 
-            {kind === 'QABUL_TOPSHIRISH' ? (
+            {isQabulTopshirish ? (
               <>
                 <Field label={t('topshiruvchi')} value={form.rahbar}
                   onChange={v => update('rahbar', v)} placeholder={t('fio')} />
@@ -242,6 +286,8 @@ export default function BayonnomPage() {
                   onChange={v => update('muhokama', v)} placeholder={t('holatiPlace')} />
                 <TextareaField label={t('izohlarQarorlar')} value={form.qaror}
                   onChange={v => update('qaror', v)} placeholder={t('qarorlar')} />
+                <TextareaField label={t('komissiyaAzolari')} value={form.taklifEtilganlar || ''}
+                  onChange={v => update('taklifEtilganlar', v)} placeholder={t('komissiyaAzolariPlace')} />
               </>
             ) : (
               <>
@@ -249,17 +295,82 @@ export default function BayonnomPage() {
                   onChange={v => update('rahbar', v)} placeholder={t('fio')} />
                 <Field label={t('kotib')} value={form.kotib}
                   onChange={v => update('kotib', v)} placeholder={t('fio')} />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label={t('kvorumJami')} value={form.kvorumJami || ''}
+                    onChange={v => update('kvorumJami', v)} placeholder="12" />
+                  <Field label={t('kvorumKelgan')} value={form.kvorumKelgan || ''}
+                    onChange={v => update('kvorumKelgan', v)} placeholder="10" />
+                </div>
+
                 <TextareaField label={t('ishtirokchilar')} value={form.ishtirokchilar}
-                  onChange={v => update('ishtirokchilar', v)} placeholder={t('ishtirokchilarRoyxati')} />
-                <Field label={t('mavzu')} value={form.mavzu}
-                  onChange={v => update('mavzu', v)} placeholder={t('yigilishMavzusi')} />
-                <TextareaField label={t('muhokama')} value={form.muhokama}
-                  onChange={v => update('muhokama', v)} placeholder={t('muhokamaPlace')} />
-                <TextareaField label={t('qaror')} value={form.qaror}
-                  onChange={v => update('qaror', v)} placeholder={t('qarorPlace')} />
+                  onChange={v => update('ishtirokchilar', v)} placeholder={t('ishtirokchilarPlace')} rows={4} />
+                <TextareaField label={t('taklifEtilganlar')} value={form.taklifEtilganlar || ''}
+                  onChange={v => update('taklifEtilganlar', v)} placeholder={t('taklifEtilganlarPlace')} rows={2} />
+
+                {kind === 'BOSHQA' && (
+                  <Field label={t('mavzu')} value={form.mavzu}
+                    onChange={v => update('mavzu', v)} placeholder={t('yigilishMavzusi')} />
+                )}
               </>
             )}
           </div>
+
+          {/* Kun tartibi (faqat QABUL_TOPSHIRISH bo'lmaganda) */}
+          {!isQabulTopshirish && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700">{t('kunTartibi')}</p>
+                <button
+                  onClick={addAgenda}
+                  className="flex items-center gap-1.5 text-xs text-purple-600 hover:text-purple-800 border border-purple-200 hover:border-purple-300 px-2.5 py-1.5 rounded-lg transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> {t('masalaQoshish')}
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {form.kunTartibi.map((it, i) => (
+                  <div key={i} className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-purple-700">
+                        {t('masalaN', { n: i + 1 })}
+                      </span>
+                      {form.kunTartibi.length > 1 && (
+                        <button
+                          onClick={() => removeAgenda(i)}
+                          className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                          title={t('masalaOchirish')}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <Field label={t('masala')} value={it.masala}
+                      onChange={v => updateAgenda(i, 'masala', v)} placeholder={t('masalaPlace')} />
+                    <TextareaField label={t('eshitildi')} value={it.eshitildi}
+                      onChange={v => updateAgenda(i, 'eshitildi', v)} placeholder={t('eshitildiPlace')} rows={3} />
+                    <TextareaField label={t('muhokamaQilindi')} value={it.muhokama}
+                      onChange={v => updateAgenda(i, 'muhokama', v)} placeholder={t('muhokamaPlace')} rows={3} />
+                    <Field label={t('ovozBerish')} value={it.ovoz}
+                      onChange={v => updateAgenda(i, 'ovoz', v)} placeholder={t('ovozBerishPlace')} />
+                    <TextareaField label={t('qaror')} value={it.qaror}
+                      onChange={v => updateAgenda(i, 'qaror', v)} placeholder={t('qarorPlace')} rows={3} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label={t('masulShaxs')} value={it.masulShaxs || ''}
+                        onChange={v => updateAgenda(i, 'masulShaxs', v)} placeholder={t('fio')} />
+                      <Field label={t('ijroMuddati')} value={it.ijroMuddati || ''}
+                        onChange={v => updateAgenda(i, 'ijroMuddati', v)} placeholder="dd.mm.yyyy" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <TextareaField label={t('ilovalar')} value={form.ilovalar || ''}
+                onChange={v => update('ilovalar', v)} placeholder={t('ilovalarPlace')} rows={2} />
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button
@@ -284,7 +395,7 @@ export default function BayonnomPage() {
             <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <Eye className="w-4 h-4" /> {t('korinish')}
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button onClick={() => setFullscreen(true)}
                 className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-300 px-2.5 py-1.5 rounded-lg transition-colors">
                 <Maximize2 className="w-3.5 h-3.5" /> {t('fullScreen')}
@@ -381,15 +492,15 @@ function Field({ label, value, onChange, placeholder }: {
   )
 }
 
-function TextareaField({ label, value, onChange, placeholder }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string
+function TextareaField({ label, value, onChange, placeholder, rows = 3 }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number
 }) {
   return (
     <div>
       <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
       <textarea
         value={value} onChange={e => onChange(e.target.value)}
-        placeholder={placeholder} rows={3}
+        placeholder={placeholder} rows={rows}
         className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition resize-none"
       />
     </div>

@@ -84,8 +84,9 @@ export default function BuyruqPage() {
         organizationId: activeOrg.id,
         type:           'BUYRUQ',
         title:          `${typeLabel} — ${form.xodimIsm || form.mavzu || form.raqam}`,
+        number:         form.raqam,
         docDate:        form.sana,
-        content:        { kind, ...form },
+        content:        { kind, text: preview, data: form },
         status,
       })
       qc.invalidateQueries({ queryKey: ['documents', activeOrg.id] })
