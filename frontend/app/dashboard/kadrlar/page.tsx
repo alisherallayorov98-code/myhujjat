@@ -1,8 +1,10 @@
 'use client'
 
-import { useState }                                      from 'react'
+import { useState, useRef, useCallback }                  from 'react'
 import { useTranslations }                               from 'next-intl'
-import { Plus, Users, Search, Edit2, Trash2, Building2, Download } from 'lucide-react'
+import {
+  Plus, Users, Search, Edit2, Trash2, Building2, Download, X, FileText,
+} from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Button }                                         from '@/components/ui/Button'
@@ -13,6 +15,8 @@ import { Modal, ConfirmDialog }                           from '@/components/ui/
 import { EmptyState, TableRowSkeleton }                   from '@/components/ui/Skeleton'
 import { Pagination }                                    from '@/components/ui/Pagination'
 import { useAuth }                                        from '@/hooks/useAuth'
+import { useDebouncedValue }                             from '@/hooks/useDebouncedValue'
+import { useKeyboardShortcut }                           from '@/hooks/useKeyboardShortcut'
 import api                                                from '@/lib/api'
 import { exportEmployeesExcel }                          from '@/lib/export/listExport'
 import { formatDate, formatNumber }                      from '@/lib/formatters'
@@ -160,16 +164,21 @@ export default function KadrlarPage() {
   const [addModal,  setAddModal]  = useState(false)
   const [editXodim, setEditXodim] = useState<Employee | null>(null)
   const [deleteEmp, setDeleteEmp] = useState<Employee | null>(null)
+  const debouncedSearch = useDebouncedValue(search, 300)
+
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  useKeyboardShortcut('mod+k', useCallback(() => searchInputRef.current?.focus(), []))
+  useKeyboardShortcut('mod+n', useCallback(() => setAddModal(true), []))
 
   const { data, isLoading } = useQuery<{ data: Employee[]; meta: { total: number; totalPages: number; page: number; limit: number } }>({
-    queryKey: ['employees', currentOrg?.id, search, page],
+    queryKey: ['employees', currentOrg?.id, debouncedSearch, page],
     queryFn:  () => {
       const params = new URLSearchParams({
         orgId: currentOrg!.id,
         page:  String(page),
         limit: '20',
       })
-      if (search) params.set('search', search)
+      if (debouncedSearch) params.set('search', debouncedSearch)
       return api.get(`/employees?${params}`).then(r => r.data)
     },
     enabled: !!currentOrg?.id,
@@ -249,13 +258,23 @@ export default function KadrlarPage() {
 
       {/* Qidiruv */}
       <div className="mb-4 flex items-center justify-between gap-3">
-        <Input
-          placeholder={t('searchPlace')}
-          leftIcon={<Search size={15} />}
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
-          className="max-w-xs"
-        />
+        <div className="relative max-w-xs flex-1 sm:flex-initial">
+          <Input
+            ref={searchInputRef}
+            placeholder={t('searchPlace') + ' (Ctrl+K)'}
+            leftIcon={<Search size={15} />}
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(''); setPage(1) }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9]"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
         {totalCount > 0 && (
           <span className="text-xs text-[#94A3B8] shrink-0">
             {totalCount} ta
@@ -319,16 +338,18 @@ export default function KadrlarPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-[#94A3B8]">{emp.tel || '—'}</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex gap-1">
                         <button
                           onClick={() => setEditXodim(emp)}
-                          className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] transition-colors"
+                          className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all"
+                          title={t('edit')}
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => setDeleteEmp(emp)}
-                          className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-colors"
+                          className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
+                          title={t('delete')}
                         >
                           <Trash2 size={14} />
                         </button>

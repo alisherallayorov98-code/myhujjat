@@ -8,6 +8,8 @@
   "newEmployee": "Yangi xodim",
   "editEmployee": "Xodimni tahrirlash",
   "cancel": "Bekor",
+  "edit": "Tahrirlash",
+  "delete": "O'chirish",
   "save": "Saqlash",
   "add": "Qo'shish",
   "noEmployeesExport": "Eksport uchun xodim yo'q",
