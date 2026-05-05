@@ -21,6 +21,7 @@ import {
 } from '@/lib/contractTemplates'
 import { formatAmountWords, formatCurrency, formatNumber } from '@/lib/formatters'
 import { renderContractHtml } from '@/lib/export/contractHtml'
+import { INDUSTRY_TEMPLATES } from '@/lib/industryTemplates'
 import { type SpecItem }      from '@/lib/qqs'
 import { cn }                 from '@/lib/cn'
 import toast                  from 'react-hot-toast'
@@ -59,11 +60,14 @@ function injectCustomSections(
 
 export default function YangiShartnoma() {
   const t = useTranslations('contracts')
-  const router         = useRouter()
-  const searchParams   = useSearchParams()
-  const cloneFromId    = searchParams.get('cloneFrom')
-  const qc             = useQueryClient()
-  const { currentOrg } = useAuth()
+  const router          = useRouter()
+  const searchParams    = useSearchParams()
+  const cloneFromId     = searchParams.get('cloneFrom')
+  const industryTplId   = searchParams.get('industryTpl')   // industryTemplates.ts dan
+  const systemTplId     = searchParams.get('fromTemplate')  // backend Template dan
+  const initialType     = searchParams.get('type') as ContractType | null
+  const qc              = useQueryClient()
+  const { currentOrg }  = useAuth()
 
   // Tashkilot yo'q bo'lsa, avval qo'shishni so'rab dashboard'ga qaytaramiz.
   useEffect(() => {
@@ -171,6 +175,42 @@ export default function YangiShartnoma() {
     draft.dismiss()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cloneSource])
+
+  // ─── Industry shablondan yaratish — frontend katalogdan
+  useEffect(() => {
+    if (!industryTplId) return
+    const tpl = INDUSTRY_TEMPLATES.find(t => t.id === industryTplId)
+    if (!tpl) return
+    setType(tpl.contractType)
+    if (initialType === 'QOSHIMCHA') setType('QOSHIMCHA') // qo'shimcha shartnoma uchun
+    setStep(2)
+    draft.dismiss()
+    toast.success(t('new_.templateLoaded', { name: tpl.name }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [industryTplId])
+
+  // ─── System shablondan yaratish — backend Template'dan
+  const { data: systemTpl } = useQuery<any>({
+    queryKey: ['template-source', systemTplId],
+    queryFn:  () => api.get(`/templates/${systemTplId}`).then(r => r.data),
+    enabled:  !!systemTplId,
+  })
+  useEffect(() => {
+    if (!systemTpl) return
+    setType(systemTpl.contractType)
+    setStep(2)
+    draft.dismiss()
+    toast.success(t('new_.templateLoaded', { name: systemTpl.name }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [systemTpl])
+
+  // initialType URL parametri (masalan ?type=QOSHIMCHA)
+  useEffect(() => {
+    if (initialType && CONTRACT_TYPE_CONFIG[initialType]) {
+      setType(initialType)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialType])
 
   const mutation = useMutation({
     mutationFn: (data: any) => api.post('/contracts', data),

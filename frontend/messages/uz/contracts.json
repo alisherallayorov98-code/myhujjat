@@ -115,6 +115,7 @@
     "draftDelete": "O'chirish",
     "draftDismiss": "Yopish",
     "draftRestored": "Qoralama tiklandi",
+    "templateLoaded": "Shablon yuklandi: {name}",
     "typeDescriptions": {
       "OLDI_SOTDI": "Tovarlarni sotish-sotib olish. Mahsulot, miqdor, narx va yetkazib berish shartlari belgilanadi.",
       "XIZMAT":     "Xizmat ko'rsatish (konsultatsiya, ta'mir, marketing va b.q.). Hajm, muddat va narx asosida.",
