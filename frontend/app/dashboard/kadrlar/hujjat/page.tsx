@@ -2,7 +2,7 @@
 
 import { useState }                                      from 'react'
 import { useTranslations }                               from 'next-intl'
-import { FileText, UserCheck, UserX, ArrowRight, Sparkles, Printer } from 'lucide-react'
+import { FileText, UserCheck, UserX, ArrowRight, Sparkles, Eye, Maximize2, Download } from 'lucide-react'
 import { useQuery }                                       from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Card }                                           from '@/components/ui/Card'
@@ -21,6 +21,7 @@ import {
 } from '@/lib/kadrlarTemplates'
 import { formatAmountWords, formatNumber } from '@/lib/formatters'
 import { DynamicFeatureRunner } from '@/components/DynamicFeatureRunner/DynamicFeatureRunner'
+import { FullscreenPreview }    from '@/components/shared/FullscreenPreview'
 import { KADRLAR_FEATURES }     from '@/lib/dynamicFeatures'
 import toast                 from 'react-hot-toast'
 import { cn }                from '@/lib/cn'
@@ -33,6 +34,7 @@ export default function HRHujjatlarPage() {
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null)
   const [preview, setPreview]         = useState('')
   const [previewTitle, setPreviewTitle] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
   const [loading, setLoading]         = useState(false)
 
   const HR_DOCS = [
@@ -153,6 +155,7 @@ export default function HRHujjatlarPage() {
 
     setPreview(content)
     setPreviewTitle(title)
+    setShowPreview(true)
   }
 
   async function handlePdf() {
@@ -235,7 +238,7 @@ export default function HRHujjatlarPage() {
           </div>
         </div>
       ) : (
-        <div className={cn('grid gap-6', preview ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2')}>
+        <div className="grid gap-6 grid-cols-1">
           <Card>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[#0F172A]">
@@ -332,13 +335,18 @@ export default function HRHujjatlarPage() {
             </div>
           </Card>
 
-          <Card padding="none">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-              <p className="text-sm font-semibold text-[#0F172A]">{t('preview')}</p>
-              {preview && (
+          {/* Tezkor ko'rinish — hujjat yaratilgach pastda kichik panel ko'rinadi.
+             To'liq ekranda ko'rish uchun "Ko'rish" tugmasi. */}
+          {preview && (
+            <Card padding="none">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText size={14} className="text-[#2563EB] shrink-0" />
+                  <p className="text-sm font-semibold text-[#0F172A] truncate">{previewTitle}</p>
+                </div>
                 <div className="flex gap-2">
-                  <Button size="xs" variant="outline" leftIcon={<Printer size={11} />} onClick={() => window.print()}>
-                    {t('print')}
+                  <Button size="xs" variant="outline" leftIcon={<Maximize2 size={11} />} onClick={() => setShowPreview(true)}>
+                    {t('view')}
                   </Button>
                   <Button size="xs" variant="outline" loading={loading} onClick={handlePdf}>
                     {t('pdf')}
@@ -347,34 +355,47 @@ export default function HRHujjatlarPage() {
                     {t('word')}
                   </Button>
                 </div>
-              )}
-            </div>
-            {preview ? (
-              <div className="bg-[#F1F5F9] py-8 px-4 sm:px-8">
-                <div
-                  className="bg-white shadow-md mx-auto p-10 sm:p-14 text-[#0F172A] rounded-sm whitespace-pre-wrap"
-                  style={{
-                    fontFamily: '"Times New Roman", serif',
-                    fontSize: 14,
-                    lineHeight: 1.8,
-                    maxWidth: 794,
-                    minHeight: 1100,
-                  }}
+              </div>
+              <div className="p-4 max-h-[200px] overflow-auto bg-[#F8FAFC]">
+                <pre
+                  className="text-[11px] text-[#475569] whitespace-pre-wrap leading-relaxed"
+                  style={{ fontFamily: '"Times New Roman", serif' }}
                 >
-                  {preview}
-                </div>
+                  {preview.slice(0, 800)}{preview.length > 800 ? '\n…' : ''}
+                </pre>
               </div>
-            ) : (
-              <div className="p-6 min-h-96 flex items-center justify-center text-[#94A3B8]">
-                <div className="text-center">
-                  <FileText size={32} className="mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">{t('previewPlaceholder')}</p>
-                </div>
-              </div>
-            )}
-          </Card>
+            </Card>
+          )}
         </div>
       )}
+
+      <FullscreenPreview
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={previewTitle}
+        content={preview}
+        emptyText={t('previewPlaceholder')}
+        toolbar={
+          <>
+            <button
+              onClick={handlePdf}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              disabled={loading}
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+            <button
+              onClick={handleDocx}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              disabled={loading}
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">Word</span>
+            </button>
+          </>
+        }
+      />
     </div>
   )
 }

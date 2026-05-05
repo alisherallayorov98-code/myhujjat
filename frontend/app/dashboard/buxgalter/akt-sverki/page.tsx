@@ -3,7 +3,7 @@
 import { useState }                                      from 'react'
 import { useRouter }                                     from 'next/navigation'
 import { useTranslations }                               from 'next-intl'
-import { Plus, Save, Download, RefreshCw, Trash2, Printer } from 'lucide-react'
+import { Plus, Save, Download, Eye, Maximize2, Trash2 }   from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Button }                                         from '@/components/ui/Button'
@@ -11,6 +11,7 @@ import { Input }                                          from '@/components/ui/
 import { Card }                                           from '@/components/ui/Card'
 import { Modal }                                          from '@/components/ui/Modal'
 import { EmptyState }                                     from '@/components/ui/Skeleton'
+import { FullscreenPreview }                              from '@/components/shared/FullscreenPreview'
 import { useAuth }                                        from '@/hooks/useAuth'
 import api                                                from '@/lib/api'
 import {
@@ -31,6 +32,7 @@ export default function AktSverkiPage() {
   const { currentOrg }   = useAuth()
   const [modal, setModal] = useState(false)
   const [preview, setPreview]       = useState('')
+  const [showPreview, setShowPreview] = useState(false)
   const [movements, setMovements]   = useState<AktSverkaMovement[]>([{ ...EMPTY_MOV }])
   const [form, setForm] = useState({
     raqam:             '',
@@ -175,17 +177,15 @@ export default function AktSverkiPage() {
         open={modal}
         onClose={() => setModal(false)}
         title={t('newAktSverka')}
-        size="full"
+        size="lg"
         footer={
           <div className="flex gap-2 w-full">
             <Button variant="outline" size="sm" onClick={() => setModal(false)}>{t('close')}</Button>
             <div className="flex-1" />
-            <Button variant="secondary" size="sm" leftIcon={<RefreshCw size={13} />} onClick={handlePreview}>{t('view')}</Button>
-            {preview && (
-              <Button variant="secondary" size="sm" leftIcon={<Printer size={13} />} onClick={() => window.print()}>
-                {t('print')}
-              </Button>
-            )}
+            <Button variant="secondary" size="sm" leftIcon={<Eye size={13} />}
+              onClick={() => { handlePreview(); setShowPreview(true) }}>
+              {t('view')}
+            </Button>
             <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
               onClick={() => {
                 const text = generateAktSverkaText(buildData())
@@ -199,8 +199,7 @@ export default function AktSverkiPage() {
           </div>
         }
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
+        <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Input label={t('raqam')} placeholder={t('raqamPlace')}
                 value={form.raqam} onChange={e => setForm(f => ({ ...f, raqam: e.target.value }))} />
@@ -273,33 +272,55 @@ export default function AktSverkiPage() {
                 ))}
               </div>
             </div>
-          </div>
 
-          <div>
-            <p className="text-sm font-semibold text-[#0F172A] mb-2">{t('preview')}</p>
-            <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] p-3 sm:p-6">
-              {preview ? (
-                <div
-                  className="bg-white shadow-md mx-auto p-8 sm:p-12 leading-relaxed text-[#0F172A] rounded-sm"
-                  style={{
-                    fontFamily: '"Times New Roman", serif',
-                    fontSize: 13,
-                    lineHeight: 1.7,
-                    whiteSpace: 'pre-wrap',
-                    minHeight: 800,
-                  }}
+            {/* Tezkor ko'rinish — to'liq ekran uchun "Ko'rish" tugmasi */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-[#0F172A]">{t('preview')}</p>
+                <button
+                  onClick={() => { handlePreview(); setShowPreview(true) }}
+                  className="text-xs text-[#2563EB] hover:underline flex items-center gap-1"
                 >
-                  {preview}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center min-h-[400px] text-[#94A3B8] text-sm">
-                  {t('previewHint')}
-                </div>
-              )}
+                  <Maximize2 size={12} /> {t('view')}
+                </button>
+              </div>
+              <div className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 max-h-[280px] overflow-auto">
+                {preview ? (
+                  <pre
+                    className="text-[11px] text-[#475569] whitespace-pre-wrap leading-relaxed"
+                    style={{ fontFamily: '"Times New Roman", serif' }}
+                  >
+                    {preview.slice(0, 600)}{preview.length > 600 ? '…' : ''}
+                  </pre>
+                ) : (
+                  <div className="text-center text-[#94A3B8] text-xs py-4">
+                    {t('previewHint')}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
         </div>
       </Modal>
+
+      <FullscreenPreview
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={`Akt-sverka № ${form.raqam || '...'}`}
+        content={preview}
+        emptyText={t('previewHint')}
+        toolbar={
+          <button
+            onClick={() => {
+              const text = generateAktSverkaText(buildData())
+              exportContractPdf({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+            }}
+            className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">PDF</span>
+          </button>
+        }
+      />
     </div>
   )
 }
