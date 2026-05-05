@@ -1,20 +1,29 @@
 'use client'
 
-import Link           from 'next/link'
+import { useState, useRef, useCallback, useMemo } from 'react'
+import Link            from 'next/link'
 import { useRouter }   from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Plus, ClipboardList, Download } from 'lucide-react'
+import {
+  Plus, ClipboardList, Download, Search, X, Trash2, Edit2,
+  TrendingUp, DollarSign, FileText,
+} from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }  from '@/components/layout/PageHeader'
 import { Button }      from '@/components/ui/Button'
+import { Input }       from '@/components/ui/Input'
 import { Card }        from '@/components/ui/Card'
 import { Badge }       from '@/components/ui/Badge'
+import { ConfirmDialog } from '@/components/ui/Modal'
 import { EmptyState }  from '@/components/ui/Skeleton'
 import { useAuth }     from '@/hooks/useAuth'
+import { useDebouncedValue }   from '@/hooks/useDebouncedValue'
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
 import api             from '@/lib/api'
 import { formatDate, formatCurrency } from '@/lib/formatters'
 import { calcSpecTotals } from '@/lib/qqs'
 import { exportSpecExcel } from '@/lib/export/specExport'
+import { cn }          from '@/lib/cn'
 import toast           from 'react-hot-toast'
 
 export default function SpesifikatsiyalarPage() {
@@ -22,6 +31,16 @@ export default function SpesifikatsiyalarPage() {
   const { currentOrg } = useAuth()
   const router         = useRouter()
   const qc             = useQueryClient()
+
+  const [search,    setSearch]    = useState('')
+  const [deleteSpec, setDeleteSpec] = useState<any | null>(null)
+  const debouncedSearch = useDebouncedValue(search, 300)
+
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  useKeyboardShortcut('mod+k', useCallback(() => searchInputRef.current?.focus(), []))
+  useKeyboardShortcut('mod+n', useCallback(() => {
+    router.push('/dashboard/spesifikatsiyalar/yangi')
+  }, [router]))
 
   const { data: specs = [], isLoading } = useQuery({
     queryKey: ['specifications', currentOrg?.id],
@@ -38,9 +57,34 @@ export default function SpesifikatsiyalarPage() {
       api.delete(`/specifications/${id}?orgId=${currentOrg?.id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['specifications'] })
+      setDeleteSpec(null)
       toast.success(t('toast.deleted'))
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
   })
+
+  // Frontend filter: search bo'yicha
+  const filtered = useMemo(() => {
+    if (!debouncedSearch.trim()) return specs as any[]
+    const q = debouncedSearch.toLowerCase()
+    return (specs as any[]).filter(s =>
+      String(s.specNumber || '').toLowerCase().includes(q) ||
+      String(s.contract?.contractNumber || '').toLowerCase().includes(q) ||
+      String(s.contract?.counterparty?.name || '').toLowerCase().includes(q)
+    )
+  }, [specs, debouncedSearch])
+
+  // Statistika
+  const stats = useMemo(() => {
+    const arr = specs as any[]
+    const total = arr.length
+    const totalAmount = arr.reduce((sum, s) => {
+      const tot = calcSpecTotals(s.items || [])
+      return sum + tot.umumiy
+    }, 0)
+    const totalRows = arr.reduce((sum, s) => sum + (s.items?.length || 0), 0)
+    return { total, totalAmount, totalRows }
+  }, [specs])
 
   const handleExcel = async (spec: any) => {
     await exportSpecExcel({
@@ -69,18 +113,68 @@ export default function SpesifikatsiyalarPage() {
         }
       />
 
+      {/* Statistika */}
+      {stats.total > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+          <SpecStatCard
+            label={t('stats.total')}
+            value={stats.total.toLocaleString()}
+            icon={<ClipboardList size={16} />}
+            color="bg-[#F1F5F9] text-[#475569]"
+          />
+          <SpecStatCard
+            label={t('stats.totalRows')}
+            value={stats.totalRows.toLocaleString()}
+            icon={<FileText size={16} />}
+            color="bg-[#DBEAFE] text-[#1D4ED8]"
+          />
+          <SpecStatCard
+            label={t('stats.totalAmount')}
+            value={formatCurrency(stats.totalAmount)}
+            icon={<DollarSign size={16} />}
+            color="bg-[#EDE9FE] text-[#7C3AED]"
+          />
+        </div>
+      )}
+
+      {/* Search */}
+      {(stats.total > 0 || debouncedSearch) && (
+        <div className="mb-4 flex items-center gap-3 flex-wrap">
+          <div className="relative max-w-sm flex-1 sm:flex-initial">
+            <Input
+              ref={searchInputRef}
+              placeholder={t('searchPlaceholder') + ' (Ctrl+K)'}
+              leftIcon={<Search size={15} />}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9]"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+          <span className="text-xs text-[#94A3B8] shrink-0">
+            {filtered.length} / {stats.total} {t('rows')}
+          </span>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
             <div key={i} className="h-16 bg-white rounded-xl border border-[#E2E8F0] animate-pulse" />
           ))}
         </div>
-      ) : specs.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <EmptyState
           icon={<ClipboardList size={28} />}
-          title={t('noSpecs')}
-          description={t('noSpecsDescription')}
-          action={{
+          title={debouncedSearch ? t('noSearchResults') : t('noSpecs')}
+          description={debouncedSearch ? '' : t('noSpecsDescription')}
+          action={debouncedSearch ? undefined : {
             label:   t('newSpec'),
             onClick: () => router.push('/dashboard/spesifikatsiyalar/yangi'),
           }}
@@ -90,7 +184,7 @@ export default function SpesifikatsiyalarPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#E2E8F0]">
+                <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                   {[t('table.number'), t('table.contract'), t('table.rows'), t('table.totalAmount'), t('table.date'), ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                       {h}
@@ -99,7 +193,7 @@ export default function SpesifikatsiyalarPage() {
                 </tr>
               </thead>
               <tbody>
-                {(specs as any[]).map((spec: any) => {
+                {filtered.map((spec: any) => {
                   const items  = spec.items || []
                   const totals = calcSpecTotals(items)
                   return (
@@ -127,13 +221,27 @@ export default function SpesifikatsiyalarPage() {
                         {formatDate(spec.createdAt, 'short')}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                        <div className="flex gap-1">
                           <button
                             onClick={() => handleExcel(spec)}
-                            className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-colors"
+                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-all"
                             title={t('tooltip.excelDownload')}
                           >
                             <Download size={14} />
+                          </button>
+                          <Link
+                            href={`/dashboard/spesifikatsiyalar/${spec.id}`}
+                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all"
+                            title={t('edit')}
+                          >
+                            <Edit2 size={14} />
+                          </Link>
+                          <button
+                            onClick={() => setDeleteSpec(spec)}
+                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
+                            title={t('delete')}
+                          >
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
@@ -145,6 +253,32 @@ export default function SpesifikatsiyalarPage() {
           </div>
         </Card>
       )}
+
+      <ConfirmDialog
+        open={!!deleteSpec}
+        onClose={() => setDeleteSpec(null)}
+        onConfirm={() => deleteSpec && deleteMutation.mutate(deleteSpec.id)}
+        title={t('deleteTitle')}
+        description={deleteSpec ? t('deleteConfirm', { number: deleteSpec.specNumber }) : ''}
+        variant="danger"
+        loading={deleteMutation.isPending}
+      />
+    </div>
+  )
+}
+
+function SpecStatCard({ label, value, icon, color }: {
+  label: string; value: string; icon: React.ReactNode; color: string
+}) {
+  return (
+    <div className="bg-white border border-[#E2E8F0] rounded-xl p-3.5 flex items-center gap-3">
+      <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', color)}>
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] uppercase tracking-wider text-[#94A3B8] truncate">{label}</p>
+        <p className="text-base font-bold text-[#0F172A] truncate tabular-nums">{value}</p>
+      </div>
     </div>
   )
 }

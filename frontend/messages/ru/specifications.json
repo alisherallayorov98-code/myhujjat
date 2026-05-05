@@ -7,6 +7,17 @@
   "newSpec": "Новая спецификация",
   "noSpecs": "Нет спецификаций",
   "noSpecsDescription": "Создайте список товаров и услуг",
+  "noSearchResults": "По запросу ничего не найдено",
+  "searchPlaceholder": "Номер, договор или контрагент...",
+  "edit": "Редактировать",
+  "delete": "Удалить",
+  "deleteTitle": "Удаление спецификации",
+  "deleteConfirm": "Удалить спецификацию № {number}?",
+  "stats": {
+    "total":       "Всего",
+    "totalRows":   "Всего строк",
+    "totalAmount": "Общая сумма"
+  },
   "notFound": "Не найдено",
   "spec": "Спецификация",
   "specNumber": "Спецификация №",

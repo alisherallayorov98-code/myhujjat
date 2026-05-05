@@ -7,6 +7,17 @@
   "newSpec": "Yangi spesifikatsiya",
   "noSpecs": "Spesifikatsiyalar yo'q",
   "noSpecsDescription": "Tovar va xizmatlar ro'yxatini yarating",
+  "noSearchResults": "Qidiruv bo'yicha hech narsa topilmadi",
+  "searchPlaceholder": "Raqam, shartnoma yoki kontragent...",
+  "edit": "Tahrirlash",
+  "delete": "O'chirish",
+  "deleteTitle": "Spesifikatsiyani o'chirish",
+  "deleteConfirm": "№ {number} spesifikatsiyasini o'chirish?",
+  "stats": {
+    "total":       "Jami",
+    "totalRows":   "Jami qatorlar",
+    "totalAmount": "Umumiy summa"
+  },
   "notFound": "Topilmadi",
   "spec": "Spesifikatsiya",
   "specNumber": "Spesifikatsiya №",
