@@ -2,7 +2,12 @@
 
 import { Plus, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { calcSpecItem, newSpecItem, BIRLIKLAR, QQS_OPTIONS, type SpecItem } from '@/lib/qqs'
+import { useTranslations } from 'next-intl'
+import {
+  calcSpecItem, newSpecItem,
+  BIRLIKLAR, QQS_OPTIONS,
+  type SpecItem, type QqsFoiz,
+} from '@/lib/qqs'
 import { formatNumber } from '@/lib/formatters'
 
 interface Props {
@@ -11,6 +16,7 @@ interface Props {
 }
 
 export function SpecTable({ items, onChange }: Props) {
+  const t = useTranslations('specifications')
 
   function update(i: number, key: keyof SpecItem, val: string | number) {
     const updated = items.map((item, idx) => {
@@ -31,16 +37,14 @@ export function SpecTable({ items, onChange }: Props) {
     const removed = items[i]
     const next    = items.filter((_, idx) => idx !== i)
     onChange(next)
-    // Undo toast — 5 sekund ichida bekor qilish mumkin
-    toast((t) => (
+    toast((tt) => (
       <span className="flex items-center gap-2">
         <span className="text-sm">Qator o&apos;chirildi</span>
         <button
           onClick={() => {
-            // Aniq joyga qaytarish
             const restored = [...next.slice(0, i), removed, ...next.slice(i)]
             onChange(restored)
-            toast.dismiss(t.id)
+            toast.dismiss(tt.id)
           }}
           className="text-[#2563EB] font-medium text-sm hover:underline"
         >
@@ -50,6 +54,17 @@ export function SpecTable({ items, onChange }: Props) {
     ), { duration: 5000 })
   }
 
+  // "Barchasi uchun QQS" — bir bosish bilan barcha qatorlarga tegishli foiz qo'llaniladi
+  function setAllQqs(foiz: QqsFoiz) {
+    if (items.length === 0) return
+    const updated = items.map(item => {
+      const calc = calcSpecItem(item.miqdori, item.narxi, foiz)
+      return { ...item, qqsFoiz: foiz, qqsSumma: calc.qqsSumma, summa: calc.summa }
+    })
+    onChange(updated)
+    toast.success(t('toast.qqsApplied', { rate: foiz === 'siz' ? '0%' : foiz + '%' }))
+  }
+
   const jami    = items.reduce((s, i) => s + i.miqdori * i.narxi, 0)
   const jamiQqs = items.reduce((s, i) => s + i.qqsSumma, 0)
   const umumiy  = items.reduce((s, i) => s + i.summa, 0)
@@ -57,19 +72,46 @@ export function SpecTable({ items, onChange }: Props) {
   const fmt = (n: number) => n > 0 ? formatNumber(n) : '—'
 
   return (
-    <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-[#E2E8F0]">
+    <div className="rounded-xl border border-[#E2E8F0] overflow-hidden">
+      {/* Toolbar — "Barchasi uchun QQS" tezkor tugmalar + qatorlar soni */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
+            {t('itemsTitle')}
+          </p>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#E2E8F0] text-[#475569] tabular-nums">
+            {items.length}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] text-[#94A3B8]">{t('allQqs')}:</span>
+          {(['siz', '0', '12', '15'] as QqsFoiz[]).map(foiz => (
+            <button
+              key={foiz}
+              type="button"
+              onClick={() => setAllQqs(foiz)}
+              disabled={items.length === 0}
+              className="text-xs px-2.5 py-1 rounded-lg border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#DBEAFE] hover:text-[#1D4ED8] hover:border-[#BFDBFE] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {foiz === 'siz' ? t('qqsLess') : foiz + '%'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+            <tr className="bg-white border-b border-[#E2E8F0]">
               <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-8">#</th>
-              <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold min-w-[180px]">Nomi *</th>
+              <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold min-w-[180px]">{t('table.nameRequired')}</th>
               <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-32">MXIK</th>
-              <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-20">Birlik</th>
-              <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-20">Miqdor</th>
-              <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-28">Narx</th>
-              <th className="px-3 py-2.5 text-center text-[#94A3B8] font-semibold w-20">QQS</th>
-              <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-28">Summa</th>
+              <th className="px-3 py-2.5 text-left text-[#94A3B8] font-semibold w-20">{t('table.unit')}</th>
+              <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-20">{t('table.qty')}</th>
+              <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-28">{t('table.price')}</th>
+              <th className="px-3 py-2.5 text-center text-[#94A3B8] font-semibold w-20">{t('table.qqs')}</th>
+              <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-28">{t('table.qqsAmount')}</th>
+              <th className="px-3 py-2.5 text-right text-[#94A3B8] font-semibold w-28">{t('table.summa')}</th>
               <th className="w-8" />
             </tr>
           </thead>
@@ -81,7 +123,7 @@ export function SpecTable({ items, onChange }: Props) {
                   <input
                     value={item.nomi}
                     onChange={e => update(i, 'nomi', e.target.value)}
-                    placeholder="Tovar/xizmat nomi"
+                    placeholder={t('form.namePlaceholder')}
                     className="w-full bg-transparent border-b border-transparent hover:border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none px-0.5 text-[#0F172A] transition"
                   />
                 </td>
@@ -107,7 +149,7 @@ export function SpecTable({ items, onChange }: Props) {
                     type="number" min="0"
                     value={item.miqdori || ''}
                     onChange={e => update(i, 'miqdori', parseFloat(e.target.value) || 0)}
-                    className="w-full text-right bg-transparent border-b border-transparent hover:border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none text-[#0F172A] transition"
+                    className="w-full text-right bg-transparent border-b border-transparent hover:border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none text-[#0F172A] tabular-nums transition"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -115,7 +157,7 @@ export function SpecTable({ items, onChange }: Props) {
                     type="number" min="0"
                     value={item.narxi || ''}
                     onChange={e => update(i, 'narxi', parseFloat(e.target.value) || 0)}
-                    className="w-full text-right bg-transparent border-b border-transparent hover:border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none text-[#0F172A] transition"
+                    className="w-full text-right bg-transparent border-b border-transparent hover:border-[#E2E8F0] focus:border-[#2563EB] focus:outline-none text-[#0F172A] tabular-nums transition"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -127,11 +169,15 @@ export function SpecTable({ items, onChange }: Props) {
                     {QQS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </td>
-                <td className="px-3 py-2 text-right font-medium text-[#0F172A]">
+                <td className="px-3 py-2 text-right tabular-nums text-[#D97706]">
+                  {item.qqsSumma > 0 ? formatNumber(item.qqsSumma) : '—'}
+                </td>
+                <td className="px-3 py-2 text-right font-medium text-[#0F172A] tabular-nums">
                   {fmt(item.summa)}
                 </td>
                 <td className="px-2 py-2">
                   <button
+                    type="button"
                     onClick={() => remove(i)}
                     aria-label="Qatorni o'chirish"
                     className="md:opacity-0 md:group-hover:opacity-100 p-2 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
@@ -145,11 +191,11 @@ export function SpecTable({ items, onChange }: Props) {
           {items.length > 0 && (
             <tfoot className="bg-[#F8FAFC] border-t border-[#E2E8F0]">
               <tr>
-                <td colSpan={9} className="px-3 py-2.5">
+                <td colSpan={10} className="px-3 py-2.5">
                   <div className="flex justify-end items-center gap-5 text-xs flex-wrap">
-                    <span className="text-[#94A3B8]">Jami (QQSsiz): <strong className="text-[#0F172A] ml-1">{fmt(jami)}</strong></span>
-                    <span className="text-[#94A3B8]">QQS: <strong className="text-[#0F172A] ml-1">{fmt(jamiQqs)}</strong></span>
-                    <span className="text-[#475569]">Umumiy: <strong className="text-[#2563EB] ml-1 text-sm">{fmt(umumiy)}</strong></span>
+                    <span className="text-[#94A3B8]">{t('withoutQqs')} <strong className="text-[#0F172A] ml-1 tabular-nums">{fmt(jami)}</strong></span>
+                    <span className="text-[#94A3B8]">{t('totalQqs')} <strong className="text-[#D97706] ml-1 tabular-nums">{fmt(jamiQqs)}</strong></span>
+                    <span className="text-[#475569]">{t('grandTotal')} <strong className="text-[#2563EB] ml-1 text-sm tabular-nums">{fmt(umumiy)}</strong></span>
                   </div>
                 </td>
               </tr>
@@ -157,11 +203,13 @@ export function SpecTable({ items, onChange }: Props) {
           )}
         </table>
       </div>
+
       <button
+        type="button"
         onClick={add}
-        className="flex items-center gap-1.5 text-sm text-[#2563EB] hover:text-[#1D4ED8] transition font-medium"
+        className="w-full py-3 text-sm text-[#2563EB] hover:bg-[#DBEAFE]/30 transition-colors flex items-center justify-center gap-2 border-t border-[#E2E8F0]"
       >
-        <Plus size={15} /> Qator qo'shish
+        <Plus size={15} /> {t('addRow')}
       </button>
     </div>
   )

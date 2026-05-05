@@ -593,43 +593,14 @@ export default function YangiShartnoma() {
 
       <div className="grid gap-6 grid-cols-1">
         <div className="space-y-5">
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-[#0F172A]">{t('new_.specTitle')}</h3>
-              <div className="flex items-center gap-3">
-                <label
-                  className={cn(
-                    'flex items-center gap-1.5 text-sm select-none',
-                    currentOrg?.qqsReg ? 'text-[#475569] cursor-pointer' : 'text-[#94A3B8] cursor-not-allowed'
-                  )}
-                  title={!currentOrg?.qqsReg ? t('new_.qqsNotRegistered') : undefined}
-                >
-                  <input type="checkbox" checked={form.qqsEnabled}
-                    disabled={!currentOrg?.qqsReg}
-                    onChange={e => setForm(f => ({ ...f, qqsEnabled: e.target.checked }))}
-                    className="rounded" />
-                  QQS
-                </label>
-                {form.qqsEnabled && (
-                  <select value={form.qqsRate}
-                    onChange={e => setForm(f => ({ ...f, qqsRate: parseInt(e.target.value) }))}
-                    className="text-sm border border-[#E2E8F0] rounded-lg px-2 py-1 focus:outline-none focus:border-[#2563EB]">
-                    <option value={0}>0%</option>
-                    <option value={12}>12%</option>
-                    <option value={15}>15%</option>
-                  </select>
-                )}
-              </div>
-            </div>
-            <SpecTable
-              items={form.specItems}
-              onChange={items => setForm(f => ({
-                ...f,
-                specItems: items,
-                amount: items.length > 0 ? String(items.reduce((s, i) => s + i.summa, 0)) : f.amount,
-              }))}
-            />
-          </Card>
+          <SpecTable
+            items={form.specItems}
+            onChange={items => setForm(f => ({
+              ...f,
+              specItems: items,
+              amount: items.length > 0 ? String(items.reduce((s, i) => s + i.summa, 0)) : f.amount,
+            }))}
+          />
 
           <Card>
             <h3 className="font-bold text-[#0F172A] mb-4">{t('new_.contractAmount')}</h3>
