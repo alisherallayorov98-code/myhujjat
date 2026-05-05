@@ -39,6 +39,25 @@
     "notesPlaceholder": "Дополнительная информация...",
     "namePlaceholder": "Название товара/услуги"
   },
+  "specNumberLabel": "Номер спецификации",
+  "specNumberPlace": "Автоматически",
+  "specNumberHint": "Если оставить пустым — авто-нумерация",
+  "yourOrg":         "Ваша организация",
+  "counterparty":    "Контрагент",
+  "noOrgSelected":   "Организация не выбрана",
+  "noCpSelected":    "Контрагент не выбран",
+  "itemsTitle":      "Список товаров/услуг",
+  "allQqs":          "НДС для всех",
+  "partyFields": {
+    "stir":        "ИНН",
+    "name":        "Название",
+    "director":    "Руководитель",
+    "bank":        "Банк",
+    "bankAccount": "Расчётный счёт",
+    "mfo":         "МФО",
+    "address":     "Адрес",
+    "phone":       "Телефон"
+  },
   "table": {
     "num": "№",
     "name": "Наименование",
@@ -61,6 +80,7 @@
   "toast": {
     "saved": "Спецификация сохранена!",
     "deleted": "Удалено",
+    "qqsApplied": "НДС {rate} применён ко всем строкам",
     "excelDownloaded": "Excel загружен",
     "error": "Ошибка"
   },

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useTranslations }       from 'next-intl'
 import { useRouter }             from 'next/navigation'
 import { Plus, Trash2, ArrowLeft, Save, Download, Calculator } from 'lucide-react'
@@ -18,7 +18,9 @@ import {
 } from '@/lib/qqs'
 import { formatAmountWords, formatNumber } from '@/lib/formatters'
 import { exportSpecExcel }   from '@/lib/export/specExport'
+import { CpDropdown }   from '../../shartnomalar/yangi/_components/CpDropdown'
 import toast            from 'react-hot-toast'
+import type { Counterparty } from '@/lib/types'
 
 export default function YangiSpesifikatsiya() {
   const t = useTranslations('specifications')
@@ -26,10 +28,13 @@ export default function YangiSpesifikatsiya() {
   const qc             = useQueryClient()
   const { currentOrg } = useAuth()
 
-  const [items,      setItems]      = useState<SpecItem[]>([newSpecItem()])
-  const [notes,      setNotes]      = useState('')
-  const [contractId, setContractId] = useState('')
+  const [items,          setItems]          = useState<SpecItem[]>([newSpecItem()])
+  const [notes,          setNotes]          = useState('')
+  const [contractId,     setContractId]     = useState('')
+  const [counterpartyId, setCounterpartyId] = useState('')
+  const [specNumber,     setSpecNumber]     = useState('')
 
+  // Shartnomalar ro'yxati (biriktirish uchun)
   const { data: contracts = [] } = useQuery({
     queryKey: ['contracts-list', currentOrg?.id],
     queryFn:  async () => {
@@ -39,6 +44,26 @@ export default function YangiSpesifikatsiya() {
     },
     enabled: !!currentOrg?.id,
   })
+
+  // Kontragentlar ro'yxati (rekvizit uchun)
+  const { data: cps = [], refetch: refetchCps } = useQuery<Counterparty[]>({
+    queryKey: ['counterparties', currentOrg?.id],
+    queryFn:  async () => {
+      if (!currentOrg?.id) return []
+      const { data } = await api.get(`/counterparties?orgId=${currentOrg.id}&limit=200`)
+      return data.data || []
+    },
+    enabled: !!currentOrg?.id,
+  })
+
+  // Shartnoma tanlanganda kontragent avtomatik to'ldiriladi
+  useEffect(() => {
+    if (!contractId) return
+    const c = (contracts as any[]).find((x: any) => x.id === contractId)
+    if (c?.counterpartyId) setCounterpartyId(c.counterpartyId)
+  }, [contractId, contracts])
+
+  const selectedCp = cps.find(c => c.id === counterpartyId)
 
   const addRow    = () => setItems(prev => [...prev, newSpecItem()])
   const removeRow = (i: number) => {
@@ -65,12 +90,23 @@ export default function YangiSpesifikatsiya() {
     })
   }, [])
 
+  // "Barchasi uchun QQS" — bir bosish bilan har qatorga tegishli foiz qo'llaniladi
+  const setAllQqs = (foiz: QqsFoiz) => {
+    setItems(prev => prev.map(item => {
+      const calc = calcSpecItem(item.miqdori, item.narxi, foiz)
+      return { ...item, qqsFoiz: foiz, qqsSumma: calc.qqsSumma, summa: calc.summa }
+    }))
+    toast.success(t('toast.qqsApplied', { rate: foiz === 'siz' ? '0%' : foiz + '%' }))
+  }
+
   const totals = calcSpecTotals(items)
 
   const mutation = useMutation({
     mutationFn: () => api.post('/specifications', {
       organizationId: currentOrg!.id,
       contractId:     contractId || undefined,
+      counterpartyId: counterpartyId || undefined,
+      specNumber:     specNumber || undefined,
       items,
       notes,
     }),
@@ -85,7 +121,7 @@ export default function YangiSpesifikatsiya() {
   const handleExcel = async () => {
     const contract = (contracts as any[]).find((c: any) => c.id === contractId)
     await exportSpecExcel({
-      specNumber:  'YANGI',
+      specNumber:  specNumber || 'YANGI',
       orgName:     currentOrg?.name || '',
       contractNum: contract?.contractNumber,
       items,
@@ -118,8 +154,22 @@ export default function YangiSpesifikatsiya() {
         }
       />
 
+      {/* 1-blok: Asosiy ma'lumotlar */}
       <Card className="mb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Input
+            label={t('specNumberLabel')}
+            placeholder={t('specNumberPlace')}
+            value={specNumber}
+            onChange={e => setSpecNumber(e.target.value)}
+            hint={t('specNumberHint')}
+          />
+          <Input
+            label={t('form.notes')}
+            placeholder={t('form.notesPlaceholder')}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+          />
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-[#374151]">{t('attachToContract')}</label>
             <select
@@ -135,20 +185,84 @@ export default function YangiSpesifikatsiya() {
               ))}
             </select>
           </div>
-          <Input
-            label={t('form.notes')}
-            placeholder={t('form.notesPlaceholder')}
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-          />
         </div>
       </Card>
 
+      {/* 2-blok: Tashkilot va kontragent rekvizitlari */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <Card padding="none">
+          <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('yourOrg')}</p>
+          </div>
+          {currentOrg ? (
+            <div className="divide-y divide-[#F1F5F9] px-4">
+              <PartyRow label={t('partyFields.stir')}        value={currentOrg.inn} />
+              <PartyRow label={t('partyFields.name')}        value={currentOrg.name} />
+              <PartyRow label={t('partyFields.director')}    value={(currentOrg as any).directorName} />
+              <PartyRow label={t('partyFields.bank')}        value={(currentOrg as any).bankName} />
+              <PartyRow label={t('partyFields.bankAccount')} value={(currentOrg as any).bankAccount} />
+              <PartyRow label={t('partyFields.mfo')}         value={(currentOrg as any).mfo} />
+              <PartyRow label={t('partyFields.address')}     value={(currentOrg as any).address} />
+              <PartyRow label={t('partyFields.phone')}       value={(currentOrg as any).phone} />
+            </div>
+          ) : (
+            <div className="p-8 text-center text-sm text-[#94A3B8]">{t('noOrgSelected')}</div>
+          )}
+        </Card>
+
+        <Card padding="none">
+          <div className="px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8] mb-2">{t('counterparty')}</p>
+            <CpDropdown
+              cps={cps as Counterparty[]}
+              value={counterpartyId}
+              onChange={(id) => setCounterpartyId(id)}
+              orgId={currentOrg?.id || ''}
+              onCpCreated={() => refetchCps()}
+            />
+          </div>
+          {selectedCp ? (
+            <div className="divide-y divide-[#F1F5F9] px-4">
+              <PartyRow label={t('partyFields.stir')}        value={selectedCp.inn} />
+              <PartyRow label={t('partyFields.name')}        value={selectedCp.name} />
+              <PartyRow label={t('partyFields.director')}    value={(selectedCp as any).directorName} />
+              <PartyRow label={t('partyFields.bank')}        value={(selectedCp as any).bankName} />
+              <PartyRow label={t('partyFields.bankAccount')} value={(selectedCp as any).bankAccount} />
+              <PartyRow label={t('partyFields.mfo')}         value={(selectedCp as any).mfo} />
+              <PartyRow label={t('partyFields.address')}     value={(selectedCp as any).address} />
+              <PartyRow label={t('partyFields.phone')}       value={(selectedCp as any).phone} />
+            </div>
+          ) : (
+            <div className="p-8 text-center text-sm text-[#94A3B8]">{t('noCpSelected')}</div>
+          )}
+        </Card>
+      </div>
+
+      {/* 3-blok: Mahsulot ro'yxati + "Barchasi uchun QQS" tezkor tugmalar */}
       <Card padding="none" className="mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('itemsTitle')}</p>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#E2E8F0] text-[#475569]">{items.length}</span>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] text-[#94A3B8]">{t('allQqs')}:</span>
+            {(['siz', '0', '12', '15'] as QqsFoiz[]).map(foiz => (
+              <button
+                key={foiz}
+                onClick={() => setAllQqs(foiz)}
+                className="text-xs px-2.5 py-1 rounded-lg border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#DBEAFE] hover:text-[#1D4ED8] hover:border-[#BFDBFE] transition"
+              >
+                {foiz === 'siz' ? t('qqsLess') : foiz + '%'}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <thead>
-              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
+              <tr className="border-b border-[#E2E8F0]">
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-[#94A3B8] w-10">{t('table.num')}</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-[#94A3B8]">{t('table.nameRequired')}</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold text-[#94A3B8] w-24">{t('table.unit')}</th>
@@ -217,7 +331,7 @@ export default function YangiSpesifikatsiya() {
                     <button
                       onClick={() => removeRow(i)}
                       disabled={items.length <= 1}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#94A3B8] hover:text-[#DC2626] transition-all disabled:opacity-0 disabled:pointer-events-none"
+                      className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 rounded text-[#94A3B8] hover:text-[#DC2626] transition-all disabled:opacity-0 disabled:pointer-events-none"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -237,6 +351,7 @@ export default function YangiSpesifikatsiya() {
         </button>
       </Card>
 
+      {/* 4-blok: Jami hisob */}
       <Card className="max-w-sm ml-auto">
         <div className="flex items-center gap-2 mb-3">
           <Calculator size={16} className="text-[#2563EB]" />
@@ -260,6 +375,16 @@ export default function YangiSpesifikatsiya() {
           </p>
         </div>
       </Card>
+    </div>
+  )
+}
+
+// ─── Tashkilot/kontragent rekvizit qatori ─────────────────────────
+function PartyRow({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="flex items-center gap-3 py-2">
+      <span className="text-[11px] text-[#94A3B8] w-28 shrink-0">{label}</span>
+      <span className="text-xs text-[#0F172A] flex-1 truncate">{value || '—'}</span>
     </div>
   )
 }

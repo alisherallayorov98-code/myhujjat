@@ -39,6 +39,25 @@
     "notesPlaceholder": "Qo'shimcha ma'lumot...",
     "namePlaceholder": "Tovar/xizmat nomi"
   },
+  "specNumberLabel": "Spesifikatsiya raqami",
+  "specNumberPlace": "Avtomatik",
+  "specNumberHint": "Bo'sh qoldirilsa avto-raqamlash",
+  "yourOrg":         "Sizning tashkilotingiz",
+  "counterparty":    "Kontragent",
+  "noOrgSelected":   "Tashkilot tanlanmagan",
+  "noCpSelected":    "Kontragent tanlanmagan",
+  "itemsTitle":      "Tovar/xizmatlar ro'yxati",
+  "allQqs":          "Barchasi uchun QQS",
+  "partyFields": {
+    "stir":        "STIR",
+    "name":        "Nomi",
+    "director":    "Rahbar",
+    "bank":        "Bank",
+    "bankAccount": "Hisob raqami",
+    "mfo":         "MFO",
+    "address":     "Manzil",
+    "phone":       "Telefon"
+  },
   "table": {
     "num": "№",
     "name": "Nomi",
@@ -61,6 +80,7 @@
   "toast": {
     "saved": "Spesifikatsiya saqlandi!",
     "deleted": "O'chirildi",
+    "qqsApplied": "QQS {rate} barcha qatorlarga qo'llandi",
     "excelDownloaded": "Excel yuklandi",
     "error": "Xatolik"
   },

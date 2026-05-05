@@ -39,6 +39,25 @@
     "notesPlaceholder": "Қўшимча маълумот...",
     "namePlaceholder": "Товар/хизмат номи"
   },
+  "specNumberLabel": "Спесификация рақами",
+  "specNumberPlace": "Автоматик",
+  "specNumberHint": "Бўш қолдирилса авто-рақамлаш",
+  "yourOrg":         "Сизнинг ташкилотингиз",
+  "counterparty":    "Контрагент",
+  "noOrgSelected":   "Ташкилот танланмаган",
+  "noCpSelected":    "Контрагент танланмаган",
+  "itemsTitle":      "Товар/хизматлар рўйхати",
+  "allQqs":          "Барчаси учун ҚҚС",
+  "partyFields": {
+    "stir":        "СТИР",
+    "name":        "Номи",
+    "director":    "Раҳбар",
+    "bank":        "Банк",
+    "bankAccount": "Ҳисоб рақами",
+    "mfo":         "МФО",
+    "address":     "Манзил",
+    "phone":       "Телефон"
+  },
   "table": {
     "num": "№",
     "name": "Номи",
@@ -61,6 +80,7 @@
   "toast": {
     "saved": "Спесификация сақланди!",
     "deleted": "Ўчирилди",
+    "qqsApplied": "ҚҚС {rate} барча қаторларга қўлланди",
     "excelDownloaded": "Excel юкланди",
     "error": "Хатолик"
   },
