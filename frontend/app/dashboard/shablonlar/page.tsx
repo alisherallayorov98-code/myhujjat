@@ -11,6 +11,7 @@ import { Card }                                            from '@/components/ui
 import { Button }                                          from '@/components/ui/Button'
 import { Badge }                                           from '@/components/ui/Badge'
 import { EmptyState }                                      from '@/components/ui/Skeleton'
+import { ConfirmDialog }                                   from '@/components/ui/Modal'
 import { DisclaimerModal }                                 from '@/components/DisclaimerModal/DisclaimerModal'
 import { useAuth }                                         from '@/hooks/useAuth'
 import api                                                 from '@/lib/api'
@@ -26,27 +27,6 @@ interface Template {
   isPublic:       boolean
   organizationId: string | null
   createdAt:      string
-}
-
-function ConfirmDialog({
-  open, onConfirm, onCancel, loading,
-}: { open: boolean; onConfirm: () => void; onCancel: () => void; loading: boolean }) {
-  const t = useTranslations('shablonlar')
-  if (!open) return null
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl p-6 w-80 shadow-xl">
-        <h3 className="text-base font-semibold text-[#0F172A] mb-2">{t('deleteTitle')}</h3>
-        <p className="text-sm text-[#475569] mb-5">
-          {t('deleteConfirm')}
-        </p>
-        <div className="flex gap-2 justify-end">
-          <Button variant="outline" size="sm" onClick={onCancel}>{t('cancel')}</Button>
-          <Button variant="danger" size="sm" loading={loading} onClick={onConfirm}>{t('deleteBtn')}</Button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 export default function ShablonlarPage() {
@@ -339,8 +319,11 @@ export default function ShablonlarPage() {
 
       <ConfirmDialog
         open={!!deleteId}
+        onClose={() => setDeleteId(null)}
         onConfirm={() => deleteId && deleteMut.mutate(deleteId)}
-        onCancel={() => setDeleteId(null)}
+        title={t('deleteTitle')}
+        description={t('deleteConfirm')}
+        variant="danger"
         loading={deleteMut.isPending}
       />
 
