@@ -1,11 +1,12 @@
 import {
   Controller, Get, Post, Delete, Body, Param, Query,
-  HttpCode, HttpStatus, BadRequestException,
+  HttpCode, HttpStatus, BadRequestException, ForbiddenException,
 } from '@nestjs/common'
 import { InvoicesService } from './invoices.service'
 import { DidoxService }    from './didox.service'
 import { CurrentUser }     from '../../common/decorators/current-user.decorator'
 import { TenantAccessService } from '../../common/services/tenant-access.service'
+import { PrismaService }       from '../prisma/prisma.service'
 
 @Controller('invoices')
 export class InvoicesController {
@@ -13,6 +14,7 @@ export class InvoicesController {
     private readonly invoices: InvoicesService,
     private readonly didox:    DidoxService,
     private readonly tenant:   TenantAccessService,
+    private readonly prisma:   PrismaService,
   ) {}
 
   // ─── Faktura ro'yxat ──────────────────────────────────────
@@ -61,11 +63,18 @@ export class InvoicesController {
     return this.invoices.syncFromDidox(user.sub, body.orgId, body)
   }
 
-  // ─── Qayta hisoblash (admin/manual) ──────────────────────
-  // Manual recalc — faqat admin uchun (lekin AdminGuard'siz). Foydalanuvchi
-  // o'zining barcha tashkilotlari bo'yicha hisoblashga ruxsati bor.
+  // ─── Qayta hisoblash — faqat ADMIN/SUPER_ADMIN uchun ────
+  // Bu endpoint butun bazadagi fakturalarni qayta hisoblaydi.
+  // Oddiy foydalanuvchi chaqira olmaydi (xavfsizlik!)
   @Post('recalc')
-  recalc(@CurrentUser() _user: any) {
+  async recalc(@CurrentUser() user: any) {
+    const u = await this.prisma.user.findUnique({
+      where:  { id: user.sub },
+      select: { role: true },
+    })
+    if (!u || (u.role !== 'ADMIN' && u.role !== 'SUPER_ADMIN')) {
+      throw new ForbiddenException("Faqat administrator chaqira oladi")
+    }
     return this.invoices.recalcAll()
   }
 }
