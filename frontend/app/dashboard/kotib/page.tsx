@@ -50,7 +50,7 @@ export default function KotibPage() {
 
       {/* Asosiy 2 ta — to'liq form bilan */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Asosiy hujjatlar</h2>
+        <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">{t('mainDocs')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Link href="/dashboard/kotib/buyruq" className="group bg-white rounded-2xl border border-gray-200 p-5 hover:shadow-md hover:border-blue-300 transition-all">
             <div className="flex items-start justify-between">
@@ -93,7 +93,7 @@ export default function KotibPage() {
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-4 h-4 text-[#7C3AED]" />
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-            AI yordamida hujjat yaratish
+            {t('aiCreate')}
           </h2>
           <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#EDE9FE] text-[#7C3AED]">Pro</span>
         </div>
