@@ -1,16 +1,17 @@
 'use client'
 
 import { useState }    from 'react'
+import Link            from 'next/link'
 import { useTranslations } from 'next-intl'
 import {
-  Plus, Building2, Star, Edit2, Trash2,
+  Plus, Building2, Star, Edit2, Trash2, Users, FileText,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }   from '@/components/layout/PageHeader'
 import { Button }       from '@/components/ui/Button'
 import { Card }         from '@/components/ui/Card'
 import { Badge }        from '@/components/ui/Badge'
-import { Modal }        from '@/components/ui/Modal'
+import { ConfirmDialog } from '@/components/ui/Modal'
 import { EmptyState }   from '@/components/ui/Skeleton'
 import { useAuth }      from '@/hooks/useAuth'
 import api              from '@/lib/api'
@@ -117,31 +118,15 @@ export default function TashkilotlarPage() {
         onClose={() => { setAddModal(false); setEditOrg(null) }}
       />
 
-      {deleteOrg && (
-        <Modal
-          open={!!deleteOrg}
-          onClose={() => setDeleteOrg(null)}
-          title={t('deleteOrg')}
-          size="sm"
-          footer={
-            <>
-              <Button variant="outline" size="sm" onClick={() => setDeleteOrg(null)}>
-                {tu('cancel')}
-              </Button>
-              <Button variant="danger" size="sm"
-                loading={deleteMutation.isPending}
-                onClick={() => deleteMutation.mutate(deleteOrg.id)}>
-                {tu('delete')}
-              </Button>
-            </>
-          }
-        >
-          <p className="text-sm text-[#475569]">
-            <strong>{deleteOrg.name}</strong> {t('deleteConfirm')}
-            {' '}{t('deleteWarning')}
-          </p>
-        </Modal>
-      )}
+      <ConfirmDialog
+        open={!!deleteOrg}
+        onClose={() => setDeleteOrg(null)}
+        onConfirm={() => deleteOrg && deleteMutation.mutate(deleteOrg.id)}
+        title={t('deleteOrg')}
+        description={deleteOrg ? `"${deleteOrg.name}" ${t('deleteConfirm')} ${t('deleteWarning')}` : ''}
+        variant="danger"
+        loading={deleteMutation.isPending}
+      />
     </div>
   )
 }
@@ -196,15 +181,24 @@ function OrgCard({ org, isCurrent, onSetDefault, onEdit, onDelete, t }: OrgCardP
           </button>
         )}
         <div className="flex-1" />
+        <Link
+          href="/dashboard/sozlamalar/tashkilot/azolar"
+          className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#7C3AED] hover:bg-[#EDE9FE] transition-colors"
+          title={t('membersBtn')}
+        >
+          <Users size={14} />
+        </Link>
         <button
           onClick={onEdit}
-          className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] transition-colors"
+          className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-colors"
+          title={t('edit')}
         >
           <Edit2 size={14} />
         </button>
         <button
           onClick={onDelete}
           className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-colors"
+          title={t('delete')}
         >
           <Trash2 size={14} />
         </button>
