@@ -10,9 +10,8 @@ export class SpecService {
       where:   { organizationId: orgId },
       orderBy: { createdAt: 'desc' },
       include: {
-        contract: {
-          select: { id: true, contractNumber: true, contractType: true },
-        },
+        contract:     { select: { id: true, contractNumber: true, contractType: true, counterpartyId: true } },
+        counterparty: { select: { id: true, name: true, inn: true } },
       },
     })
   }
@@ -20,7 +19,10 @@ export class SpecService {
   async findOne(orgId: string, id: string) {
     const spec = await this.prisma.specification.findFirst({
       where:   { id, organizationId: orgId },
-      include: { contract: true },
+      include: {
+        contract:     true,
+        counterparty: true,
+      },
     })
     if (!spec) throw new NotFoundException('Spesifikatsiya topilmadi')
     return spec
@@ -29,31 +31,53 @@ export class SpecService {
   async create(dto: {
     organizationId: string
     contractId?:    string
+    counterpartyId?: string
+    specNumber?:    string
     items:          any[]
     notes?:         string
   }) {
-    const count      = await this.prisma.specification.count({
-      where: { organizationId: dto.organizationId },
-    })
-    const year       = new Date().getFullYear()
-    const specNumber = `SPEC-${year}-${String(count + 1).padStart(3, '0')}`
+    // Foydalanuvchi bergan raqam yoki avtomatik
+    let specNumber = dto.specNumber?.trim()
+    if (!specNumber) {
+      const count = await this.prisma.specification.count({
+        where: { organizationId: dto.organizationId },
+      })
+      const year = new Date().getFullYear()
+      specNumber = `SPEC-${year}-${String(count + 1).padStart(3, '0')}`
+    }
+
+    // Agar shartnomadan kelgan kontragent bo'lsa va alohida counterpartyId
+    // berilmagan bo'lsa, shartnomadan olamiz
+    let counterpartyId = dto.counterpartyId
+    if (!counterpartyId && dto.contractId) {
+      const c = await this.prisma.contract.findFirst({
+        where: { id: dto.contractId, organizationId: dto.organizationId },
+        select: { counterpartyId: true },
+      })
+      if (c?.counterpartyId) counterpartyId = c.counterpartyId
+    }
 
     return this.prisma.specification.create({
       data: {
         organizationId: dto.organizationId,
         contractId:     dto.contractId,
+        counterpartyId,
         specNumber,
         items:          dto.items,
         notes:          dto.notes || '',
       },
-      include: { contract: true },
+      include: {
+        contract:     true,
+        counterparty: true,
+      },
     })
   }
 
   async update(orgId: string, id: string, dto: {
-    items?:      any[]
-    notes?:      string
-    contractId?: string
+    items?:          any[]
+    notes?:          string
+    contractId?:     string
+    counterpartyId?: string
   }) {
     const existing = await this.prisma.specification.findFirst({
       where: { id, organizationId: orgId },

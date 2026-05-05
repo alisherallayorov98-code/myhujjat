@@ -222,7 +222,8 @@ model Counterparty {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contracts Contract[]
+  contracts      Contract[]
+  specifications Specification[]
 
   @@index([organizationId, isActive])
   @@index([organizationId, inn])
@@ -424,16 +425,20 @@ model ContractVersion {
 // SPESIFIKATSIYALAR
 // ============================================
 model Specification {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   contractId     String?
-  contract       Contract?    @relation(fields: [contractId], references: [id])
+  contract       Contract?     @relation(fields: [contractId], references: [id])
+  counterpartyId String?
+  counterparty   Counterparty? @relation(fields: [counterpartyId], references: [id])
   specNumber     String
   items          Json
   notes          String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId, counterpartyId])
 }
 
 // ============================================
