@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useTranslations }       from 'next-intl'
 import { useRouter }             from 'next/navigation'
 import { Plus, Trash2, ArrowLeft, Save, Download, Calculator } from 'lucide-react'
@@ -63,7 +63,24 @@ export default function YangiSpesifikatsiya() {
     if (c?.counterpartyId) setCounterpartyId(c.counterpartyId)
   }, [contractId, contracts])
 
+  // Kontragent o'zgartirilganda — agar tanlangan shartnoma boshqa kontragentniki
+  // bo'lsa, shartnomani tozalaymiz (mantiqsiz aloqani oldini olish)
+  useEffect(() => {
+    if (!contractId || !counterpartyId) return
+    const c = (contracts as any[]).find((x: any) => x.id === contractId)
+    if (c && c.counterpartyId && c.counterpartyId !== counterpartyId) {
+      setContractId('')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [counterpartyId])
+
   const selectedCp = cps.find(c => c.id === counterpartyId)
+
+  // Shartnomalar dropdown — kontragent tanlangan bo'lsa, faqat unga tegishli
+  const filteredContracts = useMemo(() => {
+    if (!counterpartyId) return contracts as any[]
+    return (contracts as any[]).filter((c: any) => c.counterpartyId === counterpartyId)
+  }, [contracts, counterpartyId])
 
   const addRow    = () => setItems(prev => [...prev, newSpecItem()])
   const removeRow = (i: number) => {
@@ -175,15 +192,28 @@ export default function YangiSpesifikatsiya() {
             <select
               value={contractId}
               onChange={e => setContractId(e.target.value)}
-              className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
+              className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB] disabled:bg-[#F1F5F9] disabled:cursor-not-allowed"
+              disabled={!!counterpartyId && filteredContracts.length === 0}
             >
-              <option value="">{t('selectContract')}</option>
-              {(contracts as any[]).map((c: any) => (
+              <option value="">
+                {counterpartyId
+                  ? (filteredContracts.length === 0
+                      ? t('noContractsForCp')
+                      : t('selectContract'))
+                  : t('selectContract')
+                }
+              </option>
+              {filteredContracts.map((c: any) => (
                 <option key={c.id} value={c.id}>
-                  № {c.contractNumber} — {c.counterparty?.name || t('noCpName')}
+                  № {c.contractNumber} {!counterpartyId && c.counterparty?.name ? `— ${c.counterparty.name}` : ''}
                 </option>
               ))}
             </select>
+            {counterpartyId && filteredContracts.length > 0 && (
+              <p className="text-[11px] text-[#94A3B8]">
+                {t('contractsForCp', { count: filteredContracts.length })}
+              </p>
+            )}
           </div>
         </div>
       </Card>

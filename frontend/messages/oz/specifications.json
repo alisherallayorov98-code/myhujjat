@@ -26,6 +26,8 @@
   "save": "Сақлаш",
   "attachToContract": "Шартномага бириктириш",
   "selectContract": "Шартнома танланг (ихтиёрий)",
+  "noContractsForCp": "Бу контрагентда шартномалар йўқ",
+  "contractsForCp": "{count} та шартнома топилди",
   "noCpName": "Контрагентсиз",
   "addRow": "Қатор қўшиш",
   "totalSummary": "Жами ҳисоб",

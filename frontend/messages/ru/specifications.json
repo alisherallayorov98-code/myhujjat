@@ -26,6 +26,8 @@
   "save": "Сохранить",
   "attachToContract": "Привязать к договору",
   "selectContract": "Выберите договор (необязательно)",
+  "noContractsForCp": "У этого контрагента нет договоров",
+  "contractsForCp": "Найдено {count} договор(ов)",
   "noCpName": "Без контрагента",
   "addRow": "Добавить строку",
   "totalSummary": "Итог",

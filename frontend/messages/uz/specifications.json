@@ -26,6 +26,8 @@
   "save": "Saqlash",
   "attachToContract": "Shartnomaga biriktirish",
   "selectContract": "Shartnoma tanlang (ixtiyoriy)",
+  "noContractsForCp": "Bu kontragentda shartnomalar yo'q",
+  "contractsForCp": "{count} ta shartnoma topildi",
   "noCpName": "Kontragentsiz",
   "addRow": "Qator qo'shish",
   "totalSummary": "Jami hisob",
