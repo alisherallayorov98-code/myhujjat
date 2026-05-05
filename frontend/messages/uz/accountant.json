@@ -39,6 +39,8 @@
   "close": "Yopish",
   "view": "Ko'rish",
   "print": "Pechat",
+  "mainDocs": "Asosiy hujjatlar",
+  "aiCreate": "AI yordamida hujjat yaratish",
   "save": "Saqlash",
   "fakturaSaved": "Faktura saqlandi ✓",
   "error": "Xatolik",
