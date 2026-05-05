@@ -71,7 +71,10 @@ export class ContractsService {
         where,
         skip:    (page - 1) * limit,
         take:    limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [
+          { isPinned:  'desc' }, // Yulduzli shartnomalar yuqorida
+          { createdAt: 'desc' },
+        ],
         include: {
           counterparty: { select: { id: true, name: true, inn: true } },
           organization: { select: { id: true, name: true } },
@@ -274,6 +277,79 @@ export class ContractsService {
       thisMonth,
       totalAmount: Number(totalAmountAgg._sum.amount || 0),
     }
+  }
+
+  /**
+   * Shartnoma timeline'i: audit log + versiyalar birlashtirilgan ro'yxat.
+   * Frontend timeline kartochkasi uchun ishlatadi.
+   */
+  async getTimeline(orgId: string, id: string) {
+    // Tashkilot foydalanuvchilarining ID'lari (boshqa tashkilot audit log'lari kirmasin)
+    const orgMembers = await this.prisma.orgMember.findMany({
+      where:  { organizationId: orgId },
+      select: { userId: true },
+    })
+    const orgUserIds = orgMembers.map(m => m.userId)
+
+    const [auditLogs, versions] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        where: {
+          entity: 'contract',
+          entityId: id,
+          userId: { in: orgUserIds },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        include: {
+          user: { select: { id: true, email: true, firstName: true, lastName: true } },
+        },
+      }),
+      this.prisma.contractVersion.findMany({
+        where: { contractId: id },
+        orderBy: { version: 'desc' },
+        take: 20,
+        select: { id: true, version: true, changedBy: true, createdAt: true },
+      }),
+    ])
+
+    // Ikkalasini birlashtirib, ko'rinish uchun normalizatsiya qilamiz
+    const events = [
+      ...auditLogs.map(l => ({
+        kind:      'audit' as const,
+        id:        l.id,
+        action:    l.action,
+        details:   l.newData,
+        createdAt: l.createdAt,
+        user:      l.user
+          ? { id: l.user.id, name: [l.user.firstName, l.user.lastName].filter(Boolean).join(' ') || l.user.email }
+          : null,
+        ipAddress: l.ipAddress,
+      })),
+      ...versions.map(v => ({
+        kind:      'version' as const,
+        id:        v.id,
+        action:    'CONTRACT_VERSION',
+        details:   { version: v.version },
+        createdAt: v.createdAt,
+        user:      v.changedBy ? { id: v.changedBy, name: '' } : null,
+        ipAddress: null,
+      })),
+    ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+
+    return { events }
+  }
+
+  async togglePin(orgId: string, id: string) {
+    const c = await this.prisma.contract.findFirst({
+      where: { id, organizationId: orgId, isActive: true },
+      select: { id: true, isPinned: true },
+    })
+    if (!c) throw new NotFoundException('Shartnoma topilmadi')
+    return this.prisma.contract.update({
+      where: { id: c.id },
+      data:  { isPinned: !c.isPinned },
+      select: { id: true, isPinned: true },
+    })
   }
 
   async bulkDelete(orgId: string, ids: string[]) {

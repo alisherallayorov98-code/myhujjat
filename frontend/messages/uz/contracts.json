@@ -199,6 +199,21 @@
   "viewBtn": "To'liq ekranda ko'rish",
   "pin": "Yuqoriga mahkamlash",
   "unpin": "Mahkamlashni olib tashlash",
+  "timeline": {
+    "title": "O'zgartirishlar tarixi",
+    "empty": "Hali o'zgartirishlar yo'q",
+    "actions": {
+      "created":      "Shartnoma yaratildi",
+      "updated":      "Shartnoma tahrirlandi",
+      "deleted":      "Shartnoma o'chirildi",
+      "statusChanged":"Holat o'zgartirildi",
+      "signed":       "Imzolandi",
+      "exported":     "Eksport qilindi",
+      "shared":       "Kontragentga yuborildi",
+      "publicSigned": "Kontragent imzoladi",
+      "version":      "Yangi versiya saqlandi"
+    }
+  },
   "spec": {
     "mxikLabel": "MXIK kodi",
     "mxikHint":  "10-15 raqam",

@@ -24,6 +24,7 @@ import { exportContractPdf, exportContractDocx }                 from '@/lib/exp
 import { renderContractHtml }                                   from '@/lib/export/contractHtml'
 import { ShareLinkModal }                                       from '@/components/ShareLinkModal/ShareLinkModal'
 import { InvoicesPanel }                                        from './_components/InvoicesPanel'
+import { TimelinePanel }                                        from './_components/TimelinePanel'
 import { cn }                                                    from '@/lib/cn'
 
 const STATUS_OPTIONS = ['DRAFT', 'ACTIVE', 'COMPLETED', 'CANCELLED'] as const
@@ -364,6 +365,10 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
               </>
             )}
           </Card>
+
+          {currentOrg?.id && (
+            <TimelinePanel contractId={id} orgId={currentOrg.id} />
+          )}
         </div>
       </div>
 

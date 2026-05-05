@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Put, Delete,
+  Controller, Get, Post, Put, Patch, Delete,
   Body, Param, Query, HttpCode, HttpStatus, UseGuards, BadRequestException,
 } from '@nestjs/common'
 import { ContractsService, CreateContractDto } from './contracts.service'
@@ -66,6 +66,26 @@ export class ContractsController {
   ) {
     await this.tenant.requireResourceOwnership(user.sub, 'contract', id)
     return this.contractsService.updateStatus(orgId, id, status)
+  }
+
+  @Patch(':id/pin')
+  async togglePin(
+    @CurrentUser() user: any,
+    @Query('orgId') orgId: string,
+    @Param('id')    id:    string,
+  ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'contract', id)
+    return this.contractsService.togglePin(orgId, id)
+  }
+
+  @Get(':id/timeline')
+  async getTimeline(
+    @CurrentUser() user: any,
+    @Query('orgId') orgId: string,
+    @Param('id')    id:    string,
+  ) {
+    await this.tenant.requireResourceOwnership(user.sub, 'contract', id)
+    return this.contractsService.getTimeline(orgId, id)
   }
 
   @Delete(':id')
