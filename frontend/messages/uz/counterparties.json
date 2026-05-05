@@ -42,6 +42,28 @@
     "bank": "Bank",
     "status": "Holat"
   },
+  "edit":         "Tahrirlash",
+  "delete":       "O'chirish",
+  "newContract":  "Yangi shartnoma",
+  "deleteTitle":  "Kontragentni o'chirish",
+  "deleteConfirm": "\"{name}\" kontragentni o'chirish? Uning shartnomalari saqlanadi, lekin kontragent ko'rinmaydi.",
+  "stats": {
+    "total":    "Jami",
+    "active":   "Faol STIR",
+    "inactive": "Nofaol STIR",
+    "unknown":  "Tekshirilmagan"
+  },
+  "filter": {
+    "allStatuses": "Barcha statuslar",
+    "clearAll":    "Tozalash"
+  },
+  "bulk": {
+    "selected":      "{count} ta tanlandi",
+    "delete":        "O'chirish",
+    "clear":         "Tozalash",
+    "deleteTitle":   "Kontragentlarni o'chirish",
+    "deleteConfirm": "Tanlangan {count} ta kontragentni o'chirish?"
+  },
   "dropdown": {
     "newAdd": "Yangi qo'shish →",
     "newAddCp": "+ Yangi kontragent qo'shish",
@@ -56,6 +78,8 @@
   "toast": {
     "added": "Kontragent qo'shildi",
     "updated": "Kontragent yangilandi",
+    "deleted": "Kontragent o'chirildi",
+    "bulkDeleted": "{count} ta kontragent o'chirildi",
     "noExportData": "Eksport uchun ma'lumot yo'q",
     "excelDownloaded": "Excel yuklandi",
     "error": "Xatolik"

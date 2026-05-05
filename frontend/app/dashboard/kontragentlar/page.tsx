@@ -1,21 +1,28 @@
 'use client'
 
-import { useState }    from 'react'
+import { useState, useRef, useCallback } from 'react'
+import { useRouter }    from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Plus, Users, Search, Edit2, AlertCircle, Download } from 'lucide-react'
+import {
+  Plus, Users, Search, Edit2, AlertCircle, Download,
+  Trash2, X, FileText, RefreshCw, TrendingUp, CheckCircle,
+} from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }   from '@tanstack/react-query'
 import { PageHeader }   from '@/components/layout/PageHeader'
 import { Button }       from '@/components/ui/Button'
 import { Input }        from '@/components/ui/Input'
 import { Card }         from '@/components/ui/Card'
 import { Badge }        from '@/components/ui/Badge'
-import { Modal }        from '@/components/ui/Modal'
+import { Modal, ConfirmDialog }        from '@/components/ui/Modal'
 import { Pagination }   from '@/components/ui/Pagination'
 import { EmptyState, TableRowSkeleton } from '@/components/ui/Skeleton'
 import { StirInput, type StirData } from '@/components/shared/StirInput'
 import { useAuth }      from '@/hooks/useAuth'
+import { useDebouncedValue }   from '@/hooks/useDebouncedValue'
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
 import api              from '@/lib/api'
 import { exportCounterpartiesExcel } from '@/lib/export/listExport'
+import { cn }           from '@/lib/cn'
 import toast            from 'react-hot-toast'
 
 interface Counterparty {
@@ -126,21 +133,41 @@ function CpFormModal({ cp, open, onClose, orgId }: {
 
 export default function KontragentlarPage() {
   const t = useTranslations('counterparties')
+  const router = useRouter()
+  const qc = useQueryClient()
   const { currentOrg } = useAuth()
-  const [search,   setSearch]   = useState('')
-  const [page,     setPage]     = useState(1)
-  const [addModal, setAddModal] = useState(false)
-  const [editCp,   setEditCp]   = useState<Counterparty | null>(null)
+  const [search,        setSearch]        = useState('')
+  const [statusFilter,  setStatusFilter]  = useState('')
+  const [page,          setPage]          = useState(1)
+  const [addModal,      setAddModal]      = useState(false)
+  const [editCp,        setEditCp]        = useState<Counterparty | null>(null)
+  const [deleteCp,      setDeleteCp]      = useState<Counterparty | null>(null)
+  const [selected,      setSelected]      = useState<Set<string>>(new Set())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+
+  // Search debounce — har harf yozganda emas, 300ms keyin
+  const debouncedSearch = useDebouncedValue(search, 300)
+
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  useKeyboardShortcut('mod+k', useCallback(() => {
+    searchInputRef.current?.focus()
+  }, []))
+  useKeyboardShortcut('mod+n', useCallback(() => {
+    setAddModal(true)
+  }, []))
+  useKeyboardShortcut('escape', useCallback(() => {
+    if (selected.size > 0) setSelected(new Set())
+  }, [selected.size]))
 
   const { data, isLoading } = useQuery({
-    queryKey: ['counterparties', currentOrg?.id, page, search],
+    queryKey: ['counterparties', currentOrg?.id, page, debouncedSearch, statusFilter],
     queryFn:  async () => {
       if (!currentOrg?.id) return { data: [] as Counterparty[], meta: { total: 0, totalPages: 1, page: 1, limit: 20 } }
       const params = new URLSearchParams({
         orgId: currentOrg.id,
         page:  String(page),
         limit: '20',
-        ...(search && { search }),
+        ...(debouncedSearch && { search: debouncedSearch }),
       })
       const { data } = await api.get(`/counterparties?${params}`)
       return data as { data: Counterparty[]; meta: { total: number; totalPages: number; page: number; limit: number } }
@@ -148,10 +175,56 @@ export default function KontragentlarPage() {
     enabled: !!currentOrg?.id,
   })
 
-  const cps        = data?.data || []
+  // Frontend STIR statusi bo'yicha filter
+  const rawCps = data?.data || []
+  const filtered = statusFilter
+    ? rawCps.filter((cp: Counterparty) => cp.stirStatus === statusFilter)
+    : rawCps
+  const cps        = rawCps
   const totalPages = data?.meta?.totalPages || 1
   const total      = data?.meta?.total || 0
-  const filtered   = cps  // backend filtri allaqachon ishlatilgan
+  const allOnPageSelected = filtered.length > 0 && filtered.every((c: Counterparty) => selected.has(c.id))
+
+  // ─── Mutations
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => api.delete(`/counterparties/${id}?orgId=${currentOrg!.id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['counterparties'] })
+      setDeleteCp(null)
+      toast.success(t('toast.deleted'))
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
+  })
+
+  function toggleSelected(id: string) {
+    setSelected(s => {
+      const next = new Set(s)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+  function toggleSelectAll() {
+    if (allOnPageSelected) setSelected(new Set())
+    else setSelected(new Set(filtered.map((c: Counterparty) => c.id)))
+  }
+
+  const bulkDeleteMut = useMutation({
+    mutationFn: async () => {
+      const ids = Array.from(selected)
+      await Promise.all(ids.map(id =>
+        api.delete(`/counterparties/${id}?orgId=${currentOrg!.id}`)
+      ))
+      return { count: ids.length }
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['counterparties'] })
+      setSelected(new Set())
+      setBulkDeleteOpen(false)
+      toast.success(t('toast.bulkDeleted', { count: res.count }))
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
+  })
 
   if (!currentOrg) {
     return (
@@ -189,20 +262,101 @@ export default function KontragentlarPage() {
         }
       />
 
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <Input
-          placeholder={t('searchPlaceholder')}
-          leftIcon={<Search size={15} />}
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
-          className="max-w-sm"
-        />
+      {/* Statistika kartochkalari */}
+      {total > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <CpStatCard
+            label={t('stats.total')}
+            value={total.toLocaleString()}
+            icon={<Users size={16} />}
+            color="bg-[#F1F5F9] text-[#475569]"
+          />
+          <CpStatCard
+            label={t('stats.active')}
+            value={cps.filter((c: Counterparty) => c.stirStatus === 'active').length.toLocaleString()}
+            icon={<CheckCircle size={16} />}
+            color="bg-[#DCFCE7] text-[#15803D]"
+          />
+          <CpStatCard
+            label={t('stats.inactive')}
+            value={cps.filter((c: Counterparty) => c.stirStatus === 'inactive').length.toLocaleString()}
+            icon={<AlertCircle size={16} />}
+            color="bg-[#FEE2E2] text-[#B91C1C]"
+          />
+          <CpStatCard
+            label={t('stats.unknown')}
+            value={cps.filter((c: Counterparty) => !c.stirStatus || c.stirStatus === 'unknown').length.toLocaleString()}
+            icon={<RefreshCw size={16} />}
+            color="bg-[#FEF3C7] text-[#B45309]"
+          />
+        </div>
+      )}
+
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative max-w-sm flex-1 sm:flex-initial">
+          <Input
+            ref={searchInputRef}
+            placeholder={t('searchPlaceholder') + ' (Ctrl+K)'}
+            leftIcon={<Search size={15} />}
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(''); setPage(1) }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9]"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
+        <select
+          value={statusFilter}
+          onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
+          className="h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
+        >
+          <option value="">{t('filter.allStatuses')}</option>
+          <option value="active">{t('active')}</option>
+          <option value="inactive">{t('inactive')}</option>
+          <option value="unknown">{t('unknown')}</option>
+        </select>
+        {(search || statusFilter) && (
+          <button
+            onClick={() => { setSearch(''); setStatusFilter(''); setPage(1) }}
+            className="h-10 px-3 rounded-lg text-sm bg-[#FEE2E2] text-[#B91C1C] hover:bg-[#FECACA] flex items-center gap-1.5 transition border border-[#FECACA]"
+          >
+            <X size={13} />
+            {t('filter.clearAll')}
+          </button>
+        )}
+        <div className="flex-1" />
         {total > 0 && (
           <span className="text-xs text-[#94A3B8] shrink-0">
-            {total} ta
+            {filtered.length} / {total} ta
           </span>
         )}
       </div>
+
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="mb-3 p-3 bg-[#DBEAFE] border border-[#BFDBFE] rounded-xl flex items-center gap-3 flex-wrap">
+          <span className="text-sm font-medium text-[#1E40AF]">
+            {t('bulk.selected', { count: selected.size })}
+          </span>
+          <div className="flex-1" />
+          <Button
+            size="xs" variant="outline"
+            className="text-red-500 hover:bg-red-50 hover:border-red-200"
+            leftIcon={<Trash2 size={11} />}
+            onClick={() => setBulkDeleteOpen(true)}
+          >
+            {t('bulk.delete')}
+          </Button>
+          <Button size="xs" variant="outline" onClick={() => setSelected(new Set())}>
+            {t('bulk.clear')}
+          </Button>
+        </div>
+      )}
 
       {!isLoading && filtered.length === 0 && (
         <EmptyState
@@ -218,7 +372,15 @@ export default function KontragentlarPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#E2E8F0]">
+              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                <th className="w-10 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allOnPageSelected}
+                    onChange={toggleSelectAll}
+                    className="rounded"
+                  />
+                </th>
                 {[t('table.name'), t('table.stir'), t('table.director'), t('table.bank'), t('table.status'), ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
                     {h}
@@ -229,11 +391,24 @@ export default function KontragentlarPage() {
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRowSkeleton key={i} cols={6} />
+                  <TableRowSkeleton key={i} cols={7} />
                 ))
               ) : (
-                filtered.map(cp => (
-                  <tr key={cp.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group">
+                filtered.map((cp: Counterparty) => {
+                  const isChecked = selected.has(cp.id)
+                  return (
+                  <tr key={cp.id} className={cn(
+                    'border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group',
+                    isChecked && 'bg-[#F0F9FF]',
+                  )}>
+                    <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleSelected(cp.id)}
+                        className="rounded"
+                      />
+                    </td>
                     <td className="px-4 py-3">
                       <p className="text-sm font-medium text-[#0F172A]">{cp.name}</p>
                     </td>
@@ -263,15 +438,32 @@ export default function KontragentlarPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => setEditCp(cp)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] transition-all"
-                      >
-                        <Edit2 size={14} />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => router.push(`/dashboard/shartnomalar/yangi?cpId=${cp.id}`)}
+                          title={t('newContract')}
+                          className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#16A34A] hover:bg-[#DCFCE7] transition-all"
+                        >
+                          <FileText size={14} />
+                        </button>
+                        <button
+                          onClick={() => setEditCp(cp)}
+                          title={t('edit')}
+                          className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => setDeleteCp(cp)}
+                          title={t('delete')}
+                          className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))
+                )})
               )}
             </tbody>
           </table>
@@ -291,6 +483,46 @@ export default function KontragentlarPage() {
         orgId={currentOrg.id}
         onClose={() => { setAddModal(false); setEditCp(null) }}
       />
+
+      <ConfirmDialog
+        open={!!deleteCp}
+        onClose={() => setDeleteCp(null)}
+        onConfirm={() => deleteCp && deleteMut.mutate(deleteCp.id)}
+        title={t('deleteTitle')}
+        description={deleteCp ? t('deleteConfirm', { name: deleteCp.name }) : ''}
+        variant="danger"
+        loading={deleteMut.isPending}
+      />
+
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onClose={() => setBulkDeleteOpen(false)}
+        onConfirm={() => bulkDeleteMut.mutate()}
+        title={t('bulk.deleteTitle')}
+        description={t('bulk.deleteConfirm', { count: selected.size })}
+        variant="danger"
+        loading={bulkDeleteMut.isPending}
+      />
+    </div>
+  )
+}
+
+// ─── Statistika kartochkasi ─────────────────────────────────────────
+function CpStatCard({ label, value, icon, color }: {
+  label: string
+  value: string
+  icon:  React.ReactNode
+  color: string
+}) {
+  return (
+    <div className="bg-white border border-[#E2E8F0] rounded-xl p-3.5 flex items-center gap-3">
+      <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', color)}>
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] uppercase tracking-wider text-[#94A3B8] truncate">{label}</p>
+        <p className="text-base font-bold text-[#0F172A] truncate tabular-nums">{value}</p>
+      </div>
     </div>
   )
 }
