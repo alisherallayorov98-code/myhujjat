@@ -3,7 +3,7 @@
 import { useTranslations }     from 'next-intl'
 import { useParams, useRouter } from 'next/navigation'
 import Link           from 'next/link'
-import { ArrowLeft, Download, Edit2, FileText } from 'lucide-react'
+import { ArrowLeft, Download, FileText, FileType2 } from 'lucide-react'
 import { useQuery }   from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button }     from '@/components/ui/Button'
@@ -13,6 +13,7 @@ import api            from '@/lib/api'
 import { formatAmountWords, formatDate, formatNumber } from '@/lib/formatters'
 import { calcSpecTotals } from '@/lib/qqs'
 import { exportSpecExcel } from '@/lib/export/specExport'
+import { exportSpecDocx }  from '@/lib/export/specDocx'
 import toast          from 'react-hot-toast'
 
 export default function SpecDetailPage() {
@@ -45,11 +46,27 @@ export default function SpecDetailPage() {
     await exportSpecExcel({
       specNumber:  spec.specNumber,
       orgName:     currentOrg?.name || '',
+      cpName:      spec.counterparty?.name,
       contractNum: spec.contract?.contractNumber,
       items,
       notes:       spec.notes,
     })
     toast.success(t('toast.excelDownloaded'))
+  }
+
+  const handleWord = async () => {
+    await exportSpecDocx({
+      specNumber:   spec.specNumber,
+      specDate:     spec.createdAt,
+      city:         currentOrg?.address?.split(',')[0] || 'Toshkent',
+      contractNum:  spec.contract?.contractNumber,
+      contractDate: spec.contract?.contractDate,
+      org:          currentOrg as any,
+      cp:           spec.counterparty,
+      items,
+      notes:        spec.notes,
+    })
+    toast.success(t('toast.wordDownloaded'))
   }
 
   return (
@@ -66,6 +83,9 @@ export default function SpecDetailPage() {
           <div className="flex gap-2">
             <Button variant="outline" size="sm" leftIcon={<ArrowLeft size={14} />} onClick={() => router.back()}>
               {t('back')}
+            </Button>
+            <Button variant="outline" size="sm" leftIcon={<FileType2 size={14} />} onClick={handleWord}>
+              Word
             </Button>
             <Button variant="secondary" size="sm" leftIcon={<Download size={14} />} onClick={handleExcel}>
               Excel

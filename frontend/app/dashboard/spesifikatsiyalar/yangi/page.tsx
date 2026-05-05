@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useTranslations }       from 'next-intl'
 import { useRouter }             from 'next/navigation'
-import { Plus, Trash2, ArrowLeft, Save, Download, Calculator } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft, Save, Download, Calculator, FileType2 } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }   from '@/components/layout/PageHeader'
 import { Button }       from '@/components/ui/Button'
@@ -18,6 +18,7 @@ import {
 } from '@/lib/qqs'
 import { formatAmountWords, formatNumber } from '@/lib/formatters'
 import { exportSpecExcel }   from '@/lib/export/specExport'
+import { exportSpecDocx }    from '@/lib/export/specDocx'
 import { CpDropdown }   from '../../shartnomalar/yangi/_components/CpDropdown'
 import toast            from 'react-hot-toast'
 import type { Counterparty } from '@/lib/types'
@@ -140,10 +141,26 @@ export default function YangiSpesifikatsiya() {
     await exportSpecExcel({
       specNumber:  specNumber || 'YANGI',
       orgName:     currentOrg?.name || '',
+      cpName:      selectedCp?.name,
       contractNum: contract?.contractNumber,
       items,
       notes,
     })
+  }
+
+  const handleWord = async () => {
+    const contract = (contracts as any[]).find((c: any) => c.id === contractId)
+    await exportSpecDocx({
+      specNumber:   specNumber || 'YANGI',
+      city:         currentOrg?.address?.split(',')[0] || 'Toshkent',
+      contractNum:  contract?.contractNumber,
+      contractDate: contract?.contractDate,
+      org:          currentOrg as any,
+      cp:           selectedCp as any,
+      items,
+      notes,
+    })
+    toast.success(t('toast.wordDownloaded'))
   }
 
   return (
@@ -160,6 +177,9 @@ export default function YangiSpesifikatsiya() {
           <div className="flex gap-2">
             <Button variant="outline" size="sm" leftIcon={<ArrowLeft size={14} />} onClick={() => router.back()}>
               {t('back')}
+            </Button>
+            <Button variant="outline" size="sm" leftIcon={<FileType2 size={14} />} onClick={handleWord}>
+              Word
             </Button>
             <Button variant="secondary" size="sm" leftIcon={<Download size={14} />} onClick={handleExcel}>
               Excel

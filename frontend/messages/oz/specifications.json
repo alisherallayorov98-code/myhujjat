@@ -84,6 +84,7 @@
     "deleted": "Ўчирилди",
     "qqsApplied": "ҚҚС {rate} барча қаторларга қўлланди",
     "excelDownloaded": "Excel юкланди",
+    "wordDownloaded": "Word юкланди",
     "error": "Хатолик"
   },
   "tooltip": {

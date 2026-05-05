@@ -84,6 +84,7 @@
     "deleted": "Удалено",
     "qqsApplied": "НДС {rate} применён ко всем строкам",
     "excelDownloaded": "Excel загружен",
+    "wordDownloaded": "Word загружен",
     "error": "Ошибка"
   },
   "tooltip": {

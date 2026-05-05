@@ -84,6 +84,7 @@
     "deleted": "O'chirildi",
     "qqsApplied": "QQS {rate} barcha qatorlarga qo'llandi",
     "excelDownloaded": "Excel yuklandi",
+    "wordDownloaded": "Word yuklandi",
     "error": "Xatolik"
   },
   "tooltip": {
