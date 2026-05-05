@@ -1,10 +1,10 @@
 'use client'
 
-import { useState }                                     from 'react'
+import { useState, useRef, useCallback }                  from 'react'
 import Link                                              from 'next/link'
 import { useTranslations }                               from 'next-intl'
 import {
-  Archive, Search, FileText, Sparkles, ClipboardList, Eye,
+  Archive, Search, FileText, Sparkles, ClipboardList, Eye, X,
 } from 'lucide-react'
 import { useQuery }                                      from '@tanstack/react-query'
 import { PageHeader }                                    from '@/components/layout/PageHeader'
@@ -13,6 +13,8 @@ import { Input }                                         from '@/components/ui/I
 import { Badge, ContractStatusBadge }                    from '@/components/ui/Badge'
 import { EmptyState, TableRowSkeleton }                  from '@/components/ui/Skeleton'
 import { useAuth }                                       from '@/hooks/useAuth'
+import { useDebouncedValue }                             from '@/hooks/useDebouncedValue'
+import { useKeyboardShortcut }                           from '@/hooks/useKeyboardShortcut'
 import api                                               from '@/lib/api'
 import { formatCurrency, formatDate }                    from '@/lib/formatters'
 import { CONTRACT_TYPE_CONFIG }                          from '@/lib/contractTemplates'
@@ -73,16 +75,20 @@ export default function SeifPage() {
   const [search,     setSearch]     = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [page,       setPage]       = useState(1)
+  const debouncedSearch = useDebouncedValue(search, 300)
+
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  useKeyboardShortcut('mod+k', useCallback(() => searchInputRef.current?.focus(), []))
 
   const { data, isLoading } = useQuery<{ data: SeifDoc[]; meta: any }>({
-    queryKey: ['seif', currentOrg?.id, search, typeFilter, page],
+    queryKey: ['seif', currentOrg?.id, debouncedSearch, typeFilter, page],
     queryFn:  () => {
       const params = new URLSearchParams({
         orgId: currentOrg!.id,
         page:  String(page),
         limit: '30',
       })
-      if (search)              params.set('search', search)
+      if (debouncedSearch)      params.set('search', debouncedSearch)
       if (typeFilter !== 'all') params.set('type',   typeFilter)
       return api.get(`/documents/seif?${params}`).then(r => r.data)
     },
@@ -134,13 +140,23 @@ export default function SeifPage() {
 
       {/* Filtrlar */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <Input
-          placeholder={t('searchPlace')}
-          leftIcon={<Search size={15} />}
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
-          className="max-w-xs"
-        />
+        <div className="relative max-w-xs flex-1 sm:flex-initial">
+          <Input
+            ref={searchInputRef}
+            placeholder={t('searchPlace') + ' (Ctrl+K)'}
+            leftIcon={<Search size={15} />}
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(''); setPage(1) }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9]"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
 
         <div className="flex gap-1 bg-[#F1F5F9] rounded-lg p-1">
           {TYPE_FILTERS.map(f => (
@@ -232,17 +248,17 @@ export default function SeifPage() {
                         }
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex gap-1">
                           {doc.type === 'contract' && (
                             <Link href={`/dashboard/shartnomalar/${doc.id}`}>
-                              <span className="flex p-1.5 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-colors">
+                              <span className="flex p-1.5 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100">
                                 <Eye size={14} />
                               </span>
                             </Link>
                           )}
                           {doc.type === 'ai' && (
-                            <Link href="/dashboard/seif/ai">
-                              <span className="flex p-1.5 rounded-lg text-[#94A3B8] hover:text-[#7C3AED] hover:bg-[#EDE9FE] transition-colors">
+                            <Link href={`/dashboard/seif/ai/${doc.id}`}>
+                              <span className="flex p-1.5 rounded-lg text-[#94A3B8] hover:text-[#7C3AED] hover:bg-[#EDE9FE] transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100">
                                 <Eye size={14} />
                               </span>
                             </Link>
