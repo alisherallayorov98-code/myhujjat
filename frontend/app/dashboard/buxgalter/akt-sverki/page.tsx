@@ -139,6 +139,7 @@ export default function AktSverkiPage() {
         />
       ) : (
         <Card padding="none">
+          <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
@@ -157,7 +158,7 @@ export default function AktSverkiPage() {
                   className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group cursor-pointer"
                 >
                   <td className="px-4 py-3 text-sm font-mono text-[#2563EB]">{doc.number}</td>
-                  <td className="px-4 py-3 text-sm text-[#475569]">{doc.title}</td>
+                  <td className="px-4 py-3 text-sm text-[#475569] max-w-[220px] truncate">{doc.title}</td>
                   <td className="px-4 py-3 text-sm text-[#94A3B8]">{doc.content?.formData?.davr || '—'}</td>
                   <td className="px-4 py-3 text-sm text-[#94A3B8]">{formatDate(doc.docDate || doc.createdAt, 'short')}</td>
                   <td className="px-4 py-3">
@@ -177,6 +178,7 @@ export default function AktSverkiPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </Card>
       )}
 
@@ -207,7 +209,7 @@ export default function AktSverkiPage() {
         }
       >
         <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input label={t('raqam')} placeholder={t('raqamPlace')}
                 value={form.raqam} onChange={e => setForm(f => ({ ...f, raqam: e.target.value }))} />
               <Input label={t('sana')} type="date"

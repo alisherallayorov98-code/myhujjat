@@ -409,16 +409,16 @@ export default function KontragentlarPage() {
                         className="rounded"
                       />
                     </td>
-                    <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-[#0F172A]">{cp.name}</p>
+                    <td className="px-4 py-3 max-w-[200px]">
+                      <p className="text-sm font-medium text-[#0F172A] truncate">{cp.name}</p>
                     </td>
                     <td className="px-4 py-3 text-sm font-mono text-[#475569]">
                       {cp.inn || '—'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#475569]">
+                    <td className="px-4 py-3 text-sm text-[#475569] max-w-[160px] truncate">
                       {cp.directorName || '—'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#94A3B8]">
+                    <td className="px-4 py-3 text-sm text-[#94A3B8] max-w-[160px] truncate">
                       {cp.bankName || '—'}
                     </td>
                     <td className="px-4 py-3">

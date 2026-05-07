@@ -317,8 +317,8 @@ export default function KadrlarPage() {
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shrink-0">
                           <span className="text-white text-xs font-bold">{emp.ism?.[0]?.toUpperCase()}</span>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-[#0F172A]">{emp.ism}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-[#0F172A] truncate">{emp.ism}</p>
                           {emp.jshshir && <p className="text-xs text-[#94A3B8]">{emp.jshshir}</p>}
                         </div>
                       </div>
