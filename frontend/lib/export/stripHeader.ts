@@ -24,10 +24,14 @@ const HEADER_PATTERNS: RegExp[] = [
   /^\s*"?\d{4}[-/]\d{1,2}[-/]\d{1,2}"?\s*$/,
   // Shahar + sana bir satrda: "Toshkent shahri ... 27.04.2026" yoki tab bilan
   /^\s*[«"']?[\wʻ'`oʼÀ-ſ]+\s+shahri\s*[,.\s\t]*"?\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}"?(\s*[-y]?il)?\s*$/i,
+  // "Toshkent sh. ... "07.05.2026"" — sh. abbreviation bilan (keng bo'shliq ham bo'lishi mumkin)
+  /^\s*[«"']?[\wʻ'`oʼÀ-ſ]+\s+sh\.\s*"?\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}"?(\s*[-y]?il)?\s*$/i,
   // Sana + shahar (teskari tartibda): '"27.04.2026"   Demo MChJ'
   /^\s*"?\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}"?\s+[\wʻ'`oʼÀ-ſ\s.,&"-]+\s*$/i,
   // Yolg'iz "Toshkent shahri"
   /^\s*[«"']?[\wʻ'`oʼÀ-ſ]+\s+shahri\s*$/i,
+  // Yolg'iz "Toshkent sh."
+  /^\s*[«"']?[\wʻ'`oʼÀ-ſ]+\s+sh\.\s*$/i,
   // UPPERCASE org nomi — biznes turi suffiksi bilan tugaydi (MCHJ, OAJ, YaTT, OOO, LLC, INC, MChJ, ZAO, AJ)
   // Bu narx — generic UPPERCASE matnga tegmaslik, faqat tashkilot nomini stripping qilish
   /^\s*(?=[A-ZА-ЯЁ])(?!.*[a-zа-яё])[A-ZА-ЯЁʻ'`"«»\d.,&"\-\s]{2,80}\s+(MCHJ|MChJ|OAJ|YATT|YaTT|OOO|LLC|INC|LTD|CO|ZAO|AJ|HK)\s*$/u,

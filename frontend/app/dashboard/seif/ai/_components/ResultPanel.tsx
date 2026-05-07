@@ -7,6 +7,7 @@ import { Card }  from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { exportContractPdf  } from '@/lib/export/contractPdf'
 import { exportContractDocx } from '@/lib/export/contractDocx'
+import { printText }          from '@/lib/printDocument'
 import toast from 'react-hot-toast'
 
 interface Props {
@@ -93,7 +94,7 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
             <Sparkles size={14} className="text-[#A78BFA]" />
             <p className="text-sm font-semibold">{docType}</p>
             <div className="flex-1" />
-            <button onClick={() => window.print()} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+            <button onClick={() => printText(result)} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <Printer size={14} /><span className="hidden sm:inline">Pechat</span>
             </button>
             <button onClick={() => exportContractPdf({ title: docType, content: result, orgName })} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">

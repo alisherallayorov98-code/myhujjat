@@ -18,6 +18,7 @@ import { useAuth }                                 from '@/hooks/useAuth'
 import api                                         from '@/lib/api'
 import { exportContractPdf }                       from '@/lib/export/contractPdf'
 import { exportContractDocx }                      from '@/lib/export/contractDocx'
+import { printText }                               from '@/lib/printDocument'
 import { formatCurrency, formatDate }              from '@/lib/formatters'
 import toast                                       from 'react-hot-toast'
 
@@ -130,7 +131,7 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
                 <Button
                   variant="outline" size="sm"
                   leftIcon={<Printer size={13} />}
-                  onClick={() => window.print()}
+                  onClick={() => text && printText(text)}
                 >
                   {t('print')}
                 </Button>

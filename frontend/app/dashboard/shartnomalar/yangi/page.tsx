@@ -700,7 +700,16 @@ export default function YangiShartnoma() {
             </div>
             <div className="flex-1" />
             <button
-              onClick={() => window.print()}
+              onClick={() => {
+                const w = window.open('', '_blank')
+                if (w) {
+                  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Print</title><style>@page{margin:1.5cm}body{margin:0}</style></head><body>${previewHtml}</body></html>`)
+                  w.document.close()
+                  w.focus()
+                  w.print()
+                  w.close()
+                }
+              }}
               className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
             >
               <Printer size={14} />

@@ -16,6 +16,7 @@ import { useAuth }                                  from '@/hooks/useAuth'
 import api                                          from '@/lib/api'
 import { exportContractPdf }                        from '@/lib/export/contractPdf'
 import { exportContractDocx }                       from '@/lib/export/contractDocx'
+import { printText }                                from '@/lib/printDocument'
 import { formatDate }                               from '@/lib/formatters'
 import toast                                        from 'react-hot-toast'
 
@@ -104,7 +105,7 @@ export default function AiDocDetailPage({ params }: { params: Promise<{ id: stri
             <Button
               variant="outline" size="sm"
               leftIcon={<Printer size={13} />}
-              onClick={() => window.print()}
+              onClick={() => doc?.content && printText(doc.content)}
             >
               Pechat
             </Button>

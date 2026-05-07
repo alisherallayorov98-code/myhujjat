@@ -11,6 +11,7 @@ import {
 } from '@/lib/kotibTemplates'
 import { exportContractPdf }  from '@/lib/export/contractPdf'
 import { exportContractDocx } from '@/lib/export/contractDocx'
+import { printText }          from '@/lib/printDocument'
 import { format }             from 'date-fns'
 import {
   Plus, FileText, Trash2, Download, Copy, Check,
@@ -364,7 +365,7 @@ export default function BuyruqPage() {
             <div className="h-6 w-px bg-white/10 mx-1" />
             <p className="text-sm font-semibold">{t('korinish')}</p>
             <div className="flex-1" />
-            <button onClick={() => window.print()} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+            <button onClick={() => printText(preview)} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <Printer className="w-4 h-4" /><span className="hidden sm:inline">{t('print')}</span>
             </button>
             <button onClick={handleDocx} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
