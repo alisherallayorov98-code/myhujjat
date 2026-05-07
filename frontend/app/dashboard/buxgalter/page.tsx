@@ -33,6 +33,13 @@ export default function BuxgalterPage() {
       desc:  t('tolovGrafigiDesc'),
       color: 'bg-[#EDE9FE]',
     },
+    {
+      href:  '/dashboard/buxgalter/nazorat',
+      icon:  '🔍',
+      label: t('nazorat.label'),
+      desc:  t('nazorat.labelDesc'),
+      color: 'bg-[#FEE2E2]',
+    },
   ]
 
   return (

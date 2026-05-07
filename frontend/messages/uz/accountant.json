@@ -96,5 +96,42 @@
   "belgilash": "Belgilash",
   "calcFirst": "Avval hisoblang",
   "monthsSummary": "{months} oy · {sum} · To'landi: {paid}/{total}",
-  "grafikSaved": "To'lov grafigi saqlandi ✓"
+  "grafikSaved": "To'lov grafigi saqlandi ✓",
+
+  "nazorat": {
+    "title": "Shartnoma nazorati",
+    "desc": "Faktura summasi shartnoma summasidan oshgan yoki yaqinlashgan shartnomalar",
+    "label": "Shartnoma nazorati",
+    "labelDesc": "Faktura vs shartnoma summa nazorati",
+    "allAlerts": "Barcha ogohlantirishlar",
+    "warning": "Ogohlantirish (80%+)",
+    "critical": "Kritik (95%+)",
+    "exceeded": "Oshib ketdi (100%+)",
+    "criticalOverage": "Jiddiy oshdi (120%+)",
+    "statWarning": "Ogohlantirish",
+    "statCritical": "Kritik",
+    "statExceeded": "Oshib ketdi",
+    "statOverageSum": "Jami ortiqcha",
+    "filterYear": "Yil",
+    "filterMonth": "Oy",
+    "filterAllYears": "Barcha yillar",
+    "filterAllMonths": "Barcha oylar",
+    "filterAlert": "Holat",
+    "filterLimit": "Qator",
+    "filterAll": "Barchasi",
+    "colContract": "Shartnoma",
+    "colCounterparty": "Kontragent",
+    "colAmount": "Shartnoma summa",
+    "colInvoiced": "Faktura summa",
+    "colPercent": "%",
+    "colAlert": "Holat",
+    "noAlerts": "Ogohlantirishlar yo'q",
+    "noAlertsDesc": "Barcha shartnomalar nazorat ostida",
+    "viewContract": "Ko'rish",
+    "months": {
+      "1": "Yanvar", "2": "Fevral", "3": "Mart", "4": "Aprel",
+      "5": "May", "6": "Iyun", "7": "Iyul", "8": "Avgust",
+      "9": "Sentabr", "10": "Oktabr", "11": "Noyabr", "12": "Dekabr"
+    }
+  }
 }

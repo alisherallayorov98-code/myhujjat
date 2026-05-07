@@ -44,13 +44,16 @@ export class ContractsService {
   }
 
   async findAll(orgId: string, query: {
-    type?:   string
-    status?: string
-    search?: string
-    page?:   number
-    limit?:  number
+    type?:       string
+    status?:     string
+    search?:     string
+    page?:       number
+    limit?:      number
+    alertLevel?: string   // WARNING | CRITICAL | EXCEEDED | CRITICAL_OVERAGE | any (oshganlar)
+    year?:       number
+    month?:      number
   } = {}) {
-    const { type, status, search, page = 1, limit = 20 } = query
+    const { type, status, search, page = 1, limit = 20, alertLevel, year, month } = query
 
     const where: any = {
       organizationId: orgId,
@@ -63,6 +66,16 @@ export class ContractsService {
           { counterparty:   { name: { contains: search, mode: 'insensitive' } } },
         ],
       }),
+      ...(alertLevel === 'any'
+        ? { alertLevel: { not: null } }
+        : alertLevel
+          ? { alertLevel }
+          : {}),
+      ...(year && month
+        ? { contractDate: { startsWith: `${year}-${String(month).padStart(2, '0')}` } }
+        : year
+          ? { contractDate: { startsWith: `${year}` } }
+          : {}),
     }
 
     const [total, contracts] = await Promise.all([
@@ -71,10 +84,9 @@ export class ContractsService {
         where,
         skip:    (page - 1) * limit,
         take:    limit,
-        orderBy: [
-          { isPinned:  'desc' }, // Yulduzli shartnomalar yuqorida
-          { createdAt: 'desc' },
-        ],
+        orderBy: alertLevel
+          ? [{ totalInvoiced: 'desc' }, { createdAt: 'desc' }]
+          : [{ isPinned: 'desc' }, { createdAt: 'desc' }],
         include: {
           counterparty: { select: { id: true, name: true, inn: true } },
           organization: { select: { id: true, name: true } },

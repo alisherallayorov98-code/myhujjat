@@ -96,5 +96,42 @@
   "belgilash": "Белгилаш",
   "calcFirst": "Аввал ҳисобланг",
   "monthsSummary": "{months} ой · {sum} · Тўланди: {paid}/{total}",
-  "grafikSaved": "Тўлов графиги сақланди ✓"
+  "grafikSaved": "Тўлов графиги сақланди ✓",
+
+  "nazorat": {
+    "title": "Шартнома назорати",
+    "desc": "Фактура суммаси шартнома суммасидан ошган ёки яқинлашган шартномалар",
+    "label": "Шартнома назорати",
+    "labelDesc": "Фактура vs шартнома сумма назорати",
+    "allAlerts": "Барча огоҳлантиришлар",
+    "warning": "Огоҳлантириш (80%+)",
+    "critical": "Критик (95%+)",
+    "exceeded": "Ошиб кетди (100%+)",
+    "criticalOverage": "Жиддий ошди (120%+)",
+    "statWarning": "Огоҳлантириш",
+    "statCritical": "Критик",
+    "statExceeded": "Ошиб кетди",
+    "statOverageSum": "Жами ортиқча",
+    "filterYear": "Йил",
+    "filterMonth": "Ой",
+    "filterAllYears": "Барча йиллар",
+    "filterAllMonths": "Барча ойлар",
+    "filterAlert": "Ҳолат",
+    "filterLimit": "Қатор",
+    "filterAll": "Барчаси",
+    "colContract": "Шартнома",
+    "colCounterparty": "Контрагент",
+    "colAmount": "Шартнома суммаси",
+    "colInvoiced": "Фактура суммаси",
+    "colPercent": "%",
+    "colAlert": "Ҳолат",
+    "noAlerts": "Огоҳлантиришлар йўқ",
+    "noAlertsDesc": "Барча шартномалар назорат остида",
+    "viewContract": "Кўриш",
+    "months": {
+      "1": "Январ", "2": "Феврал", "3": "Март", "4": "Апрел",
+      "5": "Май", "6": "Июн", "7": "Июл", "8": "Август",
+      "9": "Сентябр", "10": "Октябр", "11": "Ноябр", "12": "Декабр"
+    }
+  }
 }
