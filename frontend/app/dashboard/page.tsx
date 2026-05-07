@@ -151,7 +151,7 @@ export default function DashboardPage() {
 
   const contractsLeft = isPro
     ? null
-    : 3 - (user?.subscription?.contractCount || 0)
+    : 10 - (user?.subscription?.contractCount || 0)
 
   // Limit ogohlantirish — bir oy davomida bir marta yopiladi (kalit: oy + qoldiq)
   const currentLimitKey = `${new Date().getFullYear()}-${new Date().getMonth()}-${contractsLeft}`

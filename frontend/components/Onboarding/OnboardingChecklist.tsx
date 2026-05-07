@@ -33,10 +33,12 @@ export function OnboardingChecklist() {
   const [dismissed,  setDismissed]  = useState(true)
   const [downloaded, setDownloaded] = useState(false)
   const [collapsed,  setCollapsed]  = useState(false)
+  const [hydrated,   setHydrated]   = useState(false)
 
   useEffect(() => {
     setDismissed(localStorage.getItem(DISMISS_KEY) === '1')
     setDownloaded(localStorage.getItem(DOWNLOADED_KEY) === '1')
+    setHydrated(true)
   }, [])
 
   const { data: cps = [] } = useQuery<any[]>({
@@ -103,6 +105,7 @@ export function OnboardingChecklist() {
     return () => window.removeEventListener('contract-downloaded', onDownload)
   }, [])
 
+  if (!hydrated) return null
   if (dismissed) return null
   if (!user)     return null
   if (allDone) {

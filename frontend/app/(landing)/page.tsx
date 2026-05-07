@@ -336,6 +336,96 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* DIDOX INTEGRATION */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-1.5 bg-[#DBEAFE] text-[#2563EB] text-xs font-bold px-3 py-1 rounded-full mb-4">
+              <Zap size={11} /> O'zbekiston uchun
+            </span>
+            <h2 className="font-display font-black text-[#0F172A] text-3xl md:text-4xl mb-3">
+              Davlat tizimlari bilan{' '}
+              <span className="bg-gradient-to-r from-[#2563EB] to-[#7C3AED] bg-clip-text text-transparent">
+                to'g'ridan-to'g'ri ulangan
+              </span>
+            </h2>
+            <p className="text-[#475569] text-lg max-w-2xl mx-auto">
+              DiDox va Soliq.uz bilan integratsiya — qo'lda kiritish yo'q, avtomatik sinxronizatsiya.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* DiDox */}
+            <div className="relative overflow-hidden rounded-2xl border border-[#BFDBFE] bg-gradient-to-br from-[#EFF6FF] to-white p-6">
+              <div className="absolute top-4 right-4">
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#2563EB] text-white rounded-full">LIVE</span>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-[#2563EB] flex items-center justify-center mb-4">
+                <span className="text-white font-black text-sm">DiD</span>
+              </div>
+              <h3 className="font-display font-bold text-[#0F172A] text-xl mb-2">DiDox API integratsiyasi</h3>
+              <p className="text-[#475569] text-sm mb-4 leading-relaxed">
+                Elektron fakturalar avtomatik sinxronlanadi. Shartnoma summasi oshib ketsa — darhol ogohlantirish. Buxgalter har fakturani qo'lda kiritmaydimi.
+              </p>
+              <ul className="space-y-2">
+                {[
+                  'Fakturalar real vaqtda yuklash',
+                  'Shartnoma vs faktura monitoring',
+                  '80% / 95% / 100% ogohlantirish chegaralari',
+                  'Keluvchi va chiquvchi fakturalar',
+                ].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-[#1E293B]">
+                    <Check size={14} className="text-[#2563EB] shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Soliq.uz */}
+            <div className="relative overflow-hidden rounded-2xl border border-[#BBF7D0] bg-gradient-to-br from-[#F0FDF4] to-white p-6">
+              <div className="absolute top-4 right-4">
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#16A34A] text-white rounded-full">AUTO</span>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-[#16A34A] flex items-center justify-center mb-4">
+                <span className="text-white font-black text-sm">STR</span>
+              </div>
+              <h3 className="font-display font-bold text-[#0F172A] text-xl mb-2">Soliq.uz — STIR autofill</h3>
+              <p className="text-[#475569] text-sm mb-4 leading-relaxed">
+                9 ta raqam kiriting — tashkilot nomi, rahbar, bank, MFO, manzil hammasi avtomatik to'ladi. Kontragent qo'shishda ham, shartnomada ham.
+              </p>
+              <ul className="space-y-2">
+                {[
+                  'STIR dan to\'liq rekvizitlar avtofill',
+                  'Kontragent qo\'shishda bir bosish',
+                  'Yangilangan ma\'lumotlar — doim aktual',
+                  'QQS to\'lovchi holati tekshiruvi',
+                ].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-[#1E293B]">
+                    <Check size={14} className="text-[#16A34A] shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* CTA strip */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0]">
+            <div>
+              <p className="font-semibold text-[#0F172A]">Sozlash 2 daqiqa. Birinchi faktura sinxronlanguncha.</p>
+              <p className="text-sm text-[#94A3B8] mt-0.5">DiDox API kalitingizni kiriting — qolganini biz qilamiz.</p>
+            </div>
+            <Link
+              href="/register"
+              className="shrink-0 inline-flex items-center gap-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm"
+            >
+              Bepul sinab ko'ring <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* COMPARISON */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">

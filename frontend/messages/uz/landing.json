@@ -220,7 +220,7 @@
       "free": {
         "name": "Bepul",
         "btnText": "Bepul boshlash",
-        "features": ["5 ta hujjat/oy", "Asosiy shablonlar", "PDF + Word eksport", "Email qo'llab-quvvatlash"]
+        "features": ["10 ta hujjat/oy", "Asosiy shablonlar", "PDF + Word eksport", "Email qo'llab-quvvatlash"]
       },
       "standard": {
         "name": "Standart",
@@ -238,7 +238,7 @@
     "tag": "KO'P SO'RALADIGAN",
     "title": "Tez-tez beriladigan savollar",
     "items": [
-      { "q": "Bepul rejada nima mavjud?", "a": "Oyiga 5 ta hujjat, asosiy shablonlar, PDF va Word eksport, bitta tashkilot." },
+      { "q": "Bepul rejada nima mavjud?", "a": "Oyiga 10 ta hujjat, asosiy shablonlar, PDF va Word eksport, bitta tashkilot." },
       { "q": "Mira AI ovozli yordamchi qanday ishlaydi?", "a": "O'zbek tilida \"Toshmatov uchun shartnoma 5 mln so'm\" deb gapirsangiz, AI hujjatni o'zi yaratadi va to'ldiradi. Pro rejada mavjud." },
       { "q": "Magic-link imzo qonuniy kuchga egami?", "a": "Ha, O'zbekiston Fuqarolik Kodeksi 366-moddasi bo'yicha. Imzolovchining IP, vaqt va brauzer ma'lumotlari muhrlanadi." },
       { "q": "Ma'lumotlarim xavfsizmi?", "a": "Ma'lumotlar O'zbekistondagi serverlarda AES-256 bilan shifrlangan. Doimiy backup, audit log mavjud." },

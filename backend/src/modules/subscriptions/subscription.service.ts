@@ -82,7 +82,7 @@ export class SubscriptionService {
           { plan: 'PRO' },
           { plan: 'DEMO' },
           { plan: 'STANDARD', contractCount: { lt: 50 } },
-          { plan: 'FREE',     contractCount: { lt: 3 } },
+          { plan: 'FREE',     contractCount: { lt: 10 } },
         ],
       },
       data: { contractCount: { increment: 1 } },
@@ -146,7 +146,7 @@ export class SubscriptionService {
     const sub = await this.getCurrent(userId)
 
     const limits: Record<string, number> = {
-      FREE: 3, STANDARD: 50, PRO: -1, DEMO: -1,
+      FREE: 10, STANDARD: 50, PRO: -1, DEMO: -1,
     }
 
     const limit     = limits[sub.plan] ?? 3
