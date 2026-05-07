@@ -31,8 +31,11 @@ export function useAuth() {
     try {
       const { data } = await api.get('/organizations')
       setOrganizations(data)
-      const defaultOrg = data.find((o: any) => o.isDefault) || data[0]
-      if (defaultOrg) setCurrentOrg(defaultOrg)
+      // Tanlangan tashkilotni saqlash — faqat uning ma'lumotlarini yangilash
+      const currentId = useAuthStore.getState().currentOrg?.id
+      const preserved = currentId ? data.find((o: any) => o.id === currentId) : null
+      const fallback  = data.find((o: any) => o.isDefault) ?? data[0] ?? null
+      setCurrentOrg(preserved ?? fallback)
     } catch {}
   }, [setOrganizations, setCurrentOrg])
 

@@ -11,6 +11,7 @@ import api                          from '@/lib/api'
 import toast                        from 'react-hot-toast'
 import { cn }                       from '@/lib/cn'
 import type { Organization }        from '@/lib/types'
+import { useAuth }                  from '@/hooks/useAuth'
 
 interface Props {
   org?:    Organization | null
@@ -21,7 +22,8 @@ interface Props {
 export function OrgFormModal({ org, open, onClose }: Props) {
   const t  = useTranslations('organizations')
   const tu = useTranslations('ui')
-  const qc     = useQueryClient()
+  const qc                  = useQueryClient()
+  const { loadOrganizations } = useAuth()
   const isEdit = !!org
 
   const [form, setForm] = useState({
@@ -46,6 +48,7 @@ export function OrgFormModal({ org, open, onClose }: Props) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['organizations'] })
+      loadOrganizations()
       toast.success(isEdit ? t('toast.updated') : t('toast.added'))
       onClose()
     },

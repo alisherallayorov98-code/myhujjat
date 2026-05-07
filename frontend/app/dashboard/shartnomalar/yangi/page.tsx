@@ -323,7 +323,7 @@ export default function YangiShartnoma() {
     if (!preview) return ''
     return renderContractHtml(buildContractObj())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preview, deferredForm, deferredOrgEdits, deferredType, currentOrg?.id, selectedCp?.id])
+  }, [preview, deferredForm, deferredOrgEdits, deferredType, currentOrg, selectedCp?.id])
 
   function handleCreate() {
     const v = canCreate()
