@@ -51,7 +51,8 @@
     "delete": "Удалить",
     "deleteTitle": "Удаление договоров",
     "deleteConfirm": "Удалить {count} выбранных договоров? Действие необратимо.",
-    "deleted": "Удалено договоров: {count}"
+    "deleted": "Удалено договоров: {count}",
+    "allSelected": "Выбрано договоров: {count}"
   },
   "stats": {
     "total":       "Всего",

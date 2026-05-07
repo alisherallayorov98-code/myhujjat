@@ -75,7 +75,12 @@ export default function FakturaPage() {
 
   function buildPreview() {
     const cp   = cps.find((c: any) => c.id === form.cpId)
-    const raqam = form.raqam || `FAK-${new Date().getFullYear()}-${String(fakturalar.length + 1).padStart(3, '0')}`
+    const year = new Date().getFullYear()
+    const maxNum = fakturalar.reduce((max: number, f: any) => {
+      const m = String(f.title || '').match(/FAK-\d{4}-(\d+)/)
+      return m ? Math.max(max, parseInt(m[1])) : max
+    }, 0)
+    const raqam = form.raqam || `FAK-${year}-${String(maxNum + 1).padStart(3, '0')}`
     const text = generateFakturaText({
       raqam,
       sana:      form.sana,

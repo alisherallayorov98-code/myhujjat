@@ -51,7 +51,8 @@
     "delete": "O'chirish",
     "deleteTitle": "Shartnomalarni o'chirish",
     "deleteConfirm": "Tanlangan {count} ta shartnomani o'chirish? Bu amalni qaytarib bo'lmaydi.",
-    "deleted": "{count} ta shartnoma o'chirildi"
+    "deleted": "{count} ta shartnoma o'chirildi",
+    "allSelected": "{count} ta shartnoma tanlandi"
   },
   "stats": {
     "total":       "Jami",

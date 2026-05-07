@@ -7,7 +7,7 @@ import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send, Eye,
-  TrendingUp, CheckCircle, FileEdit, DollarSign, X, Filter, Star,
+  TrendingUp, CheckCircle, FileEdit, DollarSign, X, Filter, Star, Loader2,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -55,6 +55,7 @@ export default function ShartnomalarPage() {
   const [selected,         setSelected]         = useState<Set<string>>(new Set())
   const [bulkConfirm,      setBulkConfirm]      = useState<string | null>(null)
   const [bulkDeleteOpen,   setBulkDeleteOpen]   = useState(false)
+  const [excelLoading,     setExcelLoading]     = useState(false)
 
   // Keyboard shortcuts (power users uchun)
   useKeyboardShortcut('mod+n', useCallback(() => {
@@ -82,7 +83,7 @@ export default function ShartnomalarPage() {
     enabled:  !!currentOrg?.id,
   })
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['contracts', currentOrg?.id, debouncedSearch, typeFilter, statusFilter, cpFilter, page],
     queryFn:  async () => {
       if (!currentOrg?.id) return { data: [], meta: { total: 0, totalPages: 1 } }
@@ -232,14 +233,21 @@ export default function ShartnomalarPage() {
     if (allOnPageSelected) {
       setSelected(new Set())
     } else {
-      setSelected(new Set(contracts.map((c: any) => c.id)))
+      const ids = new Set(contracts.map((c: any) => c.id))
+      setSelected(ids)
+      toast.success(t('bulk.allSelected', { count: ids.size }))
     }
   }
 
-  function handleExportExcel() {
+  async function handleExportExcel() {
     if (contracts.length === 0) { toast.error(t('toast.noExportData')); return }
-    exportContractsExcel(contracts, currentOrg?.name || 'tashkilot')
-    toast.success(t('toast.excelDownloaded'))
+    setExcelLoading(true)
+    try {
+      await exportContractsExcel(contracts, currentOrg?.name || 'tashkilot')
+      toast.success(t('toast.excelDownloaded'))
+    } finally {
+      setExcelLoading(false)
+    }
   }
 
   function handleBulkStatus(status: string) {
@@ -263,7 +271,7 @@ export default function ShartnomalarPage() {
         ]}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" leftIcon={<Download size={14} />} onClick={handleExportExcel}>
+            <Button variant="outline" size="sm" leftIcon={<Download size={14} />} loading={excelLoading} onClick={handleExportExcel}>
               Excel
             </Button>
             {isPro && (
@@ -326,7 +334,7 @@ export default function ShartnomalarPage() {
           <Input
             ref={searchInputRef}
             placeholder={t('filter.search') + ' (Ctrl+K)'}
-            leftIcon={<Search size={15} />}
+            leftIcon={isFetching && search ? <Loader2 size={15} className="animate-spin text-[#2563EB]" /> : <Search size={15} />}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1) }}
           />
@@ -673,6 +681,7 @@ function Pagination({ page, totalPages, onPageChange }: {
       >
         <ChevronRight size={14} />
       </button>
+      <span className="ml-2 text-xs text-[#94A3B8] whitespace-nowrap">{page} / {totalPages}</span>
     </div>
   )
 }

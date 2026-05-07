@@ -68,7 +68,14 @@ export default function AktSverkiPage() {
 
   function buildData(): AktSverkaData {
     return {
-      raqam:             form.raqam || `ASV-${new Date().getFullYear()}-${String(aktlar.length + 1).padStart(3, '0')}`,
+      raqam:             form.raqam || (() => {
+        const year = new Date().getFullYear()
+        const maxNum = aktlar.reduce((max: number, a: any) => {
+          const m = String(a.title || '').match(/ASV-\d{4}-(\d+)/)
+          return m ? Math.max(max, parseInt(m[1])) : max
+        }, 0)
+        return `ASV-${year}-${String(maxNum + 1).padStart(3, '0')}`
+      })(),
       sana:              form.sana,
       davr:              form.davr,
       orgNomi:           currentOrg?.name        || '',

@@ -138,7 +138,8 @@ export default function YangiShartnoma() {
     if (!currentOrg) return
     const isQqs = !!(currentOrg.qqsReg?.trim())
     const rate  = currentOrg.qqsStavka ? parseInt(currentOrg.qqsStavka) : 12
-    setForm(f => ({ ...f, qqsEnabled: isQqs, qqsRate: isNaN(rate) ? 12 : rate }))
+    const city  = currentOrg.address?.split(',')[0]?.trim() || 'Toshkent'
+    setForm(f => ({ ...f, qqsEnabled: isQqs, qqsRate: isNaN(rate) ? 12 : rate, city }))
     setOrgEdits({})
   }, [currentOrg?.id])
 

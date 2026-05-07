@@ -5,7 +5,7 @@ import { useRouter }    from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
   Plus, Users, Search, Edit2, AlertCircle, Download,
-  Trash2, X, FileText, RefreshCw, TrendingUp, CheckCircle,
+  Trash2, X, FileText, RefreshCw, TrendingUp, CheckCircle, Loader2,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }   from '@tanstack/react-query'
 import { PageHeader }   from '@/components/layout/PageHeader'
@@ -159,7 +159,7 @@ export default function KontragentlarPage() {
     if (selected.size > 0) setSelected(new Set())
   }, [selected.size]))
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['counterparties', currentOrg?.id, page, debouncedSearch, statusFilter],
     queryFn:  async () => {
       if (!currentOrg?.id) return { data: [] as Counterparty[], meta: { total: 0, totalPages: 1, page: 1, limit: 20 } }
@@ -297,7 +297,7 @@ export default function KontragentlarPage() {
           <Input
             ref={searchInputRef}
             placeholder={t('searchPlaceholder') + ' (Ctrl+K)'}
-            leftIcon={<Search size={15} />}
+            leftIcon={isFetching && debouncedSearch ? <Loader2 size={15} className="animate-spin text-[#2563EB]" /> : <Search size={15} />}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1) }}
           />

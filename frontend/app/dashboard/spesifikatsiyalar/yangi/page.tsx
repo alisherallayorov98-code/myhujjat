@@ -77,6 +77,15 @@ export default function YangiSpesifikatsiya() {
 
   const selectedCp = cps.find(c => c.id === counterpartyId)
 
+  // Sahifadan chiqishda saqlashni eslatish (faqat ma'lumot kiritilgan bo'lsa)
+  const isDirty = items.some(i => i.nomi || i.miqdori > 0 || i.narxi > 0) || !!notes || !!specNumber
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
+
   // Shartnomalar dropdown — kontragent tanlangan bo'lsa, faqat unga tegishli
   const filteredContracts = useMemo(() => {
     if (!counterpartyId) return contracts as any[]
