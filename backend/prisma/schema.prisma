@@ -335,7 +335,8 @@ model Contract {
   alertLevel    AlertLevel? // joriy ogohlantirish darajasi
   alertedAt     DateTime? // oxirgi alert vaqti
 
-  endDate   DateTime? // shartnoma tugash sanasi (ixtiyoriy)
+  endDate       DateTime? // shartnoma tugash sanasi (ixtiyoriy)
+  createdByMira Boolean   @default(false) // Mira AI tomonidan yaratilganmi
 
   isActive  Boolean  @default(true)
   isPinned  Boolean  @default(false)  // yulduzcha — eng muhim shartnomalar yuqorida ko'rinadi

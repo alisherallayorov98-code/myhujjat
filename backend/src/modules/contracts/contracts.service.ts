@@ -14,7 +14,7 @@ export interface CreateContractDto {
   contractType:    string
   contractNumber?: string
   contractDate:    string
-  endDate?:        string  // shartnoma tugash sanasi (ISO 8601)
+  endDate?:        string
   city?:           string
   amount?:         number
   content?:        string
@@ -23,6 +23,7 @@ export interface CreateContractDto {
   specItems?:      any[]
   qqsEnabled?:     boolean
   qqsRate?:        number
+  createdByMira?:  boolean
 }
 
 @Injectable()
@@ -188,6 +189,7 @@ export class ContractsService {
         specItems:      dto.specItems,
         qqsEnabled:     dto.qqsEnabled || false,
         qqsRate:        dto.qqsRate || 12,
+        createdByMira:  dto.createdByMira || false,
         status:         'DRAFT',
       },
       include: {

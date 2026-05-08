@@ -165,6 +165,33 @@ export class MiraService {
     if (threshold && amount > threshold) return true
     return false
   }
+
+  /**
+   * Mira tomonidan yaratilgan so'nggi shartnomalar (sozlamalar sahifasi uchun).
+   */
+  async getRecentContracts(userId: string) {
+    const settings = await this.prisma.miraSettings.findUnique({ where: { userId } })
+    if (!settings) return []
+
+    return this.prisma.contract.findMany({
+      where: {
+        organizationId: settings.organizationId,
+        createdByMira:  true,
+        isActive:       true,
+      },
+      take:    5,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id:             true,
+        contractNumber: true,
+        contractType:   true,
+        amount:         true,
+        status:         true,
+        createdAt:      true,
+        counterparty:   { select: { name: true } },
+      },
+    })
+  }
 }
 
 function pad(n: number): string {

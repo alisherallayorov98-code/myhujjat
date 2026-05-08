@@ -51,5 +51,9 @@
   "successCountTitle": "Mira ишлари",
   "successCountText": "{count} та шартнома муваффақиятли юборилди",
   "lastUsed": "Охирги марта: {date}",
-  "neverUsed": "Ҳали ишлатилмаган"
+  "neverUsed": "Ҳали ишлатилмаган",
+
+  "recentTitle": "Mira яратган сўнгги шартномалар",
+  "recentEmpty": "Mira ҳали шартнома яратмаган",
+  "recentAll": "Барча шартномалар"
 }

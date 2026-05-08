@@ -269,6 +269,7 @@ export class VoiceService {
             city:           args.city || 'Toshkent',
             amount:         args.amount ? Number(args.amount) : 0,
             productName:    args.productName,
+            createdByMira:  true,
           })
           return { success: true, data: { id: contract.id, contractNumber: contract.contractNumber, amount: contract.amount } }
         }

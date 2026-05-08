@@ -51,5 +51,9 @@
   "successCountTitle": "Работа Mira",
   "successCountText": "{count} договоров успешно отправлено",
   "lastUsed": "Последнее: {date}",
-  "neverUsed": "Ещё не использовалось"
+  "neverUsed": "Ещё не использовалось",
+
+  "recentTitle": "Последние договоры от Mira",
+  "recentEmpty": "Mira ещё не создала ни одного договора",
+  "recentAll": "Все договоры"
 }

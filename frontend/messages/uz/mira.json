@@ -51,5 +51,9 @@
   "successCountTitle": "Mira ishlari",
   "successCountText": "{count} ta shartnoma muvaffaqiyatli yuborildi",
   "lastUsed": "Oxirgi marta: {date}",
-  "neverUsed": "Hali ishlatilmagan"
+  "neverUsed": "Hali ishlatilmagan",
+
+  "recentTitle": "Mira yaratgan so'nggi shartnomalar",
+  "recentEmpty": "Mira hali shartnoma yaratmagan",
+  "recentAll": "Barcha shartnomalar"
 }

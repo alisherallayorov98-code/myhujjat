@@ -22,6 +22,14 @@ export class MiraController {
   }
 
   /**
+   * GET /mira/recent-contracts — Mira tomonidan yaratilgan so'nggi 5 ta shartnoma
+   */
+  @Get('recent-contracts')
+  async recentContracts(@CurrentUser() user: any) {
+    return this.mira.getRecentContracts(user.sub)
+  }
+
+  /**
    * PATCH /mira/settings — sozlamalarni yangilash
    */
   @Patch('settings')

@@ -234,7 +234,9 @@ export function VoiceAssistant() {
           className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#2563EB] text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center group"
           aria-label="Mira — ovozli yordamchi"
         >
-          <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
+          {/* Ping ring — faqat idle paytida */}
+          <span className="absolute inset-0 rounded-full bg-[#7C3AED]/25 animate-ping" />
+          <Sparkles size={18} className="relative group-hover:rotate-12 transition-transform" />
           <span className="absolute -top-1 -right-1 px-1 py-0.5 rounded-full bg-[#16A34A] text-[8px] font-bold border-2 border-white leading-none">AI</span>
         </button>
       )}
@@ -355,10 +357,11 @@ export function VoiceAssistant() {
 
             {status === 'processing' && (
               <div className="flex justify-start">
-                <div className="bg-white border border-[#E2E8F0] rounded-2xl rounded-bl-sm px-3.5 py-2.5">
-                  <div className="flex items-center gap-2 text-[#94A3B8]">
-                    <Loader2 size={14} className="animate-spin" />
-                    <span className="text-xs">O'ylamoqda...</span>
+                <div className="bg-white border border-[#E2E8F0] rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-[#7C3AED] animate-bounce [animation-delay:0ms]" />
+                    <span className="w-2 h-2 rounded-full bg-[#7C3AED] animate-bounce [animation-delay:150ms]" />
+                    <span className="w-2 h-2 rounded-full bg-[#7C3AED] animate-bounce [animation-delay:300ms]" />
                   </div>
                 </div>
               </div>

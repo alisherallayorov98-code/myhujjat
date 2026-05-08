@@ -48,7 +48,10 @@ const YES_RE = /^\s*(ha|ҳа|да|yes|y|✓|✅)\s*$/i
 const NO_RE  = /^\s*(yo'q|йўқ|нет|no|n|❌)\s*$/i
 const SIMPLE_STIR_RE = /^\s*\d{9}\s*$/
 
-const STATS_RE = /^\s*(statistika|стат(ис)?|stat|st)\s*$/i
+const STATS_RE       = /^\s*(statistika|стат(ис)?|stat|st)\s*$/i
+const LIST_RE        = /^\s*(ro['ʻ']?yxat|рўйхат|список|list|shartnomalar|шартномалар|договоры)\s*$/i
+const CP_LIST_RE     = /^\s*(kontragentlar|контрагентлар|контрагенты|partners?|hamkorlar|ҳамкорлар)\s*$/i
+const CONTRACT_NUM_RE = /^\s*(SH|sh)-\d{4}[\\/]\d{2}-\d{3,}\s*$/i
 
 // ─── Sana parserlari ──────────────────────────────────────────
 const MONTHS: Record<string, number> = {
@@ -161,6 +164,21 @@ export class VoiceFastPath {
     // ─── 4. Tezkor "statistika" ─────────────────────────────────
     if (STATS_RE.test(text)) {
       return this.handleStats(opts.orgId)
+    }
+
+    // ─── 5. "ro'yxat" / "список" → so'nggi 5 ta shartnoma ──────
+    if (LIST_RE.test(text)) {
+      return this.handleListContracts(opts.orgId)
+    }
+
+    // ─── 6. "kontragentlar" → top-5 kontragent ──────────────────
+    if (CP_LIST_RE.test(text)) {
+      return this.handleListCounterparties(opts.orgId)
+    }
+
+    // ─── 7. "SH-2026/05-001" → shartnoma tafsilotlari ──────────
+    if (CONTRACT_NUM_RE.test(text)) {
+      return this.handleContractByNumber(text.trim().toUpperCase(), opts.orgId)
     }
 
     // ─── Boshqa — LLM ga ────────────────────────────────────────
@@ -403,6 +421,7 @@ export class VoiceFastPath {
       city:           opts.city,
       amount:         opts.amount,
       productName:    opts.productName,
+      createdByMira:  true,
     })
 
     // Mira success counter
@@ -437,6 +456,101 @@ export class VoiceFastPath {
         contractId:     contract.id,
         contractNumber: contract.contractNumber || '?',
       },
+    }
+  }
+
+  /** So'nggi 5 ta shartnoma ro'yxati. */
+  private async handleListContracts(orgId: string): Promise<FastPathResult> {
+    const contracts = await this.prisma.contract.findMany({
+      where:   { organizationId: orgId, isActive: true },
+      take:    5,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        contractNumber: true,
+        contractType:   true,
+        amount:         true,
+        status:         true,
+        counterparty:   { select: { name: true } },
+      },
+    })
+    if (contracts.length === 0) {
+      return {
+        response: "Hali shartnoma yaratilmagan.",
+        toolsCalled: [{ name: 'listContracts', success: true, data: [] }],
+        state: null,
+      }
+    }
+    const lines = contracts.map((c, i) =>
+      `${i + 1}. №${c.contractNumber} — ${c.counterparty?.name || '—'} — ${formatAmount(Number(c.amount))} so'm [${c.status}]`
+    ).join('\n')
+    return {
+      response: `So'nggi ${contracts.length} ta shartnoma:\n${lines}`,
+      toolsCalled: [{ name: 'listContracts', success: true, data: contracts }],
+      state: null,
+    }
+  }
+
+  /** Top-5 kontragent ro'yxati. */
+  private async handleListCounterparties(orgId: string): Promise<FastPathResult> {
+    const cps = await this.prisma.counterparty.findMany({
+      where:   { organizationId: orgId, isActive: true },
+      take:    5,
+      orderBy: { createdAt: 'desc' },
+      select:  { id: true, name: true, inn: true },
+    })
+    const total = await this.prisma.counterparty.count({
+      where: { organizationId: orgId, isActive: true },
+    })
+    if (total === 0) {
+      return {
+        response: "Hali kontragent qo'shilmagan.",
+        toolsCalled: [{ name: 'findCounterparty', success: true, data: [] }],
+        state: null,
+      }
+    }
+    const names = cps.map(c => c.name).join(', ')
+    const suffix = total > 5 ? ` va yana ${total - 5} ta boshqa` : ''
+    return {
+      response: `Sizda jami ${total} ta kontragent bor: ${names}${suffix}.`,
+      toolsCalled: [{ name: 'findCounterparty', success: true, data: cps }],
+      state: null,
+    }
+  }
+
+  /** Shartnoma raqami bo'yicha tafsilot (masalan: SH-2026/05-001). */
+  private async handleContractByNumber(contractNumber: string, orgId: string): Promise<FastPathResult> {
+    const contract = await this.prisma.contract.findFirst({
+      where: { organizationId: orgId, contractNumber, isActive: true },
+      select: {
+        id:             true,
+        contractNumber: true,
+        contractType:   true,
+        contractDate:   true,
+        endDate:        true,
+        amount:         true,
+        status:         true,
+        productName:    true,
+        signedUs:       true,
+        signedCp:       true,
+        counterparty:   { select: { name: true } },
+      },
+    })
+    if (!contract) {
+      return {
+        response: `${contractNumber} raqamli shartnoma topilmadi.`,
+        toolsCalled: [{ name: 'getContractDetails', success: false, error: 'Topilmadi' }],
+        state: null,
+      }
+    }
+    const cp      = contract.counterparty?.name || '—'
+    const amount  = formatAmount(Number(contract.amount))
+    const signed  = contract.signedUs && contract.signedCp ? 'Ikki tomon imzolagan' :
+                    contract.signedUs ? 'Biz imzolagan, kontragent kutmoqda' :
+                    'Imzolanmagan'
+    return {
+      response: `№${contract.contractNumber}: ${cp}, ${amount} so'm, status: ${contract.status}. ${signed}.`,
+      toolsCalled: [{ name: 'getContractDetails', success: true, data: { id: contract.id, contractNumber: contract.contractNumber } }],
+      state: null,
     }
   }
 

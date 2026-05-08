@@ -5,6 +5,7 @@ import { useTranslations }     from 'next-intl'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Bot, Save, Lock, Sparkles, Shield, Hash, Loader2,
+  FileText, ArrowRight,
 } from 'lucide-react'
 import { Card }            from '@/components/ui/Card'
 import { Button }          from '@/components/ui/Button'
@@ -12,9 +13,10 @@ import { Input }           from '@/components/ui/Input'
 import { Select }          from '@/components/ui/Select'
 import { useAuth }         from '@/hooks/useAuth'
 import api                 from '@/lib/api'
-import { formatDate }      from '@/lib/formatters'
+import { formatDate, formatCurrency } from '@/lib/formatters'
 import toast               from 'react-hot-toast'
 import { cn }              from '@/lib/cn'
+import Link                from 'next/link'
 
 const TRUST_THRESHOLD = 10  // 10 ta muvaffaqiyatli shartnomadan so'ng auto-send ochiladi
 
@@ -72,6 +74,15 @@ export default function MiraSettingsPage() {
       return data
     },
     enabled:  !!currentOrg?.id,
+  })
+
+  const { data: recentContracts = [] } = useQuery<any[]>({
+    queryKey: ['mira-recent-contracts', currentOrg?.id],
+    queryFn:  async () => {
+      const { data } = await api.get('/mira/recent-contracts')
+      return data
+    },
+    enabled: !!currentOrg?.id,
   })
 
   useEffect(() => {
@@ -318,6 +329,69 @@ export default function MiraSettingsPage() {
               ? t('lastUsed', { date: formatDate(data.lastUsedAt, 'long') })
               : t('neverUsed')}
           </p>
+        </Card>
+      )}
+
+      {/* Mira tarixi — createdByMira shartnomalar */}
+      {(successCount > 0 || recentContracts.length > 0) && (
+        <Card padding="none" className="overflow-hidden">
+          <div className="px-5 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bot size={14} className="text-[#7C3AED]" />
+              <p className="text-xs font-semibold text-[#475569] uppercase tracking-wider">
+                {t('recentTitle')}
+              </p>
+            </div>
+            <Link
+              href="/dashboard/shartnomalar"
+              className="text-xs text-[#2563EB] hover:underline flex items-center gap-1"
+            >
+              {t('recentAll')} <ArrowRight size={11} />
+            </Link>
+          </div>
+          {recentContracts.length === 0 ? (
+            <div className="px-5 py-6 text-center">
+              <FileText size={24} className="mx-auto text-[#CBD5E1] mb-2" />
+              <p className="text-sm text-[#94A3B8]">{t('recentEmpty')}</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-[#F1F5F9]">
+              {recentContracts.map((c: any) => (
+                <Link
+                  key={c.id}
+                  href={`/dashboard/shartnomalar/${c.id}`}
+                  className="flex items-center gap-3 px-5 py-3 hover:bg-[#F8FAFC] transition group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[#EDE9FE] flex items-center justify-center shrink-0">
+                    <Bot size={14} className="text-[#7C3AED]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#0F172A] truncate">
+                      {c.contractNumber}
+                    </p>
+                    <p className="text-xs text-[#94A3B8] truncate mt-0.5">
+                      {c.counterparty?.name || '—'} · {formatDate(c.createdAt, 'short')}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-semibold text-[#0F172A]">
+                      {Number(c.amount) > 0 ? formatCurrency(c.amount) : '—'}
+                    </p>
+                    <span className={cn(
+                      'text-[10px] font-medium px-1.5 py-0.5 rounded-full',
+                      c.status === 'ACTIVE'    ? 'bg-[#DBEAFE] text-[#1D4ED8]' :
+                      c.status === 'COMPLETED' ? 'bg-[#DCFCE7] text-[#16A34A]' :
+                      c.status === 'CANCELLED' ? 'bg-[#FEE2E2] text-[#DC2626]' :
+                                                  'bg-[#F1F5F9] text-[#475569]'
+                    )}>
+                      {c.status}
+                    </span>
+                  </div>
+                  <ArrowRight size={13} className="text-[#CBD5E1] group-hover:text-[#7C3AED] shrink-0" />
+                </Link>
+              ))}
+            </div>
+          )}
         </Card>
       )}
 
