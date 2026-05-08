@@ -178,7 +178,13 @@ export class VoiceService {
     // Agent javobini ovozda generatsiya qilish (TTS)
     const audio = response ? await this.generateSpeech(response).catch(() => undefined) : undefined
 
-    return { transcript: userText, response, audio, toolsCalled }
+    // LLM path: createContract + autoSend → pendingSign
+    const contractTool = toolsCalled.find(t => t.name === 'createContract' && t.success && t.result?.autoSend)
+    const pendingSign = contractTool?.result
+      ? { contractId: contractTool.result.id, contractNumber: contractTool.result.contractNumber || '?' }
+      : undefined
+
+    return { transcript: userText, response, audio, toolsCalled, pendingSign }
   }
 
   // ─── Text → speech (Gemini TTS) ─────────────────────────────────────────
@@ -266,6 +272,7 @@ export class VoiceService {
             }
           }
 
+          const amount   = args.amount ? Number(args.amount) : 0
           const contract = await this.contractsService.create(ctx.userId, {
             organizationId: ctx.organizationId,
             counterpartyId,
@@ -273,11 +280,25 @@ export class VoiceService {
             contractDate:   new Date().toISOString().split('T')[0],
             endDate:        args.endDate ? String(args.endDate) : undefined,
             city:           args.city || 'Toshkent',
-            amount:         args.amount ? Number(args.amount) : 0,
+            amount,
             productName:    args.productName,
             createdByMira:  true,
           })
-          return { success: true, data: { id: contract.id, contractNumber: contract.contractNumber, amount: contract.amount } }
+          await this.miraService.incrementSuccessCount(ctx.userId)
+
+          // autoSend tekshiruvi — pendingSign signali uchun
+          const miraSettings = await this.miraService.getOrCreate(ctx.userId, ctx.organizationId)
+          const needsConfirm = this.miraService.needsConfirmation(miraSettings, amount)
+
+          return {
+            success: true,
+            data: {
+              id:             contract.id,
+              contractNumber: contract.contractNumber,
+              amount:         contract.amount,
+              autoSend:       !needsConfirm,  // frontend pendingSign uchun
+            },
+          }
         }
 
         case 'listContracts': {

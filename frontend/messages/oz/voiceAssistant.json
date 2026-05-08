@@ -22,6 +22,7 @@
   "errorTooShort": "Бироз узунроқ гапиринг (камида 1 секунд)",
   "errorMicPermission": "Микрофонга рухсат беришни унутманг",
   "errorAudioSend": "Аудио юборишда хато",
+  "clearHistory": "Тарихни тозалаш",
   "errorGeneric": "Хатолик юз берди",
   "tools": {
     "createCounterparty": "Контрагент қўшилди",

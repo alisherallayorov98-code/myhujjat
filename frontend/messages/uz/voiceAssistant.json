@@ -22,6 +22,7 @@
   "errorTooShort": "Biroz uzunroq gapiring (kamida 1 sekund)",
   "errorMicPermission": "Mikrofonga ruxsat berishni unutmang",
   "errorAudioSend": "Audio yuborishda xato",
+  "clearHistory": "Tarixni tozalash",
   "errorGeneric": "Xatolik yuz berdi",
   "tools": {
     "createCounterparty": "Kontragent qo'shildi",

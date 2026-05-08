@@ -22,6 +22,7 @@
   "errorTooShort": "Говорите немного дольше (минимум 1 секунда)",
   "errorMicPermission": "Не забудьте разрешить доступ к микрофону",
   "errorAudioSend": "Ошибка при отправке аудио",
+  "clearHistory": "Очистить историю",
   "errorGeneric": "Произошла ошибка",
   "tools": {
     "createCounterparty": "Контрагент добавлен",

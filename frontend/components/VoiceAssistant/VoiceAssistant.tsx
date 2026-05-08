@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Mic, MicOff, Loader2, X, Sparkles,
-  Check, AlertCircle, ExternalLink,
+  Check, AlertCircle, ExternalLink, Trash2,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
@@ -61,9 +61,17 @@ export function VoiceAssistant() {
     return name
   }
 
+  const storageKey = currentOrg?.id ? `mira_history_${currentOrg.id}` : null
+
   const [open,        setOpen]        = useState(false)
   const [status,      setStatus]      = useState<Status>('idle')
-  const [messages,    setMessages]    = useState<VoiceMessage[]>([])
+  const [messages,    setMessages]    = useState<VoiceMessage[]>(() => {
+    if (typeof window === 'undefined' || !storageKey) return []
+    try {
+      const saved = localStorage.getItem(storageKey)
+      return saved ? JSON.parse(saved) : []
+    } catch { return [] }
+  })
   const [textInput,   setTextInput]   = useState('')
   const [convState,   setConvState]   = useState<ConvState | null>(null)
 
@@ -72,6 +80,29 @@ export function VoiceAssistant() {
   const messagesEndRef   = useRef<HTMLDivElement>(null)
   const startTimeRef     = useRef<number>(0)
   const [recSeconds, setRecSeconds] = useState(0)
+
+  // localStorage — xabarlarni saqlash (oxirgi 20 ta)
+  useEffect(() => {
+    if (!storageKey) return
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(messages.slice(-20)))
+    } catch {}
+  }, [messages, storageKey])
+
+  // Klaviatura yorliqlari: Ctrl+Shift+M → ochish/yopish, Escape → yopish
+  const handleKeyboard = useCallback((e: KeyboardEvent) => {
+    if (e.ctrlKey && e.shiftKey && e.key === 'M') {
+      e.preventDefault()
+      setOpen(prev => !prev)
+    } else if (e.key === 'Escape') {
+      setOpen(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyboard)
+    return () => document.removeEventListener('keydown', handleKeyboard)
+  }, [handleKeyboard])
 
   // Recording timer
   useEffect(() => {
@@ -136,6 +167,14 @@ export function VoiceAssistant() {
       console.error(err)
       toast.error(t('errorMicPermission'))
       setStatus('idle')
+    }
+  }
+
+  function clearHistory() {
+    setMessages([])
+    setConvState(null)
+    if (storageKey) {
+      try { localStorage.removeItem(storageKey) } catch {}
     }
   }
 
@@ -259,12 +298,23 @@ export function VoiceAssistant() {
                 <p className="text-[11px] text-white/70 mt-0.5">AI ovozli yordamchi</p>
               </div>
             </div>
-            <button
-              onClick={() => { setOpen(false); window.speechSynthesis?.cancel(); setConvState(null) }}
-              className="p-1.5 rounded-lg hover:bg-white/15 transition"
-            >
-              <X size={16} />
-            </button>
+            <div className="flex items-center gap-1">
+              {messages.length > 0 && (
+                <button
+                  onClick={clearHistory}
+                  className="p-1.5 rounded-lg hover:bg-white/15 transition opacity-70 hover:opacity-100"
+                  title={t('clearHistory')}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+              <button
+                onClick={() => { setOpen(false); window.speechSynthesis?.cancel(); setConvState(null) }}
+                className="p-1.5 rounded-lg hover:bg-white/15 transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
