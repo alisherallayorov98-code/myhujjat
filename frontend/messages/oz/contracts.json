@@ -145,7 +145,11 @@
       "amountLabel": "Сумма (сўм)",
       "amountPlaceholder": "0",
       "contractAmountLabel": "Шартнома суммаси (сўм)"
-    }
+    },
+    "importSpecTitle": "Мавжуд спесификациядан импорт қилиш",
+    "importSpecPlaceholder": "Спесификацияни танланг…",
+    "importSpecApply": "Қўллаш",
+    "specImported": "Спесификация импорт қилинди"
   },
   "stepBar": {
     "step1": "Тур танлаш",

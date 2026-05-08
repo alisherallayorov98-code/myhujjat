@@ -145,7 +145,11 @@
       "amountLabel": "Summa (so'm)",
       "amountPlaceholder": "0",
       "contractAmountLabel": "Shartnoma summasi (so'm)"
-    }
+    },
+    "importSpecTitle": "Mavjud spesifikatsiyadan import qilish",
+    "importSpecPlaceholder": "Spesifikatsiyani tanlang…",
+    "importSpecApply": "Qo'llash",
+    "specImported": "Spesifikatsiya import qilindi"
   },
   "stepBar": {
     "step1": "Tur tanlash",

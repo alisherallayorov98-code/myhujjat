@@ -145,7 +145,11 @@
       "amountLabel": "Сумма (сум)",
       "amountPlaceholder": "0",
       "contractAmountLabel": "Сумма договора (сум)"
-    }
+    },
+    "importSpecTitle": "Импорт из существующей спецификации",
+    "importSpecPlaceholder": "Выберите спецификацию…",
+    "importSpecApply": "Применить",
+    "specImported": "Спецификация импортирована"
   },
   "stepBar": {
     "step1": "Выбор типа",

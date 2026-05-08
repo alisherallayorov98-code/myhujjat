@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react'
 import { useTranslations }    from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Eye, EyeOff, Plus, Trash2, Printer, RefreshCw, X } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Plus, Trash2, Printer, RefreshCw, X, FileSpreadsheet } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader }         from '@/components/layout/PageHeader'
 import { Button }             from '@/components/ui/Button'
@@ -96,6 +96,30 @@ export default function YangiShartnoma() {
     productName:    '',
     customSections: [] as { title: string; body: string }[],
   })
+
+  const [importSpecId, setImportSpecId] = useState('')
+
+  const { data: existingSpecs = [] } = useQuery<any[]>({
+    queryKey: ['specs-for-import', currentOrg?.id, form.counterpartyId],
+    queryFn:  () => api.get(`/specifications?orgId=${currentOrg!.id}`).then(r =>
+      (r.data.data || r.data || []).filter((s: any) =>
+        !form.counterpartyId || s.counterpartyId === form.counterpartyId || s.contract?.counterpartyId === form.counterpartyId
+      )
+    ),
+    enabled: !!currentOrg?.id && step === 3,
+  })
+
+  function applySpecImport() {
+    const spec = existingSpecs.find((s: any) => s.id === importSpecId)
+    if (!spec?.items?.length) return
+    setForm(f => ({
+      ...f,
+      specItems: spec.items as SpecItem[],
+      amount: String(spec.items.reduce((sum: number, i: any) => sum + (i.summa || 0), 0)),
+    }))
+    setImportSpecId('')
+    toast.success(t('new_.specImported'))
+  }
 
   // Auto-save: form to'ldirib turganda har 1 soniyada localStorage'ga saqlash.
   // Sahifa yopilsa yoki F5 bosilsa — keyin qaytib kelganda tiklash mumkin.
@@ -594,6 +618,37 @@ export default function YangiShartnoma() {
 
       <div className="grid gap-6 grid-cols-1">
         <div className="space-y-5">
+          {existingSpecs.length > 0 && (
+            <Card>
+              <div className="flex items-center gap-2 mb-3">
+                <FileSpreadsheet size={15} className="text-[#2563EB]" />
+                <h3 className="font-semibold text-[#0F172A] text-sm">{t('new_.importSpecTitle')}</h3>
+              </div>
+              <div className="flex gap-2">
+                <select
+                  value={importSpecId}
+                  onChange={e => setImportSpecId(e.target.value)}
+                  className="flex-1 border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#2563EB] text-[#0F172A] bg-white"
+                >
+                  <option value="">{t('new_.importSpecPlaceholder')}</option>
+                  {existingSpecs.map((s: any) => (
+                    <option key={s.id} value={s.id}>
+                      {s.specNumber}{s.counterparty?.name ? ` — ${s.counterparty.name}` : ''}{s.items?.length ? ` (${s.items.length} ta)` : ''}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!importSpecId}
+                  onClick={applySpecImport}
+                >
+                  {t('new_.importSpecApply')}
+                </Button>
+              </div>
+            </Card>
+          )}
+
           <SpecTable
             items={form.specItems}
             onChange={items => setForm(f => ({
