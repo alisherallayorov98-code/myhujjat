@@ -5,7 +5,7 @@ import { useTranslations }              from 'next-intl'
 import Link                            from 'next/link'
 import {
   Bell, Check, X, FileText, Clock,
-  CreditCard, Sparkles, AlertCircle,
+  CreditCard, Sparkles, AlertCircle, TrendingUp,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
@@ -35,6 +35,7 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; bg: string }> = {
   SUBSCRIPTION_EXPIRING:  { icon: Clock,       color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]' },
   SUBSCRIPTION_ACTIVATED: { icon: CreditCard,  color: 'text-[#16A34A]', bg: 'bg-[#DCFCE7]' },
   CONTRACT_LIMIT:         { icon: AlertCircle, color: 'text-[#DC2626]', bg: 'bg-[#FEE2E2]' },
+  CONTRACT_OVERAGE:       { icon: TrendingUp,  color: 'text-[#DC2626]', bg: 'bg-[#FEE2E2]' },
   SYSTEM:                 { icon: Bell,        color: 'text-[#475569]', bg: 'bg-[#F1F5F9]' },
   WELCOME:                { icon: Sparkles,    color: 'text-[#7C3AED]', bg: 'bg-[#EDE9FE]' },
 }

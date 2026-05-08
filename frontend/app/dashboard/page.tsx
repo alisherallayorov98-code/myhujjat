@@ -18,6 +18,7 @@ import { OnboardingChecklist } from '@/components/Onboarding/OnboardingChecklist
 import { MonthlyChart }       from '@/components/Dashboard/MonthlyChart'
 import { TypeDistribution }   from '@/components/Dashboard/TypeDistribution'
 import { UpcomingDeadlines }  from '@/components/Dashboard/UpcomingDeadlines'
+import { ContractAlerts }     from '@/components/Dashboard/ContractAlerts'
 import { CONTRACT_TYPE_CONFIG } from '@/lib/contractTemplates'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { cn }          from '@/lib/cn'
@@ -257,6 +258,13 @@ export default function DashboardPage() {
             bg="bg-[#DCFCE7]"
             hint={t('stat.contractAmount')}
           />
+        </div>
+      )}
+
+      {/* Faktura nazorat alertlari — faqat ogohlantirishlar bo'lganda ko'rinadi */}
+      {currentOrg && (
+        <div className="mb-6">
+          <ContractAlerts />
         </div>
       )}
 

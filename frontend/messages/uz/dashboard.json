@@ -90,6 +90,10 @@
     "title": "Shartnoma turlari",
     "noContracts": "Hali shartnoma yo'q"
   },
+  "alerts": {
+    "title": "Diqqat: faktura nazorat",
+    "viewAll": "Barchasi"
+  },
   "deadlines": {
     "title": "Yaqinlashayotgan muddatlar",
     "empty": "Yaqinlashayotgan muddat yo'q",
