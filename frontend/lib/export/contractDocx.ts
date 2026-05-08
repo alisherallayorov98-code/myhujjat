@@ -21,18 +21,94 @@ function fmtDate(s?: string): string {
 }
 
 function isHeading(line: string): boolean {
-  // "1. SHARTNOMA PREDMETI" — raqam + nuqta + UPPERCASE so'zlar
-  return /^\d+\.\s+[A-ZА-ЯЁʻO'ʻ‘’“”\s'"-]+$/.test(line.trim()) &&
+  return /^\d+\.\s+[A-ZА-ЯЁʻO’ʻ’’””\s’”-]+$/.test(line.trim()) &&
          line === line.toUpperCase()
 }
 
 function isSubItem(line: string): boolean {
-  // "1.1." ko'rinishidagi band
   return /^\s*\d+\.\d+\./.test(line)
 }
 
 function isDashItem(line: string): boolean {
   return /^\s*[—–-]\s+/.test(line)
+}
+
+// Buyruq/Bayonnoma matnini tahlil qilib DOCX paragraph spetsifikatsiyasiga aylantiradi
+type LineSpec = { text: string; align: ‘CENTER’|’LEFT’; bold: boolean; size: number; after: number }
+
+function parseKotibLines(text: string): LineSpec[] {
+  const lines = text.split(‘\n’)
+  const result: LineSpec[] = []
+  const firstNonEmpty = lines.findIndex(l => l.trim())
+  let i = 0
+
+  while (i < lines.length) {
+    const raw  = lines[i]
+    const line = raw.trim()
+
+    if (!line) {
+      result.push({ text: ‘’, align: ‘LEFT’, bold: false, size: 22, after: 60 })
+      i++; continue
+    }
+
+    // 1-qator: tashkilot nomi → markazlashgan, qalin
+    if (i === firstNonEmpty) {
+      result.push({ text: line, align: ‘CENTER’, bold: true, size: 24, after: 160 })
+      i++; continue
+    }
+
+    // “BUYRUQ № X” → markazlashgan, qalin
+    if (/^BUYRUQ\s*№/i.test(line)) {
+      result.push({ text: line, align: ‘CENTER’, bold: true, size: 24, after: 40 })
+      i++; continue
+    }
+
+    // Sana qatori (DD.MM.YYYY) — yolg’iz qisqa qator
+    if (/^\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}/.test(line) && line.length < 20) {
+      result.push({ text: line, align: ‘CENTER’, bold: false, size: 22, after: 160 })
+      i++; continue
+    }
+
+    // “...TO’G’RISIDA” / “HAQIDA” sarlavha → markazlashgan, qalin
+    if (/TO[‘’]?G[‘’]?RISIDA\s*$/i.test(line) || /HAQIDA\s*$/i.test(line)) {
+      result.push({ text: line, align: ‘CENTER’, bold: true, size: 22, after: 200 })
+      i++; continue
+    }
+
+    // Bayonnoma sarlavhalari
+    if (/BAYONNOMASI?\s*$/i.test(line) || /^BAYONNOMA/i.test(line)) {
+      result.push({ text: line, align: ‘CENTER’, bold: true, size: 24, after: 80 })
+      i++; continue
+    }
+
+    // “№ X” — alohida qatordagi bayonnoma raqami
+    if (/^№\s*\S+/.test(line) && line.length < 20) {
+      result.push({ text: line, align: ‘CENTER’, bold: false, size: 22, after: 80 })
+      i++; continue
+    }
+
+    // Muhim bo’lim sarlavhalari
+    if (/^(KUN TARTIBI|ESHITILDI|MUHOKAMA QILINDI|OVOZ BERISH|QAROR QILINDI|TOPSHIRILDI|HOLATI|IZOHLAR|ILOVALAR)\s*:?/i.test(line)) {
+      result.push({ text: line, align: ‘LEFT’, bold: true, size: 22, after: 80 })
+      i++; continue
+    }
+
+    // “M.O.” → markazlashgan
+    if (/^\s*M\.O\.?\s*$/i.test(line)) {
+      result.push({ text: line, align: ‘CENTER’, bold: false, size: 22, after: 80 })
+      i++; continue
+    }
+
+    // Oddiy qator
+    result.push({ text: line, align: ‘LEFT’, bold: false, size: 22, after: 80 })
+    i++
+  }
+  return result
+}
+
+// Matn buyruq/bayonnoma ekanligini aniqlash
+function isKotibDoc(content: string): boolean {
+  return /BUYRUQ\s*№/i.test(content) || /BAYONNOMA/i.test(content)
 }
 
 export async function exportContractDocx(opts: DocxOpts): Promise<void> {
@@ -47,29 +123,47 @@ export async function exportContractDocx(opts: DocxOpts): Promise<void> {
   const saveAs: (blob: Blob, filename: string) => void =
     (fileSaverMod as any).saveAs || (fileSaverMod as any).default || (fileSaverMod as any)
 
-  // ─── Eski (oddiy) format: title + content ─────────────────
+  // ─── Oddiy format: title + content ─────────────────────────
   if (!isContractOpts(opts)) {
     const paragraphs: InstanceType<typeof Paragraph>[] = []
-    paragraphs.push(new Paragraph({
-      heading:   HeadingLevel.HEADING_1,
-      alignment: AlignmentType.CENTER,
-      children:  [new TextRun({ text: opts.title, bold: true, size: 28, font: FONT })],
-    }))
-    if (opts.orgName) {
+
+    // Buyruq/Bayonnoma — to'liq strukturali rendering
+    if (isKotibDoc(opts.content)) {
+      const specs = parseKotibLines(opts.content)
+      specs.forEach(s => {
+        paragraphs.push(new Paragraph({
+          alignment: s.align === 'CENTER' ? AlignmentType.CENTER : AlignmentType.LEFT,
+          spacing:   { after: s.after },
+          children:  [new TextRun({ text: s.text, bold: s.bold, size: s.size, font: FONT })],
+        }))
+      })
+    } else {
+      // Oddiy hujjat (faktura, akt-sverki va b.)
       paragraphs.push(new Paragraph({
-        children: [new TextRun({ text: opts.orgName, size: 20, font: FONT })],
+        alignment: AlignmentType.CENTER,
+        children:  [new TextRun({ text: opts.title, bold: true, size: 28, font: FONT })],
+        spacing:   { after: 160 },
       }))
-      paragraphs.push(new Paragraph({ children: [new TextRun('')] }))
+      if (opts.orgName) {
+        paragraphs.push(new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children:  [new TextRun({ text: opts.orgName, size: 20, font: FONT })],
+          spacing:   { after: 120 },
+        }))
+      }
+      const cleanContent = stripDocumentHeader(opts.content)
+      cleanContent.split('\n').forEach(line => {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: line, size: 22, font: FONT })],
+          spacing:  { after: 80 },
+        }))
+      })
     }
-    // Boshlang'ich takror sarlavhalarni olib tashlash (allaqachon yuqorida bor)
-    const cleanContent = stripDocumentHeader(opts.content)
-    cleanContent.split('\n').forEach(line => {
-      paragraphs.push(new Paragraph({
-        children: [new TextRun({ text: line, size: 22, font: FONT })],
-        spacing:  { after: 80 },
-      }))
+
+    const margins = { top: 1134, right: 1134, bottom: 1134, left: 1701 }
+    const docSimple = new Document({
+      sections: [{ properties: { page: { margin: margins } } as any, children: paragraphs }]
     })
-    const docSimple = new Document({ sections: [{ children: paragraphs }] })
     const blobSimple = await Packer.toBlob(docSimple)
     saveAs(blobSimple, `${opts.title.replace(/\s+/g, '_')}.docx`)
     return
