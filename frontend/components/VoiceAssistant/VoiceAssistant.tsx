@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   Mic, MicOff, Loader2, X, Sparkles,
-  Check, AlertCircle, Volume2, Shield,
+  Check, AlertCircle, ExternalLink,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import api from '@/lib/api'
 import { currentLocale } from '@/lib/formatters'
 import { useAuth } from '@/hooks/useAuth'
@@ -199,10 +200,12 @@ export function VoiceAssistant() {
       if (tools.some(t => t.name === 'createCounterparty')) {
         qc.invalidateQueries({ queryKey: ['counterparties'] })
       }
-      if (tools.some(t => t.name === 'createContract')) {
+      if (tools.some(t => ['createContract', 'updateContract'].includes(t.name))) {
         qc.invalidateQueries({ queryKey: ['contracts'] })
         qc.invalidateQueries({ queryKey: ['contracts-stats'] })
         qc.invalidateQueries({ queryKey: ['recent-contracts'] })
+        qc.invalidateQueries({ queryKey: ['contracts-expiring'] })
+        qc.invalidateQueries({ queryKey: ['alert-contracts'] })
       }
 
       // Agent javobini ovozda o'qish — Gemini TTS audio bo'lsa shuni o'ynaymiz
@@ -271,12 +274,13 @@ export function VoiceAssistant() {
                 </p>
                 <div className="space-y-1.5 text-left max-w-xs mx-auto">
                   {[
-                    "💬 «Bu oy nechta shartnoma yaratilgan?»",
-                    "💬 «Toshmatov MChJ uchun shartnoma yarat»",
-                    "💬 «STIR 302756789 ni qidir»",
-                  ].map((t, i) => (
+                    t('hint1'),
+                    t('hint2'),
+                    t('hint3'),
+                    t('hint4'),
+                  ].map((hint, i) => (
                     <div key={i} className="text-xs text-[#475569] bg-white rounded-lg px-3 py-2 border border-[#E2E8F0]">
-                      {t}
+                      {hint}
                     </div>
                   ))}
                 </div>
@@ -296,19 +300,40 @@ export function VoiceAssistant() {
                 )}>
                   <p className="whitespace-pre-wrap leading-relaxed">{m.text}</p>
                   {m.toolsCalled && m.toolsCalled.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-[#F1F5F9] space-y-1">
-                      {m.toolsCalled.map((t, j) => (
-                        <div key={j} className="flex items-center gap-1.5 text-xs">
-                          {t.success
-                            ? <Check       size={11} className="text-[#16A34A] shrink-0" />
-                            : <AlertCircle size={11} className="text-[#DC2626] shrink-0" />
-                          }
-                          <span className={t.success ? 'text-[#15803D]' : 'text-[#DC2626]'}>
-                            {toolLabel(t.name)}
-                            {!t.success && t.error && `: ${t.error}`}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="mt-2 pt-2 border-t border-[#F1F5F9] space-y-1.5">
+                      {m.toolsCalled.map((tc, j) => {
+                        const contractId = tc.result?.id
+                        const contractLink = (tc.name === 'createContract' || tc.name === 'updateContract' || tc.name === 'getContractDetails') && contractId
+                          ? `/dashboard/shartnomalar/${contractId}`
+                          : null
+                        const cpLink = tc.name === 'createCounterparty' && tc.result?.id
+                          ? `/dashboard/kontragentlar/${tc.result.id}`
+                          : null
+                        return (
+                          <div key={j} className="flex items-center gap-1.5 text-xs flex-wrap">
+                            {tc.success
+                              ? <Check       size={11} className="text-[#16A34A] shrink-0" />
+                              : <AlertCircle size={11} className="text-[#DC2626] shrink-0" />
+                            }
+                            <span className={tc.success ? 'text-[#15803D]' : 'text-[#DC2626]'}>
+                              {toolLabel(tc.name)}
+                              {!tc.success && tc.error && `: ${tc.error}`}
+                            </span>
+                            {contractLink && (
+                              <Link href={contractLink} onClick={() => setOpen(false)}
+                                className="flex items-center gap-0.5 text-[#2563EB] hover:underline ml-auto shrink-0">
+                                {t('openContract')} <ExternalLink size={9} />
+                              </Link>
+                            )}
+                            {cpLink && (
+                              <Link href={cpLink} onClick={() => setOpen(false)}
+                                className="flex items-center gap-0.5 text-[#7C3AED] hover:underline ml-auto shrink-0">
+                                {t('openCp')} <ExternalLink size={9} />
+                              </Link>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
 

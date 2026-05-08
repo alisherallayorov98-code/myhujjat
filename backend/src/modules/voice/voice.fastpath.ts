@@ -20,10 +20,10 @@ export type ConversationState = {
   stir:    string
   cpId?:   string
   cpName?: string
-  // Yig'ilgan ma'lumotlar
   collected: {
     amount?:      number
     productName?: string
+    endDate?:     string  // ISO 8601
   }
   startedAt: number
 }
@@ -49,6 +49,74 @@ const NO_RE  = /^\s*(yo'q|йўқ|нет|no|n|❌)\s*$/i
 const SIMPLE_STIR_RE = /^\s*\d{9}\s*$/
 
 const STATS_RE = /^\s*(statistika|стат(ис)?|stat|st)\s*$/i
+
+// ─── Sana parserlari ──────────────────────────────────────────
+const MONTHS: Record<string, number> = {
+  yanvar: 1, yanvarda: 1, yanvargacha: 1,
+  fevral: 2, fevralgacha: 2, fevralda: 2,
+  mart: 3, martda: 3, martgacha: 3,
+  aprel: 4, aprelda: 4, aprelgacha: 4,
+  may: 5, mayda: 5, maygacha: 5,
+  iyun: 6, iyunda: 6, iyungacha: 6,
+  iyul: 7, iyulda: 7, iyulgacha: 7,
+  avgust: 8, avgustda: 8, avgustgacha: 8,
+  sentabr: 9, sentabrda: 9, sentabrgacha: 9,
+  oktabr: 10, oktabrda: 10, oktabrgacha: 10,
+  noyabr: 11, noyabrda: 11, noyabrgacha: 11,
+  dekabr: 12, dekabrda: 12, dekabrgacha: 12,
+  // Rus tilidagi oylar
+  январь: 1, февраль: 2, март: 3, апрель: 4,
+  май: 5, июнь: 6, июль: 7, август: 8,
+  сентябрь: 9, октябрь: 10, ноябрь: 11, декабрь: 12,
+}
+
+/**
+ * "31 dekabrga", "1 yilga", "6 oygacha", "3 oy" kabi patternlardan
+ * endDate (ISO 8601) ni chiqaradi. Topilmasa null qaytaradi.
+ */
+function parseEndDate(text: string): string | null {
+  const t = text.toLowerCase().trim()
+  const now = new Date()
+
+  // "N yilga" / "N yilgacha" / "N yil"
+  let m = t.match(/(\d+)\s*yil(ga(cha)?)?/)
+  if (m) {
+    const d = new Date(now)
+    d.setFullYear(d.getFullYear() + parseInt(m[1]))
+    return d.toISOString().split('T')[0]
+  }
+
+  // "N oygacha" / "N oyga" / "N oy"
+  m = t.match(/(\d+)\s*oy(ga(cha)?)?/)
+  if (m) {
+    const d = new Date(now)
+    d.setMonth(d.getMonth() + parseInt(m[1]))
+    return d.toISOString().split('T')[0]
+  }
+
+  // "N kungacha" / "N kun"
+  m = t.match(/(\d+)\s*kun(ga(cha)?)?/)
+  if (m) {
+    const d = new Date(now)
+    d.setDate(d.getDate() + parseInt(m[1]))
+    return d.toISOString().split('T')[0]
+  }
+
+  // "31 dekabrga" / "31 dekabr" / "31 dekabr 2026"
+  m = t.match(/(\d{1,2})\s+([a-zа-яё]+)\s*(\d{4})?/)
+  if (m) {
+    const day   = parseInt(m[1])
+    const month = MONTHS[m[2]]
+    const year  = m[3] ? parseInt(m[3]) : (month < now.getMonth() + 1 ? now.getFullYear() + 1 : now.getFullYear())
+    if (month && day >= 1 && day <= 31) {
+      const mm = String(month).padStart(2, '0')
+      const dd = String(day).padStart(2, '0')
+      return `${year}-${mm}-${dd}`
+    }
+  }
+
+  return null
+}
 
 export class VoiceFastPath {
   private readonly logger = new Logger('VoiceFastPath')
@@ -80,7 +148,7 @@ export class VoiceFastPath {
 
     // ─── 2. Yangi STIR raqami (faqat 9 raqam) ───────────────────
     if (SIMPLE_STIR_RE.test(text)) {
-      return this.handleStirOnly(text.replace(/\D/g, ''), opts.userId, opts.orgId)
+      return this.handleStirOnly(text.replace(/\D/g, ''), opts.userId, opts.orgId, text)
     }
 
     // ─── 3. STIR ichida boshqa matn ham bor (LLM ga ket) ────────
@@ -101,8 +169,10 @@ export class VoiceFastPath {
 
   /**
    * Foydalanuvchi faqat 9-raqamli STIR yozdi.
+   * originalText orqali endDate ham parse qilinadi (agar berilgan bo'lsa).
    */
-  private async handleStirOnly(stir: string, userId: string, orgId: string): Promise<FastPathResult> {
+  private async handleStirOnly(stir: string, userId: string, orgId: string, originalText = ''): Promise<FastPathResult> {
+    const endDate = parseEndDate(originalText) || undefined
     const settings = await this.mira.getOrCreate(userId, orgId)
 
     // STIR ma'lumot
@@ -152,7 +222,7 @@ export class VoiceFastPath {
         stir,
         cpId:   cp!.id,
         cpName,
-        collected: {},
+        collected: { endDate },
         startedAt: Date.now(),
       },
     }
@@ -273,6 +343,7 @@ export class VoiceFastPath {
       amount:       Number(settings.defaultAmount),
       city:         settings.defaultCity,
       productName:  settings.defaultProductName || undefined,
+      endDate:      state.collected.endDate,
     })
   }
 
@@ -292,6 +363,7 @@ export class VoiceFastPath {
       amount:       state.collected.amount!,
       city:         settings.defaultCity,
       productName:  state.collected.productName || settings.defaultProductName || undefined,
+      endDate:      state.collected.endDate,
     })
   }
 
@@ -307,6 +379,7 @@ export class VoiceFastPath {
     amount:       number
     city:         string
     productName?: string
+    endDate?:     string
   }): Promise<FastPathResult> {
     const settings = await this.mira.getOrCreate(opts.userId, opts.orgId)
 
@@ -326,6 +399,7 @@ export class VoiceFastPath {
       contractType:   opts.contractType,
       contractNumber: contractNumber,
       contractDate:   new Date().toISOString().split('T')[0],
+      endDate:        opts.endDate,
       city:           opts.city,
       amount:         opts.amount,
       productName:    opts.productName,

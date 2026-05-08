@@ -25,6 +25,17 @@ export const TOOLS = [
         },
       },
       {
+        name: 'findCounterparty',
+        description: "Mavjud kontragentni nomi yoki STIR bo'yicha tizimda qidiradi. Kontragent borligini tekshirish yoki shartnoma yaratishdan avval foydalaning.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            name: { type: Type.STRING, description: "Kontragent nomi (qismi ham ishlaydi, masalan: 'Toshmatov')" },
+            inn:  { type: Type.STRING, description: 'STIR (9 ta raqam)' },
+          },
+        },
+      },
+      {
         name: 'createContract',
         description: 'Yangi shartnoma yaratadi. counterpartyName yoki counterpartyInn berilsa, avtomatik kontragentni topadi.',
         parameters: {
@@ -39,8 +50,38 @@ export const TOOLS = [
             amount:           { type: Type.NUMBER, description: "Shartnoma summasi so'mda" },
             city:             { type: Type.STRING, description: 'Shahar (default: Toshkent)' },
             productName:      { type: Type.STRING, description: 'Mahsulot/xizmat nomi' },
+            endDate:          { type: Type.STRING, description: "Shartnoma tugash sanasi ISO format: YYYY-MM-DD (masalan: 2026-12-31)" },
           },
           required: ['contractType'],
+        },
+      },
+      {
+        name: 'updateContract',
+        description: "Mavjud shartnomani yangilaydi. contractNumber yoki contractId bilan topiladi.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            contractNumber: { type: Type.STRING, description: "Shartnoma raqami (masalan: SH-2026/05-001)" },
+            contractId:     { type: Type.STRING, description: "Shartnoma ID (cuid)" },
+            status: {
+              type: Type.STRING,
+              description: "Yangi status: DRAFT, ACTIVE, COMPLETED, CANCELLED",
+            },
+            amount:      { type: Type.NUMBER, description: "Yangi summa so'mda" },
+            endDate:     { type: Type.STRING, description: "Yangi tugash sanasi ISO: YYYY-MM-DD" },
+            productName: { type: Type.STRING, description: 'Yangi mahsulot/xizmat nomi' },
+          },
+        },
+      },
+      {
+        name: 'getContractDetails',
+        description: "Bitta shartnomaning to'liq ma'lumotini qaytaradi. contractNumber yoki contractId bilan topiladi.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            contractNumber: { type: Type.STRING, description: "Shartnoma raqami" },
+            contractId:     { type: Type.STRING, description: "Shartnoma ID" },
+          },
         },
       },
       {
@@ -56,7 +97,7 @@ export const TOOLS = [
       },
       {
         name: 'searchStir',
-        description: 'STIR (9 ta raqam) bo\'yicha kompaniya ma\'lumotlarini Soliq APIdan qidiradi',
+        description: "STIR (9 ta raqam) bo'yicha kompaniya ma'lumotlarini Soliq APIdan qidiradi",
         parameters: {
           type: Type.OBJECT,
           properties: {

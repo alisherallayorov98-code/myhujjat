@@ -265,6 +265,7 @@ export class VoiceService {
             counterpartyId,
             contractType:   String(args.contractType || 'BOSHQA'),
             contractDate:   new Date().toISOString().split('T')[0],
+            endDate:        args.endDate ? String(args.endDate) : undefined,
             city:           args.city || 'Toshkent',
             amount:         args.amount ? Number(args.amount) : 0,
             productName:    args.productName,
@@ -323,6 +324,113 @@ export class VoiceService {
           }
         }
 
+        case 'findCounterparty': {
+          if (!args.name && !args.inn) {
+            return { success: false, error: "Nom yoki STIR kerak" }
+          }
+          const found = await this.prisma.counterparty.findMany({
+            where: {
+              organizationId: ctx.organizationId,
+              isActive:       true,
+              OR: [
+                ...(args.inn  ? [{ inn: String(args.inn).replace(/\D/g, '') }] : []),
+                ...(args.name ? [{ name: { contains: String(args.name), mode: 'insensitive' as const } }] : []),
+              ],
+            },
+            take: 5,
+            select: { id: true, name: true, inn: true, directorName: true, phone: true },
+          })
+          if (found.length === 0) {
+            return { success: false, error: `Kontragent topilmadi: ${args.name || args.inn}` }
+          }
+          return { success: true, data: found }
+        }
+
+        case 'updateContract': {
+          if (!args.contractId && !args.contractNumber) {
+            return { success: false, error: "contractId yoki contractNumber kerak" }
+          }
+          const existing = await this.prisma.contract.findFirst({
+            where: {
+              organizationId: ctx.organizationId,
+              isActive:       true,
+              OR: [
+                ...(args.contractId     ? [{ id:             String(args.contractId) }] : []),
+                ...(args.contractNumber ? [{ contractNumber: String(args.contractNumber) }] : []),
+              ],
+            },
+            select: { id: true, contractNumber: true },
+          })
+          if (!existing) {
+            return { success: false, error: `Shartnoma topilmadi: ${args.contractNumber || args.contractId}` }
+          }
+          const updateData: Record<string, any> = {}
+          if (args.status)      updateData.status      = String(args.status)
+          if (args.amount)      updateData.amount      = Number(args.amount)
+          if (args.endDate)     updateData.endDate     = new Date(String(args.endDate))
+          if (args.productName) updateData.productName = String(args.productName)
+          if (Object.keys(updateData).length === 0) {
+            return { success: false, error: "Yangilanadigan maydon yo'q" }
+          }
+          await this.contractsService.update(ctx.organizationId, existing.id, updateData)
+          return { success: true, data: { id: existing.id, contractNumber: existing.contractNumber, updated: updateData } }
+        }
+
+        case 'getContractDetails': {
+          if (!args.contractId && !args.contractNumber) {
+            return { success: false, error: "contractId yoki contractNumber kerak" }
+          }
+          const contract = await this.prisma.contract.findFirst({
+            where: {
+              organizationId: ctx.organizationId,
+              isActive:       true,
+              OR: [
+                ...(args.contractId     ? [{ id:             String(args.contractId) }] : []),
+                ...(args.contractNumber ? [{ contractNumber: String(args.contractNumber) }] : []),
+              ],
+            },
+            select: {
+              id:             true,
+              contractNumber: true,
+              contractType:   true,
+              contractDate:   true,
+              endDate:        true,
+              amount:         true,
+              status:         true,
+              productName:    true,
+              signedUs:       true,
+              signedCp:       true,
+              didoxSent:      true,
+              totalInvoiced:  true,
+              alertLevel:     true,
+              counterparty: { select: { name: true, inn: true } },
+            },
+          })
+          if (!contract) {
+            return { success: false, error: `Shartnoma topilmadi: ${args.contractNumber || args.contractId}` }
+          }
+          return {
+            success: true,
+            data: {
+              id:             contract.id,
+              number:         contract.contractNumber,
+              type:           contract.contractType,
+              date:           contract.contractDate,
+              endDate:        contract.endDate,
+              amount:         contract.amount,
+              status:         contract.status,
+              product:        contract.productName,
+              signedUs:       contract.signedUs,
+              signedCp:       contract.signedCp,
+              didoxSent:      contract.didoxSent,
+              totalInvoiced:  contract.totalInvoiced,
+              alertLevel:     contract.alertLevel,
+              counterparty:   contract.counterparty?.name,
+              cpInn:          contract.counterparty?.inn,
+            },
+          }
+        }
+
         case 'getStats': {
           const stats = await this.contractsService.getStats(ctx.organizationId)
           const cpCount = await this.prisma.counterparty.count({
@@ -334,9 +442,9 @@ export class VoiceService {
           return {
             success: true,
             data: {
-              contracts:     stats,
+              contracts:      stats,
               counterparties: cpCount,
-              employees:     empCount,
+              employees:      empCount,
             },
           }
         }
