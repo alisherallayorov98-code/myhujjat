@@ -1,6 +1,6 @@
 'use client'
 
-import { useState }                                      from 'react'
+import { useState, useMemo }                             from 'react'
 import { useTranslations }                               from 'next-intl'
 import { FileText, UserCheck, UserX, ArrowRight, Sparkles, Eye, Maximize2, Download } from 'lucide-react'
 import { useQuery }                                       from '@tanstack/react-query'
@@ -23,6 +23,7 @@ import { formatAmountWords, formatNumber } from '@/lib/formatters'
 import { DynamicFeatureRunner } from '@/components/DynamicFeatureRunner/DynamicFeatureRunner'
 import { FullscreenPreview }    from '@/components/shared/FullscreenPreview'
 import { KADRLAR_FEATURES }     from '@/lib/dynamicFeatures'
+import { renderKotibHtml }      from '@/lib/renderKotibHtml'
 import toast                 from 'react-hot-toast'
 import { cn }                from '@/lib/cn'
 
@@ -36,6 +37,8 @@ export default function HRHujjatlarPage() {
   const [previewTitle, setPreviewTitle] = useState('')
   const [showPreview, setShowPreview] = useState(false)
   const [loading, setLoading]         = useState(false)
+
+  const previewHtml = useMemo(() => preview ? renderKotibHtml(preview) : '', [preview])
 
   const HR_DOCS = [
     {
@@ -373,7 +376,7 @@ export default function HRHujjatlarPage() {
         open={showPreview}
         onClose={() => setShowPreview(false)}
         title={previewTitle}
-        content={preview}
+        html={previewHtml}
         emptyText={t('previewPlaceholder')}
         toolbar={
           <>
