@@ -65,6 +65,7 @@ export class VoiceService {
     targetLang?: 'uz' | 'oz' | 'ru'
     state?:      ConversationState | null
     context:     VoiceContext
+    testMode?:   boolean  // true bo'lsa tool'larni bajarmaydi — faqat LLM javobi
   }): Promise<VoiceResult> {
     if (!process.env.GEMINI_API_KEY) {
       throw new BadRequestException('Gemini API key sozlanmagan')
@@ -79,8 +80,8 @@ export class VoiceService {
       throw new BadRequestException("Bo'sh buyruq")
     }
 
-    // 1.5. Tezkor algoritm (LLM'siz, token tejaydi)
-    const fastResult = await this.fastPath.tryHandle({
+    // 1.5. Tezkor algoritm — testMode'da skip (har doim LLM ishlatilsin)
+    const fastResult = !opts.testMode && await this.fastPath.tryHandle({
       text:       userText,
       userId:     opts.context.userId,
       orgId:      opts.context.organizationId,
@@ -132,10 +133,15 @@ export class VoiceService {
 
       const calls = initialResponse.functionCalls || []
 
-      // Tool'larni bajarish
+      // Tool'larni bajarish (testMode'da skip — faqat "simulyatsiya" javobi)
       const toolResponses: any[] = []
       for (const call of calls) {
-        const result = await this.executeTool(call.name!, call.args || {}, opts.context)
+        let result: { success: boolean; data?: any; error?: string }
+        if (opts.testMode) {
+          result = { success: true, data: { simulated: true, tool: call.name } }
+        } else {
+          result = await this.executeTool(call.name!, call.args || {}, opts.context)
+        }
         toolsCalled.push({ name: call.name!, result: result.data, success: result.success, error: result.error })
         toolResponses.push({
           functionResponse: {
@@ -430,6 +436,27 @@ export class VoiceService {
               cpInn:          contract.counterparty?.inn,
             },
           }
+        }
+
+        case 'listCounterparties': {
+          const limit = Math.min(Number(args.limit) || 10, 20)
+          const where: any = { organizationId: ctx.organizationId, isActive: true }
+          if (args.query) {
+            where.OR = [
+              { name: { contains: String(args.query), mode: 'insensitive' as const } },
+              { inn:  { contains: String(args.query) } },
+            ]
+          }
+          const cps = await this.prisma.counterparty.findMany({
+            where,
+            take:    limit,
+            orderBy: { createdAt: 'desc' },
+            select:  { id: true, name: true, inn: true, directorName: true },
+          })
+          const total = await this.prisma.counterparty.count({
+            where: { organizationId: ctx.organizationId, isActive: true },
+          })
+          return { success: true, data: { counterparties: cps, total } }
         }
 
         case 'getStats': {

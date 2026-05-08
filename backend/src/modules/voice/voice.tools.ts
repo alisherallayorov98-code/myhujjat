@@ -107,6 +107,17 @@ export const TOOLS = [
         },
       },
       {
+        name: 'listCounterparties',
+        description: "Tizimda mavjud kontragentlar ro'yxatini qaytaradi. Ism yoki STIR bo'yicha filter qilish mumkin. Kontragentlar kimlar bor deb so'ralganda ishlating.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            query: { type: Type.STRING, description: "Qidiruv matni — kontragent ismi yoki STIR qismi" },
+            limit: { type: Type.NUMBER, description: "Nechtasini qaytarish (default: 10, max: 20)" },
+          },
+        },
+      },
+      {
         name: 'getStats',
         description: 'Foydalanuvchi tashkilotining statistikasini qaytaradi (umumiy/faol shartnomalar, kontragentlar soni)',
         parameters: { type: Type.OBJECT, properties: {} },

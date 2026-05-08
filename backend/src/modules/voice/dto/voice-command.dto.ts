@@ -1,5 +1,5 @@
 import {
-  IsString, IsOptional, IsObject, IsIn, MaxLength, ValidateNested, Matches,
+  IsString, IsOptional, IsObject, IsIn, IsBoolean, MaxLength, ValidateNested, Matches,
 } from 'class-validator'
 import { Type } from 'class-transformer'
 
@@ -43,4 +43,9 @@ export class VoiceCommandDto {
   @IsOptional()
   @IsObject()
   state?: Record<string, any> | null
+
+  // Test rejimi — tool'larni bajarmasdan faqat LLM javobini qaytaradi
+  @IsOptional()
+  @IsBoolean()
+  testMode?: boolean
 }

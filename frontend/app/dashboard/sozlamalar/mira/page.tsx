@@ -17,6 +17,7 @@ import { formatDate, formatCurrency } from '@/lib/formatters'
 import toast               from 'react-hot-toast'
 import { cn }              from '@/lib/cn'
 import Link                from 'next/link'
+import { MiraTestChat }   from '@/components/VoiceAssistant/MiraTestChat'
 
 const TRUST_THRESHOLD = 10  // 10 ta muvaffaqiyatli shartnomadan so'ng auto-send ochiladi
 
@@ -394,6 +395,11 @@ export default function MiraSettingsPage() {
           )}
         </Card>
       )}
+
+      {/* Mini test chat */}
+      <Card>
+        <MiraTestChat />
+      </Card>
 
       <Button
         leftIcon={<Save size={14} />}

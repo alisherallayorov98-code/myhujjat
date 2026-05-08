@@ -30,6 +30,7 @@
     "updateContract": "Шартнома янгиланди",
     "getContractDetails": "Шартнома маълумоти",
     "listContracts": "Шартномалар рўйхати",
+    "listCounterparties": "Контрагентлар рўйхати",
     "searchStir": "СТИР қидирилди",
     "getStats": "Статистика олинди"
   }

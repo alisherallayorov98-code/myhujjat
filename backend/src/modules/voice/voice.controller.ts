@@ -55,6 +55,7 @@ export class VoiceController {
       audio:      body.audio,
       targetLang: body.targetLang,
       state:      (body.state as any) || null,
+      testMode:   body.testMode,
       context:    { userId: user.sub, organizationId: orgId },
     })
   }

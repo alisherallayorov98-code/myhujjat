@@ -16,16 +16,25 @@ import { StirService }           from '../stir/stir.service'
 import { MiraService }           from '../mira/mira.service'
 
 export type ConversationState = {
-  type:    'awaitingStandardConfirm' | 'awaitingAmount' | 'awaitingProductName' | 'awaitingFinalConfirm'
+  type:    'awaitingStandardConfirm' | 'awaitingAmount' | 'awaitingProductName' | 'awaitingFinalConfirm' | 'awaitingCounterpartyName' | 'awaitingContractNumber'
   stir:    string
   cpId?:   string
   cpName?: string
   collected: {
-    amount?:      number
-    productName?: string
-    endDate?:     string  // ISO 8601
+    amount?:          number
+    productName?:     string
+    endDate?:         string  // ISO 8601
+    contractNumber?:  string  // ask-each sxemasi uchun
   }
   startedAt: number
+  // awaitingContractNumber holati uchun: barcha ma'lumotlar tayyor, faqat raqam kerak
+  pendingContractData?: {
+    contractType: string
+    amount:       number
+    city:         string
+    productName?: string
+    endDate?:     string
+  }
 }
 
 export interface FastPathResult {
@@ -215,10 +224,16 @@ export class VoiceFastPath {
         })
         cpName = cp.name
       } catch (err: any) {
+        // STIR API'da topilmadi — kompaniya nomini so'rab kontragent yarataymiz
         return {
-          response: `STIR ${stir} bo'yicha kompaniya topilmadi. Qo'lda kontragent qo'shing.`,
+          response: `STIR ${stir} davlat ro'yxatida topilmadi. Kompaniya nomini ayting — men qo'shib shartnoma tuzaman.`,
           toolsCalled: [{ name: 'searchStir', success: false, error: err?.message }],
-          state: null,
+          state: {
+            type:      'awaitingCounterpartyName',
+            stir,
+            collected: { endDate },
+            startedAt: Date.now(),
+          },
         }
       }
     }
@@ -336,6 +351,85 @@ export class VoiceFastPath {
           state,
         }
 
+      case 'awaitingCounterpartyName': {
+        const name = text.trim()
+        if (name.length < 2) {
+          return {
+            response: "Kompaniya nomini kiriting (kamida 2 ta belgi).",
+            toolsCalled: [],
+            state,
+          }
+        }
+        if (NO_RE.test(text)) {
+          return {
+            response: "Bekor qilindi. Yangi STIR yuboring.",
+            toolsCalled: [],
+            state: null,
+          }
+        }
+        // Kontragent yaratamiz
+        let cp: any
+        try {
+          cp = await this.cps.create({
+            organizationId: orgId,
+            name,
+            inn: state.stir,
+          })
+        } catch (err: any) {
+          return {
+            response: `Kontragent yaratishda xato: ${err?.message}. Qaytadan urinib ko'ring.`,
+            toolsCalled: [{ name: 'createCounterparty', success: false, error: err?.message }],
+            state: null,
+          }
+        }
+        const settings = await this.mira.getOrCreate(userId, orgId)
+        const amount    = Number(settings.defaultAmount)
+        const typeName  = friendlyContractType(settings.defaultContractType)
+        return {
+          response: `${cp.name} qo'shildi! Standart ${typeName} — ${formatAmount(amount)} so'm uchun shartnoma yarataymi? (ha/yo'q)`,
+          toolsCalled: [{ name: 'createCounterparty', success: true, data: { id: cp.id, name: cp.name } }],
+          state: {
+            type:      'awaitingStandardConfirm',
+            stir:      state.stir,
+            cpId:      cp.id,
+            cpName:    cp.name,
+            collected: state.collected,
+            startedAt: Date.now(),
+          },
+        }
+      }
+
+      case 'awaitingContractNumber': {
+        const num = text.trim()
+        if (num.length < 1) {
+          return {
+            response: "Raqamni kiriting (masalan: 45 yoki DV-12).",
+            toolsCalled: [],
+            state,
+          }
+        }
+        if (NO_RE.test(text)) {
+          return {
+            response: "Bekor qilindi.",
+            toolsCalled: [],
+            state: null,
+          }
+        }
+        const d = state.pendingContractData!
+        return this.createContract({
+          userId,
+          orgId,
+          cpId:                 state.cpId!,
+          cpName:               state.cpName!,
+          contractType:         d.contractType,
+          amount:               d.amount,
+          city:                 d.city,
+          productName:          d.productName,
+          endDate:              d.endDate,
+          contractNumberOverride: num,
+        })
+      }
+
       default:
         return {
           response: "Tushunmadim. Yangi STIR yuboring.",
@@ -352,6 +446,25 @@ export class VoiceFastPath {
     userId: string, orgId: string, state: ConversationState,
   ): Promise<FastPathResult> {
     const settings = await this.mira.getOrCreate(userId, orgId)
+
+    if (settings.numberingScheme === 'ask-each') {
+      return {
+        response: "Shartnoma raqamini ayting (masalan: 45 yoki DV-12).",
+        toolsCalled: [],
+        state: {
+          ...state,
+          type: 'awaitingContractNumber',
+          pendingContractData: {
+            contractType: settings.defaultContractType,
+            amount:       Number(settings.defaultAmount),
+            city:         settings.defaultCity,
+            productName:  settings.defaultProductName || undefined,
+            endDate:      state.collected.endDate,
+          },
+        },
+      }
+    }
+
     return this.createContract({
       userId,
       orgId,
@@ -372,6 +485,25 @@ export class VoiceFastPath {
     userId: string, orgId: string, state: ConversationState,
   ): Promise<FastPathResult> {
     const settings = await this.mira.getOrCreate(userId, orgId)
+
+    if (settings.numberingScheme === 'ask-each') {
+      return {
+        response: "Shartnoma raqamini ayting (masalan: 45 yoki DV-12).",
+        toolsCalled: [],
+        state: {
+          ...state,
+          type: 'awaitingContractNumber',
+          pendingContractData: {
+            contractType: settings.defaultContractType,
+            amount:       state.collected.amount!,
+            city:         settings.defaultCity,
+            productName:  state.collected.productName || settings.defaultProductName || undefined,
+            endDate:      state.collected.endDate,
+          },
+        },
+      }
+    }
+
     return this.createContract({
       userId,
       orgId,
@@ -389,25 +521,27 @@ export class VoiceFastPath {
    * Shartnomani DB'ga yaratadi va keyingi qadamlarni belgilaydi.
    */
   private async createContract(opts: {
-    userId:       string
-    orgId:        string
-    cpId:         string
-    cpName:       string
-    contractType: string
-    amount:       number
-    city:         string
-    productName?: string
-    endDate?:     string
+    userId:                  string
+    orgId:                   string
+    cpId:                    string
+    cpName:                  string
+    contractType:            string
+    amount:                  number
+    city:                    string
+    productName?:            string
+    endDate?:                string
+    contractNumberOverride?: string  // ask-each sxemasi uchun foydalanuvchi qo'lda bergan raqam
   }): Promise<FastPathResult> {
     const settings = await this.mira.getOrCreate(opts.userId, opts.orgId)
 
-    // Raqam
-    let contractNumber: string | undefined
-    try {
-      contractNumber = await this.mira.generateContractNumber(opts.userId)
-    } catch (e: any) {
-      // ASK_EACH bo'lsa — qo'lda so'rashimiz kerak (hozircha avtomatik default)
-      contractNumber = undefined
+    // Raqam — override berilgan bo'lsa shuni ishlatamiz
+    let contractNumber: string | undefined = opts.contractNumberOverride
+    if (!contractNumber) {
+      try {
+        contractNumber = await this.mira.generateContractNumber(opts.userId)
+      } catch (e: any) {
+        contractNumber = undefined
+      }
     }
 
     // Yaratish

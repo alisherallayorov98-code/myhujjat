@@ -30,6 +30,7 @@
     "updateContract": "Shartnoma yangilandi",
     "getContractDetails": "Shartnoma ma'lumoti",
     "listContracts": "Shartnomalar ro'yxati",
+    "listCounterparties": "Kontragentlar ro'yxati",
     "searchStir": "STIR qidirildi",
     "getStats": "Statistika olindi"
   }

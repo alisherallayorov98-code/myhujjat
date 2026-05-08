@@ -55,5 +55,13 @@
 
   "recentTitle": "Mira yaratgan so'nggi shartnomalar",
   "recentEmpty": "Mira hali shartnoma yaratmagan",
-  "recentAll": "Barcha shartnomalar"
+  "recentAll": "Barcha shartnomalar",
+
+  "testTitle": "Mirani sinab ko'ring",
+  "testEmpty": "Xabar yozing — Mira javob beradi (haqiqiy amal bajarilmaydi)",
+  "testPlaceholder": "Masalan: Bu oy nechta shartnoma?",
+  "testClear": "Tozalash",
+  "testFallback": "Bajarildi",
+  "testError": "Xatolik yuz berdi",
+  "testLimitReached": "Sinov limiti tugadi. Tozalash tugmasini bosing."
 }

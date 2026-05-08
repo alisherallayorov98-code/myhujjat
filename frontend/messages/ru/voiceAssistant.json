@@ -30,6 +30,7 @@
     "updateContract": "Договор обновлён",
     "getContractDetails": "Детали договора",
     "listContracts": "Список договоров",
+    "listCounterparties": "Список контрагентов",
     "searchStir": "ИНН найден",
     "getStats": "Статистика получена"
   }

@@ -39,7 +39,11 @@ type ConvState = any  // ConversationState — server tomondan keladi, mazmuni s
 
 const TOOL_KEYS = [
   'createCounterparty',
+  'findCounterparty',
+  'listCounterparties',
   'createContract',
+  'updateContract',
+  'getContractDetails',
   'listContracts',
   'searchStir',
   'getStats',
