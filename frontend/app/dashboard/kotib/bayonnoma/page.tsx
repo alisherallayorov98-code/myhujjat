@@ -13,7 +13,8 @@ import {
 } from '@/lib/kotibTemplates'
 import { exportContractPdf }  from '@/lib/export/contractPdf'
 import { exportContractDocx } from '@/lib/export/contractDocx'
-import { printText }          from '@/lib/printDocument'
+import { printHtml }          from '@/lib/printDocument'
+import { renderKotibHtml }    from '@/lib/renderKotibHtml'
 import { format }             from 'date-fns'
 import {
   Plus, Users, Trash2, Download, Copy, Check,
@@ -67,6 +68,8 @@ export default function BayonnomPage() {
   const preview = useMemo(() => {
     try { return BAYONNOMA_TEMPLATES[kind]?.(form) ?? '' } catch { return '' }
   }, [kind, form])
+
+  const previewHtml = useMemo(() => preview ? renderKotibHtml(preview) : '', [preview])
 
   function update(k: keyof BayonnomData, v: string) {
     setForm(p => ({ ...p, [k]: v }))
@@ -417,17 +420,11 @@ export default function BayonnomPage() {
             </div>
           </div>
           <div className="bg-[#F1F5F9] rounded-2xl py-6 px-3 min-h-[700px]">
-            <div
-              className="bg-white shadow-md mx-auto p-8 rounded-sm whitespace-pre-wrap"
-              style={{
-                fontFamily: '"Times New Roman", serif',
-                fontSize: 13,
-                lineHeight: 1.7,
-                minHeight: 700,
-                maxWidth: '100%',
-              }}
-            >
-              {preview || t('malumotlarToldiring')}
+            <div className="bg-white shadow-md mx-auto rounded-sm" style={{ minHeight: 700, maxWidth: '100%' }}>
+              {previewHtml
+                ? <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+                : <div className="p-8 text-[#94A3B8] text-sm" style={{ fontFamily: '"Times New Roman", serif' }}>{t('malumotlarToldiring')}</div>
+              }
             </div>
           </div>
         </div>
@@ -446,7 +443,7 @@ export default function BayonnomPage() {
             <div className="h-6 w-px bg-white/10 mx-1" />
             <p className="text-sm font-semibold">{t('korinish')}</p>
             <div className="flex-1" />
-            <button onClick={() => printText(preview)} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+            <button onClick={() => printHtml(previewHtml)} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <Printer className="w-4 h-4" /><span className="hidden sm:inline">{t('print')}</span>
             </button>
             <button onClick={handleDocx} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
@@ -458,17 +455,11 @@ export default function BayonnomPage() {
           </div>
           <div className="flex-1 overflow-auto">
             <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
-              <div
-                className="bg-white shadow-2xl p-12 whitespace-pre-wrap"
-                style={{
-                  width: '794px',
-                  minHeight: '1123px',
-                  fontFamily: '"Times New Roman", serif',
-                  fontSize: 14,
-                  lineHeight: 1.8,
-                }}
-              >
-                {preview || t('malumotlarToldiring')}
+              <div className="bg-white shadow-2xl" style={{ width: '794px', minHeight: '1123px' }}>
+                {previewHtml
+                  ? <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+                  : <div className="p-12 text-[#94A3B8] text-sm">{t('malumotlarToldiring')}</div>
+                }
               </div>
             </div>
           </div>
