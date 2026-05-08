@@ -53,6 +53,23 @@ export default function BuyruqPage() {
     enabled:  !!activeOrg,
   })
 
+  const { data: employees = [] } = useQuery<any[]>({
+    queryKey: ['employees', activeOrg?.id],
+    queryFn:  () => api.get(`/employees?orgId=${activeOrg!.id}&limit=200`).then(r => r.data.data || []),
+    enabled:  !!activeOrg,
+  })
+
+  function applyEmployee(emp: any) {
+    setForm(p => ({
+      ...p,
+      xodimIsm:    emp.ism     || p.xodimIsm,
+      xodimLavozim: emp.lavozim || p.xodimLavozim,
+      xodimBolim:  emp.bolim   || p.xodimBolim,
+      maosh:       emp.maosh   || p.maosh,
+      ishBoshi:    emp.ishBoshi || p.ishBoshi,
+    }))
+  }
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.delete(`/documents/${id}?orgId=${activeOrg!.id}`),
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] }),
@@ -246,6 +263,29 @@ export default function BuyruqPage() {
               onChange={v => updateForm('orgNomi', v)} placeholder={t('tashkilotNomi')} />
             <Field label={t('rahbarFio')} value={form.orgRahbar}
               onChange={v => updateForm('orgRahbar', v)} placeholder={t('rahbarIsmi')} />
+
+            {employees.length > 0 && (
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t('xodimTanlash')}</label>
+                <select
+                  defaultValue=""
+                  onChange={e => {
+                    const emp = employees.find((x: any) => x.id === e.target.value)
+                    if (emp) applyEmployee(emp)
+                    e.target.value = ''
+                  }}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition bg-blue-50 text-blue-800"
+                >
+                  <option value="" disabled>{t('xodimTanlashJoy')}</option>
+                  {employees.map((emp: any) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.ism}{emp.lavozim ? ` — ${emp.lavozim}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <Field label={t('xodimFio')} value={form.xodimIsm}
               onChange={v => updateForm('xodimIsm', v)} placeholder={t('xodimIsmi')} />
             <Field label={t('lavozim')} value={form.xodimLavozim}

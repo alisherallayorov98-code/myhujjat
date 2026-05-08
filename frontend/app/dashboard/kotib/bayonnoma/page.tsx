@@ -60,6 +60,20 @@ export default function BayonnomPage() {
     enabled:  !!activeOrg,
   })
 
+  const { data: employees = [] } = useQuery<any[]>({
+    queryKey: ['employees', activeOrg?.id],
+    queryFn:  () => api.get(`/employees?orgId=${activeOrg!.id}&limit=200`).then(r => r.data.data || []),
+    enabled:  !!activeOrg,
+  })
+
+  function appendEmployee(emp: any) {
+    const line = emp.ism + (emp.lavozim ? ` — ${emp.lavozim}` : '')
+    update('ishtirokchilar', form.ishtirokchilar
+      ? form.ishtirokchilar + '\n' + line
+      : line
+    )
+  }
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.delete(`/documents/${id}?orgId=${activeOrg!.id}`),
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] }),
@@ -307,6 +321,27 @@ export default function BayonnomPage() {
                     onChange={v => update('kvorumKelgan', v)} placeholder="10" />
                 </div>
 
+                {employees.length > 0 && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">{t('xodimlarQoshish')}</label>
+                    <select
+                      defaultValue=""
+                      onChange={e => {
+                        const emp = employees.find((x: any) => x.id === e.target.value)
+                        if (emp) appendEmployee(emp)
+                        e.target.value = ''
+                      }}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition bg-purple-50 text-purple-800"
+                    >
+                      <option value="" disabled>{t('xodimTanlashJoy')}</option>
+                      {employees.map((emp: any) => (
+                        <option key={emp.id} value={emp.id}>
+                          {emp.ism}{emp.lavozim ? ` — ${emp.lavozim}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <TextareaField label={t('ishtirokchilar')} value={form.ishtirokchilar}
                   onChange={v => update('ishtirokchilar', v)} placeholder={t('ishtirokchilarPlace')} rows={4} />
                 <TextareaField label={t('taklifEtilganlar')} value={form.taklifEtilganlar || ''}
