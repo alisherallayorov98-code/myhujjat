@@ -81,7 +81,7 @@ export class VoiceService {
     }
 
     // 1.5. Tezkor algoritm — testMode'da skip (har doim LLM ishlatilsin)
-    const fastResult = !opts.testMode && await this.fastPath.tryHandle({
+    const fastResult = opts.testMode ? null : await this.fastPath.tryHandle({
       text:       userText,
       userId:     opts.context.userId,
       orgId:      opts.context.organizationId,

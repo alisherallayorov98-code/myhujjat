@@ -65,13 +65,17 @@ export function VoiceAssistant() {
 
   const [open,        setOpen]        = useState(false)
   const [status,      setStatus]      = useState<Status>('idle')
-  const [messages,    setMessages]    = useState<VoiceMessage[]>(() => {
-    if (typeof window === 'undefined' || !storageKey) return []
+  const [messages,    setMessages]    = useState<VoiceMessage[]>([])
+
+  // currentOrg tayyor bo'lgach localStorage dan tarixni tiklash
+  useEffect(() => {
+    if (!storageKey) return
     try {
       const saved = localStorage.getItem(storageKey)
-      return saved ? JSON.parse(saved) : []
-    } catch { return [] }
-  })
+      if (saved) setMessages(JSON.parse(saved))
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey])
   const [textInput,   setTextInput]   = useState('')
   const [convState,   setConvState]   = useState<ConvState | null>(null)
 

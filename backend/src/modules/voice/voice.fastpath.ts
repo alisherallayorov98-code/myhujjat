@@ -477,10 +477,14 @@ export class VoiceFastPath {
 
       case 'awaitingCounterpartyName': {
         const name = text.trim()
-        if (NO_RE.test(text)) {
+        if (NO_RE.test(text) || YES_RE.test(text)) {
+          // "ha"/"да" — bu nom emas, yo'q deb olaylik yoki qayta so'ralik
+          if (YES_RE.test(text)) {
+            return { response: msg('askCounterpartyName', lang), toolsCalled: [], state }
+          }
           return { response: msg('cancelled', lang), toolsCalled: [], state: null }
         }
-        if (name.length < 2) {
+        if (name.length < 3) {
           return { response: msg('askCounterpartyName', lang), toolsCalled: [], state }
         }
         let cp: any
