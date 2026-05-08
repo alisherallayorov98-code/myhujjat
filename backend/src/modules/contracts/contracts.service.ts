@@ -14,6 +14,7 @@ export interface CreateContractDto {
   contractType:    string
   contractNumber?: string
   contractDate:    string
+  endDate?:        string  // shartnoma tugash sanasi (ISO 8601)
   city?:           string
   amount?:         number
   content?:        string
@@ -44,16 +45,19 @@ export class ContractsService {
   }
 
   async findAll(orgId: string, query: {
-    type?:       string
-    status?:     string
-    search?:     string
-    page?:       number
-    limit?:      number
-    alertLevel?: string   // WARNING | CRITICAL | EXCEEDED | CRITICAL_OVERAGE | any (oshganlar)
-    year?:       number
-    month?:      number
+    type?:         string
+    status?:       string
+    search?:       string
+    page?:         number
+    limit?:        number
+    alertLevel?:   string   // WARNING | CRITICAL | EXCEEDED | CRITICAL_OVERAGE | any
+    year?:         number
+    month?:        number
+    expiringSoon?: boolean  // endDate mavjud va 30 kun ichida tugaydigan shartnomalar
   } = {}) {
-    const { type, status, search, page = 1, limit = 20, alertLevel, year, month } = query
+    const { type, status, search, page = 1, limit = 20, alertLevel, year, month, expiringSoon } = query
+
+    const now30 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
     const where: any = {
       organizationId: orgId,
@@ -76,6 +80,9 @@ export class ContractsService {
         : year
           ? { contractDate: { startsWith: `${year}` } }
           : {}),
+      ...(expiringSoon
+        ? { endDate: { not: null, lte: now30, gte: new Date() } }
+        : {}),
     }
 
     const [total, contracts] = await Promise.all([
@@ -86,7 +93,9 @@ export class ContractsService {
         take:    limit,
         orderBy: alertLevel
           ? [{ totalInvoiced: 'desc' }, { createdAt: 'desc' }]
-          : [{ isPinned: 'desc' }, { createdAt: 'desc' }],
+          : expiringSoon
+            ? [{ endDate: 'asc' }]
+            : [{ isPinned: 'desc' }, { createdAt: 'desc' }],
         include: {
           counterparty: { select: { id: true, name: true, inn: true } },
           organization: { select: { id: true, name: true } },
@@ -169,6 +178,7 @@ export class ContractsService {
         counterpartyId: dto.counterpartyId,
         contractNumber,
         contractDate:   dto.contractDate,
+        endDate:        dto.endDate ? new Date(dto.endDate) : undefined,
         contractType:   dto.contractType as any,
         city:           dto.city || 'Toshkent',
         amount:         dto.amount || 0,
@@ -223,9 +233,14 @@ export class ContractsService {
       })
     }
 
+    const { endDate, ...rest } = dto as any
     return this.prisma.contract.update({
       where: { id },
-      data:  { ...(dto as any), updatedAt: new Date() },
+      data:  {
+        ...rest,
+        ...(endDate !== undefined ? { endDate: endDate ? new Date(endDate) : null } : {}),
+        updatedAt: new Date(),
+      },
     })
   }
 

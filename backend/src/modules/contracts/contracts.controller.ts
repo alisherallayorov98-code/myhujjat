@@ -24,9 +24,10 @@ export class ContractsController {
   @Get()
   async findAll(@CurrentUser() user: any, @Query() query: any) {
     await this.tenant.requireOrgAccess(user.sub, query.orgId)
-    const page  = query.page  ? parseInt(query.page)  : 1
-    const limit = query.limit ? parseInt(query.limit) : 20
-    return this.contractsService.findAll(query.orgId, { ...query, page, limit })
+    const page         = query.page  ? parseInt(query.page)  : 1
+    const limit        = query.limit ? parseInt(query.limit) : 20
+    const expiringSoon = query.expiringSoon === 'true'
+    return this.contractsService.findAll(query.orgId, { ...query, page, limit, expiringSoon })
   }
 
   @Get(':id')

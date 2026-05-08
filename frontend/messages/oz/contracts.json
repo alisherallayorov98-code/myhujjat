@@ -140,6 +140,8 @@
       "contractNumberLabel": "Шартнома рақами",
       "autoHint": "Бўш → автоматик",
       "dateLabel": "Сана *",
+      "endDateLabel": "Тугаш санаси",
+      "endDateHint": "Ихтиёрий",
       "cityLabel": "Шаҳар",
       "cityPlaceholder": "Тошкент",
       "amountLabel": "Сумма (сўм)",
@@ -193,6 +195,7 @@
     "info": {
       "number": "Рақам",
       "date": "Сана",
+      "endDate": "Тугаш санаси",
       "city": "Шаҳар",
       "amount": "Сумма",
       "product": "Маҳсулот/хизмат"

@@ -5,42 +5,41 @@ import {
   Calendar, Clock, AlertCircle, ArrowRight, FileText, CreditCard,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useAuth }  from '@/hooks/useAuth'
-import { Card }     from '@/components/ui/Card'
-import { cn }       from '@/lib/cn'
+import { useQuery }   from '@tanstack/react-query'
+import { useAuth }    from '@/hooks/useAuth'
+import { Card }       from '@/components/ui/Card'
+import { cn }         from '@/lib/cn'
 import { formatDate } from '@/lib/formatters'
+import api            from '@/lib/api'
 
 interface DeadlineItem {
   id:        string
-  type:      'subscription' | 'share-link' | 'system'
+  type:      'subscription' | 'contract'
   title:     string
   date:      Date
   daysLeft:  number
   link?:     string
-  icon:      'sub' | 'share' | 'doc'
-}
-
-const ICON_MAP = {
-  sub:   CreditCard,
-  share: FileText,
-  doc:   FileText,
+  icon:      'sub' | 'doc'
 }
 
 export function UpcomingDeadlines() {
-  const { user } = useAuth()
+  const { user, currentOrg } = useAuth()
   const t = useTranslations('dashboard')
 
-  // Yaqinlashayotgan share-link tugashi — hozir alohida endpoint yo'q,
-  // kelajakda /share-links/expiring qo'shilsa shu yerda yoqiladi.
-  const shareLinks: any[] = []
+  const { data: expiring } = useQuery<{ data: any[] }>({
+    queryKey: ['contracts-expiring', currentOrg?.id],
+    queryFn:  () => api.get(`/contracts?orgId=${currentOrg!.id}&expiringSoon=true&limit=5`).then(r => r.data),
+    enabled:  !!currentOrg?.id,
+    refetchInterval: 10 * 60 * 1000,
+  })
 
   // Obuna muddati
   const subItem: DeadlineItem | null = (() => {
     const sub = user?.subscription
     if (!sub?.expiresAt || sub.plan === 'FREE') return null
     const expiry = new Date(sub.expiresAt)
-    const now = new Date()
-    const days = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const now    = new Date()
+    const days   = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
     if (days > 30 || days < 0) return null
     return {
       id:       'subscription',
@@ -53,28 +52,25 @@ export function UpcomingDeadlines() {
     }
   })()
 
-  // Share-link tugash sanasi
-  const shareLinkItems: DeadlineItem[] = shareLinks
-    .filter(l => l.isActive && !l.signedAt)
-    .map(l => {
-      const expiry = new Date(l.expiresAt)
-      const now    = new Date()
-      const days   = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-      return {
-        id:       l.id,
-        type:     'share-link' as const,
-        title:    t('deadlines.unsigned', { name: l.recipientName || t('deadlines.counterparty') }),
-        date:     expiry,
-        daysLeft: days,
-        link:     `/dashboard/shartnomalar/${l.contractId}`,
-        icon:     'share' as const,
-      }
-    })
-    .filter(i => i.daysLeft >= 0 && i.daysLeft <= 14)
+  // Tugash sanasi yaqinlashgan shartnomalar
+  const contractItems: DeadlineItem[] = (expiring?.data || []).map((c: any) => {
+    const expiry = new Date(c.endDate)
+    const now    = new Date()
+    const days   = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    return {
+      id:       c.id,
+      type:     'contract',
+      title:    c.contractNumber,
+      date:     expiry,
+      daysLeft: Math.max(0, days),
+      link:     `/dashboard/shartnomalar/${c.id}`,
+      icon:     'doc',
+    }
+  })
 
   const items: DeadlineItem[] = [
     ...(subItem ? [subItem] : []),
-    ...shareLinkItems,
+    ...contractItems,
   ].sort((a, b) => a.daysLeft - b.daysLeft)
 
   if (items.length === 0) {
@@ -110,8 +106,8 @@ function Header({ title }: { title: string }) {
 }
 
 function DeadlineRow({ item }: { item: DeadlineItem }) {
-  const t     = useTranslations('dashboard')
-  const Icon  = ICON_MAP[item.icon]
+  const t      = useTranslations('dashboard')
+  const Icon   = item.icon === 'sub' ? CreditCard : FileText
   const urgent = item.daysLeft <= 3
   const warn   = item.daysLeft <= 7 && !urgent
 

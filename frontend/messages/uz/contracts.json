@@ -140,6 +140,8 @@
       "contractNumberLabel": "Shartnoma raqami",
       "autoHint": "Bo'sh → avtomatik",
       "dateLabel": "Sana *",
+      "endDateLabel": "Tugash sanasi",
+      "endDateHint": "Ixtiyoriy",
       "cityLabel": "Shahar",
       "cityPlaceholder": "Toshkent",
       "amountLabel": "Summa (so'm)",
@@ -193,6 +195,7 @@
     "info": {
       "number": "Raqam",
       "date": "Sana",
+      "endDate": "Tugash sanasi",
       "city": "Shahar",
       "amount": "Summa",
       "product": "Mahsulot/xizmat"

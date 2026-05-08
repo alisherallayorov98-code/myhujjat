@@ -86,6 +86,7 @@ export default function YangiShartnoma() {
   const [form, setForm] = useState({
     contractNumber: '',
     contractDate:   today(),
+    endDate:        '',
     city:           'Toshkent',
     counterpartyId: '',
     amount:         '',
@@ -191,6 +192,7 @@ export default function YangiShartnoma() {
       // RESET — yangi shartnoma uchun bo'sh:
       contractNumber: '',
       contractDate:   today(),
+      endDate:        '',
       counterpartyId: '',
       amount:         '',
     }))
@@ -360,6 +362,7 @@ export default function YangiShartnoma() {
       contractType:   type,
       contractNumber: form.contractNumber || undefined,
       contractDate:   form.contractDate,
+      endDate:        form.endDate || undefined,
       city:           form.city,
       amount,
       extraData:      form.extraData,
@@ -491,12 +494,15 @@ export default function YangiShartnoma() {
         )}
 
         <Card className="mb-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Input label={t('new_.form.contractNumberLabel')} placeholder={`${new Date().getFullYear()}/001`}
               value={form.contractNumber} onChange={e => upd('contractNumber', e.target.value)}
               hint={t('new_.form.autoHint')} />
             <Input label={t('new_.form.dateLabel')} type="date"
               value={form.contractDate} onChange={e => upd('contractDate', e.target.value)} />
+            <Input label={t('new_.form.endDateLabel')} type="date"
+              value={form.endDate} onChange={e => upd('endDate', e.target.value)}
+              hint={t('new_.form.endDateHint')} />
             <Input label={t('new_.form.cityLabel')} placeholder={t('new_.form.cityPlaceholder')}
               value={form.city} onChange={e => upd('city', e.target.value)} />
             <div>

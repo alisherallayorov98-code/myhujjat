@@ -335,6 +335,8 @@ model Contract {
   alertLevel    AlertLevel? // joriy ogohlantirish darajasi
   alertedAt     DateTime? // oxirgi alert vaqti
 
+  endDate   DateTime? // shartnoma tugash sanasi (ixtiyoriy)
+
   isActive  Boolean  @default(true)
   isPinned  Boolean  @default(false)  // yulduzcha — eng muhim shartnomalar yuqorida ko'rinadi
   createdAt DateTime @default(now())
@@ -352,6 +354,7 @@ model Contract {
   @@index([counterpartyId])
   @@index([contractNumber])
   @@index([contractDate])
+  @@index([organizationId, endDate])
 }
 
 enum AlertLevel {

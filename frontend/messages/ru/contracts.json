@@ -140,6 +140,8 @@
       "contractNumberLabel": "Номер договора",
       "autoHint": "Пусто → автоматически",
       "dateLabel": "Дата *",
+      "endDateLabel": "Дата окончания",
+      "endDateHint": "Необязательно",
       "cityLabel": "Город",
       "cityPlaceholder": "Ташкент",
       "amountLabel": "Сумма (сум)",
@@ -193,6 +195,7 @@
     "info": {
       "number": "Номер",
       "date": "Дата",
+      "endDate": "Дата окончания",
       "city": "Город",
       "amount": "Сумма",
       "product": "Товар/услуга"

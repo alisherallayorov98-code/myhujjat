@@ -195,6 +195,9 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
 
             <InfoRow icon={Hash}          label={t('detail.info.number')}    value={contract.contractNumber} />
             <InfoRow icon={Calendar}      label={t('detail.info.date')}      value={formatDate(contract.contractDate, 'long')} />
+            {contract.endDate && (
+              <InfoRow icon={Calendar}    label={t('detail.info.endDate')}   value={formatDate(contract.endDate, 'long')} />
+            )}
             <InfoRow icon={MapPin}        label={t('detail.info.city')}      value={contract.city} />
             <InfoRow icon={DollarSign}    label={t('detail.info.amount')}    value={contract.amount > 0 ? formatCurrency(contract.amount) : null} />
             <InfoRow icon={ClipboardList} label={t('detail.info.product')}   value={contract.productName} />
