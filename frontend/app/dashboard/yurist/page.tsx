@@ -706,7 +706,7 @@ function CasesTab({ orgId }: { orgId: string }) {
                       {c.counterparty?.name || '—'}
                     </td>
                     <td className="px-4 py-3 text-[#475569] hidden md:table-cell">
-                      {c.amount ? formatNumber(c.amount) + ' so'm' : '—'}
+                      {c.amount ? formatNumber(c.amount) + " so'm" : '—'}
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
                       {c.deadline ? (() => {

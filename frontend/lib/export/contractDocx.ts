@@ -21,7 +21,7 @@ function fmtDate(s?: string): string {
 }
 
 function isHeading(line: string): boolean {
-  return /^\d+\.\s+[A-ZА-ЯЁʻO’ʻ’’””\s’”-]+$/.test(line.trim()) &&
+  return /^\d+\.\s+[A-ZА-ЯЁʻO'ʻ''””\s'”-]+$/.test(line.trim()) &&
          line === line.toUpperCase()
 }
 
@@ -34,10 +34,10 @@ function isDashItem(line: string): boolean {
 }
 
 // Buyruq/Bayonnoma matnini tahlil qilib DOCX paragraph spetsifikatsiyasiga aylantiradi
-type LineSpec = { text: string; align: ‘CENTER’|’LEFT’; bold: boolean; size: number; after: number }
+type LineSpec = { text: string; align: 'CENTER'|'LEFT'; bold: boolean; size: number; after: number }
 
 function parseKotibLines(text: string): LineSpec[] {
-  const lines = text.split(‘\n’)
+  const lines = text.split('\n')
   const result: LineSpec[] = []
   const firstNonEmpty = lines.findIndex(l => l.trim())
   let i = 0
@@ -47,100 +47,100 @@ function parseKotibLines(text: string): LineSpec[] {
     const line = raw.trim()
 
     if (!line) {
-      result.push({ text: ‘’, align: ‘LEFT’, bold: false, size: 22, after: 60 })
+      result.push({ text: '', align: 'LEFT', bold: false, size: 22, after: 60 })
       i++; continue
     }
 
     // 1-qator: tashkilot nomi → markazlashgan, qalin
     if (i === firstNonEmpty) {
-      result.push({ text: line, align: ‘CENTER’, bold: true, size: 24, after: 160 })
+      result.push({ text: line, align: 'CENTER', bold: true, size: 24, after: 160 })
       i++; continue
     }
 
     // “BUYRUQ № X” → markazlashgan, qalin
     if (/^BUYRUQ\s*№/i.test(line)) {
-      result.push({ text: line, align: ‘CENTER’, bold: true, size: 24, after: 40 })
+      result.push({ text: line, align: 'CENTER', bold: true, size: 24, after: 40 })
       i++; continue
     }
 
-    // Sana qatori (DD.MM.YYYY) — yolg’iz qisqa qator
+    // Sana qatori (DD.MM.YYYY) — yolg'iz qisqa qator
     if (/^\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}/.test(line) && line.length < 20) {
-      result.push({ text: line, align: ‘CENTER’, bold: false, size: 22, after: 160 })
+      result.push({ text: line, align: 'CENTER', bold: false, size: 22, after: 160 })
       i++; continue
     }
 
-    // “...TO’G’RISIDA” / “HAQIDA” sarlavha → markazlashgan, qalin
-    if (/TO[‘’]?G[‘’]?RISIDA\s*$/i.test(line) || /HAQIDA\s*$/i.test(line)) {
-      result.push({ text: line, align: ‘CENTER’, bold: true, size: 22, after: 200 })
+    // “...TO'G'RISIDA” / “HAQIDA” sarlavha → markazlashgan, qalin
+    if (/TO['']?G['']?RISIDA\s*$/i.test(line) || /HAQIDA\s*$/i.test(line)) {
+      result.push({ text: line, align: 'CENTER', bold: true, size: 22, after: 200 })
       i++; continue
     }
 
     // Bayonnoma / yurist hujjat sarlavhalari — markazlashgan
     if (
       /BAYONNOMASI?\s*$/i.test(line) || /^BAYONNOMA/i.test(line) ||
-      /^DA[‘’]VO ARIZASI\s*$/i.test(line) ||
+      /^DA['']VO ARIZASI\s*$/i.test(line) ||
       /^PRETENZIYA\s*$/i.test(line) ||
-      /^ISHONCH QOG[‘’]OZI\s*$/i.test(line) ||
+      /^ISHONCH QOG['']OZI\s*$/i.test(line) ||
       /^DALOLATNOMA\s*$/i.test(line) ||
       /^KELISHUV BITIMI\s*$/i.test(line) ||
       /^OGOHLANTIRUV XATI\s*$/i.test(line) ||
       /^SHARTNOMANI.*BEKOR QILISH/i.test(line) ||
       /^QABUL-TOPSHIRISH BAYONNOMASI\s*$/i.test(line)
     ) {
-      result.push({ text: line, align: ‘CENTER’, bold: true, size: 24, after: 80 })
+      result.push({ text: line, align: 'CENTER', bold: true, size: 24, after: 80 })
       i++; continue
     }
 
     // “№ X” — alohida qatordagi bayonnoma raqami
     if (/^№\s*\S+/.test(line) && line.length < 20) {
-      result.push({ text: line, align: ‘CENTER’, bold: false, size: 22, after: 80 })
+      result.push({ text: line, align: 'CENTER', bold: false, size: 22, after: 80 })
       i++; continue
     }
 
-    // Muhim bo’lim sarlavhalari (chap, qalin)
-    if (/^(KUN TARTIBI|BUYURADI|ESHITILDI|MUHOKAMA QILINDI|OVOZ BERISH NATIJALARI|OVOZ BERISH|QAROR QILINDI|TOPSHIRILDI|HOLATI VA MIQDORI|HOLATI|IZOHLAR VA QARORLAR|IZOHLAR|ILOVALAR|TALABNING ASOSI|TALAB MIQDORI|TALABIMIZ|OGOHLANTIRISH|TO[‘’]LOV REKVIZITLARI|HOLATNING BAYONI|HUQUQIY ASOS|TALABLAR|ILOVA|VAKILGA|VAKOLAT BERAMAN|KOMISSIYA A[‘’]ZOLARI|DALOLATNOMA PREDMETI|ANIQLANGAN HOLAT|MOLIYAVIY BAHOLASH|XULOSA|BUZILISH HOLATI|OGOHLANTIRUV MOHIYATI|BEKOR QILISH ASOSI|KUCHGA KIRISH SANASI|HISOB-KITOB TARTIBI|KELISHUV PREDMETI)\s*:?/i.test(line)) {
-      result.push({ text: line, align: ‘LEFT’, bold: true, size: 22, after: 100 })
+    // Muhim bo'lim sarlavhalari (chap, qalin)
+    if (/^(KUN TARTIBI|BUYURADI|ESHITILDI|MUHOKAMA QILINDI|OVOZ BERISH NATIJALARI|OVOZ BERISH|QAROR QILINDI|TOPSHIRILDI|HOLATI VA MIQDORI|HOLATI|IZOHLAR VA QARORLAR|IZOHLAR|ILOVALAR|TALABNING ASOSI|TALAB MIQDORI|TALABIMIZ|OGOHLANTIRISH|TO['']LOV REKVIZITLARI|HOLATNING BAYONI|HUQUQIY ASOS|TALABLAR|ILOVA|VAKILGA|VAKOLAT BERAMAN|KOMISSIYA A['']ZOLARI|DALOLATNOMA PREDMETI|ANIQLANGAN HOLAT|MOLIYAVIY BAHOLASH|XULOSA|BUZILISH HOLATI|OGOHLANTIRUV MOHIYATI|BEKOR QILISH ASOSI|KUCHGA KIRISH SANASI|HISOB-KITOB TARTIBI|KELISHUV PREDMETI)\s*:?/i.test(line)) {
+      result.push({ text: line, align: 'LEFT', bold: true, size: 22, after: 100 })
       i++; continue
     }
 
-    // Raqamli bo’lim sarlavhasi “1. PREDMET” yoki “2. 1-TOMON MAJBURIYATLARI”
-    if (/^\d+\.\s+[A-Z0-9ҚҒҲЎА-Я’ʻ\-]{3,}/.test(line)) {
-      result.push({ text: line, align: ‘LEFT’, bold: true, size: 22, after: 80 })
+    // Raqamli bo'lim sarlavhasi “1. PREDMET” yoki “2. 1-TOMON MAJBURIYATLARI”
+    if (/^\d+\.\s+[A-Z0-9ҚҒҲЎА-Я'ʻ\-]{3,}/.test(line)) {
+      result.push({ text: line, align: 'LEFT', bold: true, size: 22, after: 80 })
       i++; continue
     }
 
     // Imzo sarlavha “Rahbar: ___ / Ism /” — yorliq + quyi chiziq
-    if (/^(Rahbar|Kotib|Yig[‘’]ilish raisi|Kengash raisi|Komissiya raisi|Ta[‘’]sis yig[‘’]ilishi raisi|Topshirdi|Qabul qildi|1-TOMON VAKILI|2-TOMON VAKILI|1-TOMON|2-TOMON)\s*:?/i.test(line)) {
-      const slashParts = line.split(‘/’)
-      const label = (slashParts[0]?.trim() ?? line).replace(/[\s_]+$/, ‘’)
-      const name  = slashParts[1]?.trim() ?? ‘’
+    if (/^(Rahbar|Kotib|Yig['']ilish raisi|Kengash raisi|Komissiya raisi|Ta['']sis yig['']ilishi raisi|Topshirdi|Qabul qildi|1-TOMON VAKILI|2-TOMON VAKILI|1-TOMON|2-TOMON)\s*:?/i.test(line)) {
+      const slashParts = line.split('/')
+      const label = (slashParts[0]?.trim() ?? line).replace(/[\s_]+$/, '')
+      const name  = slashParts[1]?.trim() ?? ''
       const display = name ? `${label}  _______________  ${name}` : label
-      result.push({ text: display, align: ‘LEFT’, bold: false, size: 22, after: 80 })
+      result.push({ text: display, align: 'LEFT', bold: false, size: 22, after: 80 })
       i++; continue
     }
 
-    // Imzo chizig’i “___ / Ism /”
-    if (/^_{3,}/.test(line) && line.includes(‘/’)) {
-      const name = line.split(‘/’)[1]?.trim() ?? ‘’
+    // Imzo chizig'i “___ / Ism /”
+    if (/^_{3,}/.test(line) && line.includes('/')) {
+      const name = line.split('/')[1]?.trim() ?? ''
       const display = `_____________________________  ${name}`
-      result.push({ text: display.trim(), align: ‘LEFT’, bold: false, size: 22, after: 80 })
+      result.push({ text: display.trim(), align: 'LEFT', bold: false, size: 22, after: 80 })
       i++; continue
     }
 
     // “Hurmat bilan,” — kursiv uslub
     if (/^Hurmat bilan\s*,?\s*$/i.test(line)) {
-      result.push({ text: line, align: ‘LEFT’, bold: false, size: 22, after: 80 })
+      result.push({ text: line, align: 'LEFT', bold: false, size: 22, after: 80 })
       i++; continue
     }
 
     // “M.O.” → markazlashgan
     if (/^\s*M\.O\.?\s*$/i.test(line)) {
-      result.push({ text: line, align: ‘CENTER’, bold: false, size: 22, after: 80 })
+      result.push({ text: line, align: 'CENTER', bold: false, size: 22, after: 80 })
       i++; continue
     }
 
     // Oddiy qator
-    result.push({ text: line, align: ‘LEFT’, bold: false, size: 22, after: 80 })
+    result.push({ text: line, align: 'LEFT', bold: false, size: 22, after: 80 })
     i++
   }
   return result
