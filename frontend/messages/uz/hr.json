@@ -89,5 +89,43 @@
   "print": "Pechat",
   "pdfDownloaded": "PDF yuklandi ✓",
   "wordDownloaded": "Word yuklandi ✓",
-  "previewPlaceholder": "Hujjat ko'rinishi bu yerda chiqadi"
+  "previewPlaceholder": "Hujjat ko'rinishi bu yerda chiqadi",
+
+  "profileTitle": "Xodim profili",
+  "docsTab": "Hujjatlar",
+  "leavesTab": "Ta'tillar",
+  "actionsTab": "Tez harakatlar",
+
+  "leaveBalance": "Ta'til balansi",
+  "leaveYearlyLimit": "Yillik limit",
+  "leaveUsed": "Ishlatilgan",
+  "leaveRemaining": "Qolgan",
+  "leaveDays": "kun",
+  "addLeave": "Ta'til qo'shish",
+  "leaveAdded": "Ta'til qo'shildi ✓",
+  "leaveDeleted": "Ta'til o'chirildi",
+  "leaveTypeLabel": "Ta'til turi",
+  "leaveStart": "Boshi",
+  "leaveEnd": "Oxiri",
+  "leaveReason": "Sababi",
+  "leaveOrderNum": "Buyruq №",
+  "leaveDeleteTitle": "Ta'til o'chirilsinmi?",
+  "leaveDeleteConfirm": "Ushbu ta'tilni o'chirmoqchimisiz?",
+
+  "leaveType_YILLIK": "Yillik",
+  "leaveType_KASAL": "Kasal",
+  "leaveType_TUGILISH": "Tug'ish ta'tili",
+  "leaveType_BEPUL": "Bepul ta'til",
+  "leaveType_IJTIMOIY": "Ijtimoiy",
+  "leaveType_HARBIY": "Harbiy",
+
+  "noDocs": "Hujjatlar yo'q",
+  "noLeaves": "Ta'tillar yo'q",
+  "createOrder": "Buyruq yaratish",
+
+  "filterDept": "Bo'lim",
+  "filterStatus": "Holat",
+  "filterAll": "Barchasi",
+  "filterActive": "Faol",
+  "filterInactive": "Faol emas"
 }

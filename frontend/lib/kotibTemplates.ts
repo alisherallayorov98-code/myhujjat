@@ -64,9 +64,11 @@ export const BUYRUQ_TEMPLATES: Record<string, (d: BuyruqData) => string> = {
 BUYRUQ № ${d.raqam}
 ${d.sana}
 
-${d.xodimIsm.toUpperCase()} ni ISHGA QABUL QILISH TO'G'RISIDA
+${d.xodimIsm.toUpperCase()}NI ISHGA QABUL QILISH TO'G'RISIDA
 
-${d.orgNomi} rahbari ${d.orgRahbar} buyuradi:
+${d.orgNomi} rahbari ${d.orgRahbar}
+
+BUYURADI:
 
 1. ${d.xodimIsm} — ${d.xodimLavozim} lavozimiga${d.xodimBolim ? ` ${d.xodimBolim} bo'limiga` : ''} ${d.ishBoshi || d.sana} dan boshlab ishga qabul qilinsin.
 ${d.maosh ? `\n2. Maosh: ${d.maosh} so'm oylik belgilansin.` : ''}
@@ -75,16 +77,18 @@ ${d.qoshimcha ? `\n${d.qoshimcha}` : ''}
 Asos: ${d.asosiy || "Mehnat shartnomasi va xodimning arizasi."}
 
 Rahbar: _________________ / ${d.orgRahbar} /
-                                           M.O.`,
+M.O.`,
 
   ISHDAN_BOSHATISH: (d) => `${d.orgNomi.toUpperCase()}
 
 BUYRUQ № ${d.raqam}
 ${d.sana}
 
-${d.xodimIsm.toUpperCase()} ni ISHDAN BO'SHATISH TO'G'RISIDA
+${d.xodimIsm.toUpperCase()}NI ISHDAN BO'SHATISH TO'G'RISIDA
 
-${d.orgNomi} rahbari ${d.orgRahbar} buyuradi:
+${d.orgNomi} rahbari ${d.orgRahbar}
+
+BUYURADI:
 
 1. ${d.xodimLavozim} lavozimida ishlaydigan ${d.xodimIsm} — ${d.ishOxiri || d.sana} dan boshlab ishdan bo'shatilsin.
 
@@ -94,16 +98,18 @@ ${d.qoshimcha ? `\n${d.qoshimcha}` : ''}
 Asos: ${d.asosiy || "Xodimning arizasi."}
 
 Rahbar: _________________ / ${d.orgRahbar} /
-                                           M.O.`,
+M.O.`,
 
   LAVOZIM_OZGARTIRISH: (d) => `${d.orgNomi.toUpperCase()}
 
 BUYRUQ № ${d.raqam}
 ${d.sana}
 
-${d.xodimIsm.toUpperCase()} ni BOSHQA LAVOZIMGA O'TKAZISH TO'G'RISIDA
+${d.xodimIsm.toUpperCase()}NI BOSHQA LAVOZIMGA O'TKAZISH TO'G'RISIDA
 
-${d.orgNomi} rahbari ${d.orgRahbar} buyuradi:
+${d.orgNomi} rahbari ${d.orgRahbar}
+
+BUYURADI:
 
 1. ${d.xodimIsm} — ${d.ishBoshi || d.sana} dan boshlab ${d.xodimLavozim} lavozimiga o'tkazilsin.
 ${d.maosh ? `\n2. Maosh: ${d.maosh} so'm oylik belgilansin.` : ''}
@@ -112,7 +118,7 @@ ${d.qoshimcha ? `\n${d.qoshimcha}` : ''}
 Asos: ${d.asosiy || "Xodimning arizasi va rahbar taklifi."}
 
 Rahbar: _________________ / ${d.orgRahbar} /
-                                           M.O.`,
+M.O.`,
 
   MUKOFOT: (d) => `${d.orgNomi.toUpperCase()}
 
@@ -121,13 +127,15 @@ ${d.sana}
 
 MUKOFOT BERISH TO'G'RISIDA
 
-${d.orgNomi} rahbari ${d.orgRahbar} buyuradi:
+${d.orgNomi} rahbari ${d.orgRahbar}
+
+BUYURADI:
 
 1. ${d.xodimLavozim} lavozimidagi ${d.xodimIsm} — ${d.sabab || "vijdonli mehnati uchun"} — ${d.maosh || '___________'} so'm miqdorida bir martalik mukofot berilsin.
 ${d.qoshimcha ? `\n${d.qoshimcha}` : ''}
 
 Rahbar: _________________ / ${d.orgRahbar} /
-                                           M.O.`,
+M.O.`,
 
   BOSHQA: (d) => `${d.orgNomi.toUpperCase()}
 
@@ -136,14 +144,16 @@ ${d.sana}
 
 ${d.mavzu ? d.mavzu.toUpperCase() : 'BUYRUQ'} TO'G'RISIDA
 
-${d.orgNomi} rahbari ${d.orgRahbar} buyuradi:
+${d.orgNomi} rahbari ${d.orgRahbar}
+
+BUYURADI:
 
 ${d.sabab || '1. ___________________________________________'}
 ${d.qoshimcha ? `\n${d.qoshimcha}` : ''}
 ${d.asosiy ? `\nAsos: ${d.asosiy}` : ''}
 
 Rahbar: _________________ / ${d.orgRahbar} /
-                                           M.O.`,
+M.O.`,
 }
 
 // ──────────────────────────────────────────────
@@ -239,7 +249,7 @@ function imzolar(d: BayonnomData, raisLabel = "Yig'ilish raisi"): string {
   return `${raisLabel}:  _________________ / ${d.rahbar || '___________'} /
 Kotib:            _________________ / ${d.kotib || '___________'} /
 
-                                           M.O.`
+M.O.`
 }
 
 function ilovalarBlok(d: BayonnomData): string {
@@ -391,7 +401,7 @@ ${ilovalarBlok(d)}
 Topshirdi:    _________________ / ${d.rahbar || '___________'} /
 Qabul qildi:  _________________ / ${d.kotib  || '___________'} /
 
-                                           M.O.`,
+M.O.`,
 
   // 13) Boshqa (general purpose) — kun tartibi bilan
   BOSHQA: (d) => `${header(d.orgNomi, d.mavzu || 'Bayonnoma', d.raqam, d.sana, d.vaqtBoshlanish, d.vaqtTugash, d.joy)}

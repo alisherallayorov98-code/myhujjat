@@ -14,9 +14,10 @@ import { EmptyState }                                     from '@/components/ui/
 import { useAuth }                                        from '@/hooks/useAuth'
 import api                                                from '@/lib/api'
 import {
-  calcTolovGrafigi, type TolovGrafigiData, type TolovQatori,
+  calcTolovGrafigi, generateTolovGrafigiText, type TolovGrafigiData, type TolovQatori,
 } from '@/lib/buxgalterTemplates'
 import { exportSpecExcel }                                from '@/lib/export/specExport'
+import { exportContractPdf }                              from '@/lib/export/contractPdf'
 import { formatCurrency, formatAmountWords, formatNumber } from '@/lib/formatters'
 import toast                                              from 'react-hot-toast'
 import { cn }                                             from '@/lib/cn'
@@ -68,13 +69,27 @@ export default function TolovGrafigiPage() {
   }
 
   const mutation = useMutation({
-    mutationFn: () => api.post('/documents', {
-      organizationId: currentOrg!.id,
-      type:           'TOLOV_GRAFIGI',
-      title:          `To'lov grafigi — ${form.cpNomi || 'Kontragent'} — ${formatCurrency(parseFloat(form.asosiyQarz) || 0)}`,
-      docDate:        form.sana,
-      content:        { type: 'TOLOV_GRAFIGI', formData: form, rows },
-    }),
+    mutationFn: () => {
+      const data: TolovGrafigiData = {
+        raqam:        form.raqam,
+        sana:         form.sana,
+        orgNomi:      currentOrg?.name || '',
+        cpNomi:       form.cpNomi,
+        asosiyQarz:   parseFloat(form.asosiyQarz),
+        foizStavka:   parseFloat(form.foizStavka) || 0,
+        tolovSoni:    parseInt(form.tolovSoni),
+        boshlashSana: form.boshlashSana,
+        shartnoma:    form.shartnoma,
+      }
+      const text = generateTolovGrafigiText(data, rows)
+      return api.post('/documents', {
+        organizationId: currentOrg!.id,
+        type:           'TOLOV_GRAFIGI',
+        title:          `To'lov grafigi — ${form.cpNomi || 'Kontragent'} — ${formatCurrency(parseFloat(form.asosiyQarz) || 0)}`,
+        docDate:        form.sana,
+        content:        { type: 'TOLOV_GRAFIGI', formData: form, rows, text },
+      })
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tolov-grafik'] })
       toast.success(t('grafikSaved'))
@@ -178,6 +193,20 @@ export default function TolovGrafigiPage() {
           <div className="flex gap-2 w-full">
             <Button variant="outline" size="sm" onClick={() => setModal(false)}>{t('close')}</Button>
             <div className="flex-1" />
+            {rows.length > 0 && (
+              <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
+                onClick={() => {
+                  const data: TolovGrafigiData = {
+                    raqam: form.raqam, sana: form.sana,
+                    orgNomi: currentOrg?.name || '', cpNomi: form.cpNomi,
+                    asosiyQarz: parseFloat(form.asosiyQarz), foizStavka: parseFloat(form.foizStavka) || 0,
+                    tolovSoni: parseInt(form.tolovSoni), boshlashSana: form.boshlashSana, shartnoma: form.shartnoma,
+                  }
+                  exportContractPdf({ title: `To'lov grafigi — ${form.cpNomi}`, content: generateTolovGrafigiText(data, rows), orgName: currentOrg?.name })
+                }}>
+                PDF
+              </Button>
+            )}
             {rows.length > 0 && (
               <Button variant="secondary" size="sm" leftIcon={<Download size={13} />} onClick={handleExcel}>
                 Excel

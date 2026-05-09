@@ -151,6 +151,7 @@ model Organization {
   contracts      Contract[]
   specifications Specification[]
   employees      Employee[]
+  employeeLeaves EmployeeLeave[]
   tasischilar    Tasischi[]
   documents      Document[]
   invoices       Invoice[]
@@ -158,6 +159,7 @@ model Organization {
   miraSettings   MiraSettings[]
   bulkSendDrafts BulkSendDraft[]
   userTemplates  UserTemplate[]
+  legalCases     LegalCase[]
 }
 
 model OrgMember {
@@ -224,6 +226,7 @@ model Counterparty {
 
   contracts      Contract[]
   specifications Specification[]
+  legalCases     LegalCase[]
 
   @@index([organizationId, isActive])
   @@index([organizationId, inn])
@@ -468,6 +471,34 @@ model Employee {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  leaves    EmployeeLeave[]
+  documents Document[]
+}
+
+// ============================================
+// XODIM TA'TILLARI
+// ============================================
+model EmployeeLeave {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  employeeId     String
+  employee       Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  type      String   // YILLIK | KASAL | TUGILISH | BEPUL | IJTIMOIY | HARBIY
+  startDate DateTime
+  endDate   DateTime
+  days      Int
+  reason    String?
+  status    String   @default("APPROVED")  // DRAFT | APPROVED | REJECTED
+  orderNum  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([organizationId, employeeId])
 }
 
 // ============================================
@@ -503,9 +534,14 @@ model Document {
   content Json
   status  DocStatus    @default(DRAFT)
 
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([organizationId, employeeId])
 }
 
 enum DocumentType {
@@ -911,4 +947,63 @@ enum UserTemplateSource {
   PASTE        // Plain text paste
   CLONED       // Tizim shablonidan klonlangan
   EDITED       // Tizim shablonining tahrir qilingan versiyasi
+}
+
+// ============================================
+// YURIST BO'LIMI — ISHLAR (LEGAL CASES)
+// ============================================
+model LegalCase {
+  id             String        @id @default(cuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  counterpartyId String?
+  counterparty   Counterparty? @relation(fields: [counterpartyId], references: [id])
+
+  title    String
+  type     String               // PRETENZIYA | DAVO | KELISHUV | OGOHLANTIRUV | DALOLATNOMA | BEKOR_QILISH
+  status   String  @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED | CLOSED
+  amount   Float?
+  deadline DateTime?
+  notes    String? @db.Text
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents  LegalDocument[]
+  activities LegalCaseActivity[]
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, isActive])
+}
+
+model LegalDocument {
+  id        String    @id @default(cuid())
+  caseId    String
+  case      LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  type      String
+  title     String
+  content   String @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([caseId])
+}
+
+model LegalCaseActivity {
+  id       String    @id @default(cuid())
+  caseId   String
+  case     LegalCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  action   String    // CREATED | STATUS_CHANGED | NOTE_ADDED | DOCUMENT_ADDED
+  oldValue String?
+  newValue String?
+  note     String?   @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([caseId])
+  @@index([caseId, createdAt])
 }

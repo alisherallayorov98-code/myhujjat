@@ -18,7 +18,8 @@ import { useAuth }                                 from '@/hooks/useAuth'
 import api                                         from '@/lib/api'
 import { exportContractPdf }                       from '@/lib/export/contractPdf'
 import { exportContractDocx }                      from '@/lib/export/contractDocx'
-import { printText }                               from '@/lib/printDocument'
+import { printHtml, printText }                    from '@/lib/printDocument'
+import { renderKotibHtml }                         from '@/lib/renderKotibHtml'
 import { formatCurrency, formatDate }              from '@/lib/formatters'
 import toast                                       from 'react-hot-toast'
 
@@ -105,9 +106,10 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
     if (!doc.status) return null
     try { return t(`status.${doc.status}` as any) } catch { return doc.status }
   })()
-  const totalAmount = doc.content?.totalAmount
-  const items       = doc.content?.items
-  const text        = doc.content?.text
+  const totalAmount    = doc.content?.totalAmount
+  const items          = doc.content?.items
+  const text           = doc.content?.text
+  const isMonospaceDoc = doc.type === 'FAKTURA' || doc.type === 'AKT_SVERKI' || doc.type === 'TOLOV_GRAFIGI'
 
   return (
     <div>
@@ -131,7 +133,7 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
                 <Button
                   variant="outline" size="sm"
                   leftIcon={<Printer size={13} />}
-                  onClick={() => text && printText(text)}
+                  onClick={() => text && (isMonospaceDoc ? printText(text) : printHtml(renderKotibHtml(text)))}
                 >
                   {t('print')}
                 </Button>
@@ -173,19 +175,20 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
           </div>
           <div className="bg-[#F1F5F9] py-8 px-4 sm:px-8">
             {text ? (
-              <div
-                className="bg-white shadow-md mx-auto p-10 sm:p-14 text-[#0F172A] rounded-sm"
-                style={{
-                  fontFamily: '"Times New Roman", serif',
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  whiteSpace: 'pre-wrap',
-                  maxWidth: 794,
-                  minHeight: 1100,
-                }}
-              >
-                {text}
-              </div>
+              isMonospaceDoc ? (
+                <pre
+                  className="bg-white shadow-md mx-auto rounded-sm text-sm leading-relaxed whitespace-pre-wrap"
+                  style={{ maxWidth: 794, minHeight: 1100, fontFamily: '"Times New Roman", serif', padding: '60px 70px' }}
+                >
+                  {text}
+                </pre>
+              ) : (
+                <div
+                  className="bg-white shadow-md mx-auto rounded-sm"
+                  style={{ maxWidth: 794, minHeight: 1100 }}
+                  dangerouslySetInnerHTML={{ __html: renderKotibHtml(text) }}
+                />
+              )
             ) : (
               <div className="bg-white p-12 text-center text-[#94A3B8] mx-auto" style={{ maxWidth: 794 }}>
                 {t('noContent')}

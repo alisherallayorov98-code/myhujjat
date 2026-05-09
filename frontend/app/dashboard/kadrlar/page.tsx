@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback }                  from 'react'
 import { useTranslations }                               from 'next-intl'
 import {
-  Plus, Users, Search, Edit2, Trash2, Building2, Download, X, FileText,
+  Plus, Users, Search, Edit2, Trash2, Building2, Download, X, FileText, ChevronRight,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
@@ -159,11 +159,13 @@ export default function KadrlarPage() {
   const { currentOrg } = useAuth()
   const qc             = useQueryClient()
 
-  const [search,    setSearch]    = useState('')
-  const [page,      setPage]      = useState(1)
-  const [addModal,  setAddModal]  = useState(false)
-  const [editXodim, setEditXodim] = useState<Employee | null>(null)
-  const [deleteEmp, setDeleteEmp] = useState<Employee | null>(null)
+  const [search,      setSearch]      = useState('')
+  const [page,        setPage]        = useState(1)
+  const [bolimFilter, setBolimFilter] = useState('')
+  const [statusFilter,setStatusFilter]= useState('active')
+  const [addModal,    setAddModal]    = useState(false)
+  const [editXodim,   setEditXodim]   = useState<Employee | null>(null)
+  const [deleteEmp,   setDeleteEmp]   = useState<Employee | null>(null)
   const debouncedSearch = useDebouncedValue(search, 300)
 
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -171,14 +173,16 @@ export default function KadrlarPage() {
   useKeyboardShortcut('mod+n', useCallback(() => setAddModal(true), []))
 
   const { data, isLoading } = useQuery<{ data: Employee[]; meta: { total: number; totalPages: number; page: number; limit: number } }>({
-    queryKey: ['employees', currentOrg?.id, debouncedSearch, page],
+    queryKey: ['employees', currentOrg?.id, debouncedSearch, page, bolimFilter, statusFilter],
     queryFn:  () => {
       const params = new URLSearchParams({
-        orgId: currentOrg!.id,
-        page:  String(page),
-        limit: '20',
+        orgId:  currentOrg!.id,
+        page:   String(page),
+        limit:  '20',
+        status: statusFilter,
       })
       if (debouncedSearch) params.set('search', debouncedSearch)
+      if (bolimFilter)     params.set('bolim', bolimFilter)
       return api.get(`/employees?${params}`).then(r => r.data)
     },
     enabled: !!currentOrg?.id,
@@ -256,9 +260,9 @@ export default function KadrlarPage() {
         </div>
       )}
 
-      {/* Qidiruv */}
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="relative max-w-xs flex-1 sm:flex-initial">
+      {/* Qidiruv + Filtrlar */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
           <Input
             ref={searchInputRef}
             placeholder={t('searchPlace') + ' (Ctrl+K)'}
@@ -275,10 +279,45 @@ export default function KadrlarPage() {
             </button>
           )}
         </div>
+
+        {/* Bo'lim filtri */}
+        {(stats?.bolimlar?.length ?? 0) > 0 && (
+          <select
+            value={bolimFilter}
+            onChange={e => { setBolimFilter(e.target.value); setPage(1) }}
+            className="h-9 text-sm px-3 rounded-lg border border-[#E2E8F0] bg-white text-[#475569] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+          >
+            <option value="">{t('filterAll')}</option>
+            {stats!.bolimlar.filter(b => b.bolim).map((b: any) => (
+              <option key={b.bolim} value={b.bolim}>{b.bolim} ({b._count.id})</option>
+            ))}
+          </select>
+        )}
+
+        {/* Holat filtri */}
+        <div className="flex rounded-lg border border-[#E2E8F0] overflow-hidden">
+          {[
+            { val: 'active',   label: t('filterActive') },
+            { val: 'inactive', label: t('filterInactive') },
+            { val: 'all',      label: t('filterAll') },
+          ].map(opt => (
+            <button
+              key={opt.val}
+              onClick={() => { setStatusFilter(opt.val); setPage(1) }}
+              className={cn(
+                'px-3 h-9 text-xs font-medium transition-colors',
+                statusFilter === opt.val
+                  ? 'bg-[#2563EB] text-white'
+                  : 'bg-white text-[#475569] hover:bg-[#F8FAFC]',
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
         {totalCount > 0 && (
-          <span className="text-xs text-[#94A3B8] shrink-0">
-            {totalCount} ta
-          </span>
+          <span className="text-xs text-[#94A3B8] ml-auto shrink-0">{totalCount} ta</span>
         )}
       </div>
 
@@ -311,7 +350,11 @@ export default function KadrlarPage() {
                 </tr>
               ) : (
                 employees.map(emp => (
-                  <tr key={emp.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group">
+                  <tr
+                    key={emp.id}
+                    className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] group cursor-pointer"
+                    onClick={() => window.location.href = `/dashboard/kadrlar/${emp.id}`}
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shrink-0">
@@ -324,35 +367,36 @@ export default function KadrlarPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-[#475569]">{emp.lavozim || '—'}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 hidden md:table-cell">
                       {emp.bolim
                         ? <Badge variant="default" size="sm">{emp.bolim}</Badge>
                         : <span className="text-[#94A3B8] text-sm">—</span>
                       }
                     </td>
-                    <td className="px-4 py-3 text-sm tabular-nums text-[#0F172A]">
+                    <td className="px-4 py-3 text-sm tabular-nums text-[#0F172A] hidden lg:table-cell">
                       {emp.maosh ? `${formatNumber(Number(emp.maosh))} ${t('som')}` : '—'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#94A3B8]">
+                    <td className="px-4 py-3 text-sm text-[#94A3B8] hidden lg:table-cell">
                       {emp.ishBoshi ? formatDate(emp.ishBoshi, 'short') : '—'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#94A3B8]">{emp.tel || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-[#94A3B8] hidden xl:table-cell">{emp.tel || '—'}</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 items-center">
                         <button
-                          onClick={() => setEditXodim(emp)}
+                          onClick={e => { e.stopPropagation(); setEditXodim(emp) }}
                           className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#2563EB] hover:bg-[#DBEAFE] transition-all"
                           title={t('edit')}
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
-                          onClick={() => setDeleteEmp(emp)}
+                          onClick={e => { e.stopPropagation(); setDeleteEmp(emp) }}
                           className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-all"
                           title={t('delete')}
                         >
                           <Trash2 size={14} />
                         </button>
+                        <ChevronRight size={14} className="text-[#CBD5E1] group-hover:text-[#7C3AED] ml-1 hidden md:block" />
                       </div>
                     </td>
                   </tr>

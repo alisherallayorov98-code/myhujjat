@@ -1,23 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState }       from 'react'
 import { useTranslations } from 'next-intl'
-import { Sparkles, Copy, Check, Download, FileText, Maximize2, ChevronLeft, Printer } from 'lucide-react'
+import Link                from 'next/link'
+import { Sparkles, Copy, Check, Download, FileText, Maximize2, ChevronLeft, Printer, ExternalLink } from 'lucide-react'
 import { Card }  from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { exportContractPdf  } from '@/lib/export/contractPdf'
 import { exportContractDocx } from '@/lib/export/contractDocx'
-import { printText }          from '@/lib/printDocument'
+import { printHtml }          from '@/lib/printDocument'
+import { renderKotibHtml }    from '@/lib/renderKotibHtml'
 import toast from 'react-hot-toast'
 
 interface Props {
-  loading:   boolean
-  result:    string
-  docType:   string
-  orgName?:  string
+  loading:    boolean
+  streaming?: boolean
+  result:     string
+  docType:    string
+  orgName?:   string
+  savedId?:   string | null
 }
 
-export function ResultPanel({ loading, result, docType, orgName }: Props) {
+export function ResultPanel({ loading, streaming, result, docType, orgName, savedId }: Props) {
   const t = useTranslations('seifAi')
   const [copied, setCopied] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
@@ -37,10 +41,17 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
           <span className="text-sm font-semibold text-[#0F172A]">
             {result ? docType : t('resultPreview')}
           </span>
-          {result && <Badge variant="success" size="sm">{t('ready')}</Badge>}
+          {streaming ? (
+            <span className="flex items-center gap-1 text-xs text-[#7C3AED]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] animate-pulse" />
+              {t('generating')}
+            </span>
+          ) : result ? (
+            <Badge variant="success" size="sm">{t('ready')}</Badge>
+          ) : null}
         </div>
 
-        {result && (
+        {result && !streaming && (
           <div className="flex gap-2">
             <button
               onClick={() => setFullscreen(true)}
@@ -70,14 +81,22 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
             >
               <FileText size={12} /> Word
             </button>
+            {savedId && (
+              <Link
+                href={`/dashboard/seif/ai/${savedId}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0FDF4] border border-[#BBF7D0] text-[#15803D] hover:bg-[#DCFCE7] transition-colors"
+              >
+                <ExternalLink size={12} /> Ko'rish
+              </Link>
+            )}
           </div>
         )}
       </div>
 
       <div className="flex-1 overflow-auto bg-[#F1F5F9] p-4">
-        {loading ? <LoadingState /> :
-         result  ? <ResultView content={result} /> :
-                   <EmptyState />}
+        {loading    ? <LoadingState /> :
+         result     ? <ResultView content={result} /> :
+                      <EmptyState />}
       </div>
 
       {fullscreen && result && (
@@ -94,7 +113,7 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
             <Sparkles size={14} className="text-[#A78BFA]" />
             <p className="text-sm font-semibold">{docType}</p>
             <div className="flex-1" />
-            <button onClick={() => printText(result)} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+            <button onClick={() => printHtml(renderKotibHtml(result))} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <Printer size={14} /><span className="hidden sm:inline">Pechat</span>
             </button>
             <button onClick={() => exportContractPdf({ title: docType, content: result, orgName })} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
@@ -107,17 +126,10 @@ export function ResultPanel({ loading, result, docType, orgName }: Props) {
           <div className="flex-1 overflow-auto">
             <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
               <div
-                className="bg-white shadow-2xl p-12 whitespace-pre-wrap"
-                style={{
-                  width: '794px',
-                  minHeight: '1123px',
-                  fontFamily: '"Times New Roman", serif',
-                  fontSize: 14,
-                  lineHeight: 1.8,
-                }}
-              >
-                {result}
-              </div>
+                className="bg-white shadow-2xl"
+                style={{ width: '794px', minHeight: '1123px' }}
+                dangerouslySetInnerHTML={{ __html: renderKotibHtml(result) }}
+              />
             </div>
           </div>
         </div>
@@ -156,17 +168,10 @@ function LoadingState() {
 function ResultView({ content }: { content: string }) {
   return (
     <div
-      className="bg-white shadow-md mx-auto p-8 sm:p-12 leading-relaxed text-[#0F172A] rounded-sm whitespace-pre-wrap select-text"
-      style={{
-        fontFamily: '"Times New Roman", serif',
-        fontSize: 13,
-        lineHeight: 1.8,
-        maxWidth: 794,
-        minHeight: 600,
-      }}
-    >
-      {content}
-    </div>
+      className="bg-white shadow-md mx-auto rounded-sm select-text"
+      style={{ maxWidth: 794, minHeight: 600 }}
+      dangerouslySetInnerHTML={{ __html: renderKotibHtml(content) }}
+    />
   )
 }
 

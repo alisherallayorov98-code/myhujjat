@@ -3,7 +3,7 @@
 import { useState }                                from 'react'
 import { useTranslations }                         from 'next-intl'
 import { useQuery }                                from '@tanstack/react-query'
-import { ArrowLeft, Sparkles, Download, Copy, Check } from 'lucide-react'
+import { ArrowLeft, Sparkles, Download, Copy, Check, Printer } from 'lucide-react'
 import { Card }                                    from '@/components/ui/Card'
 import { Button }                                  from '@/components/ui/Button'
 import { Input }                                   from '@/components/ui/Input'
@@ -13,6 +13,8 @@ import { exportContractPdf  }                      from '@/lib/export/contractPd
 import { exportContractDocx }                      from '@/lib/export/contractDocx'
 import { fillPrompt, type FeatureConfig }          from '@/lib/dynamicFeatures'
 import { currentLocale }                           from '@/lib/formatters'
+import { renderKotibHtml }                         from '@/lib/renderKotibHtml'
+import { printHtml }                               from '@/lib/printDocument'
 import { cn }                                      from '@/lib/cn'
 import toast                                       from 'react-hot-toast'
 
@@ -25,9 +27,10 @@ export function DynamicFeatureRunner({ features }: Props) {
   const { currentOrg, isPro } = useAuth()
   const [selected, setSelected] = useState<FeatureConfig | null>(null)
   const [values,   setValues]   = useState<Record<string, string>>({})
-  const [result,   setResult]   = useState('')
-  const [loading,  setLoading]  = useState(false)
-  const [copied,   setCopied]   = useState(false)
+  const [result,    setResult]    = useState('')
+  const [loading,   setLoading]   = useState(false)
+  const [streaming, setStreaming] = useState(false)
+  const [copied,    setCopied]    = useState(false)
 
   // Kontragentlar (isCpField uchun)
   const { data: cps = [] } = useQuery<any[]>({
@@ -56,7 +59,6 @@ export function DynamicFeatureRunner({ features }: Props) {
     if (!selected || !currentOrg?.id) return
     if (!isPro) { toast.error(t('lockTitle')); return }
 
-    // Validate required fields
     const missing = selected.fields.find(f => f.required && !values[f.key]?.trim())
     if (missing) {
       toast.error(`${missing.label} — to'ldirilishi shart`)
@@ -65,29 +67,78 @@ export function DynamicFeatureRunner({ features }: Props) {
 
     setLoading(true)
     setResult('')
+
+    const prompt  = fillPrompt(selected.promptTemplate, values)
+    const orgData: Record<string, string> = {
+      Nomi:    currentOrg.name                  || '',
+      STIR:    (currentOrg as any).inn           || '',
+      Rahbar:  (currentOrg as any).directorName  || '',
+      Bank:    (currentOrg as any).bankName      || '',
+      Manzil:  (currentOrg as any).address       || '',
+      Telefon: (currentOrg as any).phone         || '',
+    }
+    const body = JSON.stringify({
+      orgId:      currentOrg.id,
+      docType:    selected.docType,
+      prompt,
+      orgData,
+      targetLang: currentLocale(),
+    })
+
     try {
-      const prompt = fillPrompt(selected.promptTemplate, values)
-      const orgData: Record<string, string> = {
-        Nomi:    currentOrg.name             || '',
-        STIR:    (currentOrg as any).inn     || '',
-        Rahbar:  (currentOrg as any).directorName || '',
-        Bank:    (currentOrg as any).bankName     || '',
-        Manzil:  (currentOrg as any).address      || '',
-        Telefon: (currentOrg as any).phone        || '',
-      }
-      const { data } = await api.post('/ai/generate', {
-        orgId:      currentOrg.id,
-        docType:    selected.docType,
-        prompt,
-        orgData,
-        targetLang: currentLocale(),
+      const token   = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'
+      const res     = await fetch(`${baseUrl}/ai/generate/stream`, {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body,
       })
-      setResult(data.content)
-      toast.success(t('docCreated'))
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || t('error'))
-    } finally {
+
+      if (!res.ok || !res.body) {
+        throw new Error(`HTTP ${res.status}`)
+      }
+
+      const reader  = res.body.getReader()
+      const decoder = new TextDecoder()
+      let   buffer  = ''
+      let   full    = ''
+
       setLoading(false)
+      setStreaming(true)
+
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          try {
+            const obj = JSON.parse(line.slice(6))
+            if (obj.text) {
+              full += obj.text
+              setResult(full)
+            }
+            if (obj.done) {
+              toast.success(t('docCreated'))
+            }
+            if (obj.error) {
+              throw new Error(obj.error)
+            }
+          } catch {
+            // non-JSON data line — skip
+          }
+        }
+      }
+    } catch (e: any) {
+      toast.error(e?.message || t('error'))
+      setLoading(false)
+    } finally {
+      setStreaming(false)
     }
   }
 
@@ -222,27 +273,42 @@ export function DynamicFeatureRunner({ features }: Props) {
         <Button
           fullWidth
           loading={loading}
+          disabled={streaming}
           leftIcon={loading ? undefined : <Sparkles size={15} />}
           onClick={generate}
           className="mt-4"
         >
-          {loading ? t('generating') : t('generateBtn')}
+          {loading ? t('generating') : streaming ? t('generating') : t('generateBtn')}
         </Button>
       </Card>
 
       {/* RESULT */}
       <Card padding="none" className="flex flex-col min-h-[500px]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-          <p className="text-sm font-semibold text-[#0F172A]">
-            {result ? selected.title : t('resultPreview')}
-          </p>
-          {result && (
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-[#0F172A]">
+              {result ? selected.title : t('resultPreview')}
+            </p>
+            {streaming && (
+              <span className="flex items-center gap-1 text-xs text-[#7C3AED]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] animate-pulse" />
+                {t('generating')}
+              </span>
+            )}
+          </div>
+          {result && !streaming && (
             <div className="flex gap-2">
               <button
                 onClick={handleCopy}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F1F5F9]"
               >
                 {copied ? <><Check size={11} className="text-[#16A34A]" /> {t('copied')}</> : <><Copy size={11} /> {t('copy')}</>}
+              </button>
+              <button
+                onClick={() => printHtml(renderKotibHtml(result))}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F1F5F9]"
+              >
+                <Printer size={11} /> Pechat
               </button>
               <button
                 onClick={() => exportContractPdf({ title: selected.title, content: result, orgName: currentOrg?.name })}
@@ -269,12 +335,9 @@ export function DynamicFeatureRunner({ features }: Props) {
               <p className="text-xs text-[#94A3B8]">{t('loadingHint')}</p>
             </div>
           ) : result ? (
-            <pre
-              className="whitespace-pre-wrap leading-relaxed text-[#0F172A]"
-              style={{ fontFamily: '"Times New Roman", serif', fontSize: 13, lineHeight: 1.7 }}
-            >
-              {result}
-            </pre>
+            <div
+              dangerouslySetInnerHTML={{ __html: renderKotibHtml(result) }}
+            />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center gap-3 text-[#94A3B8]">
               <Sparkles size={28} className="opacity-30" />

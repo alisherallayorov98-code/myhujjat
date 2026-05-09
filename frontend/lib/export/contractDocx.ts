@@ -75,8 +75,18 @@ function parseKotibLines(text: string): LineSpec[] {
       i++; continue
     }
 
-    // Bayonnoma sarlavhalari
-    if (/BAYONNOMASI?\s*$/i.test(line) || /^BAYONNOMA/i.test(line)) {
+    // Bayonnoma / yurist hujjat sarlavhalari — markazlashgan
+    if (
+      /BAYONNOMASI?\s*$/i.test(line) || /^BAYONNOMA/i.test(line) ||
+      /^DA[‘’]VO ARIZASI\s*$/i.test(line) ||
+      /^PRETENZIYA\s*$/i.test(line) ||
+      /^ISHONCH QOG[‘’]OZI\s*$/i.test(line) ||
+      /^DALOLATNOMA\s*$/i.test(line) ||
+      /^KELISHUV BITIMI\s*$/i.test(line) ||
+      /^OGOHLANTIRUV XATI\s*$/i.test(line) ||
+      /^SHARTNOMANI.*BEKOR QILISH/i.test(line) ||
+      /^QABUL-TOPSHIRISH BAYONNOMASI\s*$/i.test(line)
+    ) {
       result.push({ text: line, align: ‘CENTER’, bold: true, size: 24, after: 80 })
       i++; continue
     }
@@ -87,9 +97,39 @@ function parseKotibLines(text: string): LineSpec[] {
       i++; continue
     }
 
-    // Muhim bo’lim sarlavhalari
-    if (/^(KUN TARTIBI|ESHITILDI|MUHOKAMA QILINDI|OVOZ BERISH|QAROR QILINDI|TOPSHIRILDI|HOLATI|IZOHLAR|ILOVALAR)\s*:?/i.test(line)) {
+    // Muhim bo’lim sarlavhalari (chap, qalin)
+    if (/^(KUN TARTIBI|BUYURADI|ESHITILDI|MUHOKAMA QILINDI|OVOZ BERISH NATIJALARI|OVOZ BERISH|QAROR QILINDI|TOPSHIRILDI|HOLATI VA MIQDORI|HOLATI|IZOHLAR VA QARORLAR|IZOHLAR|ILOVALAR|TALABNING ASOSI|TALAB MIQDORI|TALABIMIZ|OGOHLANTIRISH|TO[‘’]LOV REKVIZITLARI|HOLATNING BAYONI|HUQUQIY ASOS|TALABLAR|ILOVA|VAKILGA|VAKOLAT BERAMAN|KOMISSIYA A[‘’]ZOLARI|DALOLATNOMA PREDMETI|ANIQLANGAN HOLAT|MOLIYAVIY BAHOLASH|XULOSA|BUZILISH HOLATI|OGOHLANTIRUV MOHIYATI|BEKOR QILISH ASOSI|KUCHGA KIRISH SANASI|HISOB-KITOB TARTIBI|KELISHUV PREDMETI)\s*:?/i.test(line)) {
+      result.push({ text: line, align: ‘LEFT’, bold: true, size: 22, after: 100 })
+      i++; continue
+    }
+
+    // Raqamli bo’lim sarlavhasi “1. PREDMET” yoki “2. 1-TOMON MAJBURIYATLARI”
+    if (/^\d+\.\s+[A-Z0-9ҚҒҲЎА-Я’ʻ\-]{3,}/.test(line)) {
       result.push({ text: line, align: ‘LEFT’, bold: true, size: 22, after: 80 })
+      i++; continue
+    }
+
+    // Imzo sarlavha “Rahbar: ___ / Ism /” — yorliq + quyi chiziq
+    if (/^(Rahbar|Kotib|Yig[‘’]ilish raisi|Kengash raisi|Komissiya raisi|Ta[‘’]sis yig[‘’]ilishi raisi|Topshirdi|Qabul qildi|1-TOMON VAKILI|2-TOMON VAKILI|1-TOMON|2-TOMON)\s*:?/i.test(line)) {
+      const slashParts = line.split(‘/’)
+      const label = (slashParts[0]?.trim() ?? line).replace(/[\s_]+$/, ‘’)
+      const name  = slashParts[1]?.trim() ?? ‘’
+      const display = name ? `${label}  _______________  ${name}` : label
+      result.push({ text: display, align: ‘LEFT’, bold: false, size: 22, after: 80 })
+      i++; continue
+    }
+
+    // Imzo chizig’i “___ / Ism /”
+    if (/^_{3,}/.test(line) && line.includes(‘/’)) {
+      const name = line.split(‘/’)[1]?.trim() ?? ‘’
+      const display = `_____________________________  ${name}`
+      result.push({ text: display.trim(), align: ‘LEFT’, bold: false, size: 22, after: 80 })
+      i++; continue
+    }
+
+    // “Hurmat bilan,” — kursiv uslub
+    if (/^Hurmat bilan\s*,?\s*$/i.test(line)) {
+      result.push({ text: line, align: ‘LEFT’, bold: false, size: 22, after: 80 })
       i++; continue
     }
 
@@ -106,9 +146,19 @@ function parseKotibLines(text: string): LineSpec[] {
   return result
 }
 
-// Matn buyruq/bayonnoma ekanligini aniqlash
+// Matn kotib yoki yurist hujjati ekanligini aniqlash (structured rendering uchun)
 function isKotibDoc(content: string): boolean {
-  return /BUYRUQ\s*№/i.test(content) || /BAYONNOMA/i.test(content)
+  return (
+    /BUYRUQ\s*№/i.test(content) ||
+    /BAYONNOMA/i.test(content)   ||
+    /^PRETENZIYA\s*$/im.test(content) ||
+    /^DA'VO ARIZASI\s*$/im.test(content) ||
+    /^ISHONCH QOG'OZI\s*$/im.test(content) ||
+    /^DALOLATNOMA\s*$/im.test(content) ||
+    /^KELISHUV BITIMI\s*$/im.test(content) ||
+    /^OGOHLANTIRUV XATI\s*$/im.test(content) ||
+    /^SHARTNOMANI.*BEKOR QILISH/im.test(content)
+  )
 }
 
 export async function exportContractDocx(opts: DocxOpts): Promise<void> {

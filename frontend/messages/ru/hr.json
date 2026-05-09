@@ -89,5 +89,43 @@
   "print": "Печать",
   "pdfDownloaded": "PDF загружен ✓",
   "wordDownloaded": "Word загружен ✓",
-  "previewPlaceholder": "Здесь появится документ"
+  "previewPlaceholder": "Здесь появится документ",
+
+  "profileTitle": "Профиль сотрудника",
+  "docsTab": "Документы",
+  "leavesTab": "Отпуска",
+  "actionsTab": "Быстрые действия",
+
+  "leaveBalance": "Баланс отпуска",
+  "leaveYearlyLimit": "Годовой лимит",
+  "leaveUsed": "Использовано",
+  "leaveRemaining": "Осталось",
+  "leaveDays": "дней",
+  "addLeave": "Добавить отпуск",
+  "leaveAdded": "Отпуск добавлен ✓",
+  "leaveDeleted": "Отпуск удалён",
+  "leaveTypeLabel": "Тип отпуска",
+  "leaveStart": "Начало",
+  "leaveEnd": "Конец",
+  "leaveReason": "Причина",
+  "leaveOrderNum": "Приказ №",
+  "leaveDeleteTitle": "Удалить отпуск?",
+  "leaveDeleteConfirm": "Вы хотите удалить этот отпуск?",
+
+  "leaveType_YILLIK": "Ежегодный",
+  "leaveType_KASAL": "По болезни",
+  "leaveType_TUGILISH": "Декретный",
+  "leaveType_BEPUL": "Без содержания",
+  "leaveType_IJTIMOIY": "Социальный",
+  "leaveType_HARBIY": "Военный",
+
+  "noDocs": "Документов нет",
+  "noLeaves": "Отпусков нет",
+  "createOrder": "Создать приказ",
+
+  "filterDept": "Отдел",
+  "filterStatus": "Статус",
+  "filterAll": "Все",
+  "filterActive": "Активные",
+  "filterInactive": "Неактивные"
 }

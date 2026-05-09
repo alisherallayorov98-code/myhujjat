@@ -4,7 +4,7 @@ import { useState, useMemo }                     from 'react'
 import { useRouter }                             from 'next/navigation'
 import { useTranslations }                       from 'next-intl'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth }                           from '@/hooks/useAuth'
+import { useAuth }                               from '@/hooks/useAuth'
 import api from '@/lib/api'
 import {
   BAYONNOMA_TYPES, BAYONNOMA_TEMPLATES,
@@ -18,7 +18,7 @@ import { renderKotibHtml }    from '@/lib/renderKotibHtml'
 import { format }             from 'date-fns'
 import {
   Plus, Users, Trash2, Download, Copy, Check,
-  ChevronLeft, Eye, Save, Maximize2, Printer,
+  ChevronLeft, Eye, Save, Maximize2, Printer, ChevronDown, BookMarked, X,
 } from 'lucide-react'
 
 interface DocRow {
@@ -28,8 +28,20 @@ interface DocRow {
 
 type Step = 'list' | 'form'
 
+function toDmy(iso: string) {
+  if (!iso || !iso.includes('-')) return iso
+  const [y, m, d] = iso.split('-')
+  return `${d}.${m}.${y}`
+}
+
+const STATUS_ORDER = ['DRAFT', 'FINAL', 'SENT']
+function nextStatus(s: string) {
+  const i = STATUS_ORDER.indexOf(s)
+  return STATUS_ORDER[(i + 1) % STATUS_ORDER.length]
+}
+
 const EMPTY: BayonnomData = {
-  raqam: '', sana: format(new Date(), 'dd.MM.yyyy'),
+  raqam: '', sana: format(new Date(), 'yyyy-MM-dd'),
   vaqtBoshlanish: '', vaqtTugash: '', joy: '',
   orgNomi: '', rahbar: '', kotib: '',
   ishtirokchilar: '', taklifEtilganlar: '',
@@ -41,18 +53,34 @@ const EMPTY: BayonnomData = {
 
 export default function BayonnomPage() {
   const t = useTranslations('secretary')
-  const router          = useRouter()
-  const { currentOrg: activeOrg } = useAuth()
-  const qc              = useQueryClient()
-  const [step, setStep] = useState<Step>('list')
+  const router                      = useRouter()
+  const { currentOrg: activeOrg }   = useAuth()
+  const qc                          = useQueryClient()
+  const [step, setStep]             = useState<Step>('list')
   const [fullscreen, setFullscreen] = useState(false)
-  const [kind, setKind] = useState(BAYONNOMA_TYPES[0].value)
-  const [form, setForm] = useState<BayonnomData>({ ...EMPTY })
-  const [copied, setCopied]  = useState(false)
-  const [saving, setSaving]  = useState(false)
+  const [kind, setKind]             = useState(BAYONNOMA_TYPES[0].value)
+  const [form, setForm]             = useState<BayonnomData>({ ...EMPTY })
+  const [copied, setCopied]         = useState(false)
+  const [saving, setSaving]         = useState(false)
+  const [toDelete, setToDelete]     = useState<string | null>(null)
+  const [error, setError]           = useState('')
+  const [typeOpen, setTypeOpen]     = useState(false)
+  const [showTplModal, setShowTplModal] = useState(false)
+  const [tplName, setTplName]           = useState('')
 
-  const bayonnomaLabel = (val: string) => t(`bayonnomaType_${val}` as any)
+  const bayonnomaLabel  = (val: string) => t(`bayonnomaType_${val}` as any)
   const isQabulTopshirish = kind === 'QABUL_TOPSHIRISH'
+
+  const STATUS_CLS: Record<string, string> = {
+    DRAFT: 'bg-gray-100 text-gray-600',
+    FINAL: 'bg-green-100 text-green-700',
+    SENT:  'bg-blue-100 text-blue-700',
+  }
+  const STATUS_LBL: Record<string, string> = {
+    DRAFT: t('statusDraft'),
+    FINAL: t('statusFinal'),
+    SENT:  t('statusSent'),
+  }
 
   const { data: docs = [], isLoading } = useQuery<DocRow[]>({
     queryKey: ['documents', activeOrg?.id, 'BAYONNOMA'],
@@ -66,6 +94,64 @@ export default function BayonnomPage() {
     enabled:  !!activeOrg,
   })
 
+  const { data: myTemplates = [] } = useQuery<any[]>({
+    queryKey: ['user-templates', activeOrg?.id, 'BAYONNOMA'],
+    queryFn:  async () => {
+      const res = await api.get(`/user-templates?orgId=${activeOrg!.id}&limit=100`)
+      return (res.data.data || []).filter((t: any) => {
+        try { return JSON.parse(t.rawContent || '{}').docModule === 'BAYONNOMA' }
+        catch { return false }
+      })
+    },
+    enabled: !!activeOrg,
+  })
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => api.delete(`/documents/${id}?orgId=${activeOrg!.id}`),
+    onSuccess:  () => {
+      setToDelete(null)
+      qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] })
+    },
+  })
+
+  const updateStatusMut = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      api.put(`/documents/${id}?orgId=${activeOrg!.id}`, { status }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] }),
+  })
+
+  const saveTplMut = useMutation({
+    mutationFn: (name: string) => api.post('/user-templates', {
+      organizationId: activeOrg!.id,
+      name,
+      source: 'CUSTOM',
+      rawContent: JSON.stringify({ docModule: 'BAYONNOMA', kind, data: form }),
+    }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['user-templates', activeOrg?.id, 'BAYONNOMA'] })
+      setShowTplModal(false)
+      setTplName('')
+    },
+  })
+
+  const deleteTplMut = useMutation({
+    mutationFn: (id: string) => api.delete(`/user-templates/${id}?orgId=${activeOrg!.id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['user-templates', activeOrg?.id, 'BAYONNOMA'] }),
+  })
+
+  function applyTemplate(tpl: any) {
+    try {
+      const { kind: k, data } = JSON.parse(tpl.rawContent || '{}')
+      if (k) setKind(k)
+      if (data) setForm({
+        ...data,
+        sana: format(new Date(), 'yyyy-MM-dd'),
+        raqam: '',
+        kunTartibi: data.kunTartibi?.length ? data.kunTartibi : [newAgendaItem()],
+      })
+    } catch {}
+  }
+
   function appendEmployee(emp: any) {
     const line = emp.ism + (emp.lavozim ? ` — ${emp.lavozim}` : '')
     update('ishtirokchilar', form.ishtirokchilar
@@ -74,14 +160,11 @@ export default function BayonnomPage() {
     )
   }
 
-  const deleteMut = useMutation({
-    mutationFn: (id: string) => api.delete(`/documents/${id}?orgId=${activeOrg!.id}`),
-    onSuccess:  () => qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] }),
-  })
+  const displayForm = useMemo(() => ({ ...form, sana: toDmy(form.sana) }), [form])
 
   const preview = useMemo(() => {
-    try { return BAYONNOMA_TEMPLATES[kind]?.(form) ?? '' } catch { return '' }
-  }, [kind, form])
+    try { return BAYONNOMA_TEMPLATES[kind]?.(displayForm) ?? '' } catch { return '' }
+  }, [kind, displayForm])
 
   const previewHtml = useMemo(() => preview ? renderKotibHtml(preview) : '', [preview])
 
@@ -108,17 +191,22 @@ export default function BayonnomPage() {
   function initNew() {
     setForm({
       ...EMPTY,
+      sana:      format(new Date(), 'yyyy-MM-dd'),
       kunTartibi: [newAgendaItem()],
-      orgNomi: activeOrg?.name ?? '',
-      rahbar:  activeOrg?.directorName ?? '',
-      joy:     activeOrg?.address ?? '',
+      orgNomi:   activeOrg?.name        ?? '',
+      rahbar:    activeOrg?.directorName ?? '',
+      joy:       activeOrg?.address     ?? '',
     })
     setKind(BAYONNOMA_TYPES[0].value)
+    setError('')
     setStep('form')
   }
 
   async function handleSave(status: 'DRAFT' | 'FINAL') {
     if (!activeOrg) return
+    if (!form.raqam.trim()) { setError(t('raqamMajburiy') || 'Bayonnoma raqami kiritilishi shart'); return }
+    if (!form.sana)         { setError(t('sanaMajburiy')  || 'Sana kiritilishi shart'); return }
+    setError('')
     setSaving(true)
     try {
       const typeLabel = bayonnomaLabel(kind)
@@ -128,9 +216,8 @@ export default function BayonnomPage() {
         type:           'BAYONNOMA',
         title:          `${typeLabel} — ${titleHint || form.raqam}`,
         number:         form.raqam,
-        docDate:        form.sana,
-        // text — saved rendered preview; data — structured form for re-editing later
-        content:        { kind, text: preview, data: form },
+        docDate:        toDmy(form.sana),
+        content:        { kind, text: preview, data: { ...form, sana: toDmy(form.sana) } },
         status,
       })
       qc.invalidateQueries({ queryKey: ['documents', activeOrg.id] })
@@ -141,30 +228,17 @@ export default function BayonnomPage() {
   }
 
   async function handlePdf() {
-    const label = bayonnomaLabel(kind)
-    await exportContractPdf({ title: `${label} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+    await exportContractPdf({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
   }
 
   async function handleDocx() {
-    const label = bayonnomaLabel(kind)
-    await exportContractDocx({ title: `${label} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+    await exportContractDocx({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
   }
 
   function handleCopy() {
     navigator.clipboard.writeText(preview)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }
-
-  const STATUS_CLS: Record<string, string> = {
-    DRAFT: 'bg-gray-100 text-gray-600',
-    FINAL: 'bg-green-100 text-green-700',
-    SENT:  'bg-blue-100 text-blue-700',
-  }
-  const STATUS_LBL: Record<string, string> = {
-    DRAFT: t('statusDraft'),
-    FINAL: t('statusFinal'),
-    SENT:  t('statusSent'),
   }
 
   if (step === 'list') return (
@@ -210,20 +284,38 @@ export default function BayonnomPage() {
                   <td className="px-5 py-3 font-medium text-gray-900">{d.title}</td>
                   <td className="px-5 py-3 text-gray-500">{d.docDate || format(new Date(d.createdAt), 'dd.MM.yyyy')}</td>
                   <td className="px-5 py-3">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_CLS[d.status] ?? STATUS_CLS.DRAFT}`}>
-                      {STATUS_LBL[d.status] ?? d.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deleteMut.mutate(d.id)
-                      }}
-                      className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                      onClick={e => { e.stopPropagation(); updateStatusMut.mutate({ id: d.id, status: nextStatus(d.status) }) }}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full hover:opacity-75 transition-opacity ${STATUS_CLS[d.status] ?? STATUS_CLS.DRAFT}`}
+                      title="Holatni o'zgartirish uchun bosing"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {STATUS_LBL[d.status] ?? d.status}
                     </button>
+                  </td>
+                  <td className="px-5 py-3 text-right" onClick={e => e.stopPropagation()}>
+                    {toDelete === d.id ? (
+                      <div className="flex items-center gap-3 justify-end">
+                        <button
+                          onClick={() => deleteMut.mutate(d.id)}
+                          className="text-xs font-medium text-red-600 hover:underline"
+                        >
+                          Ha, o'chir
+                        </button>
+                        <button
+                          onClick={() => setToDelete(null)}
+                          className="text-xs text-gray-400 hover:underline"
+                        >
+                          Bekor
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setToDelete(d.id)}
+                        className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -245,24 +337,65 @@ export default function BayonnomPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-5">
-          {/* Bayonnoma turi */}
+          {myTemplates.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+              <p className="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-1.5">
+                <BookMarked className="w-3.5 h-3.5" /> Mening shablonlarim
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {myTemplates.map(tpl => (
+                  <div key={tpl.id} className="flex items-center gap-1 bg-white border border-amber-200 rounded-lg px-2.5 py-1.5">
+                    <button
+                      onClick={() => applyTemplate(tpl)}
+                      className="text-xs font-medium text-amber-800 hover:text-amber-600 transition-colors"
+                    >
+                      {tpl.name}
+                    </button>
+                    <button
+                      onClick={() => deleteTplMut.mutate(tpl.id)}
+                      className="text-gray-300 hover:text-red-400 transition-colors ml-1"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Bayonnoma turi — dropdown */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
             <p className="text-sm font-medium text-gray-700 mb-3">{t('bayonnomaTuri')}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {BAYONNOMA_TYPES.map(b => (
-                <button
-                  key={b.value}
-                  onClick={() => setKind(b.value)}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-medium transition-all text-left ${
-                    kind === b.value
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                  }`}
-                >
-                  <span className="shrink-0">{b.icon}</span>
-                  <span className="truncate">{bayonnomaLabel(b.value)}</span>
-                </button>
-              ))}
+            <div className="relative">
+              <button
+                onClick={() => setTypeOpen(p => !p)}
+                className="w-full flex items-center justify-between border border-purple-300 bg-purple-50 text-purple-800 rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-purple-100 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <span>{BAYONNOMA_TYPES.find(b => b.value === kind)?.icon}</span>
+                  {bayonnomaLabel(kind)}
+                </span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${typeOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {typeOpen && (
+                <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  <div className="max-h-72 overflow-y-auto">
+                    {BAYONNOMA_TYPES.map(b => (
+                      <button
+                        key={b.value}
+                        onClick={() => { setKind(b.value); setTypeOpen(false) }}
+                        className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left hover:bg-purple-50 transition-colors ${
+                          kind === b.value ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-700'
+                        }`}
+                      >
+                        <span className="shrink-0">{b.icon}</span>
+                        {bayonnomaLabel(b.value)}
+                        {kind === b.value && <Check className="w-3.5 h-3.5 ml-auto text-purple-600" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -270,11 +403,17 @@ export default function BayonnomPage() {
           <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
             <p className="text-sm font-medium text-gray-700">{t('malumotlar')}</p>
 
+            {error && (
+              <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                {error}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <Field label={t('bayonnomaRaqami')} value={form.raqam}
-                onChange={v => update('raqam', v)} placeholder="001" />
-              <Field label={t('sana')} value={form.sana}
-                onChange={v => update('sana', v)} placeholder="dd.mm.yyyy" />
+                onChange={v => update('raqam', v)} placeholder="001" required />
+              <Field label={t('sana')} value={form.sana} type="date"
+                onChange={v => update('sana', v)} required />
             </div>
 
             {!isQabulTopshirish && (
@@ -355,7 +494,7 @@ export default function BayonnomPage() {
             )}
           </div>
 
-          {/* Kun tartibi (faqat QABUL_TOPSHIRISH bo'lmaganda) */}
+          {/* Kun tartibi */}
           {!isQabulTopshirish && (
             <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
               <div className="flex items-center justify-between">
@@ -411,7 +550,13 @@ export default function BayonnomPage() {
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={() => { setTplName(''); setShowTplModal(true) }}
+              className="flex items-center gap-2 justify-center bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+            >
+              <BookMarked className="w-4 h-4" /> Shablon saqlash
+            </button>
             <button
               onClick={() => handleSave('DRAFT')}
               disabled={saving}
@@ -427,10 +572,46 @@ export default function BayonnomPage() {
               <Check className="w-4 h-4" /> {t('saqlash')}
             </button>
           </div>
+
+          {showTplModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+              <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm space-y-4">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <BookMarked className="w-4 h-4 text-amber-500" /> Shablon nomini kiriting
+                </h3>
+                <input
+                  autoFocus
+                  value={tplName}
+                  onChange={e => setTplName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && tplName.trim() && saveTplMut.mutate(tplName.trim())}
+                  placeholder="Masalan: Aksiyadorlar yig'ilishi"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 transition"
+                />
+                <p className="text-xs text-gray-400">
+                  Keyingi safar shu shablon tanlansa, barcha maydonlar avto-to'ladi.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowTplModal(false)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                  >
+                    Bekor
+                  </button>
+                  <button
+                    onClick={() => tplName.trim() && saveTplMut.mutate(tplName.trim())}
+                    disabled={!tplName.trim() || saveTplMut.isPending}
+                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                  >
+                    Saqlash
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <Eye className="w-4 h-4" /> {t('korinish')}
             </p>
@@ -504,14 +685,18 @@ export default function BayonnomPage() {
   )
 }
 
-function Field({ label, value, onChange, placeholder }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string
+function Field({ label, value, onChange, placeholder, type = 'text', required }: {
+  label: string; value: string; onChange: (v: string) => void
+  placeholder?: string; type?: string; required?: boolean
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-gray-500 mb-1">
+        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
       <input
-        value={value} onChange={e => onChange(e.target.value)}
+        type={type} value={value}
+        onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition"
       />

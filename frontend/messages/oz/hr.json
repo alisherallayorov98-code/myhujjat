@@ -89,5 +89,43 @@
   "print": "Печат",
   "pdfDownloaded": "PDF юкланди ✓",
   "wordDownloaded": "Word юкланди ✓",
-  "previewPlaceholder": "Ҳужжат кўриниши бу ерда чиқади"
+  "previewPlaceholder": "Ҳужжат кўриниши бу ерда чиқади",
+
+  "profileTitle": "Ходим профили",
+  "docsTab": "Ҳужжатлар",
+  "leavesTab": "Таътиллар",
+  "actionsTab": "Тез ҳаракатлар",
+
+  "leaveBalance": "Таътил баланси",
+  "leaveYearlyLimit": "Йиллик лимит",
+  "leaveUsed": "Ишлатилган",
+  "leaveRemaining": "Қолган",
+  "leaveDays": "кун",
+  "addLeave": "Таътил қўшиш",
+  "leaveAdded": "Таътил қўшилди ✓",
+  "leaveDeleted": "Таътил ўчирилди",
+  "leaveTypeLabel": "Таътил тури",
+  "leaveStart": "Боши",
+  "leaveEnd": "Охири",
+  "leaveReason": "Сабаби",
+  "leaveOrderNum": "Буйруқ №",
+  "leaveDeleteTitle": "Таътил ўчирилсинми?",
+  "leaveDeleteConfirm": "Ушбу таътилни ўчирмоқчимисиз?",
+
+  "leaveType_YILLIK": "Йиллик",
+  "leaveType_KASAL": "Касал",
+  "leaveType_TUGILISH": "Туғиш таътили",
+  "leaveType_BEPUL": "Бепул таътил",
+  "leaveType_IJTIMOIY": "Ижтимоий",
+  "leaveType_HARBIY": "Ҳарбий",
+
+  "noDocs": "Ҳужжатлар йўқ",
+  "noLeaves": "Таътиллар йўқ",
+  "createOrder": "Буйруқ яратиш",
+
+  "filterDept": "Бўлим",
+  "filterStatus": "Ҳолат",
+  "filterAll": "Барчаси",
+  "filterActive": "Фаол",
+  "filterInactive": "Фаол эмас"
 }

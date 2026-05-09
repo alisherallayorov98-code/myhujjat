@@ -30,6 +30,7 @@ import { FoundersModule }          from './modules/founders/founders.module'
 import { NotificationsModule }     from './modules/notifications/notifications.module'
 import { VoiceModule }             from './modules/voice/voice.module'
 import { MiraModule }              from './modules/mira/mira.module'
+import { LegalModule }             from './modules/legal/legal.module'
 import { BulkSendModule }          from './modules/bulk-send/bulk-send.module'
 import { ShareLinksModule }        from './modules/share-links/share-links.module'
 import { TelegramModule }          from './modules/telegram/telegram.module'
@@ -80,6 +81,7 @@ import { RequestLoggerMiddleware } from './common/request-logger.middleware'
     NotificationsModule,
     VoiceModule,
     MiraModule,
+    LegalModule,
     BulkSendModule,
     ShareLinksModule,
     TelegramModule,

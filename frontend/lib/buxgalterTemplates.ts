@@ -154,6 +154,40 @@ export interface TolovQatori {
   tolangan: boolean
 }
 
+export function generateTolovGrafigiText(d: TolovGrafigiData, rows: TolovQatori[]): string {
+  const jamiTolov = rows.reduce((s, r) => s + r.jami, 0)
+  const header    = 'Oy  Sana          Asosiy (so\'m)     Foiz (so\'m)     Jami (so\'m)      Qoldiq (so\'m)'
+  const divider   = '─'.repeat(header.length)
+  const rowLines  = rows.map(r =>
+    `${String(r.oy).padStart(3)}  ${r.sana.padEnd(12)}  ` +
+    `${r.asosiy.toLocaleString('uz-UZ').padStart(16)}  ` +
+    `${(r.foiz > 0 ? r.foiz.toLocaleString('uz-UZ') : '—').padStart(14)}  ` +
+    `${r.jami.toLocaleString('uz-UZ').padStart(14)}  ` +
+    `${r.qoldiq.toLocaleString('uz-UZ').padStart(16)}`
+  ).join('\n')
+
+  return `TO'LOV GRAFIGI
+${d.raqam ? '№ ' + d.raqam : ''}
+${d.sana}
+${d.shartnoma ? 'Shartnoma asosida: ' + d.shartnoma : ''}
+
+Tashkilot: ${d.orgNomi}
+Kontragent: ${d.cpNomi}
+Asosiy qarz: ${d.asosiyQarz.toLocaleString('uz-UZ')} so'm
+Foiz stavkasi: ${d.foizStavka}% (oylik)
+To'lov muddati: ${d.tolovSoni} oy
+
+${divider}
+${header}
+${divider}
+${rowLines}
+${divider}
+JAMI:${' '.repeat(header.length - 5 - jamiTolov.toLocaleString('uz-UZ').length)}${jamiTolov.toLocaleString('uz-UZ')}
+${divider}
+
+Jami to'lov: ${formatAmountWords(jamiTolov)}`
+}
+
 export function calcTolovGrafigi(d: TolovGrafigiData): TolovQatori[] {
   const rows: TolovQatori[] = []
   const oylikAsosiy = Math.round(d.asosiyQarz / d.tolovSoni)

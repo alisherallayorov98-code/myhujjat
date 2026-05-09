@@ -1,10 +1,8 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Scale } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { Input }  from '@/components/ui/Input'
-import { useYuristDocs } from './DocCardGrid'
+import { Input }           from '@/components/ui/Input'
+import { useYuristDocs }   from './DocCardGrid'
 
 export interface FormState {
   raqam:            string
@@ -34,6 +32,19 @@ export interface FormState {
   tomon2Majburiyat: string
   tolovSumma:       string
   tolovMuddat:      string
+  // Ogohlantiruv
+  ogohSabab:        string
+  bajarishMuddat:   string
+  oqibat:           string
+  // Dalolatnoma
+  dalolatnomaJoyi:  string
+  komissiya:        string
+  holatTavsifi:     string
+  qiymat:           string
+  // Bekor qilish
+  bekorSabab:       string
+  kuchKirishSana:   string
+  hisobTartib:      string
 }
 
 interface Props {
@@ -46,9 +57,8 @@ interface Props {
 }
 
 export function YuristForm({ selectedDoc, form, setForm, cps, onBack, onGenerate }: Props) {
-  const t = useTranslations('lawyer')
+  const t    = useTranslations('lawyer')
   const docs = useYuristDocs()
-  const upd = (key: keyof FormState, val: string) => setForm(f => ({ ...f, [key]: val }))
 
   return (
     <div className="flex items-center justify-between mb-4">
@@ -65,9 +75,12 @@ export function YuristForm({ selectedDoc, form, setForm, cps, onBack, onGenerate
   ) as any
 }
 
-export function YuristFormFields({ selectedDoc, form, setForm, cps }: Omit<Props, 'onBack' | 'onGenerate'>) {
-  const t = useTranslations('lawyer')
-  const upd = (key: keyof FormState, val: string) => setForm(f => ({ ...f, [key]: val }))
+export function YuristFormFields({
+  selectedDoc, form, setForm, cps,
+}: Omit<Props, 'onBack' | 'onGenerate'>) {
+  const t   = useTranslations('lawyer')
+  const upd = (key: keyof FormState, val: string) =>
+    setForm(f => ({ ...f, [key]: val }))
 
   return (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
@@ -76,46 +89,52 @@ export function YuristFormFields({ selectedDoc, form, setForm, cps }: Omit<Props
         <Input label={t('sana')}  value={form.sana}  onChange={e => upd('sana',  e.target.value)} />
       </div>
 
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-[#374151]">
-          {selectedDoc === 'pretenziya' ? t('javobgar') : t('ikkinchiTomon')} *
-        </label>
-        <select
-          value={form.cpNomi}
-          onChange={e => {
-            const cp = cps.find((c: any) => c.name === e.target.value)
-            if (cp) {
-              setForm(f => ({
-                ...f,
-                cpNomi:   cp.name,
-                cpInn:    cp.inn          || '',
-                cpRahbar: cp.directorName || '',
-                cpManzil: cp.address      || '',
-              }))
-            } else {
-              upd('cpNomi', e.target.value)
-            }
-          }}
-          className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
-        >
-          <option value="">{t('selectCp')}</option>
-          {cps.map((cp: any) => (
-            <option key={cp.id} value={cp.name}>{cp.name}</option>
-          ))}
-        </select>
-      </div>
+      {/* Kontragent tanlash (ishonch qog'oz uchun majburiy emas) */}
+      {selectedDoc !== 'ishonch_qogoz' && (
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium text-[#374151]">
+            {selectedDoc === 'pretenziya' ? t('javobgar') : t('ikkinchiTomon')}
+          </label>
+          <select
+            value={form.cpNomi}
+            onChange={e => {
+              const cp = cps.find((c: any) => c.name === e.target.value)
+              if (cp) {
+                setForm(f => ({
+                  ...f,
+                  cpNomi:   cp.name,
+                  cpInn:    cp.inn          || '',
+                  cpRahbar: cp.directorName || '',
+                  cpManzil: cp.address      || '',
+                }))
+              } else {
+                upd('cpNomi', e.target.value)
+              }
+            }}
+            className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
+          >
+            <option value="">{t('selectCp')}</option>
+            {cps.map((cp: any) => (
+              <option key={cp.id} value={cp.name}>{cp.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
-      {form.cpNomi && (
+      {form.cpNomi && selectedDoc !== 'ishonch_qogoz' && (
         <div className="grid grid-cols-2 gap-3">
           <Input label={t('rahbar')} value={form.cpRahbar} onChange={e => upd('cpRahbar', e.target.value)} />
           <Input label={t('stir')}   value={form.cpInn}    onChange={e => upd('cpInn',    e.target.value)} />
         </div>
       )}
 
-      {selectedDoc === 'pretenziya'    && <PretenziyaFields  form={form} upd={upd} t={t} />}
-      {selectedDoc === 'davo_ariza'    && <DavoArizaFields   form={form} upd={upd} t={t} />}
-      {selectedDoc === 'ishonch_qogoz' && <IshonchFields     form={form} upd={upd} t={t} />}
-      {selectedDoc === 'kelishuv'      && <KelishuvFields    form={form} upd={upd} t={t} />}
+      {selectedDoc === 'pretenziya'    && <PretenziyaFields    form={form} upd={upd} t={t} />}
+      {selectedDoc === 'davo_ariza'    && <DavoArizaFields     form={form} upd={upd} t={t} />}
+      {selectedDoc === 'ishonch_qogoz' && <IshonchFields       form={form} upd={upd} t={t} />}
+      {selectedDoc === 'kelishuv'      && <KelishuvFields      form={form} upd={upd} t={t} />}
+      {selectedDoc === 'ogohlantiruv'  && <OgohlantiruvFields  form={form} upd={upd} t={t} />}
+      {selectedDoc === 'dalolatnoma'   && <DalolatnomaFields   form={form} upd={upd} t={t} />}
+      {selectedDoc === 'bekor_qilish'  && <BekorQilishFields   form={form} upd={upd} t={t} />}
     </div>
   )
 }
@@ -129,8 +148,7 @@ function PretenziyaFields({ form, upd, t }: FieldsProps) {
         <Input label={t('shartnomaRaqam')} value={form.shartnomaRaqam} onChange={e => upd('shartnomaRaqam', e.target.value)} />
         <Input label={t('shartnomaSana')}  value={form.shartnomaSana}  onChange={e => upd('shartnomaSana',  e.target.value)} />
       </div>
-      <Input label={t('majburiyat')}
-        placeholder={t('majburiyatPlace')}
+      <Input label={t('majburiyat')} placeholder={t('majburiyatPlace')}
         value={form.majburiyat} onChange={e => upd('majburiyat', e.target.value)} />
       <div className="grid grid-cols-2 gap-3">
         <Input label={t('qarzSumma')} type="number" value={form.qarzSumma}
@@ -180,10 +198,8 @@ function IshonchFields({ form, upd, t }: FieldsProps) {
         <Input label={t('amalMuddat')} value={form.amalMuddat}    onChange={e => upd('amalMuddat',    e.target.value)} />
       </div>
       <Input label={t('vakilManzil')} value={form.vakilManzil} onChange={e => upd('vakilManzil', e.target.value)} />
-      <Input label={t('vakolatDoirasi')}
-        placeholder={t('vakolatPlace')}
-        value={form.vakolatDoirasi}
-        onChange={e => upd('vakolatDoirasi', e.target.value)} />
+      <Input label={t('vakolatDoirasi')} placeholder={t('vakolatPlace')}
+        value={form.vakolatDoirasi} onChange={e => upd('vakolatDoirasi', e.target.value)} />
     </>
   )
 }
@@ -199,6 +215,95 @@ function KelishuvFields({ form, upd, t }: FieldsProps) {
           onChange={e => upd('tolovSumma', e.target.value)} />
         <Input label={t('tolovMuddat')} value={form.tolovMuddat}
           onChange={e => upd('tolovMuddat', e.target.value)} />
+      </div>
+    </>
+  )
+}
+
+function OgohlantiruvFields({ form, upd, t }: FieldsProps) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3">
+        <Input label={t('shartnomaRaqam')} value={form.shartnomaRaqam} onChange={e => upd('shartnomaRaqam', e.target.value)} />
+        <Input label={t('shartnomaSana')}  value={form.shartnomaSana}  onChange={e => upd('shartnomaSana',  e.target.value)} />
+      </div>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[#374151]">{t('ogohSabab')}</label>
+        <textarea rows={3} value={form.ogohSabab}
+          onChange={e => upd('ogohSabab', e.target.value)}
+          className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#2563EB]"
+          placeholder="Shartnoma majburiyatini buzish sababi..." />
+      </div>
+      <Input label={t('bajarishMuddat')} value={form.bajarishMuddat}
+        placeholder="5 (besh) ish kuni"
+        onChange={e => upd('bajarishMuddat', e.target.value)} />
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[#374151]">{t('oqibat')}</label>
+        <textarea rows={3} value={form.oqibat}
+          onChange={e => upd('oqibat', e.target.value)}
+          className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#2563EB]"
+          placeholder="Bajarmaslik oqibati (ixtiyoriy — standart matn qo'llaniladi)" />
+      </div>
+    </>
+  )
+}
+
+function DalolatnomaFields({ form, upd, t }: FieldsProps) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3">
+        <Input label={t('dalolatnomaJoyi')} value={form.dalolatnomaJoyi}
+          placeholder="Toshkent"
+          onChange={e => upd('dalolatnomaJoyi', e.target.value)} />
+        <Input label={t('shartnomaRaqam')} value={form.shartnomaRaqam}
+          onChange={e => upd('shartnomaRaqam', e.target.value)} />
+      </div>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[#374151]">{t('komissiya')}</label>
+        <textarea rows={3} value={form.komissiya}
+          onChange={e => upd('komissiya', e.target.value)}
+          className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#2563EB]"
+          placeholder="1. Ism Familiya — tashkilot vakili&#10;2. Ism Familiya — kontragent vakili" />
+      </div>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[#374151]">{t('holatTavsifi')}</label>
+        <textarea rows={3} value={form.holatTavsifi}
+          onChange={e => upd('holatTavsifi', e.target.value)}
+          className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#2563EB]"
+          placeholder="Aniqlangan kamomad/nuqson tavsifi..." />
+      </div>
+      <Input label={t('qiymat')} type="number" value={form.qiymat}
+        placeholder="Kamomad qiymati (so'm)"
+        onChange={e => upd('qiymat', e.target.value)} />
+    </>
+  )
+}
+
+function BekorQilishFields({ form, upd, t }: FieldsProps) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3">
+        <Input label={t('shartnomaRaqam')} value={form.shartnomaRaqam}
+          onChange={e => upd('shartnomaRaqam', e.target.value)} />
+        <Input label={t('shartnomaSana')}  value={form.shartnomaSana}
+          onChange={e => upd('shartnomaSana',  e.target.value)} />
+      </div>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[#374151]">{t('bekorSabab')}</label>
+        <textarea rows={3} value={form.bekorSabab}
+          onChange={e => upd('bekorSabab', e.target.value)}
+          className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#2563EB]"
+          placeholder="FK 351-modda asosida — majburiyat bajarilmaganligi sababli..." />
+      </div>
+      <Input label={t('kuchKirishSana')} value={form.kuchKirishSana}
+        placeholder="30 (o'ttiz) kun"
+        onChange={e => upd('kuchKirishSana', e.target.value)} />
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-[#374151]">{t('hisobTartib')}</label>
+        <textarea rows={3} value={form.hisobTartib}
+          onChange={e => upd('hisobTartib', e.target.value)}
+          className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#2563EB]"
+          placeholder="Hisob-kitob tartibi (ixtiyoriy — standart matn qo'llaniladi)" />
       </div>
     </>
   )

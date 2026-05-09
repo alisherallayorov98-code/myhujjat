@@ -7,14 +7,15 @@ import { Button }  from '@/components/ui/Button'
 import { EXAMPLE_PROMPTS } from './constants'
 
 interface Props {
-  docType:  string
-  prompt:   string
-  setPrompt: (v: string) => void
-  loading:  boolean
+  docType:    string
+  prompt:     string
+  setPrompt:  (v: string) => void
+  loading:    boolean
+  streaming?: boolean
   onGenerate: () => void
 }
 
-export function PromptForm({ docType, prompt, setPrompt, loading, onGenerate }: Props) {
+export function PromptForm({ docType, prompt, setPrompt, loading, streaming, onGenerate }: Props) {
   const t = useTranslations('seifAi')
   const examples = EXAMPLE_PROMPTS[docType] || []
 
@@ -49,11 +50,12 @@ export function PromptForm({ docType, prompt, setPrompt, loading, onGenerate }: 
       <Button
         fullWidth size="md"
         loading={loading}
-        leftIcon={loading ? undefined : <Sparkles size={16} />}
+        disabled={streaming}
+        leftIcon={(loading || streaming) ? undefined : <Sparkles size={16} />}
         onClick={onGenerate}
         className="mt-3"
       >
-        {loading ? t('generating') : t('generateBtn')}
+        {(loading || streaming) ? t('generating') : t('generateBtn')}
       </Button>
     </Card>
   )

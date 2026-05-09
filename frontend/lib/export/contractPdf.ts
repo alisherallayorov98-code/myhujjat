@@ -11,9 +11,19 @@ function isContractOpts(o: PdfOpts): o is { contract: any } {
   return 'contract' in o
 }
 
-// Matn buyruq/bayonnoma ekanligini aniqlash
+// Matn kotib yoki yurist hujjati ekanligini aniqlash (HTML render uchun)
 function isKotibDoc(content: string): boolean {
-  return /BUYRUQ\s*№/i.test(content) || /BAYONNOMA/i.test(content)
+  return (
+    /BUYRUQ\s*№/i.test(content) ||
+    /BAYONNOMA/i.test(content)   ||
+    /^PRETENZIYA\s*$/im.test(content) ||
+    /^DA'VO ARIZASI\s*$/im.test(content) ||
+    /^ISHONCH QOG'OZI\s*$/im.test(content) ||
+    /^DALOLATNOMA\s*$/im.test(content) ||
+    /^KELISHUV BITIMI\s*$/im.test(content) ||
+    /^OGOHLANTIRUV XATI\s*$/im.test(content) ||
+    /^SHARTNOMANI.*BEKOR QILISH/im.test(content)
+  )
 }
 
 async function exportSimplePdf(opts: { title: string; content: string; orgName?: string; number?: string }) {

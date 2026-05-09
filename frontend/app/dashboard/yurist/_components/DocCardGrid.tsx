@@ -1,7 +1,11 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { AlertTriangle, Gavel, FileCheck, Handshake, ArrowRight, type LucideIcon } from 'lucide-react'
+import {
+  AlertTriangle, Gavel, FileCheck, Handshake,
+  Bell, ClipboardList, XCircle,
+  ArrowRight, type LucideIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 export interface YuristDoc {
@@ -14,10 +18,13 @@ export interface YuristDoc {
 }
 
 const YURIST_DOCS_BASE = [
-  { id: 'pretenziya',    nameKey: 'pretenziyaName',    descKey: 'pretenziyaDesc',    icon: AlertTriangle, color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]' },
-  { id: 'davo_ariza',    nameKey: 'davoArizaName',     descKey: 'davoArizaDesc',     icon: Gavel,         color: 'text-[#DC2626]', bg: 'bg-[#FEE2E2]' },
-  { id: 'ishonch_qogoz', nameKey: 'ishonchQogozName',  descKey: 'ishonchQogozDesc',  icon: FileCheck,     color: 'text-[#2563EB]', bg: 'bg-[#DBEAFE]' },
-  { id: 'kelishuv',      nameKey: 'kelishuvName',      descKey: 'kelishuvDesc',      icon: Handshake,     color: 'text-[#16A34A]', bg: 'bg-[#DCFCE7]' },
+  { id: 'pretenziya',    nameKey: 'pretenziyaName',   descKey: 'pretenziyaDesc',   icon: AlertTriangle, color: 'text-[#D97706]', bg: 'bg-[#FEF3C7]' },
+  { id: 'davo_ariza',    nameKey: 'davoArizaName',    descKey: 'davoArizaDesc',    icon: Gavel,         color: 'text-[#DC2626]', bg: 'bg-[#FEE2E2]' },
+  { id: 'ishonch_qogoz', nameKey: 'ishonchQogozName', descKey: 'ishonchQogozDesc', icon: FileCheck,     color: 'text-[#2563EB]', bg: 'bg-[#DBEAFE]' },
+  { id: 'kelishuv',      nameKey: 'kelishuvName',     descKey: 'kelishuvDesc',     icon: Handshake,     color: 'text-[#16A34A]', bg: 'bg-[#DCFCE7]' },
+  { id: 'ogohlantiruv',  nameKey: 'ogohlantiruvName', descKey: 'ogohlantiruvDesc', icon: Bell,          color: 'text-[#D97706]', bg: 'bg-[#FEF9C3]' },
+  { id: 'dalolatnoma',   nameKey: 'dalolatnomaName',  descKey: 'dalolatnomaDesc',  icon: ClipboardList, color: 'text-[#7C3AED]', bg: 'bg-[#EDE9FE]' },
+  { id: 'bekor_qilish',  nameKey: 'bekorQilishName',  descKey: 'bekorQilishDesc',  icon: XCircle,       color: 'text-[#DC2626]', bg: 'bg-[#FEE2E2]' },
 ] as const
 
 export function useYuristDocs(): YuristDoc[] {
@@ -37,10 +44,10 @@ export const YURIST_DOCS: YuristDoc[] = YURIST_DOCS_BASE.map(d => ({
 }))
 
 export function DocCardGrid({ onSelect }: { onSelect: (id: string) => void }) {
-  const t = useTranslations('lawyer')
+  const t    = useTranslations('lawyer')
   const docs = useYuristDocs()
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {docs.map(doc => (
         <button
           key={doc.id}

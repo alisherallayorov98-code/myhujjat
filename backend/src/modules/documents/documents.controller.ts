@@ -38,16 +38,18 @@ export class DocumentsController {
   @Get()
   async findAll(
     @CurrentUser() user: any,
-    @Query('orgId') orgId:  string,
-    @Query('type')  type?:  DocumentType,
-    @Query('page')  page?:  string,
-    @Query('limit') limit?: string,
+    @Query('orgId')      orgId:       string,
+    @Query('type')       type?:       DocumentType,
+    @Query('page')       page?:       string,
+    @Query('limit')      limit?:      string,
+    @Query('employeeId') employeeId?: string,
   ) {
     await this.tenant.requireOrgAccess(user.sub, orgId)
     return this.svc.findAll(orgId, {
       type,
       page:  page  ? Number(page)  : 1,
       limit: limit ? Number(limit) : 30,
+      employeeId,
     })
   }
 

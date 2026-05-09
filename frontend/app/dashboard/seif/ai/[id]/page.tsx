@@ -16,7 +16,8 @@ import { useAuth }                                  from '@/hooks/useAuth'
 import api                                          from '@/lib/api'
 import { exportContractPdf }                        from '@/lib/export/contractPdf'
 import { exportContractDocx }                       from '@/lib/export/contractDocx'
-import { printText }                                from '@/lib/printDocument'
+import { printHtml }                                from '@/lib/printDocument'
+import { renderKotibHtml }                          from '@/lib/renderKotibHtml'
 import { formatDate }                               from '@/lib/formatters'
 import toast                                        from 'react-hot-toast'
 
@@ -105,7 +106,7 @@ export default function AiDocDetailPage({ params }: { params: Promise<{ id: stri
             <Button
               variant="outline" size="sm"
               leftIcon={<Printer size={13} />}
-              onClick={() => doc?.content && printText(doc.content)}
+              onClick={() => doc?.content && printHtml(renderKotibHtml(doc.content))}
             >
               Pechat
             </Button>
@@ -138,18 +139,10 @@ export default function AiDocDetailPage({ params }: { params: Promise<{ id: stri
           <div className="bg-[#F1F5F9] py-8 px-4 sm:px-8">
             {doc.content ? (
               <div
-                className="bg-white shadow-md mx-auto p-10 sm:p-14 text-[#0F172A] rounded-sm"
-                style={{
-                  fontFamily: '"Times New Roman", serif',
-                  fontSize: 14,
-                  lineHeight: 1.8,
-                  whiteSpace: 'pre-wrap',
-                  maxWidth: 794,
-                  minHeight: 1100,
-                }}
-              >
-                {doc.content}
-              </div>
+                className="bg-white shadow-md mx-auto rounded-sm"
+                style={{ maxWidth: 794, minHeight: 1100 }}
+                dangerouslySetInnerHTML={{ __html: renderKotibHtml(doc.content) }}
+              />
             ) : (
               <div className="bg-white p-12 text-center text-[#94A3B8] mx-auto" style={{ maxWidth: 794 }}>
                 {t('noContent')}

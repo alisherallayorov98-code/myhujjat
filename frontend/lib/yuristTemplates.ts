@@ -21,14 +21,12 @@ export interface YuristData {
 // ============================================
 export function generatePretenziya(d: YuristData): string {
   return `PRETENZIYA
-(Da'vogar xat)
 
 Kimga: ${d.cpNomi}
-       ${d.cpManzil || '_______________'}
-       ${d.cpRahbar ? 'Rahbar: ' + d.cpRahbar : ''}
-
+Manzil: ${d.cpManzil || '_______________'}
+${d.cpRahbar ? `Mansabdor shaxs: ${d.cpRahbar}` : ''}
 Kimdan: ${d.orgNomi}
-        ${d.orgManzil || '_______________'}
+Manzil: ${d.orgManzil || '_______________'}
 
 Raqam: № ${d.raqam}               Sana: ${d.sana}
 
@@ -66,7 +64,7 @@ MFO:  ${d.orgMfo || '_______________'}
 Hurmat bilan,
 
 _______________ / ${d.orgRahbar} /
-       M.O.
+M.O.
 ${d.orgNomi}
 Tel: ${d.orgTel || '_______________'}`
 }
@@ -78,14 +76,14 @@ export function generateDavoAriza(d: YuristData): string {
   return `O'ZBEKISTON RESPUBLIKASI
 ${d.extra?.SUD_NOMI || 'TOSHKENT SHAHAR IQTISODIY SUDI'}GA
 
-Da'vogar:        ${d.orgNomi}
-                 STIR: ${d.orgInn}
-                 Manzil: ${d.orgManzil || '_______________'}
-                 Tel: ${d.orgTel || '_______________'}
+Da'vogar: ${d.orgNomi}
+STIR: ${d.orgInn}
+Manzil: ${d.orgManzil || '_______________'}
+Tel: ${d.orgTel || '_______________'}
 
-Javobgar:        ${d.cpNomi}
-                 ${d.cpInn ? 'STIR: ' + d.cpInn : ''}
-                 Manzil: ${d.cpManzil || '_______________'}
+Javobgar: ${d.cpNomi}
+${d.cpInn ? `STIR: ${d.cpInn}` : ''}
+Manzil: ${d.cpManzil || '_______________'}
 
 DA'VO ARIZASI
 
@@ -157,10 +155,149 @@ Ushbu ishonch qog'ozi ${d.extra?.AMAL_MUDDAT || '1 (bir) yil'} muddatga berilgan
 ${d.extra?.QAYTA_VAKOLAT || 'Qayta vakolat berish taqiqlanadi.'}
 
 _______________ / ${d.orgRahbar} /
-       M.O.
+M.O.
 ${d.orgNomi}
 
 Notarial tasdiqlash: _______________`
+}
+
+// ============================================
+// OGOHLANTIRUV XATI
+// ============================================
+export function generateOgohlantiruv(d: YuristData): string {
+  return `OGOHLANTIRUV XATI
+
+Kimga: ${d.cpNomi}
+       ${d.cpRahbar ? d.cpRahbar + ' janoblariga' : '_______________'}
+       ${d.cpManzil || ''}
+
+Kimdan: ${d.orgNomi}
+
+Raqam: № ${d.raqam}               Sana: ${d.sana}
+
+Hurmatli ${d.cpRahbar || 'Rahbar'},
+
+${d.orgNomi} (keyingi o'rinlarda "Ogohlantirayotchi tomon") sizning tashkilotingizga ${d.cpNomi} (keyingi o'rinlarda "Ogohlantirilayotgan tomon") quyidagi masala bo'yicha rasmiy ogohlantiruv yo'llaydi.
+
+BUZILISH HOLATI:
+
+Tomonlar o'rtasida tuzilgan № ${d.extra?.SHARTNOMA_RAQAM || '___'} sonli, ${d.extra?.SHARTNOMA_SANA || '___'} yildagi shartnomaga muvofiq, ${d.cpNomi} quyidagi majburiyatni bajarmagan yoki lozim darajada bajarmagan:
+
+${d.extra?.OGOH_SABAB || '— _______________________________________________'}
+
+OGOHLANTIRUV MOHIYATI:
+
+Sizni ushbu qonunbuzarlikni ${d.extra?.BAJARISH_MUDDAT || "5 (besh) ish kuni"} ichida bartaraf etishga ogohlantiramiz.
+
+Agar belgilangan muddatda majburiyat bajarilmasa:
+${d.extra?.OQIBAT || "— O'zbekiston Respublikasi Iqtisodiy sudiga da'vo arizasi beriladi;\n— Yetkazilgan zararlar va penya to'lov talabi qo'yiladi;\n— Ish bergan shartnomaning bir tomonlama bekor qilinishi ko'rib chiqiladi."}
+
+Ushbu muammoni tinch yo'l bilan hal etishga umid qilamiz va murojaat qilishingizni so'raymiz.
+
+Hurmat bilan,
+
+_______________ / ${d.orgRahbar} /
+M.O.
+${d.orgNomi}
+Tel: ${d.orgTel || '_______________'}`
+}
+
+// ============================================
+// DALOLATNOMA
+// ============================================
+export function generateDalolatnoma(d: YuristData): string {
+  return `DALOLATNOMA
+
+${d.extra?.DALOLATNOMA_JOYI || 'Toshkent'} shahri                    "${d.sana}"
+
+Ushbu dalolatnoma № ${d.raqam} quyidagi tomonlar ishtirokida tuzildi:
+
+1-Tomon: ${d.orgNomi}
+         STIR: ${d.orgInn}
+         Vakili: ${d.orgRahbar}
+         Manzil: ${d.orgManzil || '_______________'}
+
+2-Tomon: ${d.cpNomi}
+         ${d.cpInn ? 'STIR: ' + d.cpInn : ''}
+         Vakili: ${d.cpRahbar || '_______________'}
+         Manzil: ${d.cpManzil || '_______________'}
+
+KOMISSIYA A'ZOLARI:
+
+${d.extra?.KOMISSIYA || `1. ${d.orgRahbar} — ${d.orgNomi} vakili\n2. ${d.cpRahbar || '_______________'} — ${d.cpNomi} vakili\n3. _______________ — mustaqil kuzatuvchi`}
+
+DALOLATNOMA PREDMETI:
+
+Tomonlar № ${d.extra?.SHARTNOMA_RAQAM || '___'} sonli shartnoma doirasida yetkazib berilgan tovar/ko'rsatilgan xizmat sifati va miqdori tekshirildi.
+
+ANIQLANGAN HOLAT:
+
+${d.extra?.HOLAT_TAVSIFI || '— _______________________________________________\n— _______________________________________________'}
+
+MOLIYAVIY BAHOLASH:
+
+Kamomad/nuqson miqdori: ${d.extra?.QIYMAT || '_______________'}
+
+XULOSA:
+
+Yuqorida ko'rsatilgan kamomad/nuqson ${d.cpNomi} tomonidan ${d.extra?.BAJARISH_MUDDAT || "10 (o'n) ish kuni"} ichida bartaraf etilishi lozim.
+
+Ushbu dalolatnoma 2 nusxada tuzildi va har bir tomon 1 nusxasini oldi.
+
+1-TOMON VAKILI:
+_______________ / ${d.orgRahbar} /
+M.O.
+${d.orgNomi}
+
+2-TOMON VAKILI:
+_______________ / ${d.cpRahbar || '___'} /
+M.O.
+${d.cpNomi}`
+}
+
+// ============================================
+// SHARTNOMANI BEKOR QILISH XATI
+// ============================================
+export function generateBekorQilishXati(d: YuristData): string {
+  return `SHARTNOMANI BIR TOMONLAMA BEKOR QILISH TO'G'RISIDA XABARNOMA
+
+Kimga: ${d.cpNomi}
+       ${d.cpRahbar ? d.cpRahbar + ' janoblariga' : '_______________'}
+
+Kimdan: ${d.orgNomi}
+
+Raqam: № ${d.raqam}               Sana: ${d.sana}
+
+Hurmatli ${d.cpRahbar || 'Rahbar'},
+
+${d.orgNomi} tomonidan ${d.cpNomi} bilan tuzilgan № ${d.extra?.SHARTNOMA_RAQAM || '___'} sonli, ${d.extra?.SHARTNOMA_SANA || '___'} yildagi shartnomani (keyingi o'rinlarda "Shartnoma") bir tomonlama bekor qilish to'g'risida xabarnoma yuboradi.
+
+BEKOR QILISH ASOSI:
+
+${d.extra?.BEKOR_SABAB || `O'zbekiston Respublikasi Fuqarolik kodeksining 351-moddasi asosida — Shartnomani bir tomonlama bekor qilish.\n\nKonkret sabab: kontragent o'z majburiyatlarini belgilangan muddatlarda bajarmagan.`}
+
+KUCHGA KIRISH SANASI:
+
+Ushbu xabarnoma qabul qilinganidan boshlab ${d.extra?.KUCH_KIRISH_SANA || "30 (o'ttiz) kun"} o'tgach Shartnoma bekor qilingan hisoblanadi.
+
+HISOB-KITOB TARTIBI:
+
+${d.extra?.HISOB_TARTIB || `1. Tomonlar o'zaro hisob-kitobni ushbu xabarnoma imzolanganidan ${d.extra?.KUCH_KIRISH_SANA || "30 kun"} ichida amalga oshiradilar.
+2. ${d.orgNomi} tomonidan avans to'langan bo'lsa, ${d.cpNomi} ularni qaytaradi.
+3. Bajarilgan ishlar hajmiga yarasha haq to'lanadi.`}
+
+OGOHLANTIRISH:
+
+Agar hisob-kitob muddatida amalga oshirilmasa, ${d.orgNomi} sudga murojaat qilishga majbur bo'ladi. Barcha sud xarajatlari Javobgar zimmasiga yuklatiladi.
+
+Qabul qilganingizni tasdiqlovchi yozma javob kutiladi.
+
+Hurmat bilan,
+
+_______________ / ${d.orgRahbar} /
+M.O.
+${d.orgNomi}
+Tel: ${d.orgTel || '_______________'}`
 }
 
 // ============================================
@@ -196,9 +333,11 @@ ${d.extra?.TOLOV_SHARTLARI ||
 5.1. Ushbu bitim imzolanganidan so'ng tomonlarning da'vo talablari o'z kuchini yo'qotadi.
 5.2. Bitim 2 nusxada tuzilgan.
 
-1-TOMON:                               2-TOMON:
-${d.orgNomi}                           ${d.cpNomi}
+1-TOMON: ${d.orgNomi}
+_______________ / ${d.orgRahbar} /
+M.O.
 
-_______________ / ${d.orgRahbar} /     _______________ / ${d.cpRahbar || '___'} /
-       M.O.                                    M.O.`
+2-TOMON: ${d.cpNomi}
+_______________ / ${d.cpRahbar || '___'} /
+M.O.`
 }

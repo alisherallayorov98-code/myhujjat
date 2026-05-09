@@ -38,8 +38,17 @@ export default function KotibPage() {
     enabled:  !!activeOrg,
   })
 
-  const buyruqCount    = recent.filter(d => d.type === 'BUYRUQ').length
-  const bayonnomCount  = recent.filter(d => d.type === 'BAYONNOMA').length
+  const { data: buyruqCount = 0 } = useQuery<number>({
+    queryKey: ['documents-count', activeOrg?.id, 'BUYRUQ'],
+    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}&type=BUYRUQ&limit=1`).then(r => r.data.meta?.total ?? 0),
+    enabled:  !!activeOrg,
+  })
+
+  const { data: bayonnomCount = 0 } = useQuery<number>({
+    queryKey: ['documents-count', activeOrg?.id, 'BAYONNOMA'],
+    queryFn:  () => api.get(`/documents?orgId=${activeOrg!.id}&type=BAYONNOMA&limit=1`).then(r => r.data.meta?.total ?? 0),
+    enabled:  !!activeOrg,
+  })
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">

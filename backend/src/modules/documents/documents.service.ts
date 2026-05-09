@@ -9,6 +9,7 @@ export interface CreateDocDto {
   docDate?:       string
   content:        Record<string, unknown>
   status?:        DocStatus
+  employeeId?:    string
 }
 
 export interface UpdateDocDto {
@@ -27,13 +28,19 @@ export class DocumentsService {
   // ============================================
 
   async findAll(orgId: string, query: {
-    type?:  DocumentType
-    page?:  number
-    limit?: number
+    type?:       DocumentType
+    page?:       number
+    limit?:      number
+    employeeId?: string
   } = {}) {
-    const { type, page = 1 } = query
+    const { type, page = 1, employeeId } = query
     const limit = Math.min(query.limit || 30, 100)
-    const where = { organizationId: orgId, isActive: true, ...(type ? { type } : {}) }
+    const where: any = {
+      organizationId: orgId,
+      isActive:       true,
+      ...(type       ? { type }       : {}),
+      ...(employeeId ? { employeeId } : {}),
+    }
 
     const [total, data] = await Promise.all([
       this.prisma.document.count({ where }),
@@ -71,6 +78,7 @@ export class DocumentsService {
         docDate:        dto.docDate,
         content:        dto.content as any,
         status:         dto.status ?? 'DRAFT',
+        ...(dto.employeeId ? { employeeId: dto.employeeId } : {}),
       },
     })
   }
