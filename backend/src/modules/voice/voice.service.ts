@@ -37,7 +37,7 @@ export interface VoiceResult {
 export class VoiceService {
   private readonly logger = new Logger(VoiceService.name)
   private readonly client: GoogleGenAI
-  private readonly model    = 'gemini-2.5-pro'           // matn + tool calling uchun
+  private readonly model    = 'gemini-2.0-flash'               // matn + tool calling uchun
   private readonly ttsModel = 'gemini-2.5-flash-preview-tts'  // ovoz uchun
 
   private readonly fastPath: VoiceFastPath
@@ -172,7 +172,11 @@ export class VoiceService {
       }
     } catch (err: any) {
       this.logger.error(`Gemini xato: ${err?.message}`)
-      throw new BadRequestException(err?.message || 'AI xatosi')
+      const msg: string = err?.message || ''
+      if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota')) {
+        throw new BadRequestException('AI limiti tugadi. Biroz kutib qayta urinib ko\'ring.')
+      }
+      throw new BadRequestException(msg || 'AI xatosi')
     }
 
     // Agent javobini ovozda generatsiya qilish (TTS)
