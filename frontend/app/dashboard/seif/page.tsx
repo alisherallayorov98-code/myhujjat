@@ -187,7 +187,7 @@ export default function SeifPage() {
       {/* Jadval */}
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
                 {[t('tableHujjat'), t('tableTur'), t('tableKontragent'), t('tableSana'), t('tableSumma'), t('tableHolat'), ''].map(h => (

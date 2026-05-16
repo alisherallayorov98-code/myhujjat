@@ -177,7 +177,7 @@ export default function FakturaPage() {
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[560px]">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
                 {[t('tableRaqam'), t('tableSarlavha'), t('tableSumma'), t('tableSana'), ''].map(h => (

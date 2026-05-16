@@ -159,7 +159,7 @@ export default function KontragentlarPage() {
     if (selected.size > 0) setSelected(new Set())
   }, [selected.size]))
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ['counterparties', currentOrg?.id, page, debouncedSearch, statusFilter],
     queryFn:  async () => {
       if (!currentOrg?.id) return { data: [] as Counterparty[], meta: { total: 0, totalPages: 1, page: 1, limit: 20 } }
@@ -173,6 +173,7 @@ export default function KontragentlarPage() {
       return data as { data: Counterparty[]; meta: { total: number; totalPages: number; page: number; limit: number } }
     },
     enabled: !!currentOrg?.id,
+    retry:   1,
   })
 
   // Frontend STIR statusi bo'yicha filter
@@ -358,7 +359,20 @@ export default function KontragentlarPage() {
         </div>
       )}
 
-      {!isLoading && filtered.length === 0 && (
+      {isError ? (
+        <Card>
+          <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+            <div className="w-12 h-12 rounded-xl bg-[#FEE2E2] flex items-center justify-center">
+              <Users size={20} className="text-[#DC2626]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#0F172A]">Ma'lumotlarni yuklashda xatolik</p>
+              <p className="text-xs text-[#94A3B8] mt-0.5">Internet aloqasini tekshirib, qayta urinib ko'ring</p>
+            </div>
+            <button onClick={() => refetch()} className="text-xs font-medium text-[#2563EB] hover:underline">Qayta urinish</button>
+          </div>
+        </Card>
+      ) : !isLoading && filtered.length === 0 && (
         <EmptyState
           icon={<Users size={28} />}
           title={t('noCounterparties')}

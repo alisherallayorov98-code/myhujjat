@@ -172,7 +172,7 @@ export default function KadrlarPage() {
   useKeyboardShortcut('mod+k', useCallback(() => searchInputRef.current?.focus(), []))
   useKeyboardShortcut('mod+n', useCallback(() => setAddModal(true), []))
 
-  const { data, isLoading } = useQuery<{ data: Employee[]; meta: { total: number; totalPages: number; page: number; limit: number } }>({
+  const { data, isLoading, isError, refetch } = useQuery<{ data: Employee[]; meta: { total: number; totalPages: number; page: number; limit: number } }>({
     queryKey: ['employees', currentOrg?.id, debouncedSearch, page, bolimFilter, statusFilter],
     queryFn:  () => {
       const params = new URLSearchParams({
@@ -186,6 +186,7 @@ export default function KadrlarPage() {
       return api.get(`/employees?${params}`).then(r => r.data)
     },
     enabled: !!currentOrg?.id,
+    retry:   1,
   })
 
   const employees   = data?.data || []
@@ -324,7 +325,7 @@ export default function KadrlarPage() {
       {/* Jadval */}
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-[#E2E8F0]">
                 {[t('tableEmployee'), t('tableLavozim'), t('tableBolim'), t('tableSalary'), t('tableIshBoshi'), t('tablePhone'), ''].map(h => (
@@ -337,6 +338,14 @@ export default function KadrlarPage() {
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={7} />)
+              ) : isError ? (
+                <tr><td colSpan={7}>
+                  <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+                    <p className="text-sm font-medium text-[#0F172A]">Ma'lumotlarni yuklashda xatolik</p>
+                    <p className="text-xs text-[#94A3B8]">Internet aloqasini tekshirib, qayta urinib ko'ring</p>
+                    <button onClick={() => refetch()} className="text-xs text-[#2563EB] hover:underline">Qayta urinish</button>
+                  </div>
+                </td></tr>
               ) : employees.length === 0 ? (
                 <tr>
                   <td colSpan={7}>

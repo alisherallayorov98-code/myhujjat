@@ -447,7 +447,7 @@ export default function EmployeeProfilePage() {
                     <td className="px-4 py-3">
                       <LeaveTypeBadge type={leave.type} />
                       {leave.reason && (
-                        <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[140px]">{leave.reason}</div>
+                        <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[140px]" title={leave.reason}>{leave.reason}</div>
                       )}
                     </td>
                     <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{formatDate(leave.startDate)}</td>

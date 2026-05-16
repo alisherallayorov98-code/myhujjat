@@ -242,7 +242,8 @@ export default function BuyruqPage() {
             <p className="text-gray-400 text-sm mt-1">{t('yangiBuyruqYarating')}</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[560px]">
             <thead>
               <tr className="text-left border-b border-gray-100">
                 <th className="px-5 py-3 font-medium text-gray-500">{t('raqam')}</th>
@@ -300,6 +301,7 @@ export default function BuyruqPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

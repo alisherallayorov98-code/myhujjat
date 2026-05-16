@@ -196,7 +196,7 @@ export default function SpesifikatsiyalarPage() {
       ) : (
         <Card padding="none">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                   {[t('table.number'), t('table.contract'), t('table.rows'), t('table.totalAmount'), t('table.date'), ''].map(h => (
