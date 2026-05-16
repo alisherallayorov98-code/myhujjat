@@ -171,10 +171,18 @@ export default function SpesifikatsiyalarPage() {
           ))}
         </div>
       ) : isError ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-          <p className="text-[#DC2626] font-medium">Ma'lumotlarni yuklashda xatolik yuz berdi</p>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>Qayta urinish</Button>
-        </div>
+        <Card>
+          <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+            <div className="w-12 h-12 rounded-xl bg-[#FEE2E2] flex items-center justify-center">
+              <ClipboardList size={20} className="text-[#DC2626]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#0F172A]">Ma'lumotlarni yuklashda xatolik</p>
+              <p className="text-xs text-[#94A3B8] mt-0.5">Internet aloqasini tekshirib, qayta urinib ko'ring</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>Qayta urinish</Button>
+          </div>
+        </Card>
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={<ClipboardList size={28} />}

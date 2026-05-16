@@ -133,7 +133,7 @@ export default function AktSverkiPage() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-14 bg-white rounded-xl border border-[#E2E8F0] animate-pulse" />
+            <div key={i} className="h-16 bg-white rounded-xl border border-[#E2E8F0] animate-pulse" />
           ))}
         </div>
       ) : aktlar.length === 0 ? (

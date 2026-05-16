@@ -279,6 +279,7 @@ export default function YangiShartnoma() {
       toast.error(v.message!)
       return
     }
+    setServerError([])
     setStep(3)
   }
 
@@ -363,6 +364,7 @@ export default function YangiShartnoma() {
   function handleCreate() {
     const v = canCreate()
     if (!v.ok) { toast.error(v.message!); return }
+    setServerError([])
     const amount = specTotal > 0 ? specTotal : parseFloat(form.amount) || 0
     mutation.mutate({
       organizationId: currentOrg!.id,
@@ -631,13 +633,21 @@ export default function YangiShartnoma() {
       <StepBar step={3} />
 
       {serverError.length > 0 && (
-        <div className="mb-4 p-3.5 bg-[#FEF2F2] border border-[#FECACA] rounded-xl">
-          <p className="text-sm font-semibold text-[#DC2626] mb-1">{t('toast.error')}</p>
-          <ul className="space-y-0.5">
-            {serverError.map((err, i) => (
-              <li key={i} className="text-xs text-[#B91C1C]">• {err}</li>
-            ))}
-          </ul>
+        <div className="mb-4 p-3.5 bg-[#FEF2F2] border border-[#FECACA] rounded-xl flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-[#DC2626] mb-1">{t('toast.error')}</p>
+            <ul className="space-y-0.5">
+              {serverError.map((err, i) => (
+                <li key={i} className="text-xs text-[#B91C1C]">• {err}</li>
+              ))}
+            </ul>
+          </div>
+          <button
+            onClick={() => setServerError([])}
+            className="p-1 rounded text-[#FCA5A5] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition shrink-0"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 

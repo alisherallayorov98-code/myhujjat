@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link                from 'next/link'
 import {
   FileText, ClipboardList, Calculator,
-  Users, Sparkles,
+  Users, Sparkles, AlertTriangle,
   Plus, ArrowRight, Wallet, X,
 } from 'lucide-react'
 import { useQuery }    from '@tanstack/react-query'
@@ -26,8 +26,9 @@ import { cn }          from '@/lib/cn'
 
 function WidgetError() {
   return (
-    <div className="flex items-center justify-center p-6 bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#94A3B8]">
-      Yuklashda xatolik
+    <div className="flex items-center gap-2 p-5 bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#94A3B8]">
+      <AlertTriangle size={15} className="text-[#FCA5A5] shrink-0" />
+      Yuklashda xatolik yuz berdi
     </div>
   )
 }
