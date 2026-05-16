@@ -19,9 +19,18 @@ import { MonthlyChart }       from '@/components/Dashboard/MonthlyChart'
 import { TypeDistribution }   from '@/components/Dashboard/TypeDistribution'
 import { UpcomingDeadlines }  from '@/components/Dashboard/UpcomingDeadlines'
 import { ContractAlerts }     from '@/components/Dashboard/ContractAlerts'
+import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary'
 import { CONTRACT_TYPE_CONFIG } from '@/lib/contractTemplates'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { cn }          from '@/lib/cn'
+
+function WidgetError() {
+  return (
+    <div className="flex items-center justify-center p-6 bg-white border border-[#E2E8F0] rounded-xl text-sm text-[#94A3B8]">
+      Yuklashda xatolik
+    </div>
+  )
+}
 
 interface ContractsStats {
   total: number
@@ -173,7 +182,9 @@ export default function DashboardPage() {
       />
 
       {/* Onboarding checklist (faqat yangi foydalanuvchilarga) */}
-      <OnboardingChecklist />
+      <ErrorBoundary fallback={<></>}>
+        <OnboardingChecklist />
+      </ErrorBoundary>
 
       {/* Limit ogohlantirish — dismissable */}
       {contractsLeft !== null && contractsLeft <= 1 && limitDismissed !== currentLimitKey && (
@@ -264,7 +275,9 @@ export default function DashboardPage() {
       {/* Faktura nazorat alertlari — faqat ogohlantirishlar bo'lganda ko'rinadi */}
       {currentOrg && (
         <div className="mb-6">
-          <ContractAlerts />
+          <ErrorBoundary fallback={<></>}>
+            <ContractAlerts />
+          </ErrorBoundary>
         </div>
       )}
 
@@ -273,15 +286,21 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
           {allRecent.length > 0 ? (
             <>
-              <MonthlyChart contracts={allRecent} />
-              <TypeDistribution contracts={allRecent} />
+              <ErrorBoundary fallback={<WidgetError />}>
+                <MonthlyChart contracts={allRecent} />
+              </ErrorBoundary>
+              <ErrorBoundary fallback={<WidgetError />}>
+                <TypeDistribution contracts={allRecent} />
+              </ErrorBoundary>
             </>
           ) : (
             <>
               <div className="lg:col-span-2" />
             </>
           )}
-          <UpcomingDeadlines />
+          <ErrorBoundary fallback={<WidgetError />}>
+            <UpcomingDeadlines />
+          </ErrorBoundary>
         </div>
       )}
 

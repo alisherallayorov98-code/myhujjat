@@ -42,7 +42,7 @@ export default function SpesifikatsiyalarPage() {
     router.push('/dashboard/spesifikatsiyalar/yangi')
   }, [router]))
 
-  const { data: specs = [], isLoading } = useQuery({
+  const { data: specs = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['specifications', currentOrg?.id],
     queryFn:  async () => {
       if (!currentOrg?.id) return []
@@ -50,6 +50,7 @@ export default function SpesifikatsiyalarPage() {
       return data
     },
     enabled: !!currentOrg?.id,
+    retry:   1,
   })
 
   const deleteMutation = useMutation({
@@ -168,6 +169,11 @@ export default function SpesifikatsiyalarPage() {
           {[1, 2, 3].map(i => (
             <div key={i} className="h-16 bg-white rounded-xl border border-[#E2E8F0] animate-pulse" />
           ))}
+        </div>
+      ) : isError ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+          <p className="text-[#DC2626] font-medium">Ma'lumotlarni yuklashda xatolik yuz berdi</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>Qayta urinish</Button>
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState

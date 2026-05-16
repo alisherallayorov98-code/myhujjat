@@ -30,14 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
       url:         SITE_URL,
       siteName:    'MyHujjat.uz',
       images: [
-        { url: '/icons/icon-512.png', width: 512, height: 512, alt: 'MyHujjat.uz' },
+        { url: '/opengraph-image', width: 1200, height: 630, alt: "MyHujjat.uz — O'zbekiston hujjat platformasi" },
       ],
     },
     twitter: {
       card:        'summary_large_image',
       title:       'MyHujjat.uz',
       description: t('twitterDescription'),
-      images:      ['/icons/icon-512.png'],
+      images:      ['/opengraph-image'],
     },
     robots: {
       index:   true,

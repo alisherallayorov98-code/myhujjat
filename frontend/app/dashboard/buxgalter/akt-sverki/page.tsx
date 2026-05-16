@@ -130,7 +130,13 @@ export default function AktSverkiPage() {
         }
       />
 
-      {aktlar.length === 0 && !isLoading ? (
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-14 bg-white rounded-xl border border-[#E2E8F0] animate-pulse" />
+          ))}
+        </div>
+      ) : aktlar.length === 0 ? (
         <EmptyState
           icon={<span className="text-3xl">📊</span>}
           title={t('noAktSverkas')}

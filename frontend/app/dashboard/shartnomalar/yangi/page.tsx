@@ -239,15 +239,23 @@ export default function YangiShartnoma() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialType])
 
+  const [serverError, setServerError] = useState<string[]>([])
+
   const mutation = useMutation({
     mutationFn: (data: any) => api.post('/contracts', data),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['contracts'] })
-      draft.clear() // Saqlangan qoralama tozalanadi
+      draft.clear()
+      setServerError([])
       toast.success(t('toast.created'))
       router.push(`/dashboard/shartnomalar/${res.data.id}`)
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
+    onError: (e: any) => {
+      const msg = e?.response?.data?.message
+      const errs: string[] = Array.isArray(msg) ? msg : [msg || t('toast.error')]
+      setServerError(errs)
+      toast.error(errs[0])
+    },
   })
 
   // ─── Step navigation validatsiyasi ──────────────────────────────────
@@ -621,6 +629,17 @@ export default function YangiShartnoma() {
         }
       />
       <StepBar step={3} />
+
+      {serverError.length > 0 && (
+        <div className="mb-4 p-3.5 bg-[#FEF2F2] border border-[#FECACA] rounded-xl">
+          <p className="text-sm font-semibold text-[#DC2626] mb-1">{t('toast.error')}</p>
+          <ul className="space-y-0.5">
+            {serverError.map((err, i) => (
+              <li key={i} className="text-xs text-[#B91C1C]">• {err}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="grid gap-6 grid-cols-1">
         <div className="space-y-5">

@@ -370,7 +370,7 @@ export default function KontragentlarPage() {
       {(isLoading || filtered.length > 0) && (
       <Card padding="none">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                 <th className="w-10 px-3 py-3">

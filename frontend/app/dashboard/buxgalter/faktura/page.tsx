@@ -134,6 +134,15 @@ export default function FakturaPage() {
     onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
+  function validateAndSave() {
+    const hasValidItem = items.some(it => it.nomi.trim() && it.miqdori > 0 && it.narxi > 0)
+    if (!hasValidItem) {
+      toast.error(t('itemsRequired'))
+      return
+    }
+    mutation.mutate()
+  }
+
   function openModal() {
     setItems([newSpecItem()])
     setPreview('')
@@ -240,7 +249,7 @@ export default function FakturaPage() {
             </Button>
             <Button size="sm" leftIcon={<Save size={13} />}
               loading={mutation.isPending}
-              onClick={() => mutation.mutate()}>
+              onClick={validateAndSave}>
               {t('save')}
             </Button>
           </div>
