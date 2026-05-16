@@ -21,7 +21,8 @@ function fmtDate(s?: string): string {
 }
 
 function isHeading(line: string): boolean {
-  return /^\d+\.\s+[A-ZА-ЯЁʻO'ʻ''””\s'”-]+$/.test(line.trim()) &&
+  // ҒҲҚҶӮЎҒҳқҷ — Uzbek-specific Cyrillic not in А-Я range
+  return /^\d+\.\s+[A-ZА-ЯЁҒҲҚҶӮЎʻO'ʻ''””\s'”-]+$/.test(line.trim()) &&
          line === line.toUpperCase()
 }
 
@@ -215,7 +216,8 @@ export async function exportContractDocx(opts: DocxOpts): Promise<void> {
       sections: [{ properties: { page: { margin: margins } } as any, children: paragraphs }]
     })
     const blobSimple = await Packer.toBlob(docSimple)
-    saveAs(blobSimple, `${opts.title.replace(/\s+/g, '_')}.docx`)
+    const safeTitle = opts.title.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '_')
+    saveAs(blobSimple, `${safeTitle}.docx`)
     return
   }
 

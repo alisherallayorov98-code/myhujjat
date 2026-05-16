@@ -18,6 +18,7 @@ import {
   generateAktSverkaText, type AktSverkaData, type AktSverkaMovement,
 } from '@/lib/buxgalterTemplates'
 import { exportContractPdf }  from '@/lib/export/contractPdf'
+import { exportContractDocx } from '@/lib/export/contractDocx'
 import { formatDate }         from '@/lib/formatters'
 import toast                  from 'react-hot-toast'
 
@@ -204,6 +205,13 @@ export default function AktSverkiPage() {
             <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
               onClick={() => {
                 const text = generateAktSverkaText(buildData())
+                exportContractDocx({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+              }}>
+              Word
+            </Button>
+            <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
+              onClick={() => {
+                const text = generateAktSverkaText(buildData())
                 exportContractPdf({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
               }}>
               PDF
@@ -324,16 +332,28 @@ export default function AktSverkiPage() {
         content={preview}
         emptyText={t('previewHint')}
         toolbar={
-          <button
-            onClick={() => {
-              const text = generateAktSverkaText(buildData())
-              exportContractPdf({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
-            }}
-            className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
-          >
-            <Download size={14} />
-            <span className="hidden sm:inline">PDF</span>
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                const text = generateAktSverkaText(buildData())
+                exportContractDocx({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+              }}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">Word</span>
+            </button>
+            <button
+              onClick={() => {
+                const text = generateAktSverkaText(buildData())
+                exportContractPdf({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+              }}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+          </div>
         }
       />
     </div>

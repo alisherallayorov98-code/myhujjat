@@ -70,13 +70,13 @@ export function ResultPanel({ loading, streaming, result, docType, orgName, save
               }
             </button>
             <button
-              onClick={() => exportContractPdf({ title: docType, content: result, orgName })}
+              onClick={() => exportContractPdf({ title: docType, content: result, orgName }).catch(() => toast.error('PDF yuklab olishda xatolik'))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-colors"
             >
               <Download size={12} /> PDF
             </button>
             <button
-              onClick={() => exportContractDocx({ title: docType, content: result, orgName })}
+              onClick={() => exportContractDocx({ title: docType, content: result, orgName }).catch(() => toast.error('Word yuklab olishda xatolik'))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E2E8F0] bg-white text-[#475569] hover:bg-[#F1F5F9] transition-colors"
             >
               <FileText size={12} /> Word
@@ -116,10 +116,10 @@ export function ResultPanel({ loading, streaming, result, docType, orgName, save
             <button onClick={() => printHtml(renderKotibHtml(result))} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <Printer size={14} /><span className="hidden sm:inline">Pechat</span>
             </button>
-            <button onClick={() => exportContractPdf({ title: docType, content: result, orgName })} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+            <button onClick={() => exportContractPdf({ title: docType, content: result, orgName }).catch(() => toast.error('PDF yuklab olishda xatolik'))} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <Download size={14} /><span className="hidden sm:inline">PDF</span>
             </button>
-            <button onClick={() => exportContractDocx({ title: docType, content: result, orgName })} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
+            <button onClick={() => exportContractDocx({ title: docType, content: result, orgName }).catch(() => toast.error('Word yuklab olishda xatolik'))} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
               <FileText size={14} /><span className="hidden sm:inline">Word</span>
             </button>
           </div>

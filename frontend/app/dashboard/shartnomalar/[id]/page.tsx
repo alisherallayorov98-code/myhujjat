@@ -26,6 +26,7 @@ import { ShareLinkModal }                                       from '@/componen
 import { InvoicesPanel }                                        from './_components/InvoicesPanel'
 import { TimelinePanel }                                        from './_components/TimelinePanel'
 import { cn }                                                    from '@/lib/cn'
+import toast                                                     from 'react-hot-toast'
 
 const STATUS_OPTIONS = ['DRAFT', 'ACTIVE', 'COMPLETED', 'CANCELLED'] as const
 
@@ -135,7 +136,12 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
             <Button
               variant="outline" size="sm"
               leftIcon={<Download size={13} />}
-              onClick={async () => { await exportContractDocx(contract); window.dispatchEvent(new Event('contract-downloaded')) }}
+              onClick={async () => {
+                try {
+                  await exportContractDocx(contract)
+                  window.dispatchEvent(new Event('contract-downloaded'))
+                } catch { toast.error('Word faylini yuklashda xatolik') }
+              }}
             >
               {t('preview.word')}
             </Button>

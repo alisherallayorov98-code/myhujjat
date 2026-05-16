@@ -20,6 +20,7 @@ import {
   QQS_OPTIONS, type SpecItem, type QqsFoiz,
 } from '@/lib/qqs'
 import { exportContractPdf }                              from '@/lib/export/contractPdf'
+import { exportContractDocx }                             from '@/lib/export/contractDocx'
 import { formatCurrency, formatDate, formatNumber }       from '@/lib/formatters'
 import toast                                              from 'react-hot-toast'
 
@@ -243,6 +244,13 @@ export default function FakturaPage() {
             <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
               onClick={() => {
                 const { text, raqam } = buildPreview()
+                exportContractDocx({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
+              }}>
+              Word
+            </Button>
+            <Button variant="secondary" size="sm" leftIcon={<Download size={13} />}
+              onClick={() => {
+                const { text, raqam } = buildPreview()
                 exportContractPdf({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
               }}>
               PDF
@@ -386,16 +394,28 @@ export default function FakturaPage() {
         content={preview}
         emptyText={t('previewHint')}
         toolbar={
-          <button
-            onClick={() => {
-              const { text, raqam } = buildPreview()
-              exportContractPdf({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
-            }}
-            className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
-          >
-            <Download size={14} />
-            <span className="hidden sm:inline">PDF</span>
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                const { text, raqam } = buildPreview()
+                exportContractDocx({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
+              }}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">Word</span>
+            </button>
+            <button
+              onClick={() => {
+                const { text, raqam } = buildPreview()
+                exportContractPdf({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
+              }}
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+          </div>
         }
       />
     </div>

@@ -16,6 +16,7 @@ import { exportContractDocx } from '@/lib/export/contractDocx'
 import { printHtml }          from '@/lib/printDocument'
 import { renderKotibHtml }    from '@/lib/renderKotibHtml'
 import { format }             from 'date-fns'
+import toast                  from 'react-hot-toast'
 import {
   Plus, Users, Trash2, Download, Copy, Check,
   ChevronLeft, Eye, Save, Maximize2, Printer, ChevronDown, BookMarked, X,
@@ -228,11 +229,15 @@ export default function BayonnomPage() {
   }
 
   async function handlePdf() {
-    await exportContractPdf({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+    try {
+      await exportContractPdf({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+    } catch { toast.error('PDF faylini yuklashda xatolik') }
   }
 
   async function handleDocx() {
-    await exportContractDocx({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+    try {
+      await exportContractDocx({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+    } catch { toast.error('Word faylini yuklashda xatolik') }
   }
 
   function handleCopy() {
