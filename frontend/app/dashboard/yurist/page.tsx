@@ -79,10 +79,10 @@ const CASE_TYPE_FROM_DOC: Record<string, string> = {
 
 function statusBadge(status: string) {
   const map: Record<string, { cls: string; label: string }> = {
-    OPEN:        { cls: 'bg-blue-100 text-blue-700',   label: 'Ochiq' },
-    IN_PROGRESS: { cls: 'bg-amber-100 text-amber-700', label: 'Jarayonda' },
-    RESOLVED:    { cls: 'bg-green-100 text-green-700', label: "Hal bo'ldi" },
-    CLOSED:      { cls: 'bg-gray-100 text-gray-600',   label: 'Yopildi' },
+    OPEN:        { cls: 'bg-[#DBEAFE] text-[#1D4ED8]',   label: 'Ochiq' },
+    IN_PROGRESS: { cls: 'bg-[#FEF3C7] text-[#B45309]',  label: 'Jarayonda' },
+    RESOLVED:    { cls: 'bg-[#DCFCE7] text-[#16A34A]',  label: "Hal bo'ldi" },
+    CLOSED:      { cls: 'bg-[#F1F5F9] text-[#475569]',  label: 'Yopildi' },
   }
   const s = map[status] ?? map.OPEN
   return <span className={cn('inline-flex px-2 py-0.5 rounded text-xs font-medium', s.cls)}>{s.label}</span>
@@ -123,10 +123,10 @@ function StatCard({ label, value, icon, color, danger }: {
 
 function ActivityIcon({ action }: { action: string }) {
   const map: Record<string, { icon: React.ReactNode; cls: string }> = {
-    CREATED:        { icon: <GitCommit    size={14} />, cls: 'bg-blue-100 text-blue-600' },
-    STATUS_CHANGED: { icon: <ArrowRight   size={14} />, cls: 'bg-amber-100 text-amber-600' },
-    DOCUMENT_ADDED: { icon: <FileText     size={14} />, cls: 'bg-purple-100 text-purple-600' },
-    NOTE_ADDED:     { icon: <MessageSquare size={14} />, cls: 'bg-green-100 text-green-600' },
+    CREATED:        { icon: <GitCommit    size={14} />, cls: 'bg-[#DBEAFE] text-[#2563EB]' },
+    STATUS_CHANGED: { icon: <ArrowRight   size={14} />, cls: 'bg-[#FEF3C7] text-[#D97706]' },
+    DOCUMENT_ADDED: { icon: <FileText     size={14} />, cls: 'bg-[#EDE9FE] text-[#7C3AED]' },
+    NOTE_ADDED:     { icon: <MessageSquare size={14} />, cls: 'bg-[#DCFCE7] text-[#16A34A]' },
   }
   const cfg = map[action] ?? map.CREATED
   return (
@@ -385,7 +385,7 @@ function CreateCaseModal({ open, onClose, orgId, initialType, initialTitle, init
           placeholder="OOO Romashka — Pretenziya" />
 
         <div>
-          <label className="block text-sm font-medium text-[#374151] mb-1">{t('caseType')}</label>
+          <label className="block text-sm font-medium text-[#475569] mb-1">{t('caseType')}</label>
           <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
             className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
             {CASE_TYPES.map(ct => (
@@ -395,7 +395,7 @@ function CreateCaseModal({ open, onClose, orgId, initialType, initialTitle, init
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#374151] mb-1">{t('ikkinchiTomon')}</label>
+          <label className="block text-sm font-medium text-[#475569] mb-1">{t('ikkinchiTomon')}</label>
           <select value={form.counterpartyId} onChange={e => setForm(f => ({ ...f, counterpartyId: e.target.value }))}
             className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
             <option value="">{t('selectCp')}</option>
@@ -407,14 +407,14 @@ function CreateCaseModal({ open, onClose, orgId, initialType, initialTitle, init
           <Input label={t('caseAmount')} type="number" value={form.amount}
             onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
           <div>
-            <label className="block text-sm font-medium text-[#374151] mb-1">{t('caseDeadline')}</label>
+            <label className="block text-sm font-medium text-[#475569] mb-1">{t('caseDeadline')}</label>
             <Input type="date" value={form.deadline}
               onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#374151] mb-1">{t('caseNotes')}</label>
+          <label className="block text-sm font-medium text-[#475569] mb-1">{t('caseNotes')}</label>
           <textarea rows={2} value={form.notes}
             onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
             className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[#2563EB]" />
@@ -502,7 +502,7 @@ function SaveToCaseModal({ open, onClose, orgId, docType, docTitle, docContent, 
 
         {mode === 'existing' && (
           <div>
-            <label className="block text-sm font-medium text-[#374151] mb-1">Ish tanlang</label>
+            <label className="block text-sm font-medium text-[#475569] mb-1">Ish tanlang</label>
             <select value={caseId} onChange={e => setCaseId(e.target.value)}
               className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
               <option value="">— Ish tanlang —</option>
@@ -549,12 +549,12 @@ function DeadlineBanner({ orgId, onShowCases }: { orgId: string; onShowCases: ()
   if (!total) return null
 
   return (
-    <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 flex items-center gap-3">
-      <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-        <Bell size={18} className="text-red-600" />
+    <div className="mb-5 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-[#FEE2E2] flex items-center justify-center shrink-0">
+        <Bell size={18} className="text-[#DC2626]" />
       </div>
       <div className="flex-1 text-sm">
-        <span className="font-semibold text-red-700">
+        <span className="font-semibold text-[#B91C1C]">
           {overdueCount > 0 && `${overdueCount} ta ish muddati o'tgan`}
           {overdueCount > 0 && urgentCount > 0 && ', '}
           {urgentCount  > 0 && `${urgentCount} ta ish 2 kun ichida tugaydi`}
@@ -562,7 +562,7 @@ function DeadlineBanner({ orgId, onShowCases }: { orgId: string; onShowCases: ()
       </div>
       <button
         onClick={onShowCases}
-        className="text-xs font-medium text-red-600 hover:text-red-700 underline underline-offset-2 shrink-0"
+        className="text-xs font-medium text-[#DC2626] hover:text-[#B91C1C] underline underline-offset-2 shrink-0"
       >
         Ko'rish →
       </button>
@@ -924,11 +924,11 @@ export default function YuristPage() {
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
-          <StatCard label={t('statusOpen')}       value={stats.open}         icon={<Briefcase     size={18} className="text-blue-600"  />} color="bg-blue-100" />
-          <StatCard label={t('statusInProgress')} value={stats.inProgress}   icon={<Clock         size={18} className="text-amber-600" />} color="bg-amber-100" />
-          <StatCard label={t('statusResolved')}   value={stats.resolved}     icon={<CheckCircle   size={18} className="text-green-600" />} color="bg-green-100" />
-          <StatCard label={t('statusClosed')}     value={stats.closed}       icon={<XCircle       size={18} className="text-gray-500"  />} color="bg-gray-100" />
-          <StatCard label={t('overdue')}          value={stats.overdueCount} icon={<AlertTriangle size={18} className="text-red-600"   />} color="bg-red-100" danger />
+          <StatCard label={t('statusOpen')}       value={stats.open}         icon={<Briefcase     size={18} className="text-[#2563EB]" />} color="bg-[#DBEAFE]" />
+          <StatCard label={t('statusInProgress')} value={stats.inProgress}   icon={<Clock         size={18} className="text-[#D97706]" />} color="bg-[#FEF3C7]" />
+          <StatCard label={t('statusResolved')}   value={stats.resolved}     icon={<CheckCircle   size={18} className="text-[#16A34A]" />} color="bg-[#DCFCE7]" />
+          <StatCard label={t('statusClosed')}     value={stats.closed}       icon={<XCircle       size={18} className="text-[#94A3B8]" />} color="bg-[#F1F5F9]" />
+          <StatCard label={t('overdue')}          value={stats.overdueCount} icon={<AlertTriangle size={18} className="text-[#DC2626]" />} color="bg-[#FEE2E2]" danger />
         </div>
       )}
 
@@ -977,7 +977,7 @@ export default function YuristPage() {
                 <div className="mb-4 p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
                   <div className="flex items-center gap-2 mb-2">
                     <FolderOpen size={14} className="text-[#2563EB]" />
-                    <span className="text-xs font-medium text-[#374151]">{t('fillFromCase')}</span>
+                    <span className="text-xs font-medium text-[#475569]">{t('fillFromCase')}</span>
                   </div>
                   <div className="flex gap-2">
                     <select
