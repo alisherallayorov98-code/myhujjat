@@ -196,7 +196,7 @@ function CaseDetailModal({ open, onClose, caseId, orgId }: {
   return (
     <Modal open={open} onClose={onClose} title={lc?.title || '...'}>
       {isLoading ? (
-        <TableRowSkeleton rows={4} />
+        <div className="space-y-2"><TableRowSkeleton /><TableRowSkeleton /><TableRowSkeleton /><TableRowSkeleton /></div>
       ) : lc ? (
         <div className="space-y-4">
           {/* Header info */}
@@ -304,7 +304,7 @@ function CaseDetailModal({ open, onClose, caseId, orgId }: {
           {innerTab === 'activity' && (
             <div className="space-y-1 max-h-72 overflow-y-auto">
               {actLoading ? (
-                <TableRowSkeleton rows={3} />
+                <div className="space-y-2"><TableRowSkeleton /><TableRowSkeleton /><TableRowSkeleton /></div>
               ) : !actData?.activities?.length ? (
                 <div className="py-8 text-center text-[#94A3B8] text-sm">{t('noActivity')}</div>
               ) : (
@@ -393,7 +393,7 @@ function CreateCaseModal({ open, onClose, orgId, initialType, initialTitle, init
           <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
             className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]">
             {CASE_TYPES.map(ct => (
-              <option key={ct} value={ct}>{t(`caseType_${ct}` as any, { fallback: ct })}</option>
+              <option key={ct} value={ct}>{(() => { try { return t(`caseType_${ct}` as any) } catch { return ct } })()}</option>
             ))}
           </select>
         </div>
@@ -674,7 +674,7 @@ function CasesTab({ orgId }: { orgId: string }) {
 
       <Card padding="none">
         {isLoading ? (
-          <div className="p-4"><TableRowSkeleton rows={4} /></div>
+          <div className="p-4 space-y-2"><TableRowSkeleton /><TableRowSkeleton /><TableRowSkeleton /><TableRowSkeleton /></div>
         ) : !data?.data?.length ? (
           <div className="py-16 text-center text-[#94A3B8] text-sm">{t('noCases')}</div>
         ) : (
@@ -752,11 +752,11 @@ function CasesTab({ orgId }: { orgId: string }) {
 
       <ConfirmDialog
         open={!!deleteId}
+        onClose={() => setDeleteId('')}
         title={t('caseDeleteTitle')}
-        message={t('caseDeleteConfirm')}
-        confirmLabel={t('delete')}
+        description={t('caseDeleteConfirm')}
+        confirmText={t('delete')}
         onConfirm={() => deleteMutation.mutate(deleteId)}
-        onCancel={() => setDeleteId('')}
       />
     </div>
   )

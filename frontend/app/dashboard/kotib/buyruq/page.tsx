@@ -297,7 +297,7 @@ export default function BuyruqPage() {
                       <button
                         onClick={e => { e.stopPropagation(); updateStatusMut.mutate({ id: d.id, status: nextStatus(d.status) }) }}
                         className={cn('text-xs font-medium px-2.5 py-1 rounded-full hover:opacity-75 transition-opacity', STATUS_CLS[d.status] ?? STATUS_CLS.DRAFT)}
-                        title={t('holatniOzgartirish')}
+                        title="Holatni o'zgartirish"
                       >
                         {STATUS_LBL[d.status] ?? d.status}
                       </button>
@@ -306,10 +306,10 @@ export default function BuyruqPage() {
                       {toDelete === d.id ? (
                         <div className="flex items-center gap-3 justify-end">
                           <button onClick={() => deleteMut.mutate(d.id)} className="text-xs font-medium text-[#DC2626] hover:underline">
-                            {t('haOchir')}
+                            {"Ha, o'chir"}
                           </button>
                           <button onClick={() => setToDelete(null)} className="text-xs text-[#94A3B8] hover:underline">
-                            {t('bekor')}
+                            Bekor
                           </button>
                         </div>
                       ) : (
@@ -340,7 +340,7 @@ export default function BuyruqPage() {
         breadcrumbs={[
           { label: 'Dashboard', path: '/dashboard' },
           { label: t('kotib'),  path: '/dashboard/kotib' },
-          { label: t('buyruqlar'), onClick: () => setStep('list') },
+          { label: t('buyruqlar'), path: '/dashboard/kotib/buyruq' },
           { label: t('yangiBuyruq') },
         ]}
         actions={
@@ -357,7 +357,7 @@ export default function BuyruqPage() {
           {myTemplates.length > 0 && (
             <div className="bg-[#FEF3C7] border border-[#FDE68A] rounded-xl p-4">
               <p className="text-xs font-semibold text-[#92400E] mb-2.5 flex items-center gap-1.5">
-                <BookMarked size={13} /> {t('meningShablonlarim')}
+                <BookMarked size={13} /> Mening shablonlarim
               </p>
               <div className="flex flex-wrap gap-2">
                 {myTemplates.map(tpl => (
@@ -523,7 +523,7 @@ export default function BuyruqPage() {
               leftIcon={<BookMarked size={13} />}
               onClick={() => { setTplName(''); setShowTplModal(true) }}
             >
-              {t('sablonSaqlash')}
+              Shablon saqlash
             </Button>
             <Button
               variant="secondary"
@@ -627,12 +627,12 @@ export default function BuyruqPage() {
       <Modal
         open={showTplModal}
         onClose={() => setShowTplModal(false)}
-        title={t('sablonNominiKiriting')}
+        title="Shablon nomini kiriting"
         size="sm"
         footer={
           <div className="flex gap-2 w-full">
             <Button variant="outline" size="sm" onClick={() => setShowTplModal(false)} className="flex-1">
-              {t('bekor')}
+              Bekor
             </Button>
             <Button
               size="sm"
@@ -652,9 +652,9 @@ export default function BuyruqPage() {
             value={tplName}
             onChange={e => setTplName(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && tplName.trim() && saveTplMut.mutate(tplName.trim())}
-            placeholder={t('sablonNomiPlace')}
+            placeholder="Masalan: Ishga qabul buyrug'i"
           />
-          <p className="text-xs text-[#94A3B8]">{t('sablonHint')}</p>
+          <p className="text-xs text-[#94A3B8]">Keyingi safar shu shablon tanlansa, barcha maydonlar avto-to'ladi.</p>
         </div>
       </Modal>
     </div>
