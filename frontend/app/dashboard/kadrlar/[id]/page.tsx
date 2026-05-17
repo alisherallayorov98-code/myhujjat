@@ -376,7 +376,7 @@ export default function EmployeeProfilePage() {
           </div>
 
           {docsLoading ? (
-            <div className="p-4"><TableRowSkeleton rows={3} /></div>
+            <div className="p-4 space-y-2"><TableRowSkeleton /><TableRowSkeleton /><TableRowSkeleton /></div>
           ) : !docsData?.data?.length ? (
             <div className="py-12 text-center text-[#94A3B8] text-sm">{t('noDocs')}</div>
           ) : (
@@ -426,7 +426,7 @@ export default function EmployeeProfilePage() {
           </div>
 
           {leavesLoading ? (
-            <div className="p-4"><TableRowSkeleton rows={3} /></div>
+            <div className="p-4 space-y-2"><TableRowSkeleton /><TableRowSkeleton /><TableRowSkeleton /></div>
           ) : !leavesData?.leaves?.length ? (
             <div className="py-12 text-center text-[#94A3B8] text-sm">{t('noLeaves')}</div>
           ) : (
@@ -516,11 +516,11 @@ export default function EmployeeProfilePage() {
 
       <ConfirmDialog
         open={!!deleteLeaveId}
+        onClose={() => setDeleteLeaveId(null)}
         title={t('leaveDeleteTitle')}
-        message={t('leaveDeleteConfirm')}
-        confirmLabel={t('delete')}
+        description={t('leaveDeleteConfirm')}
+        confirmText={t('delete')}
         onConfirm={() => deleteLeaveId && deleteLeaveMutation.mutate(deleteLeaveId)}
-        onCancel={() => setDeleteLeaveId(null)}
       />
     </div>
   )
