@@ -280,7 +280,7 @@ export default function EmployeeProfilePage() {
           <p className="text-sm text-[#64748B]">{emp.lavozim || t('noLavozim')}</p>
         </div>
         <div className="ml-auto">
-          <Badge variant={emp.isActive ? 'success' : 'error'}>
+          <Badge variant={emp.isActive ? 'success' : 'danger'}>
             {emp.isActive ? t('filterActive') : t('filterInactive')}
           </Badge>
         </div>
