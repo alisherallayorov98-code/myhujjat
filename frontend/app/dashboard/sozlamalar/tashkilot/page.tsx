@@ -10,6 +10,7 @@ import { Input }                           from '@/components/ui/Input'
 import { useAuth }                         from '@/hooks/useAuth'
 import api                                 from '@/lib/api'
 import toast                               from 'react-hot-toast'
+import { getBankByMfo }                    from '@/lib/bankMfo'
 
 export default function TashkilotSozlamalarPage() {
   const t = useTranslations('settings')
@@ -126,7 +127,12 @@ export default function TashkilotSozlamalarPage() {
               label={t('mfo')}
               placeholder={t('mfoPlace')}
               value={form.mfo}
-              onChange={e => upd('mfo', e.target.value)}
+              onChange={e => {
+                const mfo = e.target.value.replace(/\D/g, '').slice(0, 5)
+                const bank = mfo.length === 5 ? getBankByMfo(mfo) : null
+                upd('mfo', mfo)
+                if (bank) upd('bankName', bank)
+              }}
             />
           </div>
         </div>

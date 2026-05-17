@@ -12,6 +12,7 @@ import toast                        from 'react-hot-toast'
 import { cn }                       from '@/lib/cn'
 import type { Organization }        from '@/lib/types'
 import { useAuth }                  from '@/hooks/useAuth'
+import { getBankByMfo }             from '@/lib/bankMfo'
 
 interface Props {
   org?:    Organization | null
@@ -136,7 +137,12 @@ export function OrgFormModal({ org, open, onClose }: Props) {
             <Input label={t('form.bankName')} placeholder={t('form.bankPlaceholder')}
               value={form.bankName} onChange={e => upd('bankName', e.target.value)} />
             <Input label={t('form.mfo')} placeholder={t('form.mfoPlaceholder')}
-              value={form.mfo} onChange={e => upd('mfo', e.target.value.replace(/\D/g, '').slice(0, 5))} />
+              value={form.mfo} onChange={e => {
+                const mfo = e.target.value.replace(/\D/g, '').slice(0, 5)
+                const bank = mfo.length === 5 ? getBankByMfo(mfo) : null
+                upd('mfo', mfo)
+                if (bank) upd('bankName', bank)
+              }} />
             <div className="sm:col-span-2">
               <Input label={t('form.bankAccount')} placeholder={t('form.bankAccountPlaceholder')}
                 value={form.bankAccount} onChange={e => upd('bankAccount', e.target.value)} />

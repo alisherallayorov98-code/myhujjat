@@ -8,6 +8,7 @@ import { Input }  from '@/components/ui/Input'
 import api        from '@/lib/api'
 import { cn }     from '@/lib/cn'
 import toast      from 'react-hot-toast'
+import { getBankByMfo } from '@/lib/bankMfo'
 import type { Counterparty } from '@/lib/types'
 
 interface CpDropdownProps {
@@ -201,7 +202,11 @@ export function CpDropdown({ cps, value, onChange, orgId, onCpCreated }: CpDropd
         <Input label={t('address')} value={newCp.address} onChange={e => setNewCp(p => ({ ...p, address: e.target.value }))} />
         <div className="grid grid-cols-2 gap-3">
           <Input label={t('bank')} value={newCp.bankName} onChange={e => setNewCp(p => ({ ...p, bankName: e.target.value }))} />
-          <Input label={t('mfo')} value={newCp.mfo} onChange={e => setNewCp(p => ({ ...p, mfo: e.target.value }))} />
+          <Input label={t('mfo')} value={newCp.mfo} onChange={e => {
+            const mfo = e.target.value.replace(/\D/g, '').slice(0, 5)
+            const bank = mfo.length === 5 ? getBankByMfo(mfo) : null
+            setNewCp(p => ({ ...p, mfo, ...(bank ? { bankName: bank } : {}) }))
+          }} />
           <div className="col-span-2">
             <Input label={t('bankAccount')} value={newCp.bankAccount} onChange={e => setNewCp(p => ({ ...p, bankAccount: e.target.value }))} />
           </div>
