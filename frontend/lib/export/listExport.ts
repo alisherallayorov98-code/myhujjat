@@ -1,5 +1,105 @@
 import { CONTRACT_TYPE_CONFIG } from '../contractTemplates'
 
+// ─── CSV helpers ──────────────────────────────────────────────────────────────
+
+function escapeCsv(v: any): string {
+  const s = String(v ?? '')
+  return s.includes(',') || s.includes('"') || s.includes('\n')
+    ? `"${s.replace(/"/g, '""')}"`
+    : s
+}
+
+function buildCsv(rows: Record<string, any>[], headers: { key: string; label: string }[]): string {
+  const head = headers.map(h => escapeCsv(h.label)).join(',')
+  const body = rows.map(row => headers.map(h => escapeCsv(row[h.key])).join(','))
+  return [head, ...body].join('\r\n')
+}
+
+function downloadCsv(content: string, filename: string) {
+  const bom  = '﻿'  // Excel UTF-8 BOM
+  const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8;' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
+export function exportContractsCsv(contracts: any[], orgName: string) {
+  const rows = contracts.map(c => ({
+    number:    c.contractNumber,
+    type:      (CONTRACT_TYPE_CONFIG as any)[c.contractType]?.name ?? c.contractType,
+    cp:        c.counterparty?.name ?? '',
+    cpInn:     c.counterparty?.inn  ?? '',
+    date:      c.contractDate ?? '',
+    amount:    Number(c.amount) || 0,
+    status:    STATUS_LABEL[c.status] ?? c.status,
+    createdAt: new Date(c.createdAt).toLocaleDateString('uz-UZ'),
+  }))
+  const headers = [
+    { key: 'number',    label: 'Raqam' },
+    { key: 'type',      label: 'Tur' },
+    { key: 'cp',        label: 'Kontragent' },
+    { key: 'cpInn',     label: 'STIR' },
+    { key: 'date',      label: 'Sana' },
+    { key: 'amount',    label: "Summa (so'm)" },
+    { key: 'status',    label: 'Holat' },
+    { key: 'createdAt', label: 'Yaratilgan' },
+  ]
+  const date = new Date().toISOString().split('T')[0]
+  const safe = orgName.replace(/[\\/:*?"<>|]/g, '_')
+  downloadCsv(buildCsv(rows, headers), `Shartnomalar_${safe}_${date}.csv`)
+}
+
+export function exportCounterpartiesCsv(cps: any[], orgName: string) {
+  const rows = cps.map(c => ({
+    name:     c.name,
+    inn:      c.inn          || '',
+    director: c.directorName || '',
+    bank:     c.bankName     || '',
+    account:  c.bankAccount  || '',
+    mfo:      c.mfo          || '',
+    address:  c.address      || '',
+    phone:    c.phone        || '',
+  }))
+  const headers = [
+    { key: 'name',     label: 'Nomi' },
+    { key: 'inn',      label: 'STIR' },
+    { key: 'director', label: 'Rahbar' },
+    { key: 'bank',     label: 'Bank' },
+    { key: 'account',  label: 'Hisob raqami' },
+    { key: 'mfo',      label: 'MFO' },
+    { key: 'address',  label: 'Manzil' },
+    { key: 'phone',    label: 'Telefon' },
+  ]
+  const date = new Date().toISOString().split('T')[0]
+  const safe = orgName.replace(/[\\/:*?"<>|]/g, '_')
+  downloadCsv(buildCsv(rows, headers), `Kontragentlar_${safe}_${date}.csv`)
+}
+
+export function exportEmployeesCsv(emps: any[], orgName: string) {
+  const rows = emps.map(e => ({
+    ism:      e.ism,
+    jshshir:  e.jshshir  || '',
+    lavozim:  e.lavozim  || '',
+    bolim:    e.bolim    || '',
+    maosh:    Number(e.maosh) || '',
+    ishBoshi: e.ishBoshi ? new Date(e.ishBoshi).toLocaleDateString('uz-UZ') : '',
+    tel:      e.tel      || '',
+  }))
+  const headers = [
+    { key: 'ism',      label: 'Ism Familiya' },
+    { key: 'jshshir',  label: 'JSHSHIR' },
+    { key: 'lavozim',  label: 'Lavozim' },
+    { key: 'bolim',    label: "Bo'lim" },
+    { key: 'maosh',    label: "Maosh (so'm)" },
+    { key: 'ishBoshi', label: 'Ish boshi' },
+    { key: 'tel',      label: 'Telefon' },
+  ]
+  const date = new Date().toISOString().split('T')[0]
+  const safe = orgName.replace(/[\\/:*?"<>|]/g, '_')
+  downloadCsv(buildCsv(rows, headers), `Xodimlar_${safe}_${date}.csv`)
+}
+
 const STATUS_LABEL: Record<string, string> = {
   DRAFT:     'Qoralama',
   ACTIVE:    'Faol',

@@ -270,7 +270,7 @@ export default function ShablonlarPage() {
                     </Link>
                     <Button
                       variant="outline" size="sm"
-                      className="text-red-500 hover:bg-red-50 hover:border-red-200"
+                      className="text-[#DC2626] hover:bg-[#FEF2F2] hover:border-[#FECACA]"
                       onClick={() => setDeleteId(tpl.id)}
                     >
                       <Trash2 size={13} />

@@ -409,7 +409,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex-1">
               <h3 className="font-display font-bold text-lg mb-1">{t('ai.title')}</h3>
-              <p className="text-blue-100 text-sm mb-4">
+              <p className="text-[#BFDBFE] text-sm mb-4">
                 {t('ai.description')}
               </p>
               <Link href="/dashboard/seif/ai">

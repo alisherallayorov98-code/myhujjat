@@ -6,7 +6,7 @@ import { useRouter }                               from 'next/navigation'
 import Link                                        from 'next/link'
 import {
   ArrowLeft, Download, Trash2, FileText, Printer,
-  Calendar, Hash, DollarSign, Tag,
+  Calendar, Hash, DollarSign, Tag, Maximize2, Loader2,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }   from '@tanstack/react-query'
 import { PageHeader }                              from '@/components/layout/PageHeader'
@@ -14,6 +14,7 @@ import { Card }                                    from '@/components/ui/Card'
 import { Button }                                  from '@/components/ui/Button'
 import { Badge }                                   from '@/components/ui/Badge'
 import { Modal }                                   from '@/components/ui/Modal'
+import { FullscreenPreview }                       from '@/components/shared/FullscreenPreview'
 import { useAuth }                                 from '@/hooks/useAuth'
 import api                                         from '@/lib/api'
 import { exportContractPdf }                       from '@/lib/export/contractPdf'
@@ -29,7 +30,9 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
   const { currentOrg } = useAuth()
   const router         = useRouter()
   const qc             = useQueryClient()
-  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteOpen,  setDeleteOpen]  = useState(false)
+  const [fsOpen,      setFsOpen]      = useState(false)
+  const [exporting,   setExporting]   = useState<'pdf' | 'docx' | null>(null)
 
   const { data: doc, isLoading } = useQuery<any>({
     queryKey: ['document', id, currentOrg?.id],
@@ -45,10 +48,10 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
       qc.invalidateQueries({ queryKey: ['akt-sverki'] })
       qc.invalidateQueries({ queryKey: ['tolov-grafik'] })
       toast.success(t('deleted'))
-      // Tipiga qarab tegishli ro'yxatga qaytaramiz
       const backHref = backUrlFor(doc?.type)
       router.push(backHref)
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || "O'chirishda xatolik"),
   })
 
   function backUrlFor(type?: string): string {
@@ -70,12 +73,15 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
       content: text,
       orgName: currentOrg?.name,
     }
+    setExporting(format)
     try {
       if (format === 'pdf') await exportContractPdf(opts)
       else                  await exportContractDocx(opts)
       toast.success(t('downloaded', { type: format === 'pdf' ? 'PDF' : 'Word' }))
     } catch {
       toast.error(t('exportError'))
+    } finally {
+      setExporting(null)
     }
   }
 
@@ -132,6 +138,13 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
               <>
                 <Button
                   variant="outline" size="sm"
+                  leftIcon={<Maximize2 size={13} />}
+                  onClick={() => setFsOpen(true)}
+                >
+                  {"Ko'rish"}
+                </Button>
+                <Button
+                  variant="outline" size="sm"
                   leftIcon={<Printer size={13} />}
                   onClick={() => text && (isMonospaceDoc ? printText(text) : printHtml(renderKotibHtml(text)))}
                 >
@@ -139,14 +152,16 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
                 </Button>
                 <Button
                   variant="outline" size="sm"
-                  leftIcon={<Download size={13} />}
+                  loading={exporting === 'pdf'}
+                  leftIcon={exporting === 'pdf' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
                   onClick={() => handleExport('pdf')}
                 >
                   {t('pdf')}
                 </Button>
                 <Button
                   variant="outline" size="sm"
-                  leftIcon={<Download size={13} />}
+                  loading={exporting === 'docx'}
+                  leftIcon={exporting === 'docx' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
                   onClick={() => handleExport('docx')}
                 >
                   {t('word')}
@@ -155,7 +170,7 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
             )}
             <Button
               variant="outline" size="sm"
-              className="text-red-500 hover:bg-red-50 hover:border-red-200"
+              className="text-[#DC2626] hover:bg-[#FEF2F2] hover:border-[#FECACA]"
               onClick={() => setDeleteOpen(true)}
               leftIcon={<Trash2 size={13} />}
             >
@@ -267,6 +282,50 @@ export default function HujjatDetailPage({ params }: { params: Promise<{ id: str
           </p>
         </Modal>
       )}
+
+      <FullscreenPreview
+        open={fsOpen}
+        onClose={() => setFsOpen(false)}
+        title={doc.title || typeName}
+        html={!isMonospaceDoc && text ? renderKotibHtml(text) : undefined}
+        content={isMonospaceDoc ? text : undefined}
+        toolbar={
+          text ? (
+            <>
+              <button
+                disabled={!!exporting}
+                onClick={async () => {
+                  setExporting('docx')
+                  try {
+                    await exportContractDocx({ title: doc.title || typeName, content: text, orgName: currentOrg?.name })
+                    toast.success('Word yuklandi')
+                  } catch { toast.error('Eksportda xatolik') }
+                  finally { setExporting(null) }
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/10 hover:bg-white/20 disabled:opacity-50 transition"
+              >
+                {exporting === 'docx' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                Word
+              </button>
+              <button
+                disabled={!!exporting}
+                onClick={async () => {
+                  setExporting('pdf')
+                  try {
+                    await exportContractPdf({ title: doc.title || typeName, content: text, orgName: currentOrg?.name })
+                    toast.success('PDF yuklandi')
+                  } catch { toast.error('Eksportda xatolik') }
+                  finally { setExporting(null) }
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/10 hover:bg-white/20 disabled:opacity-50 transition"
+              >
+                {exporting === 'pdf' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                PDF
+              </button>
+            </>
+          ) : undefined
+        }
+      />
     </div>
   )
 }

@@ -34,6 +34,7 @@ export default function YangiSpesifikatsiya() {
   const [contractId,     setContractId]     = useState('')
   const [counterpartyId, setCounterpartyId] = useState('')
   const [specNumber,     setSpecNumber]     = useState('')
+  const [itemsError,     setItemsError]     = useState('')
 
   // Shartnomalar ro'yxati (biriktirish uchun)
   const { data: contracts = [] } = useQuery({
@@ -113,6 +114,9 @@ export default function YangiSpesifikatsiya() {
       }
 
       next[i] = item
+      if ((field === 'nomi' && String(val).trim()) || (field === 'miqdori' && Number(val) > 0) || (field === 'narxi' && Number(val) > 0)) {
+        setItemsError('')
+      }
       return next
     })
   }, [])
@@ -127,6 +131,18 @@ export default function YangiSpesifikatsiya() {
   }
 
   const totals = calcSpecTotals(items)
+
+  function validateAndSave() {
+    const hasValidItem = items.some(it => it.nomi.trim() && it.miqdori > 0 && it.narxi > 0)
+    if (!hasValidItem) {
+      const msg = "Kamida bitta to'liq qator kerak (nom, miqdor, narx)"
+      setItemsError(msg)
+      toast.error(msg)
+      return
+    }
+    setItemsError('')
+    mutation.mutate()
+  }
 
   const mutation = useMutation({
     mutationFn: () => api.post('/specifications', {
@@ -193,7 +209,7 @@ export default function YangiSpesifikatsiya() {
             <Button variant="secondary" size="sm" leftIcon={<Download size={14} />} onClick={handleExcel}>
               Excel
             </Button>
-            <Button size="sm" leftIcon={<Save size={14} />} loading={mutation.isPending} onClick={() => mutation.mutate()}>
+            <Button size="sm" leftIcon={<Save size={14} />} loading={mutation.isPending} onClick={validateAndSave}>
               {t('save')}
             </Button>
           </div>
@@ -303,6 +319,9 @@ export default function YangiSpesifikatsiya() {
           <div className="flex items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">{t('itemsTitle')}</p>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#E2E8F0] text-[#475569]">{items.length}</span>
+            {itemsError && (
+              <span className="text-xs text-[#DC2626]">{itemsError}</span>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] text-[#94A3B8]">{t('allQqs')}:</span>

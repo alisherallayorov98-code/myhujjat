@@ -82,10 +82,10 @@ const LEAVE_COLORS: Record<string, string> = {
 
 function LeaveTypeBadge({ type }: { type: string }) {
   const t = useTranslations('hr')
-  const cls = LEAVE_COLORS[type] ?? 'bg-gray-100 text-gray-600'
+  const cls = LEAVE_COLORS[type] ?? 'bg-[#F1F5F9] text-gray-600'
   return (
     <span className={cn('inline-flex px-2 py-0.5 rounded text-xs font-medium', cls)}>
-      {t(`leaveType_${type}` as any, { fallback: type })}
+      {(() => { try { return t(`leaveType_${type}` as any) } catch { return type } })()}
     </span>
   )
 }
@@ -125,21 +125,21 @@ function AddLeaveModal({
     <Modal open={open} onClose={onClose} title={t('addLeave')}>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('leaveTypeLabel')}</label>
+          <label className="block text-sm font-medium text-[#374151] mb-1">{t('leaveTypeLabel')}</label>
           <select
             value={form.type}
             onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
           >
             {LEAVE_TYPES.map(lt => (
-              <option key={lt} value={lt}>{t(`leaveType_${lt}` as any, { fallback: lt })}</option>
+              <option key={lt} value={lt}>{(() => { try { return t(`leaveType_${lt}` as any) } catch { return lt } })()}</option>
             ))}
           </select>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('leaveStart')}</label>
+            <label className="block text-sm font-medium text-[#374151] mb-1">{t('leaveStart')}</label>
             <Input
               type="date"
               value={form.startDate}
@@ -147,7 +147,7 @@ function AddLeaveModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('leaveEnd')}</label>
+            <label className="block text-sm font-medium text-[#374151] mb-1">{t('leaveEnd')}</label>
             <Input
               type="date"
               value={form.endDate}
@@ -157,7 +157,7 @@ function AddLeaveModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('leaveOrderNum')}</label>
+          <label className="block text-sm font-medium text-[#374151] mb-1">{t('leaveOrderNum')}</label>
           <Input
             placeholder="BUY-2026-001"
             value={form.orderNum}
@@ -166,12 +166,12 @@ function AddLeaveModal({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('leaveReason')}</label>
+          <label className="block text-sm font-medium text-[#374151] mb-1">{t('leaveReason')}</label>
           <textarea
             rows={2}
             value={form.reason}
             onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+            className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
           />
         </div>
 
@@ -248,8 +248,8 @@ export default function EmployeeProfilePage() {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-48" />
-          <div className="h-32 bg-gray-200 rounded" />
+          <div className="h-8 bg-[#E2E8F0] rounded w-48" />
+          <div className="h-32 bg-[#E2E8F0] rounded" />
         </div>
       </div>
     )
@@ -271,13 +271,13 @@ export default function EmployeeProfilePage() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.back()}
-          className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+          className="p-2 rounded-lg hover:bg-[#F1F5F9] text-[#64748B] transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">{emp.ism}</h1>
-          <p className="text-sm text-gray-500">{emp.lavozim || t('noLavozim')}</p>
+          <h1 className="text-xl font-semibold text-[#0F172A]">{emp.ism}</h1>
+          <p className="text-sm text-[#64748B]">{emp.lavozim || t('noLavozim')}</p>
         </div>
         <div className="ml-auto">
           <Badge variant={emp.isActive ? 'success' : 'error'}>
@@ -323,20 +323,20 @@ export default function EmployeeProfilePage() {
         </div>
 
         {/* Leave balance bar */}
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="mt-4 pt-4 border-t border-[#F1F5F9]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">{t('leaveBalance')}</span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm font-medium text-[#374151]">{t('leaveBalance')}</span>
+            <span className="text-sm text-[#64748B]">
               {emp.leaveBalance.used}/{emp.leaveBalance.yearly} {t('leaveDays')}
             </span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-2">
+          <div className="w-full bg-[#F1F5F9] rounded-full h-2">
             <div
-              className={cn('h-2 rounded-full transition-all', usedPct >= 100 ? 'bg-red-500' : usedPct >= 75 ? 'bg-amber-400' : 'bg-[#2563EB]')}
+              className={cn('h-2 rounded-full transition-all', usedPct >= 100 ? 'bg-[#EF4444]' : usedPct >= 75 ? 'bg-[#FBBF24]' : 'bg-[#2563EB]')}
               style={{ width: `${usedPct}%` }}
             />
           </div>
-          <div className="flex justify-between mt-1 text-xs text-gray-500">
+          <div className="flex justify-between mt-1 text-xs text-[#64748B]">
             <span>{t('leaveUsed')}: {emp.leaveBalance.used}</span>
             <span>{t('leaveRemaining')}: {emp.leaveBalance.remaining}</span>
           </div>
@@ -344,7 +344,7 @@ export default function EmployeeProfilePage() {
       </Card>
 
       {/* ── Tabs ───────────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+      <div className="flex gap-1 bg-[#F1F5F9] p-1 rounded-xl">
         {TABS.map(({ key, label, icon }) => (
           <button
             key={key}
@@ -353,7 +353,7 @@ export default function EmployeeProfilePage() {
               'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all',
               tab === key
                 ? 'bg-white text-[#2563EB] shadow-sm'
-                : 'text-gray-500 hover:text-gray-700',
+                : 'text-[#64748B] hover:text-[#374151]',
             )}
           >
             {icon}{label}
@@ -364,8 +364,8 @@ export default function EmployeeProfilePage() {
       {/* ── Hujjatlar tab ──────────────────────────────────────────────────── */}
       {tab === 'docs' && (
         <Card className="overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-            <span className="text-sm font-medium text-gray-700">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#F1F5F9]">
+            <span className="text-sm font-medium text-[#374151]">
               {t('docsTab')} ({emp.docsCount})
             </span>
             <Link href={`/dashboard/kadrlar/hujjat`}>
@@ -378,28 +378,28 @@ export default function EmployeeProfilePage() {
           {docsLoading ? (
             <div className="p-4"><TableRowSkeleton rows={3} /></div>
           ) : !docsData?.data?.length ? (
-            <div className="py-12 text-center text-gray-400 text-sm">{t('noDocs')}</div>
+            <div className="py-12 text-center text-[#94A3B8] text-sm">{t('noDocs')}</div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-gray-500 border-b border-gray-100 bg-gray-50">
+                <tr className="text-left text-xs text-[#64748B] border-b border-[#F1F5F9] bg-gray-50">
                   <th className="px-4 py-2 font-medium">{t('tableEmployee')}</th>
                   <th className="px-4 py-2 font-medium hidden sm:table-cell">{t('sana')}</th>
                   <th className="px-4 py-2 font-medium hidden md:table-cell">{t('buyruqRaqam')}</th>
                   <th className="px-4 py-2 font-medium">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-[#F8FAFC]">
                 {docsData.data.map(doc => (
-                  <tr key={doc.id} className="hover:bg-gray-50">
+                  <tr key={doc.id} className="hover:bg-[#F8FAFC]">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{doc.title}</div>
-                      <div className="text-xs text-gray-400">{doc.type}</div>
+                      <div className="font-medium text-[#0F172A]">{doc.title}</div>
+                      <div className="text-xs text-[#94A3B8]">{doc.type}</div>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">
+                    <td className="px-4 py-3 text-[#64748B] hidden sm:table-cell">
                       {doc.docDate ? formatDate(doc.docDate) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 hidden md:table-cell">
+                    <td className="px-4 py-3 text-[#64748B] hidden md:table-cell">
                       {doc.number || '—'}
                     </td>
                     <td className="px-4 py-3">
@@ -418,8 +418,8 @@ export default function EmployeeProfilePage() {
       {/* ── Ta'tillar tab ──────────────────────────────────────────────────── */}
       {tab === 'leaves' && (
         <Card className="overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-            <span className="text-sm font-medium text-gray-700">{t('leavesTab')}</span>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#F1F5F9]">
+            <span className="text-sm font-medium text-[#374151]">{t('leavesTab')}</span>
             <Button size="sm" onClick={() => setAddLeaveOpen(true)}>
               <Plus className="w-3.5 h-3.5 mr-1" />{t('addLeave')}
             </Button>
@@ -428,11 +428,11 @@ export default function EmployeeProfilePage() {
           {leavesLoading ? (
             <div className="p-4"><TableRowSkeleton rows={3} /></div>
           ) : !leavesData?.leaves?.length ? (
-            <div className="py-12 text-center text-gray-400 text-sm">{t('noLeaves')}</div>
+            <div className="py-12 text-center text-[#94A3B8] text-sm">{t('noLeaves')}</div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-gray-500 border-b border-gray-100 bg-gray-50">
+                <tr className="text-left text-xs text-[#64748B] border-b border-[#F1F5F9] bg-gray-50">
                   <th className="px-4 py-2 font-medium">{t('leaveTypeLabel')}</th>
                   <th className="px-4 py-2 font-medium hidden sm:table-cell">{t('leaveStart')}</th>
                   <th className="px-4 py-2 font-medium hidden sm:table-cell">{t('leaveEnd')}</th>
@@ -441,23 +441,23 @@ export default function EmployeeProfilePage() {
                   <th className="px-4 py-2 w-10" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-[#F8FAFC]">
                 {leavesData.leaves.map(leave => (
-                  <tr key={leave.id} className="hover:bg-gray-50">
+                  <tr key={leave.id} className="hover:bg-[#F8FAFC]">
                     <td className="px-4 py-3">
                       <LeaveTypeBadge type={leave.type} />
                       {leave.reason && (
-                        <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[140px]" title={leave.reason}>{leave.reason}</div>
+                        <div className="text-xs text-[#94A3B8] mt-0.5 truncate max-w-[140px]" title={leave.reason}>{leave.reason}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{formatDate(leave.startDate)}</td>
-                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{formatDate(leave.endDate)}</td>
-                    <td className="px-4 py-3 font-medium text-gray-900">{leave.days}</td>
-                    <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{leave.orderNum || '—'}</td>
+                    <td className="px-4 py-3 text-[#64748B] hidden sm:table-cell">{formatDate(leave.startDate)}</td>
+                    <td className="px-4 py-3 text-[#64748B] hidden sm:table-cell">{formatDate(leave.endDate)}</td>
+                    <td className="px-4 py-3 font-medium text-[#0F172A]">{leave.days}</td>
+                    <td className="px-4 py-3 text-[#94A3B8] text-xs hidden md:table-cell">{leave.orderNum || '—'}</td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => setDeleteLeaveId(leave.id)}
-                        className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-1 rounded hover:bg-[#FEF2F2] text-[#94A3B8] hover:text-[#DC2626] transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -531,10 +531,10 @@ export default function EmployeeProfilePage() {
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2">
-      <span className="mt-0.5 text-gray-400">{icon}</span>
+      <span className="mt-0.5 text-[#94A3B8]">{icon}</span>
       <div>
-        <div className="text-xs text-gray-400">{label}</div>
-        <div className="text-sm font-medium text-gray-900">{value}</div>
+        <div className="text-xs text-[#94A3B8]">{label}</div>
+        <div className="text-sm font-medium text-[#0F172A]">{value}</div>
       </div>
     </div>
   )
@@ -556,8 +556,8 @@ function ActionCard({
       <div className="flex items-start gap-3">
         <div className={cn('p-2.5 rounded-xl', bg)}>{icon}</div>
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-gray-900 text-sm">{title}</div>
-          <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">{desc}</div>
+          <div className="font-medium text-[#0F172A] text-sm">{title}</div>
+          <div className="text-xs text-[#64748B] mt-0.5 line-clamp-2">{desc}</div>
           <div className="mt-3 flex gap-2 flex-wrap">
             <Link href={href} onClick={onClick}>
               <Button size="sm" variant="outline">

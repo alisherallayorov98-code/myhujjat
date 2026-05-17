@@ -3,7 +3,7 @@
 import { useState }                                      from 'react'
 import { useRouter }                                     from 'next/navigation'
 import { useTranslations }                               from 'next-intl'
-import { Plus, Save, Download, Eye, Maximize2 }           from 'lucide-react'
+import { Plus, Save, Download, Eye, Maximize2, Loader2 }  from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Button }                                         from '@/components/ui/Button'
@@ -31,9 +31,11 @@ export default function FakturaPage() {
   const router           = useRouter()
   const qc               = useQueryClient()
   const { currentOrg }   = useAuth()
-  const [modal, setModal] = useState(false)
-  const [preview, setPreview] = useState('')
+  const [modal, setModal]             = useState(false)
+  const [preview, setPreview]         = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [exporting, setExporting]     = useState<'pdf' | 'docx' | null>(null)
+  const [formErrors, setFormErrors]   = useState<Record<string, string>>({})
   const [items, setItems]     = useState<SpecItem[]>([newSpecItem()])
   const [form, setForm]       = useState({
     raqam:     '',
@@ -136,11 +138,17 @@ export default function FakturaPage() {
   })
 
   function validateAndSave() {
+    const errs: Record<string, string> = {}
+    if (!form.cpId) errs.cpId = 'Kontragent tanlanmagan'
+    if (!form.sana) errs.sana = 'Sana majburiy'
     const hasValidItem = items.some(it => it.nomi.trim() && it.miqdori > 0 && it.narxi > 0)
-    if (!hasValidItem) {
-      toast.error(t('itemsRequired'))
+    if (!hasValidItem) errs.items = t('itemsRequired')
+    if (Object.keys(errs).length) {
+      setFormErrors(errs)
+      toast.error(Object.values(errs)[0])
       return
     }
+    setFormErrors({})
     mutation.mutate()
   }
 
@@ -148,6 +156,7 @@ export default function FakturaPage() {
     setItems([newSpecItem()])
     setPreview('')
     setForm({ raqam: '', sana: today(), cpId: '', notes: '', shartnoma: '' })
+    setFormErrors({})
     setModal(true)
   }
 
@@ -268,21 +277,23 @@ export default function FakturaPage() {
               <Input label={t('raqam')} placeholder={t('raqamPlace')}
                 value={form.raqam} onChange={e => setForm(f => ({ ...f, raqam: e.target.value }))} />
               <Input label={t('sana')} type="date"
-                value={form.sana} onChange={e => setForm(f => ({ ...f, sana: e.target.value }))} />
+                error={formErrors.sana}
+                value={form.sana} onChange={e => { setForm(f => ({ ...f, sana: e.target.value })); setFormErrors(p => ({ ...p, sana: '' })) }} />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-[#475569]">{t('buyer')}</label>
               <select
                 value={form.cpId}
-                onChange={e => setForm(f => ({ ...f, cpId: e.target.value }))}
-                className="w-full h-10 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
+                onChange={e => { setForm(f => ({ ...f, cpId: e.target.value })); setFormErrors(p => ({ ...p, cpId: '' })) }}
+                className={`w-full h-10 rounded-lg text-sm px-3 bg-white border focus:outline-none focus:border-[#2563EB] ${formErrors.cpId ? 'border-[#DC2626]' : 'border-[#E2E8F0]'}`}
               >
                 <option value="">{t('selectCp')}</option>
                 {cps.map((cp: any) => (
                   <option key={cp.id} value={cp.id}>{cp.name}</option>
                 ))}
               </select>
+              {formErrors.cpId && <p className="text-xs text-[#DC2626]">⚠ {formErrors.cpId}</p>}
             </div>
 
             <Input label={t('shartnoma')} placeholder={t('shartnomaPlace')}
@@ -298,6 +309,7 @@ export default function FakturaPage() {
                   <Plus size={12} /> {t('addItem')}
                 </button>
               </div>
+              {formErrors.items && <p className="text-xs text-[#DC2626] mb-2">⚠ {formErrors.items}</p>}
 
               <div className="space-y-2">
                 {items.map((item, i) => (
@@ -396,23 +408,35 @@ export default function FakturaPage() {
         toolbar={
           <div className="flex gap-1">
             <button
-              onClick={() => {
-                const { text, raqam } = buildPreview()
-                exportContractDocx({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
+              disabled={!!exporting}
+              onClick={async () => {
+                setExporting('docx')
+                try {
+                  const { text, raqam } = buildPreview()
+                  await exportContractDocx({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
+                  toast.success('Word yuklandi')
+                } catch { toast.error('Eksportda xatolik') }
+                finally { setExporting(null) }
               }}
-              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm disabled:opacity-50"
             >
-              <Download size={14} />
+              {exporting === 'docx' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               <span className="hidden sm:inline">Word</span>
             </button>
             <button
-              onClick={() => {
-                const { text, raqam } = buildPreview()
-                exportContractPdf({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
+              disabled={!!exporting}
+              onClick={async () => {
+                setExporting('pdf')
+                try {
+                  const { text, raqam } = buildPreview()
+                  await exportContractPdf({ title: `Faktura ${raqam}`, content: text, orgName: currentOrg?.name })
+                  toast.success('PDF yuklandi')
+                } catch { toast.error('Eksportda xatolik') }
+                finally { setExporting(null) }
               }}
-              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm disabled:opacity-50"
             >
-              <Download size={14} />
+              {exporting === 'pdf' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               <span className="hidden sm:inline">PDF</span>
             </button>
           </div>

@@ -6,8 +6,9 @@ import { useRouter }               from 'next/navigation'
 import { useTranslations }         from 'next-intl'
 import {
   Plus, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown,
-  Download, ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send, Eye,
+  ChevronLeft, ChevronRight, Calendar, Trash2, Copy, Send, Eye,
   TrendingUp, CheckCircle, FileEdit, DollarSign, X, Filter, Star, Loader2,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -17,6 +18,7 @@ import { Card }      from '@/components/ui/Card'
 import { ContractStatusBadge } from '@/components/ui/Badge'
 import { ConfirmDialog }     from '@/components/ui/Modal'
 import { EmptyState, TableRowSkeleton } from '@/components/ui/Skeleton'
+import { ExportDropdown } from '@/components/ui/ExportDropdown'
 import { useDebouncedValue }   from '@/hooks/useDebouncedValue'
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
 import { useRef }              from 'react'
@@ -24,7 +26,7 @@ import { useAuth }   from '@/hooks/useAuth'
 import api           from '@/lib/api'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { CONTRACT_TYPE_CONFIG } from '@/lib/contractTemplates'
-import { exportContractsExcel } from '@/lib/export/listExport'
+import { exportContractsExcel, exportContractsCsv } from '@/lib/export/listExport'
 import { cn }        from '@/lib/cn'
 import toast         from 'react-hot-toast'
 
@@ -83,7 +85,7 @@ export default function ShartnomalarPage() {
     enabled:  !!currentOrg?.id,
   })
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ['contracts', currentOrg?.id, debouncedSearch, typeFilter, statusFilter, cpFilter, page],
     queryFn:  async () => {
       if (!currentOrg?.id) return { data: [], meta: { total: 0, totalPages: 1 } }
@@ -100,6 +102,7 @@ export default function ShartnomalarPage() {
       return data
     },
     enabled: !!currentOrg?.id,
+    retry:   1,
   })
 
   // Kontragentlar ro'yxati — filter dropdown uchun
@@ -239,12 +242,27 @@ export default function ShartnomalarPage() {
     }
   }
 
-  async function handleExportExcel() {
-    if (contracts.length === 0) { toast.error(t('toast.noExportData')); return }
+  async function handleExportAll(format: 'excel' | 'csv') {
+    if (!currentOrg) return
     setExcelLoading(true)
     try {
-      await exportContractsExcel(contracts, currentOrg?.name || 'tashkilot')
-      toast.success(t('toast.excelDownloaded'))
+      const params = new URLSearchParams({ orgId: currentOrg.id, limit: '10000' })
+      if (debouncedSearch) params.set('search', debouncedSearch)
+      if (typeFilter)      params.set('type', typeFilter)
+      if (statusFilter)    params.set('status', statusFilter)
+      if (cpFilter)        params.set('counterpartyId', cpFilter)
+      const { data: res } = await api.get(`/contracts?${params}`)
+      const all: any[] = res.data || []
+      if (all.length === 0) { toast.error(t('toast.noExportData')); return }
+      if (format === 'excel') {
+        await exportContractsExcel(all, currentOrg.name)
+        toast.success(`Excel: ${all.length} ta eksport qilindi`)
+      } else {
+        exportContractsCsv(all, currentOrg.name)
+        toast.success(`CSV: ${all.length} ta eksport qilindi`)
+      }
+    } catch {
+      toast.error('Eksportda xatolik')
     } finally {
       setExcelLoading(false)
     }
@@ -271,9 +289,23 @@ export default function ShartnomalarPage() {
         ]}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" leftIcon={<Download size={14} />} loading={excelLoading} onClick={handleExportExcel}>
-              Excel
-            </Button>
+            <ExportDropdown
+              loading={excelLoading}
+              options={[
+                {
+                  label: 'Excel (.xlsx)',
+                  icon: <FileSpreadsheet size={14} />,
+                  onClick: () => handleExportAll('excel'),
+                  disabled: (data?.meta?.total || 0) === 0,
+                },
+                {
+                  label: 'CSV',
+                  icon: <FileText size={14} />,
+                  onClick: () => handleExportAll('csv'),
+                  disabled: (data?.meta?.total || 0) === 0,
+                },
+              ]}
+            />
             {isPro && (
               <Link href="/dashboard/shartnomalar/ommaviy">
                 <Button variant="outline" size="sm" leftIcon={<Send size={14} />}>
@@ -408,7 +440,7 @@ export default function ShartnomalarPage() {
           </Button>
           <Button
             size="xs" variant="outline"
-            className="text-red-500 hover:bg-red-50 hover:border-red-200"
+            className="text-[#DC2626] hover:bg-[#FEF2F2] hover:border-[#FECACA]"
             leftIcon={<Trash2 size={11} />}
             onClick={() => setBulkDeleteOpen(true)}
           >
@@ -448,6 +480,21 @@ export default function ShartnomalarPage() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRowSkeleton key={i} cols={9} />
                 ))
+              ) : isError ? (
+                <tr>
+                  <td colSpan={9}>
+                    <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+                      <div className="w-12 h-12 rounded-xl bg-[#FEE2E2] flex items-center justify-center">
+                        <FileText size={20} className="text-[#DC2626]" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#0F172A]">Ma'lumotlarni yuklashda xatolik</p>
+                        <p className="text-xs text-[#94A3B8] mt-0.5">Internet aloqasini tekshirib, qayta urinib ko'ring</p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => refetch()}>Qayta urinish</Button>
+                    </div>
+                  </td>
+                </tr>
               ) : contracts.length === 0 ? (
                 <tr>
                   <td colSpan={9}>

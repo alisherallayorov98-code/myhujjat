@@ -212,7 +212,7 @@ export default function MineTemplateEditPage() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-red-500 hover:bg-red-50 hover:border-red-200"
+              className="w-full text-[#DC2626] hover:bg-[#FEF2F2] hover:border-[#FECACA]"
               leftIcon={<Trash2 size={13} />}
               onClick={() => setDeleteOpen(true)}
               loading={deleteMut.isPending}

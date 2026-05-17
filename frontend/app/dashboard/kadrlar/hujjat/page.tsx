@@ -206,7 +206,7 @@ export default function HRHujjatlarPage() {
         <div className="space-y-8">
           {/* Asosiy 4 ta — to'liq form bilan */}
           <div>
-            <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Asosiy hujjatlar</h2>
+            <h2 className="text-sm font-semibold text-[#374151] mb-3 uppercase tracking-wider">Asosiy hujjatlar</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {HR_DOCS.map(doc => (
                 <button
@@ -232,7 +232,7 @@ export default function HRHujjatlarPage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-[#7C3AED]" />
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+              <h2 className="text-sm font-semibold text-[#374151] uppercase tracking-wider">
                 AI yordamida shablon yaratish
               </h2>
               <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#EDE9FE] text-[#7C3AED]">Pro</span>

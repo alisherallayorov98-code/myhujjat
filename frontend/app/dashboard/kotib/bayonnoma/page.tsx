@@ -17,9 +17,10 @@ import { printHtml }          from '@/lib/printDocument'
 import { renderKotibHtml }    from '@/lib/renderKotibHtml'
 import { format }             from 'date-fns'
 import toast                  from 'react-hot-toast'
+import { FullscreenPreview } from '@/components/shared/FullscreenPreview'
 import {
   Plus, Users, Trash2, Download, Copy, Check,
-  ChevronLeft, Eye, Save, Maximize2, Printer, ChevronDown, BookMarked, X,
+  ChevronLeft, Eye, Save, Maximize2, Printer, ChevronDown, BookMarked, X, Loader2,
 } from 'lucide-react'
 
 interface DocRow {
@@ -63,6 +64,7 @@ export default function BayonnomPage() {
   const [form, setForm]             = useState<BayonnomData>({ ...EMPTY })
   const [copied, setCopied]         = useState(false)
   const [saving, setSaving]         = useState(false)
+  const [exporting, setExporting]   = useState<'pdf' | 'docx' | null>(null)
   const [toDelete, setToDelete]     = useState<string | null>(null)
   const [error, setError]           = useState('')
   const [typeOpen, setTypeOpen]     = useState(false)
@@ -73,9 +75,9 @@ export default function BayonnomPage() {
   const isQabulTopshirish = kind === 'QABUL_TOPSHIRISH'
 
   const STATUS_CLS: Record<string, string> = {
-    DRAFT: 'bg-gray-100 text-gray-600',
-    FINAL: 'bg-green-100 text-green-700',
-    SENT:  'bg-blue-100 text-blue-700',
+    DRAFT: 'bg-[#F1F5F9] text-[#475569]',
+    FINAL: 'bg-[#DCFCE7] text-[#16A34A]',
+    SENT:  'bg-[#DBEAFE] text-[#1D4ED8]',
   }
   const STATUS_LBL: Record<string, string> = {
     DRAFT: t('statusDraft'),
@@ -113,12 +115,14 @@ export default function BayonnomPage() {
       setToDelete(null)
       qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] })
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || "O'chirishda xatolik"),
   })
 
   const updateStatusMut = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       api.put(`/documents/${id}?orgId=${activeOrg!.id}`, { status }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] }),
+    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik yuz berdi'),
   })
 
   const saveTplMut = useMutation({
@@ -133,11 +137,13 @@ export default function BayonnomPage() {
       setShowTplModal(false)
       setTplName('')
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || 'Shablon saqlanmadi'),
   })
 
   const deleteTplMut = useMutation({
     mutationFn: (id: string) => api.delete(`/user-templates/${id}?orgId=${activeOrg!.id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['user-templates', activeOrg?.id, 'BAYONNOMA'] }),
+    onError: (e: any) => toast.error(e?.response?.data?.message || "Shablon o'chirilmadi"),
   })
 
   function applyTemplate(tpl: any) {
@@ -205,8 +211,16 @@ export default function BayonnomPage() {
 
   async function handleSave(status: 'DRAFT' | 'FINAL') {
     if (!activeOrg) return
-    if (!form.raqam.trim()) { setError(t('raqamMajburiy') || 'Bayonnoma raqami kiritilishi shart'); return }
-    if (!form.sana)         { setError(t('sanaMajburiy')  || 'Sana kiritilishi shart'); return }
+    const missing: string[] = []
+    if (!form.raqam.trim())   missing.push('Bayonnoma raqami')
+    if (!form.sana)           missing.push('Sana')
+    if (!form.orgNomi.trim()) missing.push('Tashkilot nomi')
+    if (missing.length) {
+      const msg = `To'ldirilmagan maydonlar: ${missing.join(', ')}`
+      setError(msg)
+      toast.error(msg)
+      return
+    }
     setError('')
     setSaving(true)
     try {
@@ -229,15 +243,21 @@ export default function BayonnomPage() {
   }
 
   async function handlePdf() {
+    setExporting('pdf')
     try {
       await exportContractPdf({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+      toast.success('PDF yuklandi')
     } catch { toast.error('PDF faylini yuklashda xatolik') }
+    finally { setExporting(null) }
   }
 
   async function handleDocx() {
+    setExporting('docx')
     try {
       await exportContractDocx({ title: `${bayonnomaLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+      toast.success('Word yuklandi')
     } catch { toast.error('Word faylini yuklashda xatolik') }
+    finally { setExporting(null) }
   }
 
   function handleCopy() {
@@ -249,45 +269,49 @@ export default function BayonnomPage() {
   if (step === 'list') return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t('bayonnomalar')}</h1>
+        <h1 className="text-2xl font-bold text-[#0F172A]">{t('bayonnomalar')}</h1>
         <button
           onClick={initNew}
-          className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
+          className="flex items-center gap-2 bg-[#7C3AED] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#6D28D9] transition-colors"
         >
           <Plus className="w-4 h-4" /> {t('yangiBayonnoma')}
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200">
+      <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-x-auto">
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400">{t('yuklanmoqda')}</div>
+          <div className="p-4 space-y-3">
+            {[0,1,2,3].map(i => (
+              <div key={i} className="h-12 bg-[#F1F5F9] rounded-xl animate-pulse" />
+            ))}
+          </div>
         ) : docs.length === 0 ? (
           <div className="p-16 text-center">
-            <Users className="w-14 h-14 mx-auto text-gray-200 mb-4" />
-            <p className="text-gray-500 font-medium">{t('bayonnomalarYoq')}</p>
-            <p className="text-gray-400 text-sm mt-1">{t('yangiBayonnomaYarating')}</p>
+            <Users className="w-14 h-14 mx-auto text-[#E2E8F0] mb-4" />
+            <p className="text-[#64748B] font-medium">{t('bayonnomalarYoq')}</p>
+            <p className="text-[#94A3B8] text-sm mt-1">{t('yangiBayonnomaYarating')}</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
-              <tr className="text-left border-b border-gray-100">
-                <th className="px-5 py-3 font-medium text-gray-500">{t('raqam')}</th>
-                <th className="px-5 py-3 font-medium text-gray-500">{t('sarlavha')}</th>
-                <th className="px-5 py-3 font-medium text-gray-500">{t('sana')}</th>
-                <th className="px-5 py-3 font-medium text-gray-500">{t('status')}</th>
+              <tr className="text-left border-b border-[#F1F5F9]">
+                <th className="px-5 py-3 font-medium text-[#64748B]">{t('raqam')}</th>
+                <th className="px-5 py-3 font-medium text-[#64748B]">{t('sarlavha')}</th>
+                <th className="px-5 py-3 font-medium text-[#64748B]">{t('sana')}</th>
+                <th className="px-5 py-3 font-medium text-[#64748B]">{t('status')}</th>
                 <th className="px-5 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[#F8FAFC]">
               {docs.map(d => (
                 <tr
                   key={d.id}
                   onClick={() => router.push(`/dashboard/hujjat/${d.id}`)}
-                  className="hover:bg-gray-50 cursor-pointer"
+                  className="hover:bg-[#F8FAFC] cursor-pointer"
                 >
-                  <td className="px-5 py-3 text-gray-500">{d.number}</td>
-                  <td className="px-5 py-3 font-medium text-gray-900">{d.title}</td>
-                  <td className="px-5 py-3 text-gray-500">{d.docDate || format(new Date(d.createdAt), 'dd.MM.yyyy')}</td>
+                  <td className="px-5 py-3 text-[#64748B]">{d.number}</td>
+                  <td className="px-5 py-3 font-medium text-[#0F172A]">{d.title}</td>
+                  <td className="px-5 py-3 text-[#64748B]">{d.docDate || format(new Date(d.createdAt), 'dd.MM.yyyy')}</td>
                   <td className="px-5 py-3">
                     <button
                       onClick={e => { e.stopPropagation(); updateStatusMut.mutate({ id: d.id, status: nextStatus(d.status) }) }}
@@ -302,13 +326,13 @@ export default function BayonnomPage() {
                       <div className="flex items-center gap-3 justify-end">
                         <button
                           onClick={() => deleteMut.mutate(d.id)}
-                          className="text-xs font-medium text-red-600 hover:underline"
+                          className="text-xs font-medium text-[#DC2626] hover:underline"
                         >
                           Ha, o'chir
                         </button>
                         <button
                           onClick={() => setToDelete(null)}
-                          className="text-xs text-gray-400 hover:underline"
+                          className="text-xs text-[#94A3B8] hover:underline"
                         >
                           Bekor
                         </button>
@@ -316,7 +340,7 @@ export default function BayonnomPage() {
                     ) : (
                       <button
                         onClick={() => setToDelete(d.id)}
-                        className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                        className="text-[#CBD5E1] hover:text-[#DC2626] transition-colors p-1"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -334,31 +358,31 @@ export default function BayonnomPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => setStep('list')} className="text-gray-400 hover:text-gray-700 transition-colors">
+        <button onClick={() => setStep('list')} className="text-[#94A3B8] hover:text-[#374151] transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">{t('yangiBayonnoma')}</h1>
+        <h1 className="text-xl font-bold text-[#0F172A]">{t('yangiBayonnoma')}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-5">
           {myTemplates.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-              <p className="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-1.5">
+            <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl p-4">
+              <p className="text-xs font-semibold text-[#B45309] mb-2 flex items-center gap-1.5">
                 <BookMarked className="w-3.5 h-3.5" /> Mening shablonlarim
               </p>
               <div className="flex flex-wrap gap-2">
                 {myTemplates.map(tpl => (
-                  <div key={tpl.id} className="flex items-center gap-1 bg-white border border-amber-200 rounded-lg px-2.5 py-1.5">
+                  <div key={tpl.id} className="flex items-center gap-1 bg-white border border-[#FDE68A] rounded-lg px-2.5 py-1.5">
                     <button
                       onClick={() => applyTemplate(tpl)}
-                      className="text-xs font-medium text-amber-800 hover:text-amber-600 transition-colors"
+                      className="text-xs font-medium text-[#92400E] hover:text-[#D97706] transition-colors"
                     >
                       {tpl.name}
                     </button>
                     <button
                       onClick={() => deleteTplMut.mutate(tpl.id)}
-                      className="text-gray-300 hover:text-red-400 transition-colors ml-1"
+                      className="text-[#CBD5E1] hover:text-[#FCA5A5] transition-colors ml-1"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -369,12 +393,12 @@ export default function BayonnomPage() {
           )}
 
           {/* Bayonnoma turi — dropdown */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5">
-            <p className="text-sm font-medium text-gray-700 mb-3">{t('bayonnomaTuri')}</p>
+          <div className="bg-white rounded-2xl border border-[#E2E8F0] p-5">
+            <p className="text-sm font-medium text-[#374151] mb-3">{t('bayonnomaTuri')}</p>
             <div className="relative">
               <button
                 onClick={() => setTypeOpen(p => !p)}
-                className="w-full flex items-center justify-between border border-purple-300 bg-purple-50 text-purple-800 rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-purple-100 transition-colors"
+                className="w-full flex items-center justify-between border border-[#C4B5FD] bg-[#F3E8FF] text-[#6D28D9] rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-[#EDE9FE] transition-colors"
               >
                 <span className="flex items-center gap-2">
                   <span>{BAYONNOMA_TYPES.find(b => b.value === kind)?.icon}</span>
@@ -383,19 +407,19 @@ export default function BayonnomPage() {
                 <ChevronDown className={`w-4 h-4 transition-transform ${typeOpen ? 'rotate-180' : ''}`} />
               </button>
               {typeOpen && (
-                <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-xl shadow-lg overflow-hidden">
                   <div className="max-h-72 overflow-y-auto">
                     {BAYONNOMA_TYPES.map(b => (
                       <button
                         key={b.value}
                         onClick={() => { setKind(b.value); setTypeOpen(false) }}
-                        className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left hover:bg-purple-50 transition-colors ${
-                          kind === b.value ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-700'
+                        className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left hover:bg-[#F3E8FF] transition-colors ${
+                          kind === b.value ? 'bg-[#F3E8FF] text-[#7C3AED] font-medium' : 'text-[#374151]'
                         }`}
                       >
                         <span className="shrink-0">{b.icon}</span>
                         {bayonnomaLabel(b.value)}
-                        {kind === b.value && <Check className="w-3.5 h-3.5 ml-auto text-purple-600" />}
+                        {kind === b.value && <Check className="w-3.5 h-3.5 ml-auto text-[#7C3AED]" />}
                       </button>
                     ))}
                   </div>
@@ -405,20 +429,22 @@ export default function BayonnomPage() {
           </div>
 
           {/* Asosiy ma'lumotlar */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
-            <p className="text-sm font-medium text-gray-700">{t('malumotlar')}</p>
+          <div className="bg-white rounded-2xl border border-[#E2E8F0] p-5 space-y-4">
+            <p className="text-sm font-medium text-[#374151]">{t('malumotlar')}</p>
 
             {error && (
-              <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+              <div className="text-xs text-[#DC2626] bg-[#FEF2F2] border border-[#FECACA] rounded-xl px-3 py-2">
                 {error}
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3">
               <Field label={t('bayonnomaRaqami')} value={form.raqam}
-                onChange={v => update('raqam', v)} placeholder="001" required />
+                onChange={v => { update('raqam', v); if (v.trim()) setError('') }} placeholder="001" required
+                error={!!error && !form.raqam.trim()} />
               <Field label={t('sana')} value={form.sana} type="date"
-                onChange={v => update('sana', v)} required />
+                onChange={v => { update('sana', v); if (v) setError('') }} required
+                error={!!error && !form.sana} />
             </div>
 
             {!isQabulTopshirish && (
@@ -434,7 +460,8 @@ export default function BayonnomPage() {
               onChange={v => update('joy', v)} placeholder={t('joyiPlace')} />
 
             <Field label={t('tashkilotNomi')} value={form.orgNomi}
-              onChange={v => update('orgNomi', v)} placeholder={t('tashkilotNomi')} />
+              onChange={v => { update('orgNomi', v); if (v.trim()) setError('') }} placeholder={t('tashkilotNomi')}
+              error={!!error && !form.orgNomi.trim()} />
 
             {isQabulTopshirish ? (
               <>
@@ -467,7 +494,7 @@ export default function BayonnomPage() {
 
                 {employees.length > 0 && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">{t('xodimlarQoshish')}</label>
+                    <label className="block text-xs font-medium text-[#64748B] mb-1">{t('xodimlarQoshish')}</label>
                     <select
                       defaultValue=""
                       onChange={e => {
@@ -475,7 +502,7 @@ export default function BayonnomPage() {
                         if (emp) appendEmployee(emp)
                         e.target.value = ''
                       }}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition bg-purple-50 text-purple-800"
+                      className="w-full border border-[#E2E8F0] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#A78BFA] transition bg-[#F3E8FF] text-[#6D28D9]"
                     >
                       <option value="" disabled>{t('xodimTanlashJoy')}</option>
                       {employees.map((emp: any) => (
@@ -501,12 +528,12 @@ export default function BayonnomPage() {
 
           {/* Kun tartibi */}
           {!isQabulTopshirish && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
+            <div className="bg-white rounded-2xl border border-[#E2E8F0] p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-700">{t('kunTartibi')}</p>
+                <p className="text-sm font-medium text-[#374151]">{t('kunTartibi')}</p>
                 <button
                   onClick={addAgenda}
-                  className="flex items-center gap-1.5 text-xs text-purple-600 hover:text-purple-800 border border-purple-200 hover:border-purple-300 px-2.5 py-1.5 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-[#7C3AED] hover:text-[#6D28D9] border border-[#DDD6FE] hover:border-[#C4B5FD] px-2.5 py-1.5 rounded-lg transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" /> {t('masalaQoshish')}
                 </button>
@@ -514,15 +541,15 @@ export default function BayonnomPage() {
 
               <div className="space-y-4">
                 {form.kunTartibi.map((it, i) => (
-                  <div key={i} className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+                  <div key={i} className="rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-purple-700">
+                      <span className="text-xs font-bold text-[#7C3AED]">
                         {t('masalaN', { n: i + 1 })}
                       </span>
                       {form.kunTartibi.length > 1 && (
                         <button
                           onClick={() => removeAgenda(i)}
-                          className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                          className="text-[#CBD5E1] hover:text-[#DC2626] transition-colors p-1"
                           title={t('masalaOchirish')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -558,21 +585,21 @@ export default function BayonnomPage() {
           <div className="flex gap-3 flex-wrap">
             <button
               onClick={() => { setTplName(''); setShowTplModal(true) }}
-              className="flex items-center gap-2 justify-center bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+              className="flex items-center gap-2 justify-center bg-[#FFFBEB] hover:bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
             >
               <BookMarked className="w-4 h-4" /> Shablon saqlash
             </button>
             <button
               onClick={() => handleSave('DRAFT')}
               disabled={saving}
-              className="flex items-center gap-2 flex-1 justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 flex-1 justify-center bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#374151] px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
             >
               <Save className="w-4 h-4" /> {t('qoralama')}
             </button>
             <button
               onClick={() => handleSave('FINAL')}
               disabled={saving}
-              className="flex items-center gap-2 flex-1 justify-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 flex-1 justify-center bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
             >
               <Check className="w-4 h-4" /> {t('saqlash')}
             </button>
@@ -581,8 +608,8 @@ export default function BayonnomPage() {
           {showTplModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
               <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm space-y-4">
-                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <BookMarked className="w-4 h-4 text-amber-500" /> Shablon nomini kiriting
+                <h3 className="font-semibold text-[#0F172A] flex items-center gap-2">
+                  <BookMarked className="w-4 h-4 text-[#F59E0B]" /> Shablon nomini kiriting
                 </h3>
                 <input
                   autoFocus
@@ -590,22 +617,22 @@ export default function BayonnomPage() {
                   onChange={e => setTplName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && tplName.trim() && saveTplMut.mutate(tplName.trim())}
                   placeholder="Masalan: Aksiyadorlar yig'ilishi"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 transition"
+                  className="w-full border border-[#E2E8F0] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/20 focus:border-[#F59E0B] transition"
                 />
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[#94A3B8]">
                   Keyingi safar shu shablon tanlansa, barcha maydonlar avto-to'ladi.
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowTplModal(false)}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                    className="flex-1 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#374151] px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
                   >
                     Bekor
                   </button>
                   <button
                     onClick={() => tplName.trim() && saveTplMut.mutate(tplName.trim())}
                     disabled={!tplName.trim() || saveTplMut.isPending}
-                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                    className="flex-1 bg-[#FFFBEB]0 hover:bg-[#D97706] text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                   >
                     Saqlash
                   </button>
@@ -617,26 +644,26 @@ export default function BayonnomPage() {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <p className="text-sm font-medium text-[#374151] flex items-center gap-2">
               <Eye className="w-4 h-4" /> {t('korinish')}
             </p>
             <div className="flex gap-2 flex-wrap">
               <button onClick={() => setFullscreen(true)}
-                className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-300 px-2.5 py-1.5 rounded-lg transition-colors">
+                className="flex items-center gap-1.5 text-xs text-[#374151] hover:text-[#1D4ED8] border border-[#E2E8F0] hover:border-[#93C5FD] px-2.5 py-1.5 rounded-lg transition-colors">
                 <Maximize2 className="w-3.5 h-3.5" /> {t('fullScreen')}
               </button>
               <button onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-2.5 py-1.5 rounded-lg transition-colors">
-                {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-gray-800 border border-[#E2E8F0] px-2.5 py-1.5 rounded-lg transition-colors">
+                {copied ? <Check className="w-3.5 h-3.5 text-[#16A34A]" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? t('nusxaOlindi') : t('nusxa')}
               </button>
-              <button onClick={handleDocx}
-                className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 border border-blue-200 px-2.5 py-1.5 rounded-lg transition-colors">
-                <Download className="w-3.5 h-3.5" /> {t('word')}
+              <button onClick={handleDocx} disabled={!!exporting}
+                className="flex items-center gap-1.5 text-xs text-[#2563EB] hover:text-[#1E40AF] border border-[#BFDBFE] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                {exporting === 'docx' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} {t('word')}
               </button>
-              <button onClick={handlePdf}
-                className="flex items-center gap-1.5 text-xs text-red-600 hover:text-red-800 border border-red-200 px-2.5 py-1.5 rounded-lg transition-colors">
-                <Download className="w-3.5 h-3.5" /> {t('pdf')}
+              <button onClick={handlePdf} disabled={!!exporting}
+                className="flex items-center gap-1.5 text-xs text-[#DC2626] hover:text-[#991B1B] border border-[#FECACA] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                {exporting === 'pdf' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} {t('pdf')}
               </button>
             </div>
           </div>
@@ -651,59 +678,55 @@ export default function BayonnomPage() {
         </div>
       </div>
 
-      {fullscreen && (
-        <div className="fixed inset-0 z-50 bg-[#1E293B] flex flex-col">
-          <div className="bg-[#0F172A] text-white border-b border-[#1E293B] flex items-center px-3 sm:px-4 h-14 gap-2 shrink-0">
+      <FullscreenPreview
+        open={fullscreen}
+        onClose={() => setFullscreen(false)}
+        title={t('korinish')}
+        html={previewHtml || undefined}
+        emptyText={t('malumotlarToldiring')}
+        toolbar={
+          <>
             <button
-              onClick={() => setFullscreen(false)}
-              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              disabled={!!exporting}
+              onClick={handleDocx}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/10 hover:bg-white/20 disabled:opacity-50 transition"
             >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('back')}</span>
+              {exporting === 'docx' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              {t('word')}
             </button>
-            <div className="h-6 w-px bg-white/10 mx-1" />
-            <p className="text-sm font-semibold">{t('korinish')}</p>
-            <div className="flex-1" />
-            <button onClick={() => printHtml(previewHtml)} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
-              <Printer className="w-4 h-4" /><span className="hidden sm:inline">{t('print')}</span>
+            <button
+              disabled={!!exporting}
+              onClick={handlePdf}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/10 hover:bg-white/20 disabled:opacity-50 transition"
+            >
+              {exporting === 'pdf' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              {t('pdf')}
             </button>
-            <button onClick={handleDocx} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
-              <Download className="w-4 h-4" /><span className="hidden sm:inline">{t('word')}</span>
-            </button>
-            <button onClick={handlePdf} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
-              <Download className="w-4 h-4" /><span className="hidden sm:inline">{t('pdf')}</span>
-            </button>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
-              <div className="bg-white shadow-2xl" style={{ width: '794px', minHeight: '1123px' }}>
-                {previewHtml
-                  ? <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
-                  : <div className="p-12 text-[#94A3B8] text-sm">{t('malumotlarToldiring')}</div>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        }
+      />
     </div>
   )
 }
 
-function Field({ label, value, onChange, placeholder, type = 'text', required }: {
+function Field({ label, value, onChange, placeholder, type = 'text', required, error }: {
   label: string; value: string; onChange: (v: string) => void
-  placeholder?: string; type?: string; required?: boolean
+  placeholder?: string; type?: string; required?: boolean; error?: boolean
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1">
-        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+      <label className="block text-xs font-medium text-[#64748B] mb-1">
+        {label}{required && <span className="text-[#FCA5A5] ml-0.5">*</span>}
       </label>
       <input
         type={type} value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition"
+        className={`w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 transition ${
+          error
+            ? 'border-[#DC2626] focus:ring-[#DC2626]/20 focus:border-[#DC2626]'
+            : 'border-[#E2E8F0] focus:ring-[#7C3AED]/20 focus:border-[#A78BFA]'
+        }`}
       />
     </div>
   )
@@ -714,11 +737,11 @@ function TextareaField({ label, value, onChange, placeholder, rows = 3 }: {
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-[#64748B] mb-1">{label}</label>
       <textarea
         value={value} onChange={e => onChange(e.target.value)}
         placeholder={placeholder} rows={rows}
-        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition resize-none"
+        className="w-full border border-[#E2E8F0] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#A78BFA] transition resize-none"
       />
     </div>
   )

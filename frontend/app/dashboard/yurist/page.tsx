@@ -92,10 +92,10 @@ function deadlineLabel(deadline: string): { text: string; cls: string } {
   const now   = new Date()
   const d     = new Date(deadline)
   const diff  = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  if (diff < 0)  return { text: `${Math.abs(diff)} kun o'tdi`, cls: 'text-red-600 font-semibold' }
-  if (diff === 0) return { text: 'Bugun',                      cls: 'text-red-500 font-semibold' }
-  if (diff === 1) return { text: 'Ertaga',                     cls: 'text-amber-600 font-semibold' }
-  return              { text: `${diff} kun qoldi`,             cls: 'text-amber-500' }
+  if (diff < 0)  return { text: `${Math.abs(diff)} kun o'tdi`, cls: 'text-[#DC2626] font-semibold' }
+  if (diff === 0) return { text: 'Bugun',                      cls: 'text-[#EF4444] font-semibold' }
+  if (diff === 1) return { text: 'Ertaga',                     cls: 'text-[#D97706] font-semibold' }
+  return              { text: `${diff} kun qoldi`,             cls: 'text-[#F59E0B]' }
 }
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
@@ -177,6 +177,7 @@ function CaseDetailModal({ open, onClose, caseId, orgId }: {
       qc.invalidateQueries({ queryKey: ['legal-activity', caseId] })
       toast.success(t('caseUpdated'))
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('exportError')),
   })
 
   const noteMutation = useMutation({
@@ -379,10 +380,13 @@ function CreateCaseModal({ open, onClose, orgId, initialType, initialTitle, init
 
   return (
     <Modal open={open} onClose={() => onClose()} title={t('newCase')}>
-      <div className="space-y-4">
+      <div className="space-y-4" onKeyDown={e => {
+        if (e.key === 'Enter' && !(e.target as HTMLElement).matches('textarea,select') && form.title && !mutation.isPending)
+          mutation.mutate()
+      }}>
         <Input label={t('caseTitle')} value={form.title}
           onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-          placeholder="OOO Romashka — Pretenziya" />
+          placeholder="OOO Romashka — Pretenziya" autoFocus />
 
         <div>
           <label className="block text-sm font-medium text-[#475569] mb-1">{t('caseType')}</label>
@@ -586,21 +590,21 @@ function DeadlinePanel({ orgId, onCaseClick }: {
   if (!urgent.length) return null
 
   return (
-    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-amber-200">
-        <AlertTriangle size={14} className="text-amber-600" />
-        <span className="text-xs font-semibold text-amber-700">{t('deadlinePanel')}</span>
+    <div className="mb-4 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#FDE68A]">
+        <AlertTriangle size={14} className="text-[#D97706]" />
+        <span className="text-xs font-semibold text-[#B45309]">{t('deadlinePanel')}</span>
       </div>
-      <div className="divide-y divide-amber-100">
+      <div className="divide-y divide-[#FEF3C7]">
         {urgent.map((c: any) => {
           const dl = deadlineLabel(c.deadline)
           return (
             <button
               key={c.id}
               onClick={() => onCaseClick(c.id)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-amber-100/50 text-left transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#FEF3C7]/50 text-left transition-colors"
             >
-              <div className={cn('w-2 h-2 rounded-full shrink-0', dl.cls.includes('red') ? 'bg-red-500' : 'bg-amber-500')} />
+              <div className={cn('w-2 h-2 rounded-full shrink-0', dl.cls.includes('DC2626') || dl.cls.includes('EF4444') ? 'bg-[#EF4444]' : 'bg-[#F59E0B]')} />
               <span className="flex-1 text-sm font-medium text-[#0F172A] truncate">{c.title}</span>
               <span className={cn('text-xs shrink-0', dl.cls)}>{dl.text}</span>
             </button>
@@ -636,6 +640,7 @@ function CasesTab({ orgId }: { orgId: string }) {
       toast.success(t('caseDeleted'))
       setDeleteId('')
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('exportError')),
   })
 
   const STATUSES = [

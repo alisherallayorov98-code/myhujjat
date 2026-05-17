@@ -20,9 +20,11 @@ import { printHtml }          from '@/lib/printDocument'
 import { renderKotibHtml }    from '@/lib/renderKotibHtml'
 import { format }             from 'date-fns'
 import { cn }                 from '@/lib/cn'
+import toast                  from 'react-hot-toast'
+import { FullscreenPreview } from '@/components/shared/FullscreenPreview'
 import {
   Plus, FileText, Trash2, Download, Copy, Check,
-  ChevronLeft, Eye, Save, Maximize2, Printer, BookMarked, X,
+  ChevronLeft, Eye, Save, Maximize2, Printer, BookMarked, X, Loader2,
 } from 'lucide-react'
 
 interface DocRow {
@@ -67,6 +69,7 @@ export default function BuyruqPage() {
   const [form, setForm]             = useState<BuyruqData>({ ...EMPTY_DATA })
   const [copied, setCopied]         = useState(false)
   const [saving, setSaving]         = useState(false)
+  const [exporting, setExporting]   = useState<'pdf' | 'docx' | null>(null)
   const [toDelete, setToDelete]     = useState<string | null>(null)
   const [error, setError]           = useState('')
   const [showTplModal, setShowTplModal] = useState(false)
@@ -110,12 +113,14 @@ export default function BuyruqPage() {
       setToDelete(null)
       qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] })
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || "O'chirishda xatolik"),
   })
 
   const updateStatusMut = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       api.put(`/documents/${id}?orgId=${activeOrg!.id}`, { status }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents', activeOrg?.id] }),
+    onError: (e: any) => toast.error(e?.response?.data?.message || 'Xatolik yuz berdi'),
   })
 
   const saveTplMut = useMutation({
@@ -130,11 +135,13 @@ export default function BuyruqPage() {
       setShowTplModal(false)
       setTplName('')
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || 'Shablon saqlanmadi'),
   })
 
   const deleteTplMut = useMutation({
     mutationFn: (id: string) => api.delete(`/user-templates/${id}?orgId=${activeOrg!.id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['user-templates', activeOrg?.id, 'BUYRUQ'] }),
+    onError: (e: any) => toast.error(e?.response?.data?.message || "Shablon o'chirilmadi"),
   })
 
   function applyTemplate(tpl: any) {
@@ -180,8 +187,16 @@ export default function BuyruqPage() {
 
   async function handleSave(status: 'DRAFT' | 'FINAL') {
     if (!activeOrg) return
-    if (!form.raqam.trim()) { setError(t('raqamMajburiy') || 'Buyruq raqami kiritilishi shart'); return }
-    if (!form.sana)         { setError(t('sanaMajburiy')  || 'Sana kiritilishi shart'); return }
+    const missing: string[] = []
+    if (!form.raqam.trim()) missing.push('Buyruq raqami')
+    if (!form.sana)         missing.push('Sana')
+    if (kind !== 'BOSHQA' && !form.xodimIsm?.trim()) missing.push('Xodim ismi')
+    if (missing.length) {
+      const msg = `To'ldirilmagan maydonlar: ${missing.join(', ')}`
+      setError(msg)
+      toast.error(msg)
+      return
+    }
     setError('')
     setSaving(true)
     try {
@@ -202,11 +217,21 @@ export default function BuyruqPage() {
     }
   }
 
-  async function handlePdf()  {
-    await exportContractPdf({ title: `${buyruqLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+  async function handlePdf() {
+    setExporting('pdf')
+    try {
+      await exportContractPdf({ title: `${buyruqLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+      toast.success('PDF yuklandi')
+    } catch { toast.error('PDF faylini yuklashda xatolik') }
+    finally { setExporting(null) }
   }
   async function handleDocx() {
-    await exportContractDocx({ title: `${buyruqLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+    setExporting('docx')
+    try {
+      await exportContractDocx({ title: `${buyruqLabel(kind)} № ${form.raqam}`, content: preview, orgName: form.orgNomi })
+      toast.success('Word yuklandi')
+    } catch { toast.error('Word faylini yuklashda xatolik') }
+    finally { setExporting(null) }
   }
   function handleCopy() {
     navigator.clipboard.writeText(preview)
@@ -389,9 +414,11 @@ export default function BuyruqPage() {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <Input label={t('buyruqRaqami')} value={form.raqam}
-                  onChange={e => updateForm('raqam', e.target.value)} placeholder="001" required />
+                  error={!!error && !form.raqam.trim() ? 'Majburiy' : undefined}
+                  onChange={e => { updateForm('raqam', e.target.value); if (e.target.value.trim()) setError('') }} placeholder="001" required />
                 <Input label={t('sana')} type="date" value={form.sana}
-                  onChange={e => updateForm('sana', e.target.value)} required />
+                  error={!!error && !form.sana ? 'Majburiy' : undefined}
+                  onChange={e => { updateForm('sana', e.target.value); if (e.target.value) setError('') }} required />
               </div>
 
               <Input label={t('tashkilotNomi')} value={form.orgNomi}
@@ -422,7 +449,8 @@ export default function BuyruqPage() {
               )}
 
               <Input label={t('xodimFio')} value={form.xodimIsm}
-                onChange={e => updateForm('xodimIsm', e.target.value)} placeholder={t('xodimIsmi')} />
+                error={!!error && kind !== 'BOSHQA' && !form.xodimIsm?.trim() ? 'Majburiy' : undefined}
+                onChange={e => { updateForm('xodimIsm', e.target.value); if (e.target.value.trim()) setError('') }} placeholder={t('xodimIsmi')} />
               <Input label={t('lavozim')} value={form.xodimLavozim}
                 onChange={e => updateForm('xodimLavozim', e.target.value)} placeholder={t('lavozim')} />
 
@@ -540,16 +568,16 @@ export default function BuyruqPage() {
                 {copied ? t('nusxaOlindi') : t('nusxa')}
               </button>
               <button
-                onClick={handleDocx}
-                className="flex items-center gap-1.5 text-xs text-[#2563EB] hover:text-[#1D4ED8] border border-[#BFDBFE] px-2.5 py-1.5 rounded-lg transition-colors"
+                onClick={handleDocx} disabled={!!exporting}
+                className="flex items-center gap-1.5 text-xs text-[#2563EB] hover:text-[#1D4ED8] border border-[#BFDBFE] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
               >
-                <Download size={13} /> {t('word')}
+                {exporting === 'docx' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />} {t('word')}
               </button>
               <button
-                onClick={handlePdf}
-                className="flex items-center gap-1.5 text-xs text-[#DC2626] hover:text-[#B91C1C] border border-[#FECACA] px-2.5 py-1.5 rounded-lg transition-colors"
+                onClick={handlePdf} disabled={!!exporting}
+                className="flex items-center gap-1.5 text-xs text-[#DC2626] hover:text-[#B91C1C] border border-[#FECACA] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
               >
-                <Download size={13} /> {t('pdf')}
+                {exporting === 'pdf' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />} {t('pdf')}
               </button>
             </div>
           </div>
@@ -567,41 +595,33 @@ export default function BuyruqPage() {
       </div>
 
       {/* ─── Fullscreen preview ─── */}
-      {fullscreen && (
-        <div className="fixed inset-0 z-50 bg-[#1E293B] flex flex-col">
-          <div className="bg-[#0F172A] text-white border-b border-[#1E293B] flex items-center px-3 sm:px-4 h-14 gap-2 shrink-0">
+      <FullscreenPreview
+        open={fullscreen}
+        onClose={() => setFullscreen(false)}
+        title={t('korinish')}
+        html={previewHtml || undefined}
+        emptyText={t('malumotlarToldiring')}
+        toolbar={
+          <>
             <button
-              onClick={() => setFullscreen(false)}
-              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              disabled={!!exporting}
+              onClick={handleDocx}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/10 hover:bg-white/20 disabled:opacity-50 transition"
             >
-              <ChevronLeft size={16} />
-              <span className="hidden sm:inline">{t('back')}</span>
+              {exporting === 'docx' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              {t('word')}
             </button>
-            <div className="h-6 w-px bg-white/10 mx-1" />
-            <p className="text-sm font-semibold">{t('korinish')}</p>
-            <div className="flex-1" />
-            <button onClick={() => printHtml(previewHtml)} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
-              <Printer size={14} /><span className="hidden sm:inline">{t('print')}</span>
+            <button
+              disabled={!!exporting}
+              onClick={handlePdf}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/10 hover:bg-white/20 disabled:opacity-50 transition"
+            >
+              {exporting === 'pdf' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              {t('pdf')}
             </button>
-            <button onClick={handleDocx} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
-              <Download size={14} /><span className="hidden sm:inline">{t('word')}</span>
-            </button>
-            <button onClick={handlePdf} className="p-2 rounded-lg hover:bg-white/10 transition text-sm flex items-center gap-1.5">
-              <Download size={14} /><span className="hidden sm:inline">{t('pdf')}</span>
-            </button>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <div className="min-h-full flex justify-center p-4 sm:p-8 lg:p-12">
-              <div className="bg-white shadow-2xl" style={{ width: '794px', minHeight: '1123px' }}>
-                {previewHtml
-                  ? <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
-                  : <div className="p-12 text-[#94A3B8] text-sm">{t('malumotlarToldiring')}</div>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        }
+      />
 
       {/* ─── Save template modal ─── */}
       <Modal

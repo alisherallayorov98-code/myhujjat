@@ -3,7 +3,7 @@
 import { useState }                                      from 'react'
 import { useRouter }                                     from 'next/navigation'
 import { useTranslations }                               from 'next-intl'
-import { Plus, Save, Download, Eye, Maximize2, Trash2 }   from 'lucide-react'
+import { Plus, Save, Download, Eye, Maximize2, Trash2, Loader2 } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
 import { Button }                                         from '@/components/ui/Button'
@@ -31,9 +31,11 @@ export default function AktSverkiPage() {
   const router           = useRouter()
   const qc               = useQueryClient()
   const { currentOrg }   = useAuth()
-  const [modal, setModal] = useState(false)
-  const [preview, setPreview]       = useState('')
+  const [modal, setModal]             = useState(false)
+  const [preview, setPreview]         = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [exporting, setExporting]     = useState<'pdf' | 'docx' | null>(null)
+  const [formErrors, setFormErrors]   = useState<Record<string, string>>({})
   const [movements, setMovements]   = useState<AktSverkaMovement[]>([{ ...EMPTY_MOV }])
   const [form, setForm] = useState({
     raqam:             '',
@@ -94,6 +96,19 @@ export default function AktSverkiPage() {
     setPreview(generateAktSverkaText(buildData()))
   }
 
+  function validateAndSave() {
+    const errs: Record<string, string> = {}
+    if (!form.cpNomi.trim()) errs.cpNomi = 'Kontragent nomi majburiy'
+    if (!form.sana)          errs.sana   = 'Sana majburiy'
+    if (Object.keys(errs).length) {
+      setFormErrors(errs)
+      toast.error(Object.values(errs)[0])
+      return
+    }
+    setFormErrors({})
+    mutation.mutate()
+  }
+
   const mutation = useMutation({
     mutationFn: () => {
       const data = buildData()
@@ -125,7 +140,7 @@ export default function AktSverkiPage() {
           { label: t('aktSverkaLabel') },
         ]}
         actions={
-          <Button leftIcon={<Plus size={14} />} size="sm" onClick={() => { setPreview(''); setModal(true) }}>
+          <Button leftIcon={<Plus size={14} />} size="sm" onClick={() => { setPreview(''); setFormErrors({}); setModal(true) }}>
             {t('newAktSverka')}
           </Button>
         }
@@ -216,7 +231,7 @@ export default function AktSverkiPage() {
               }}>
               PDF
             </Button>
-            <Button size="sm" leftIcon={<Save size={13} />} loading={mutation.isPending} onClick={() => mutation.mutate()}>
+            <Button size="sm" leftIcon={<Save size={13} />} loading={mutation.isPending} onClick={validateAndSave}>
               {t('save')}
             </Button>
           </div>
@@ -227,7 +242,8 @@ export default function AktSverkiPage() {
               <Input label={t('raqam')} placeholder={t('raqamPlace')}
                 value={form.raqam} onChange={e => setForm(f => ({ ...f, raqam: e.target.value }))} />
               <Input label={t('sana')} type="date"
-                value={form.sana} onChange={e => setForm(f => ({ ...f, sana: e.target.value }))} />
+                error={formErrors.sana}
+                value={form.sana} onChange={e => { setForm(f => ({ ...f, sana: e.target.value })); setFormErrors(p => ({ ...p, sana: '' })) }} />
             </div>
             <Input label={t('davr')} placeholder={t('davrPlace')}
               value={form.davr} onChange={e => setForm(f => ({ ...f, davr: e.target.value }))} />
@@ -239,7 +255,10 @@ export default function AktSverkiPage() {
                 <select
                   onChange={e => {
                     const cp = cps.find((c: any) => c.id === e.target.value)
-                    if (cp) setForm(f => ({ ...f, cpNomi: cp.name, cpInn: cp.inn || '', cpRahbar: cp.directorName || '' }))
+                    if (cp) {
+                      setForm(f => ({ ...f, cpNomi: cp.name, cpInn: cp.inn || '', cpRahbar: cp.directorName || '' }))
+                      setFormErrors(p => ({ ...p, cpNomi: '' }))
+                    }
                   }}
                   className="w-full h-9 rounded-lg text-sm px-3 bg-white border border-[#E2E8F0] focus:outline-none focus:border-[#2563EB]"
                 >
@@ -248,7 +267,8 @@ export default function AktSverkiPage() {
                 </select>
               </div>
               <Input label={t('kontragentNomi')} placeholder={t('kontragentNomiPlace')}
-                value={form.cpNomi} onChange={e => setForm(f => ({ ...f, cpNomi: e.target.value }))} />
+                error={formErrors.cpNomi}
+                value={form.cpNomi} onChange={e => { setForm(f => ({ ...f, cpNomi: e.target.value })); setFormErrors(p => ({ ...p, cpNomi: '' })) }} />
               <div className="grid grid-cols-2 gap-2">
                 <Input label={t('inn')} placeholder={t('innPlace')}
                   value={form.cpInn} onChange={e => setForm(f => ({ ...f, cpInn: e.target.value }))} />
@@ -334,23 +354,35 @@ export default function AktSverkiPage() {
         toolbar={
           <div className="flex gap-1">
             <button
-              onClick={() => {
-                const text = generateAktSverkaText(buildData())
-                exportContractDocx({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+              disabled={!!exporting}
+              onClick={async () => {
+                setExporting('docx')
+                try {
+                  const text = generateAktSverkaText(buildData())
+                  await exportContractDocx({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+                  toast.success('Word yuklandi')
+                } catch { toast.error('Eksportda xatolik') }
+                finally { setExporting(null) }
               }}
-              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm disabled:opacity-50"
             >
-              <Download size={14} />
+              {exporting === 'docx' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               <span className="hidden sm:inline">Word</span>
             </button>
             <button
-              onClick={() => {
-                const text = generateAktSverkaText(buildData())
-                exportContractPdf({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+              disabled={!!exporting}
+              onClick={async () => {
+                setExporting('pdf')
+                try {
+                  const text = generateAktSverkaText(buildData())
+                  await exportContractPdf({ title: `Akt-sverka`, content: text, orgName: currentOrg?.name })
+                  toast.success('PDF yuklandi')
+                } catch { toast.error('Eksportda xatolik') }
+                finally { setExporting(null) }
               }}
-              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm"
+              className="p-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5 text-sm disabled:opacity-50"
             >
-              <Download size={14} />
+              {exporting === 'pdf' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               <span className="hidden sm:inline">PDF</span>
             </button>
           </div>

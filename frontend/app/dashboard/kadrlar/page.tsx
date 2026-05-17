@@ -3,7 +3,8 @@
 import { useState, useRef, useCallback }                  from 'react'
 import { useTranslations }                               from 'next-intl'
 import {
-  Plus, Users, Search, Edit2, Trash2, Building2, Download, X, FileText, ChevronRight,
+  Plus, Users, Search, Edit2, Trash2, Building2, X, FileText, ChevronRight,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }          from '@tanstack/react-query'
 import { PageHeader }                                     from '@/components/layout/PageHeader'
@@ -14,12 +15,16 @@ import { Badge }                                          from '@/components/ui/
 import { Modal, ConfirmDialog }                           from '@/components/ui/Modal'
 import { EmptyState, TableRowSkeleton }                   from '@/components/ui/Skeleton'
 import { Pagination }                                    from '@/components/ui/Pagination'
+import { ExportDropdown }                                from '@/components/ui/ExportDropdown'
+import { CsvImportButton }                               from '@/components/ui/CsvImportButton'
 import { useAuth }                                        from '@/hooks/useAuth'
 import { useDebouncedValue }                             from '@/hooks/useDebouncedValue'
 import { useKeyboardShortcut }                           from '@/hooks/useKeyboardShortcut'
 import api                                                from '@/lib/api'
-import { exportEmployeesExcel }                          from '@/lib/export/listExport'
+import { exportEmployeesExcel, exportEmployeesCsv }      from '@/lib/export/listExport'
+import { mapCsvToEmployee }                              from '@/lib/import/csvImport'
 import { formatDate, formatNumber }                      from '@/lib/formatters'
+import { cn }                                            from '@/lib/cn'
 import toast                                              from 'react-hot-toast'
 import Link                                               from 'next/link'
 
@@ -64,7 +69,7 @@ function XodimModal({
   const mutation = useMutation({
     mutationFn: (data: typeof form) =>
       isEdit
-        ? api.put(`/employees/${xodim!.id}`, data)
+        ? api.put(`/employees/${xodim!.id}?orgId=${orgId}`, data)
         : api.post('/employees', { ...data, organizationId: orgId }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['employees'] })
@@ -110,7 +115,10 @@ function XodimModal({
         </>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-5" onKeyDown={e => {
+        if (e.key === 'Enter' && !(e.target as HTMLElement).matches('textarea') && form.ism && !mutation.isPending)
+          mutation.mutate(form)
+      }}>
         <div className="flex gap-2 items-end">
           <div className="flex-1">
             <Input
@@ -131,7 +139,7 @@ function XodimModal({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input label={t('fullName')} placeholder={t('fullNamePlace')}
-            value={form.ism} onChange={e => upd('ism', e.target.value)} required />
+            value={form.ism} onChange={e => upd('ism', e.target.value)} required autoFocus />
           <Input label={t('passport')} placeholder={t('passportPlace')}
             value={form.passport} onChange={e => upd('passport', e.target.value)} />
           <Input label={t('lavozim')} placeholder={t('lavozimPlace')}
@@ -166,6 +174,7 @@ export default function KadrlarPage() {
   const [addModal,    setAddModal]    = useState(false)
   const [editXodim,   setEditXodim]   = useState<Employee | null>(null)
   const [deleteEmp,   setDeleteEmp]   = useState<Employee | null>(null)
+  const [excelLoading,setExcelLoading]= useState(false)
   const debouncedSearch = useDebouncedValue(search, 300)
 
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -200,12 +209,13 @@ export default function KadrlarPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/employees/${id}`),
+    mutationFn: (id: string) => api.delete(`/employees/${id}?orgId=${currentOrg!.id}`),
     onSuccess:  () => {
       qc.invalidateQueries({ queryKey: ['employees'] })
       qc.invalidateQueries({ queryKey: ['employees-stats'] })
       toast.success(t('employeeDeleted'))
     },
+    onError: (e: any) => toast.error(e?.response?.data?.message || t('error')),
   })
 
   return (
@@ -219,14 +229,64 @@ export default function KadrlarPage() {
         ]}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" leftIcon={<Download size={14} />}
-              onClick={() => {
-                if (employees.length === 0) { toast.error(t('noEmployeesExport')); return }
-                exportEmployeesExcel(employees, currentOrg?.name || 'tashkilot')
-                toast.success(t('excelDownloaded'))
-              }}>
-              {t('excel')}
-            </Button>
+            <CsvImportButton
+              label="Import"
+              onImport={async (rows) => {
+                let ok = 0, fail = 0
+                for (const row of rows) {
+                  const dto = mapCsvToEmployee(row)
+                  if (!dto.ism) { fail++; continue }
+                  try {
+                    await api.post('/employees', { ...dto, organizationId: currentOrg!.id })
+                    ok++
+                  } catch { fail++ }
+                }
+                qc.invalidateQueries({ queryKey: ['employees'] })
+                qc.invalidateQueries({ queryKey: ['employees-stats'] })
+                return { ok, fail }
+              }}
+            />
+            <ExportDropdown
+              loading={excelLoading}
+              options={[
+                {
+                  label: 'Excel (.xlsx)',
+                  icon: <FileSpreadsheet size={14} />,
+                  onClick: async () => {
+                    setExcelLoading(true)
+                    try {
+                      const params = new URLSearchParams({ orgId: currentOrg!.id, limit: '10000', status: statusFilter })
+                      if (debouncedSearch) params.set('search', debouncedSearch)
+                      const { data } = await api.get(`/employees?${params}`)
+                      const all: any[] = data.data || []
+                      if (all.length === 0) { toast.error(t('noEmployeesExport')); return }
+                      await exportEmployeesExcel(all, currentOrg?.name || 'tashkilot')
+                      toast.success(`Excel: ${all.length} ta eksport qilindi`)
+                    } catch { toast.error('Eksportda xatolik') }
+                    finally { setExcelLoading(false) }
+                  },
+                  disabled: totalCount === 0,
+                },
+                {
+                  label: 'CSV',
+                  icon: <FileText size={14} />,
+                  onClick: async () => {
+                    setExcelLoading(true)
+                    try {
+                      const params = new URLSearchParams({ orgId: currentOrg!.id, limit: '10000', status: statusFilter })
+                      if (debouncedSearch) params.set('search', debouncedSearch)
+                      const { data } = await api.get(`/employees?${params}`)
+                      const all: any[] = data.data || []
+                      if (all.length === 0) { toast.error(t('noEmployeesExport')); return }
+                      exportEmployeesCsv(all, currentOrg?.name || 'tashkilot')
+                      toast.success(`CSV: ${all.length} ta eksport qilindi`)
+                    } catch { toast.error('Eksportda xatolik') }
+                    finally { setExcelLoading(false) }
+                  },
+                  disabled: totalCount === 0,
+                },
+              ]}
+            />
             <Link href="/dashboard/kadrlar/hujjat">
               <Button variant="secondary" size="sm">{t('hrDocuments')}</Button>
             </Link>

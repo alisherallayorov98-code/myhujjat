@@ -240,6 +240,7 @@ export default function YangiShartnoma() {
   }, [initialType])
 
   const [serverError, setServerError] = useState<string[]>([])
+  const [stepErrors,  setStepErrors]  = useState<Record<string, string>>({})
 
   const mutation = useMutation({
     mutationFn: (data: any) => api.post('/contracts', data),
@@ -274,11 +275,15 @@ export default function YangiShartnoma() {
   }
 
   function tryGoToStep3() {
-    const v = canGoToStep3()
-    if (!v.ok) {
-      toast.error(v.message!)
+    const errs: Record<string, string> = {}
+    if (!form.counterpartyId) errs.counterpartyId = t('new_.validation.cpRequired')
+    if (!form.contractDate)   errs.contractDate   = t('new_.validation.dateRequired')
+    if (Object.keys(errs).length) {
+      setStepErrors(errs)
+      toast.error(Object.values(errs)[0])
       return
     }
+    setStepErrors({})
     setServerError([])
     setStep(3)
   }
@@ -362,8 +367,18 @@ export default function YangiShartnoma() {
   }, [preview, deferredForm, deferredOrgEdits, deferredType, currentOrg, selectedCp?.id])
 
   function handleCreate() {
-    const v = canCreate()
-    if (!v.ok) { toast.error(v.message!); return }
+    const errs: Record<string, string> = {}
+    if (!form.counterpartyId) errs.counterpartyId = t('new_.validation.cpRequired')
+    if (!form.contractDate)   errs.contractDate   = t('new_.validation.dateRequired')
+    const totalAmount = form.specItems.reduce((s, i) => s + i.summa, 0) || parseFloat(form.amount) || 0
+    if (totalAmount <= 0)     errs.items = t('new_.validation.amountRequired')
+    if (!currentOrg)          errs.items = t('toast.orgRequired')
+    if (Object.keys(errs).length) {
+      setStepErrors(errs)
+      toast.error(Object.values(errs)[0])
+      return
+    }
+    setStepErrors({})
     setServerError([])
     const amount = specTotal > 0 ? specTotal : parseFloat(form.amount) || 0
     mutation.mutate({
@@ -509,7 +524,9 @@ export default function YangiShartnoma() {
               value={form.contractNumber} onChange={e => upd('contractNumber', e.target.value)}
               hint={t('new_.form.autoHint')} />
             <Input label={t('new_.form.dateLabel')} type="date"
-              value={form.contractDate} onChange={e => upd('contractDate', e.target.value)} />
+              value={form.contractDate}
+              error={stepErrors.contractDate}
+              onChange={e => { upd('contractDate', e.target.value); setStepErrors(p => ({ ...p, contractDate: '' })) }} />
             <Input label={t('new_.form.endDateLabel')} type="date"
               value={form.endDate} onChange={e => upd('endDate', e.target.value)}
               hint={t('new_.form.endDateHint')} />
@@ -559,10 +576,13 @@ export default function YangiShartnoma() {
               <CpDropdown
                 cps={cps as Counterparty[]}
                 value={form.counterpartyId}
-                onChange={(id) => upd('counterpartyId', id)}
+                onChange={(id) => { upd('counterpartyId', id); setStepErrors(p => ({ ...p, counterpartyId: '' })) }}
                 orgId={currentOrg?.id || ''}
                 onCpCreated={() => refetchCps()}
               />
+              {stepErrors.counterpartyId && (
+                <p className="text-xs text-[#DC2626] mt-1">{stepErrors.counterpartyId}</p>
+              )}
             </div>
             {selectedCp ? (
               <div className="divide-y divide-[#F1F5F9] px-4">
@@ -684,13 +704,21 @@ export default function YangiShartnoma() {
             </Card>
           )}
 
+          {stepErrors.items && (
+            <p className="text-xs text-[#DC2626] mb-2">{stepErrors.items}</p>
+          )}
           <SpecTable
             items={form.specItems}
-            onChange={items => setForm(f => ({
-              ...f,
-              specItems: items,
-              amount: items.length > 0 ? String(items.reduce((s, i) => s + i.summa, 0)) : f.amount,
-            }))}
+            onChange={items => {
+              setForm(f => ({
+                ...f,
+                specItems: items,
+                amount: items.length > 0 ? String(items.reduce((s, i) => s + i.summa, 0)) : f.amount,
+              }))
+              if (items.some(i => i.nomi.trim() && i.miqdori > 0 && i.narxi > 0)) {
+                setStepErrors(p => ({ ...p, items: '' }))
+              }
+            }}
           />
 
           <Card>
@@ -716,7 +744,9 @@ export default function YangiShartnoma() {
                 </div>
               ) : (
                 <Input label={t('new_.form.contractAmountLabel')} placeholder={t('new_.form.amountPlaceholder')} type="number"
-                  value={form.amount} onChange={e => upd('amount', e.target.value)}
+                  value={form.amount}
+                  error={stepErrors.items}
+                  onChange={e => { upd('amount', e.target.value); if (parseFloat(e.target.value) > 0) setStepErrors(p => ({ ...p, items: '' })) }}
                   hint={form.amount && parseFloat(form.amount) > 0 ? formatAmountWords(parseFloat(form.amount)) : ''} />
               )}
             </div>

@@ -4,8 +4,9 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouter }    from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
-  Plus, Users, Search, Edit2, AlertCircle, Download,
+  Plus, Users, Search, Edit2, AlertCircle,
   Trash2, X, FileText, RefreshCw, TrendingUp, CheckCircle, Loader2,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient }   from '@tanstack/react-query'
 import { PageHeader }   from '@/components/layout/PageHeader'
@@ -16,12 +17,15 @@ import { Badge }        from '@/components/ui/Badge'
 import { Modal, ConfirmDialog }        from '@/components/ui/Modal'
 import { Pagination }   from '@/components/ui/Pagination'
 import { EmptyState, TableRowSkeleton } from '@/components/ui/Skeleton'
+import { ExportDropdown } from '@/components/ui/ExportDropdown'
+import { CsvImportButton } from '@/components/ui/CsvImportButton'
 import { StirInput, type StirData } from '@/components/shared/StirInput'
 import { useAuth }      from '@/hooks/useAuth'
 import { useDebouncedValue }   from '@/hooks/useDebouncedValue'
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
 import api              from '@/lib/api'
-import { exportCounterpartiesExcel } from '@/lib/export/listExport'
+import { exportCounterpartiesExcel, exportCounterpartiesCsv } from '@/lib/export/listExport'
+import { mapCsvToCounterparty } from '@/lib/import/csvImport'
 import { cn }           from '@/lib/cn'
 import toast            from 'react-hot-toast'
 
@@ -61,7 +65,7 @@ function CpFormModal({ cp, open, onClose, orgId }: {
   })
   const mutation = useMutation({
     mutationFn: async (data: typeof form) => {
-      if (isEdit) return api.put(`/counterparties/${cp!.id}`, data)
+      if (isEdit) return api.put(`/counterparties/${cp!.id}?orgId=${orgId}`, data)
       return api.post('/counterparties', { ...data, organizationId: orgId })
     },
     onSuccess: () => {
@@ -101,7 +105,10 @@ function CpFormModal({ cp, open, onClose, orgId }: {
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4" onKeyDown={e => {
+        if (e.key === 'Enter' && !(e.target as HTMLElement).matches('textarea') && form.name && !mutation.isPending)
+          mutation.mutate(form)
+      }}>
         <StirInput
           value={form.inn}
           onChange={v => upd('inn', v)}
@@ -111,7 +118,7 @@ function CpFormModal({ cp, open, onClose, orgId }: {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input label={t('form.name')} placeholder={t('form.namePlaceholder')}
-            value={form.name} onChange={e => upd('name', e.target.value)} required />
+            value={form.name} onChange={e => upd('name', e.target.value)} required autoFocus />
           <Input label={t('form.director')} placeholder={t('form.directorPlaceholder')}
             value={form.directorName} onChange={e => upd('directorName', e.target.value)} />
           <Input label={t('form.phone')} placeholder={t('form.phonePlaceholder')}
@@ -144,6 +151,7 @@ export default function KontragentlarPage() {
   const [deleteCp,      setDeleteCp]      = useState<Counterparty | null>(null)
   const [selected,      setSelected]      = useState<Set<string>>(new Set())
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [excelLoading,  setExcelLoading]  = useState(false)
 
   // Search debounce — har harf yozganda emas, 300ms keyin
   const debouncedSearch = useDebouncedValue(search, 300)
@@ -227,6 +235,29 @@ export default function KontragentlarPage() {
     onError: (e: any) => toast.error(e?.response?.data?.message || t('toast.error')),
   })
 
+  async function handleExportAll(format: 'excel' | 'csv') {
+    if (!currentOrg) return
+    setExcelLoading(true)
+    try {
+      const params = new URLSearchParams({ orgId: currentOrg.id, limit: '10000' })
+      if (debouncedSearch) params.set('search', debouncedSearch)
+      const { data } = await api.get(`/counterparties?${params}`)
+      const allCps: any[] = data.data || []
+      if (allCps.length === 0) { toast.error(t('toast.noExportData')); return }
+      if (format === 'excel') {
+        await exportCounterpartiesExcel(allCps, currentOrg.name)
+        toast.success(`Excel: ${allCps.length} ta eksport qilindi`)
+      } else {
+        exportCounterpartiesCsv(allCps, currentOrg.name)
+        toast.success(`CSV: ${allCps.length} ta eksport qilindi`)
+      }
+    } catch {
+      toast.error('Eksportda xatolik')
+    } finally {
+      setExcelLoading(false)
+    }
+  }
+
   if (!currentOrg) {
     return (
       <EmptyState
@@ -248,14 +279,39 @@ export default function KontragentlarPage() {
         ]}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" leftIcon={<Download size={14} />}
-              onClick={() => {
-                if (filtered.length === 0) { toast.error(t('toast.noExportData')); return }
-                exportCounterpartiesExcel(filtered, currentOrg?.name || 'tashkilot')
-                toast.success(t('toast.excelDownloaded'))
-              }}>
-              Excel
-            </Button>
+            <CsvImportButton
+              label="Import"
+              onImport={async (rows) => {
+                let ok = 0, fail = 0
+                for (const row of rows) {
+                  const dto = mapCsvToCounterparty(row)
+                  if (!dto.name) { fail++; continue }
+                  try {
+                    await api.post('/counterparties', { ...dto, organizationId: currentOrg.id })
+                    ok++
+                  } catch { fail++ }
+                }
+                qc.invalidateQueries({ queryKey: ['counterparties'] })
+                return { ok, fail }
+              }}
+            />
+            <ExportDropdown
+              loading={excelLoading}
+              options={[
+                {
+                  label: 'Excel (.xlsx)',
+                  icon: <FileSpreadsheet size={14} />,
+                  onClick: () => handleExportAll('excel'),
+                  disabled: total === 0,
+                },
+                {
+                  label: 'CSV',
+                  icon: <FileText size={14} />,
+                  onClick: () => handleExportAll('csv'),
+                  disabled: total === 0,
+                },
+              ]}
+            />
             <Button leftIcon={<Plus size={14} />} size="sm" onClick={() => setAddModal(true)}>
               {t('add')}
             </Button>
@@ -347,7 +403,7 @@ export default function KontragentlarPage() {
           <div className="flex-1" />
           <Button
             size="xs" variant="outline"
-            className="text-red-500 hover:bg-red-50 hover:border-red-200"
+            className="text-[#DC2626] hover:bg-[#FEF2F2] hover:border-[#FECACA]"
             leftIcon={<Trash2 size={11} />}
             onClick={() => setBulkDeleteOpen(true)}
           >
