@@ -17,7 +17,7 @@ export function BottomNav() {
     { icon: LayoutDashboard, label: t('home'),      path: '/dashboard',              exact: true  },
     { icon: FileText,        label: t('contracts'), path: '/dashboard/shartnomalar', exact: false },
     { icon: Sparkles,        label: t('ai'),        path: '/dashboard/seif/ai',      exact: false },
-    { icon: Archive,         label: t('safe'),      path: '/dashboard/seif',         exact: false },
+    { icon: Archive,         label: t('safe'),      path: '/dashboard/seif',         exact: true  },
     { icon: Menu,            label: t('menu'),      path: '/dashboard/menu',         exact: false },
   ]
 

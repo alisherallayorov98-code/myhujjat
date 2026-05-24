@@ -41,7 +41,7 @@ export function CookieConsent() {
   if (!show) return null
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 p-4 sm:p-6 bg-gradient-to-t from-black/20 to-transparent pointer-events-none">
+    <div className="fixed inset-x-0 bottom-0 z-50 p-4 pb-20 sm:pb-6 bg-gradient-to-t from-black/20 to-transparent pointer-events-none">
       <div className="max-w-3xl mx-auto bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-4 sm:p-5 pointer-events-auto animate-scale-in">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#FEF3C7] flex items-center justify-center shrink-0">

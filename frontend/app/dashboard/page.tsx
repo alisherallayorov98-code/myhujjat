@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link                from 'next/link'
 import {
   FileText, ClipboardList, Calculator,
-  Users, Sparkles, AlertTriangle,
+  Users, Building2, Sparkles, AlertTriangle,
   Plus, ArrowRight, Wallet, X,
 } from 'lucide-react'
 import { useQuery }    from '@tanstack/react-query'
@@ -247,7 +247,7 @@ export default function DashboardPage() {
             hint={contractsStats?.active ? t('stat.activeCount', { count: contractsStats.active }) : t('stat.noneYet')}
           />
           <StatCard
-            icon={Users}
+            icon={Building2}
             label={t('stat.counterparties')}
             value={cps.length}
             color="text-[#7C3AED]"

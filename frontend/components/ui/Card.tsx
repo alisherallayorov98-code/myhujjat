@@ -29,7 +29,7 @@ export function Card({
       className={cn(
         'bg-white rounded-xl',
         bordered && 'border border-[#E2E8F0]',
-        'shadow-[0_1px_3px_rgba(0,0,0,0.06)]',
+        'shadow-card',
         paddings[padding],
         hoverable && 'cursor-pointer hover:border-[#2563EB]/30 hover:shadow-md transition-all duration-200',
         className

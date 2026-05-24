@@ -223,7 +223,7 @@ export default function HomePage() {
             {t('documentTypes.intro')}
           </p>
           <div className="overflow-hidden">
-            <div className="flex gap-3 animate-scroll">
+            <div className="flex gap-3 animate-scroll hover:[animation-play-state:paused]">
               {[...docTypes, ...docTypes].map((d, i) => (
                 <div
                   key={i}
@@ -300,15 +300,15 @@ export default function HomePage() {
             {steps.map((s, i) => (
               <div key={s.n} className="relative">
                 <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 h-full">
-                  <div className="font-display font-black text-5xl bg-gradient-to-br from-[#DBEAFE] to-transparent bg-clip-text text-transparent mb-3">
+                  <div className="font-display font-black text-5xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] bg-clip-text text-transparent mb-3">
                     {s.n}
                   </div>
                   <h3 className="font-display font-bold text-[#0F172A] text-lg mb-2">{s.title}</h3>
                   <p className="text-sm text-[#475569] leading-relaxed">{s.desc}</p>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-1/2 -right-3 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-[#E2E8F0] z-10 items-center justify-center">
-                    <ArrowRight size={11} className="text-[#94A3B8] m-auto" />
+                  <div className="hidden md:flex absolute top-1/2 -right-3 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-[#E2E8F0] z-10 items-center justify-center">
+                    <ArrowRight size={11} className="text-[#94A3B8]" />
                   </div>
                 )}
               </div>

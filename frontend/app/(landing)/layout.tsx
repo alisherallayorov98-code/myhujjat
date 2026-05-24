@@ -1,6 +1,7 @@
 import Link               from 'next/link'
 import type { Metadata }  from 'next'
 import { getTranslations } from 'next-intl/server'
+import { ChevronDown }    from 'lucide-react'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://myhujjat.uz'
 
@@ -61,8 +62,9 @@ async function LandingHeader() {
 
         <nav className="hidden md:flex items-center gap-6 text-sm">
           <details className="relative group">
-            <summary className="list-none cursor-pointer text-[#475569] hover:text-[#0F172A] transition-colors">
+            <summary className="list-none cursor-pointer flex items-center gap-1 text-[#475569] hover:text-[#0F172A] transition-colors select-none">
               {t('kimUchun')}
+              <ChevronDown size={14} className="transition-transform duration-200 group-open:rotate-180" />
             </summary>
             <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-[#E2E8F0] rounded-xl shadow-lg p-2 z-50">
               <Link href="/buxgalterlar-uchun" className="block px-3 py-2 rounded-lg hover:bg-[#F1F5F9] text-[#0F172A]">
@@ -149,9 +151,9 @@ async function LandingFooter() {
           <p className="text-xs">&copy; {new Date().getFullYear()} MyHujjat.uz. {t('copyright')}</p>
           <div className="flex items-center gap-3 text-xs">
             <Link href="/terms"   className="hover:text-white transition-colors">{t('termsShort')}</Link>
-            <span className="text-[#1E293B]">·</span>
+            <span className="text-[#475569]">·</span>
             <Link href="/privacy" className="hover:text-white transition-colors">{t('privacyShort')}</Link>
-            <span className="text-[#1E293B]">·</span>
+            <span className="text-[#475569]">·</span>
             <span>🇺🇿 {t('city')}</span>
           </div>
         </div>
