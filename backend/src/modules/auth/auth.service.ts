@@ -174,6 +174,77 @@ export class AuthService {
   }
 
   // ============================================
+  // E-IMZO ORQALI KIRISH
+  // ============================================
+  async eimzoLogin(data: { pinfl: string; inn: string; cn: string; ip?: string }) {
+    const identifier = data.pinfl || data.inn;
+    if (!identifier) {
+      throw new BadRequestException("Sertifikatda JSHSHIR yoki STIR topilmadi");
+    }
+
+    let user = await this.prisma.user.findUnique({
+      where: { pinfl: identifier },
+      include: { subscription: true }
+    });
+
+    if (!user) {
+      // Yangi foydalanuvchi yaratish
+      const fakeEmail = `${identifier}@e-imzo.myhujjat.uz`;
+      const passwordHash = await bcrypt.hash(randomBytes(16).toString('hex'), 12);
+      
+      const parts = data.cn.split(' ');
+      const lastName = parts[0] || 'User';
+      const firstName = parts.slice(1).join(' ') || '';
+
+      user = await this.prisma.user.create({
+        data: {
+          email: fakeEmail,
+          pinfl: identifier,
+          passwordHash,
+          firstName,
+          lastName,
+          isVerified: true,
+          subscription: {
+            create: {
+              plan: 'FREE',
+              status: 'ACTIVE',
+              startedAt: new Date()
+            }
+          }
+        },
+        include: { subscription: true }
+      });
+
+      // Agar INN bo'lsa, tashkilot ham ochib beramiz
+      if (data.inn) {
+         await this.prisma.organization.create({
+           data: {
+             userId: user.id,
+             name: data.cn,
+             inn: data.inn,
+             directorName: data.cn,
+             directorPinfl: data.pinfl,
+             isActive: true,
+             isDefault: true,
+           }
+         });
+      }
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Hisob bloklangan');
+    }
+
+    this.auditService.log({
+      userId: user.id,
+      action: 'USER_EIMZO_LOGIN',
+      ipAddress: data.ip,
+    });
+
+    return this.generateTokens(user);
+  }
+
+  // ============================================
   // TOKENLAR YARATISH
   // ============================================
   async generateTokens(user: any) {
