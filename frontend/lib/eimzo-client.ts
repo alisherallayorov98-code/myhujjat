@@ -1,37 +1,36 @@
-export interface EimzoKey {
+export interface EimzoCert {
   alias:     string
+  disk:      string
+  path:      string
+  name:      string
   subjectDn: string
   issuerDn:  string
   notBefore: string
   notAfter:  string
   serialNum: string
   type:      string
-  disk?:     string
 }
 
 class EimzoClient {
   private ws:      WebSocket | null = null
   private pending: Map<string, { resolve: Function; reject: Function }> = new Map()
-  private msgId   = 0
+  private msgId    = 0
 
   async connect(): Promise<void> {
     if (this.ws?.readyState === WebSocket.OPEN) return
 
     const urls = [
-      'ws://127.0.0.1:64646/CAPI/ws',
-      'ws://127.0.0.1:64646',
       'wss://127.0.0.1:64443/CAPI/ws',
-      'wss://127.0.0.1:64443',
+      'wss://localhost:64443/CAPI/ws',
+      'ws://127.0.0.1:64646/CAPI/ws',
+      'ws://localhost:64646/CAPI/ws',
     ]
 
     for (const url of urls) {
       try {
         await new Promise<void>((resolve, reject) => {
-          const ws = new WebSocket(url)
-          const timer = setTimeout(() => {
-            ws.close()
-            reject(new Error('timeout'))
-          }, 2000)
+          const ws    = new WebSocket(url)
+          const timer = setTimeout(() => { ws.close(); reject(new Error('timeout')) }, 3000)
 
           ws.onopen = () => {
             clearTimeout(timer)
@@ -39,11 +38,11 @@ class EimzoClient {
             ws.onmessage = (event) => {
               try {
                 const data = JSON.parse(event.data)
-                const pend = this.pending.get(data.id)
+                const pend = this.pending.get(String(data.id))
                 if (pend) {
-                  this.pending.delete(data.id)
-                  if (data.status === 'ok') pend.resolve(data)
-                  else pend.reject(new Error(data.reason || 'E-imzo xatolik'))
+                  this.pending.delete(String(data.id))
+                  if (data.success === true || data.success === 'true') pend.resolve(data)
+                  else pend.reject(new Error(data.reason || data.message || 'E-imzo xatolik'))
                 }
               } catch {}
             }
@@ -60,41 +59,50 @@ class EimzoClient {
     throw new Error('E-imzo ilovasi topilmadi')
   }
 
-  async listKeys(): Promise<EimzoKey[]> {
-    const response = await this.send({ method: 'listAllUserKeys' })
-    return response.keys || []
-  }
-
-  async sign(alias: string, challenge: string): Promise<{
-    signature: string; certificate: string
-  }> {
-    const response = await this.send({
-      method: 'createPkcs7',
-      id:     alias,
-      data:   challenge,
-    })
-    return {
-      signature:   response.pkcs7b64 || '',
-      certificate: response.sertifikat || '',
-    }
-  }
-
-  private send(data: Record<string, any>): Promise<any> {
+  private call(plugin: string, name: string, args: string[] = []): Promise<any> {
     return new Promise((resolve, reject) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
         reject(new Error('E-imzo ga ulanilmagan'))
         return
       }
-      const id = String(++this.msgId)
+      const id  = String(++this.msgId)
+      const msg: Record<string, any> = { plugin, name, id }
+      if (args.length > 0) msg.arguments = args
       this.pending.set(id, { resolve, reject })
-      this.ws.send(JSON.stringify({ ...data, id }))
+      this.ws.send(JSON.stringify(msg))
       setTimeout(() => {
         if (this.pending.has(id)) {
           this.pending.delete(id)
-          reject(new Error('E-imzo javob bermadi'))
+          reject(new Error('E-imzo javob bermadi (timeout)'))
         }
       }, 30_000)
     })
+  }
+
+  async listCertificates(): Promise<EimzoCert[]> {
+    const res = await this.call('pfx', 'list_all_certificates')
+    return res.certificates || res.keys || []
+  }
+
+  async loadKey(cert: EimzoCert): Promise<string> {
+    const res = await this.call('pfx', 'load_key', [
+      cert.disk,
+      cert.path || '',
+      cert.name,
+      cert.alias,
+    ])
+    return res.keyId || res.id || ''
+  }
+
+  async sign(keyId: string, challengeHex: string): Promise<string> {
+    // challenge hex → base64 (E-IMZO create_pkcs7 data_64 talab qiladi)
+    const base64 = btoa(challengeHex)
+    const res = await this.call('pkcs7', 'create_pkcs7', [base64, keyId, 'no'])
+    return res.pkcs7 || res.pkcs7b64 || ''
+  }
+
+  async unloadKey(keyId: string): Promise<void> {
+    await this.call('pfx', 'unload_key', [keyId]).catch(() => {})
   }
 
   disconnect() { this.ws?.close() }

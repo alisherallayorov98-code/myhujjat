@@ -6,7 +6,7 @@ import { Shield, CheckCircle, AlertCircle, Key, Loader2 }   from 'lucide-react'
 import { Button }                                            from '@/components/ui/Button'
 import { Modal }                                             from '@/components/ui/Modal'
 import api                                                   from '@/lib/api'
-import { eimzoClient, EimzoKey, checkEimzoInstalled }        from '@/lib/eimzo-client'
+import { eimzoClient, EimzoCert, checkEimzoInstalled }        from '@/lib/eimzo-client'
 import toast                                                 from 'react-hot-toast'
 import { cn }                                                from '@/lib/cn'
 import { useAuth }                                           from '@/hooks/useAuth'
@@ -20,8 +20,8 @@ interface EimzoLoginModalProps {
 export function EimzoLoginModal({ open, onClose }: EimzoLoginModalProps) {
   const t = useTranslations('eimzoSign') // Using eimzoSign translations
   const [installed,   setInstalled]   = useState<boolean | null>(null)
-  const [keys,        setKeys]        = useState<EimzoKey[]>([])
-  const [selectedKey, setSelectedKey] = useState<EimzoKey | null>(null)
+  const [keys,        setKeys]        = useState<EimzoCert[]>([])
+  const [selectedKey, setSelectedKey] = useState<EimzoCert | null>(null)
   const [loading,     setLoading]     = useState(false)
   const [status,      setStatus]      = useState<'idle' | 'connecting' | 'signing' | 'success' | 'error'>('idle')
   const { loadUser } = useAuth()
@@ -37,7 +37,7 @@ export function EimzoLoginModal({ open, onClose }: EimzoLoginModalProps) {
     setInstalled(isInstalled)
     if (isInstalled) {
       try {
-        const keyList = await eimzoClient.listKeys()
+        const keyList = await eimzoClient.listCertificates()
         setKeys(keyList)
         if (keyList.length === 1) setSelectedKey(keyList[0])
       } catch {}
@@ -54,10 +54,15 @@ export function EimzoLoginModal({ open, onClose }: EimzoLoginModalProps) {
       const res = await api.get('/auth/e-imzo/challenge')
       const { challenge, challengeId } = res.data
 
-      // 2. Sign challenge with E-IMZO
-      const { signature } = await eimzoClient.sign(selectedKey.alias, challenge)
+      // 2. Load key (E-IMZO parol so'raydi)
+      const keyId = await eimzoClient.loadKey(selectedKey)
+
+      // 3. Sign challenge with E-IMZO
+      const signature = await eimzoClient.sign(keyId, challenge)
+      await eimzoClient.unloadKey(keyId)
 
       // 3. Send signature to login endpoint
+      // 4. Send signature to backend
       const { data } = await api.post('/auth/e-imzo/login', { pkcs7: signature, challengeId })
       
       if (data.accessToken) {
