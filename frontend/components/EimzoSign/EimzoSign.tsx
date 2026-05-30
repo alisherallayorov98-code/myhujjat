@@ -49,9 +49,11 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
     setStatus('signing')
     try {
       const { data: { id: challengeId, challenge } } = await api.get('/eimzo/challenge')
-      const { signature, certificate } = await eimzoClient.sign(selectedKey.alias, challenge)
+      const keyId = await eimzoClient.loadKey(selectedKey)
+      const pkcs7 = await eimzoClient.sign(keyId, challenge)
+      await eimzoClient.unloadKey(keyId)
       const { data } = await api.post(`/eimzo/verify/${contractId}`, {
-        challengeId, signature, certificate, signerType,
+        challengeId, signature: pkcs7, certificate: '', signerType,
       })
       if (data.success) {
         setStatus('success')

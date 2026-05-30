@@ -77,6 +77,7 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
   // ─── 3) Imzolash va Didox'ga yuborish (ketma-ket) ─────────
   const signAndSendAll = async (key: EimzoCert, currentItems: BulkItem[]) => {
     setPhase('signing')
+    const keyId = await eimzoClient.loadKey(key)
     for (let i = 0; i < currentItems.length; i++) {
       const item = currentItems[i]
       if (!item.contractId || item.status === 'sent' || item.status === 'error') continue
@@ -85,10 +86,10 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
       try {
         // Challenge
         const { data: ch } = await api.get('/eimzo/challenge')
-        const { signature, certificate } = await eimzoClient.sign(key.alias, ch.challenge)
+        const pkcs7 = await eimzoClient.sign(keyId, ch.challenge)
         const { data: verifyResp } = await api.post(`/eimzo/verify/${item.contractId}`, {
           challengeId: ch.id,
-          signature, certificate,
+          signature: pkcs7, certificate: '',
           signerType: 'us',
         })
         if (!verifyResp.success) throw new Error('Imzo tasdiqlanmadi')
@@ -109,6 +110,7 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
         onItemUpdate(i, { status: 'error', errorMessage: e?.message?.slice(0, 100) || 'Imzo xato' })
       }
     }
+    await eimzoClient.unloadKey(keyId)
     setPhase('done')
     onComplete()
   }
