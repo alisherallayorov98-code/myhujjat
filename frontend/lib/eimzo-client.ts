@@ -20,10 +20,10 @@ class EimzoClient {
     if (this.ws?.readyState === WebSocket.OPEN) return
 
     const urls = [
-      'wss://127.0.0.1:64443/CAPI/ws',
-      'wss://localhost:64443/CAPI/ws',
-      'ws://127.0.0.1:64646/CAPI/ws',
-      'ws://localhost:64646/CAPI/ws',
+      'wss://127.0.0.1:64443',
+      'wss://localhost:64443',
+      'ws://127.0.0.1:64646',
+      'ws://localhost:64646',
     ]
 
     for (const url of urls) {
