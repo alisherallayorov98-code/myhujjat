@@ -2,7 +2,7 @@
 # sslip.io DNS sizning IP ni avtomatik ko'rsatadi
 
 # Frontend — asosiy sayt
-myhujjat-45-92-173-48.sslip.io {
+app.kabinetim.uz {
 	reverse_proxy frontend:3000
 
 	# API'ni shu domen ostidan o'tkazish (CORS muammosi yo'q)

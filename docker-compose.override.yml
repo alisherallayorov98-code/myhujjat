@@ -14,7 +14,8 @@ services:
     ports:
       - "4100:4000"
 
-  # Caddy — port 80 ishg'ol etilgan VPS'da ishlamaydi, hozircha o'chiq
   caddy:
-    profiles:
-      - disabled
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
