@@ -8,7 +8,7 @@ import {
 import { Card }                          from '@/components/ui/Card'
 import { Button }                        from '@/components/ui/Button'
 import api                               from '@/lib/api'
-import { eimzoClient, EimzoKey, checkEimzoInstalled } from '@/lib/eimzo-client'
+import { eimzoClient, EimzoCert, checkEimzoInstalled } from '@/lib/eimzo-client'
 import toast                             from 'react-hot-toast'
 import { cn }                            from '@/lib/cn'
 import type { BulkDraft, BulkItem }      from './types'
@@ -27,8 +27,8 @@ type Phase = 'idle' | 'connecting' | 'keypick' | 'creating' | 'signing' | 'sendi
 export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComplete, refreshDraft }: Props) {
   const t = useTranslations('bulkSend')
   const [phase, setPhase] = useState<Phase>('idle')
-  const [keys, setKeys]   = useState<EimzoKey[]>([])
-  const [selectedKey, setSelectedKey] = useState<EimzoKey | null>(null)
+  const [keys, setKeys]   = useState<EimzoCert[]>([])
+  const [selectedKey, setSelectedKey] = useState<EimzoCert | null>(null)
   const [progressIdx, setProgressIdx] = useState(0)
 
   const items = draft.items || []
@@ -58,7 +58,7 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
     const ok = await checkEimzoInstalled()
     if (!ok) { toast.error(t('noEimzo')); setPhase('error'); return false }
     try {
-      const ks = await eimzoClient.listKeys()
+      const ks = await eimzoClient.listCertificates()
       setKeys(ks)
       if (ks.length === 1) {
         setSelectedKey(ks[0])
@@ -75,7 +75,7 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
   }
 
   // ─── 3) Imzolash va Didox'ga yuborish (ketma-ket) ─────────
-  const signAndSendAll = async (key: EimzoKey, currentItems: BulkItem[]) => {
+  const signAndSendAll = async (key: EimzoCert, currentItems: BulkItem[]) => {
     setPhase('signing')
     for (let i = 0; i < currentItems.length; i++) {
       const item = currentItems[i]
@@ -130,7 +130,7 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
     await signAndSendAll(k, workItems)
   }
 
-  const handleKeyPick = async (k: EimzoKey) => {
+  const handleKeyPick = async (k: EimzoCert) => {
     setSelectedKey(k)
     await signAndSendAll(k, items)
   }
@@ -304,7 +304,7 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
     void signSingle(selectedKey, item, idx)
   }
 
-  async function signSingle(key: EimzoKey, item: BulkItem, idx: number) {
+  async function signSingle(key: EimzoCert, item: BulkItem, idx: number) {
     onItemUpdate(idx, { status: 'created', errorMessage: undefined })
     try {
       const { data: ch } = await api.get('/eimzo/challenge')

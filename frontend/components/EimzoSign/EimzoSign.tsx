@@ -6,7 +6,7 @@ import { Shield, CheckCircle, AlertCircle, Key, Loader2 }   from 'lucide-react'
 import { Button }                                            from '@/components/ui/Button'
 import { Modal }                                             from '@/components/ui/Modal'
 import api                                                   from '@/lib/api'
-import { eimzoClient, EimzoKey, checkEimzoInstalled }        from '@/lib/eimzo-client'
+import { eimzoClient, EimzoCert, checkEimzoInstalled }        from '@/lib/eimzo-client'
 import toast                                                 from 'react-hot-toast'
 import { cn }                                                from '@/lib/cn'
 
@@ -20,8 +20,8 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
   const t = useTranslations('eimzoSign')
   const [open,        setOpen]        = useState(false)
   const [installed,   setInstalled]   = useState<boolean | null>(null)
-  const [keys,        setKeys]        = useState<EimzoKey[]>([])
-  const [selectedKey, setSelectedKey] = useState<EimzoKey | null>(null)
+  const [keys,        setKeys]        = useState<EimzoCert[]>([])
+  const [selectedKey, setSelectedKey] = useState<EimzoCert | null>(null)
   const [loading,     setLoading]     = useState(false)
   const [status,      setStatus]      = useState<'idle' | 'connecting' | 'signing' | 'success' | 'error'>('idle')
 
@@ -35,7 +35,7 @@ export function EimzoSign({ contractId, signerType, onSigned }: EimzoSignProps) 
     setInstalled(isInstalled)
     if (isInstalled) {
       try {
-        const keyList = await eimzoClient.listKeys()
+        const keyList = await eimzoClient.listCertificates()
         setKeys(keyList)
         if (keyList.length === 1) setSelectedKey(keyList[0])
       } catch {}
