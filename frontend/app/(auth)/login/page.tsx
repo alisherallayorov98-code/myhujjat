@@ -8,6 +8,7 @@ import { useAuth }                           from '@/hooks/useAuth'
 import { Button }                            from '@/components/ui/Button'
 import { Input }                             from '@/components/ui/Input'
 import { Logo }                              from '@/components/shared/Logo'
+import { EimzoLoginModal }                   from '@/components/auth/EimzoLoginModal'
 import toast                                 from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [errors,   setErrors]   = useState<Record<string, string>>({})
   const [needs2FA, setNeeds2FA] = useState(false)
   const [code,     setCode]     = useState('')
+  const [eimzoOpen, setEimzoOpen] = useState(false)
   const { login } = useAuth()
 
   const validate = () => {
@@ -100,6 +102,27 @@ export default function LoginPage() {
             <div className="mb-8">
               <h2 className="font-display font-black text-[#0F172A] text-2xl mb-1.5">{t('login')}</h2>
               <p className="text-[#94A3B8] text-sm">{t('loginSubtitle')}</p>
+            </div>
+
+            <Button
+              type="button"
+              fullWidth
+              size="lg"
+              variant="outline"
+              onClick={() => setEimzoOpen(true)}
+              leftIcon={<ShieldCheck size={18} />}
+              className="mb-6 text-[#2563EB] border-[#2563EB] hover:bg-[#DBEAFE]"
+            >
+              E-IMZO orqali kirish
+            </Button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#E2E8F0]" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-3 text-xs text-[#94A3B8]">{t('or')} email orqali</span>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -237,6 +260,8 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      
+      <EimzoLoginModal open={eimzoOpen} onClose={() => setEimzoOpen(false)} />
     </div>
   )
 }

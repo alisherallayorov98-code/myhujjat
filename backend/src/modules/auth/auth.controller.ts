@@ -5,6 +5,7 @@ import {
 import { Throttle } from '@nestjs/throttler'
 import { Request, Response } from 'express'
 import { AuthService }       from './auth.service'
+import { EimzoService }      from './e-imzo.service'
 import { Public }            from '../../common/decorators/public.decorator'
 import { CurrentUser }       from '../../common/decorators/current-user.decorator'
 import { ZodValidationPipe } from '../../common/validation/zod.pipe'
@@ -14,7 +15,41 @@ import {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly eimzoService: EimzoService
+  ) {}
+
+  @Public()
+  @Get('e-imzo/challenge')
+  getEimzoChallenge() {
+    return this.eimzoService.generateChallenge();
+  }
+
+  @Public()
+  @Post('e-imzo/login')
+  @HttpCode(HttpStatus.OK)
+  async eimzoLogin(@Body() body: { pkcs7: string; challengeId: string }, @Req() req: Request, @Res() res: Response) {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const data = this.eimzoService.parsePkcs7(body.pkcs7, body.challengeId);
+    
+    const tokens = await this.authService.eimzoLogin({
+      pinfl: data.pinfl,
+      inn: data.inn,
+      cn: data.cn,
+      ip
+    });
+
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure:   process.env.COOKIE_SECURE !== 'false' && process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge:   7 * 24 * 60 * 60 * 1000,
+      path:     '/api/v1/auth',
+    });
+
+    return res.json({ accessToken: tokens.accessToken, user: tokens.user });
+  }
 
   @Public()
   @Throttle({ medium: { ttl: 60_000, limit: 5 } })
