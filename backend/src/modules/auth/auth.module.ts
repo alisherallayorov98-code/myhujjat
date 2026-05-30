@@ -2,6 +2,7 @@ import { Module }         from '@nestjs/common'
 import { JwtModule }      from '@nestjs/jwt'
 import { AuthService }    from './auth.service'
 import { AuthController } from './auth.controller'
+import { EimzoService }   from './e-imzo.service'
 import { SessionsService }    from './sessions.service'
 import { SessionsController } from './sessions.controller'
 import { TwoFactorService }    from './two-factor.service'
@@ -23,7 +24,7 @@ import { NotificationsModule } from '../notifications/notifications.module'
     }),
   ],
   controllers: [AuthController, SessionsController, TwoFactorController],
-  providers:   [AuthService, SessionsService, TwoFactorService],
+  providers:   [AuthService, SessionsService, TwoFactorService, EimzoService],
   exports:     [AuthService, JwtModule],
 })
 export class AuthModule {}
