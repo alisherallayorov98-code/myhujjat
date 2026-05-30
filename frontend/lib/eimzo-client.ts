@@ -15,29 +15,49 @@ class EimzoClient {
   private msgId   = 0
 
   async connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.ws = new WebSocket('ws://127.0.0.1:64646')
+    if (this.ws?.readyState === WebSocket.OPEN) return
 
-      this.ws.onopen = () => resolve()
+    const urls = [
+      'ws://127.0.0.1:64646/CAPI/ws',
+      'ws://127.0.0.1:64646',
+      'wss://127.0.0.1:64443/CAPI/ws',
+      'wss://127.0.0.1:64443',
+    ]
 
-      this.ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data)
-          const pend = this.pending.get(data.id)
-          if (pend) {
-            this.pending.delete(data.id)
-            if (data.status === 'ok') {
-              pend.resolve(data)
-            } else {
-              pend.reject(new Error(data.reason || 'E-imzo xatolik'))
+    for (const url of urls) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const ws = new WebSocket(url)
+          const timer = setTimeout(() => {
+            ws.close()
+            reject(new Error('timeout'))
+          }, 2000)
+
+          ws.onopen = () => {
+            clearTimeout(timer)
+            this.ws = ws
+            ws.onmessage = (event) => {
+              try {
+                const data = JSON.parse(event.data)
+                const pend = this.pending.get(data.id)
+                if (pend) {
+                  this.pending.delete(data.id)
+                  if (data.status === 'ok') pend.resolve(data)
+                  else pend.reject(new Error(data.reason || 'E-imzo xatolik'))
+                }
+              } catch {}
             }
+            ws.onclose = () => { if (this.ws === ws) this.ws = null }
+            resolve()
           }
-        } catch {}
+          ws.onerror = () => { clearTimeout(timer); reject(new Error('error')) }
+        })
+        return
+      } catch {
+        // keyingi URL ga o'tamiz
       }
-
-      this.ws.onerror   = () => reject(new Error('E-imzo ilovasi topilmadi'))
-      this.ws.onclose   = () => { this.ws = null }
-    })
+    }
+    throw new Error('E-imzo ilovasi topilmadi')
   }
 
   async listKeys(): Promise<EimzoKey[]> {
