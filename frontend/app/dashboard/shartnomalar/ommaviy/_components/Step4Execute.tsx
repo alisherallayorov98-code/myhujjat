@@ -310,9 +310,11 @@ export function Step4Execute({ draft, orgId, onItemUpdate, onAllItemsSet, onComp
     onItemUpdate(idx, { status: 'created', errorMessage: undefined })
     try {
       const { data: ch } = await api.get('/eimzo/challenge')
-      const { signature, certificate } = await eimzoClient.sign(key.alias, ch.challenge)
+      const keyId  = await eimzoClient.loadKey(key)
+      const pkcs7  = await eimzoClient.sign(keyId, ch.challenge)
+      await eimzoClient.unloadKey(keyId)
       const { data: verifyResp } = await api.post(`/eimzo/verify/${item.contractId}`, {
-        challengeId: ch.id, signature, certificate, signerType: 'us',
+        challengeId: ch.id, signature: pkcs7, certificate: '', signerType: 'us',
       })
       if (!verifyResp.success) throw new Error('Imzo tasdiqlanmadi')
       onItemUpdate(idx, { status: 'signed' })
