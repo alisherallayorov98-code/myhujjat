@@ -59,4 +59,15 @@ export class OrgMembersController {
     await this.tenant.requireOwner(user.sub, orgId)
     return this.service.removeMember(id)
   }
+
+  // Faqat OWNER egalikni boshqa a'zoga o'tkaza oladi
+  @Post(':orgId/members/transfer-owner')
+  async transferOwner(
+    @CurrentUser() user: any,
+    @Param('orgId') orgId: string,
+    @Body('userId') newOwnerUserId: string,
+  ) {
+    await this.tenant.requireOwner(user.sub, orgId)
+    return this.service.transferOwnership(orgId, newOwnerUserId)
+  }
 }

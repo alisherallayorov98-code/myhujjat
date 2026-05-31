@@ -50,7 +50,13 @@ export class OrgsService {
       .map(m => m.organization)
       .filter(o => o.isActive)
 
-    return [...owned, ...memberOrgList]
+    // Egasi endi a'zo ham bo'lgani uchun tashkilot ikki ro'yxatda chiqishi mumkin —
+    // ID bo'yicha takrorlarni olib tashlaymiz.
+    const byId = new Map<string, typeof owned[number]>()
+    for (const o of owned)          byId.set(o.id, o)
+    for (const o of memberOrgList)  if (!byId.has(o.id)) byId.set(o.id, o as any)
+
+    return Array.from(byId.values())
   }
 
   async findOne(userId: string, id: string) {
@@ -93,9 +99,17 @@ export class OrgsService {
 
     const isDefault = count === 0
 
-    return this.prisma.organization.create({
+    const org = await this.prisma.organization.create({
       data: { userId, ...dto, isDefault }
     })
+
+    // Yaratuvchini OWNER a'zo sifatida yozib qo'yamiz — egalik a'zolik orqali
+    // saqlanadi va keyinchalik boshqa xodimga o'tkazilishi mumkin.
+    await this.prisma.orgMember.create({
+      data: { organizationId: org.id, userId, role: 'OWNER', status: 'ACTIVE' },
+    }).catch(() => {}) // allaqachon a'zo bo'lsa — e'tiborsiz qoldiramiz
+
+    return org
   }
 
   async update(userId: string, id: string, dto: Partial<CreateOrgDto>) {

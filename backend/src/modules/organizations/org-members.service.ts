@@ -68,7 +68,48 @@ export class OrgMembersService {
 
   async removeMember(memberId: string) {
     const member = await this.prisma.orgMember.findUnique({ where: { id: memberId } })
-    if (member?.role === 'OWNER') throw new BadRequestException("Owerni o'chirish mumkin emas")
+    if (member?.role === 'OWNER') {
+      throw new BadRequestException(
+        "Egani o'chirib bo'lmaydi. Avval egalikni boshqa a'zoga o'tkazing, keyin uni o'chiring.",
+      )
+    }
     return this.prisma.orgMember.delete({ where: { id: memberId } })
+  }
+
+  /**
+   * Egalikni boshqa a'zoga o'tkazadi.
+   * Xodim (ayniqsa tashkilotni yaratgan egasi) ishdan ketsa, tashkilot va uning
+   * barcha ma'lumotlari joyida qoladi — faqat egasi yangi xodimga o'tadi.
+   */
+  async transferOwnership(orgId: string, newOwnerUserId: string) {
+    // Yangi egasi avval shu tashkilotning faol a'zosi bo'lishi kerak
+    const target = await this.prisma.orgMember.findFirst({
+      where: { organizationId: orgId, userId: newOwnerUserId, status: 'ACTIVE' },
+    })
+    if (!target) {
+      throw new BadRequestException(
+        "Yangi egasi avval tashkilot a'zosi bo'lishi kerak. Avval uni taklif qiling.",
+      )
+    }
+
+    await this.prisma.$transaction([
+      // Eski egalarni oddiy a'zoga tushiramiz
+      this.prisma.orgMember.updateMany({
+        where: { organizationId: orgId, role: 'OWNER' },
+        data:  { role: 'MEMBER' },
+      }),
+      // Yangi egasini OWNER qilamiz
+      this.prisma.orgMember.update({
+        where: { id: target.id },
+        data:  { role: 'OWNER' },
+      }),
+      // Organization.userId ni ham yangi egaga moslab qo'yamiz (qulaylik uchun)
+      this.prisma.organization.update({
+        where: { id: orgId },
+        data:  { userId: newOwnerUserId },
+      }),
+    ])
+
+    return { success: true }
   }
 }

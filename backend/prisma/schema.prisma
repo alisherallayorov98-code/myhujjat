@@ -99,8 +99,8 @@ model PushSubscription {
 // ============================================
 model Organization {
   id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   name          String
   fullName      String?
