@@ -198,5 +198,12 @@
   "roleMember": "Участник",
   "roleOwnerDesc": "Полный контроль",
   "roleAccountantDesc": "Фактуры, отчеты",
-  "roleMemberDesc": "Просмотр и создание"
+  "roleMemberDesc": "Просмотр и создание",
+  "transferOwnerBtn": "Передать права",
+  "transferOwnerTitle": "Передача прав владельца",
+  "transferOwnerDesc": "Выбранный участник станет новым владельцем организации. Вы получите роль MEMBER. Это действие необратимо.",
+  "transferOwnerSelect": "Выберите нового владельца",
+  "transferOwnerConfirm": "Подтвердите передачу",
+  "transferOwnerSuccess": "Права успешно переданы",
+  "transferOwnerNoMembers": "Нет других активных участников для передачи"
 }

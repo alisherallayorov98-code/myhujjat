@@ -198,5 +198,12 @@
   "roleMember": "Аъзо",
   "roleOwnerDesc": "Тўлиқ назорат",
   "roleAccountantDesc": "Фактура, ҳисоботлар",
-  "roleMemberDesc": "Кўриш ва яратиш"
+  "roleMemberDesc": "Кўриш ва яратиш",
+  "transferOwnerBtn": "Эгаликни ўтказиш",
+  "transferOwnerTitle": "Эгаликни ўтказиш",
+  "transferOwnerDesc": "Танланган аъзо ташкилотнинг янги эгасига айланади. Сиз MEMBER ролига ўтасиз. Бу амал қайтариб бўлмайди.",
+  "transferOwnerSelect": "Янги эгани танланг",
+  "transferOwnerConfirm": "Ўтказишни тасдиқланг",
+  "transferOwnerSuccess": "Эгалик муваффақиятли ўтказилди",
+  "transferOwnerNoMembers": "Ўтказиш учун бошқа фаол аъзолар йўқ"
 }

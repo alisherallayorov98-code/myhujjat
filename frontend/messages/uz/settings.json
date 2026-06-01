@@ -198,5 +198,12 @@
   "roleMember": "A'zo",
   "roleOwnerDesc": "To'liq nazorat",
   "roleAccountantDesc": "Faktura, hisobotlar",
-  "roleMemberDesc": "Ko'rish va yaratish"
+  "roleMemberDesc": "Ko'rish va yaratish",
+  "transferOwnerBtn": "Egalikni o'tkazish",
+  "transferOwnerTitle": "Egalikni o'tkazish",
+  "transferOwnerDesc": "Tanlangan a'zo tashkilotning yangi egasiga aylanadi. Siz MEMBER roliga o'tasiz. Bu amal qaytarib bo'lmaydi.",
+  "transferOwnerSelect": "Yangi egani tanlang",
+  "transferOwnerConfirm": "O'tkazishni tasdiqlang",
+  "transferOwnerSuccess": "Egalik muvaffaqiyatli o'tkazildi",
+  "transferOwnerNoMembers": "O'tkazish uchun boshqa faol a'zolar yo'q"
 }
